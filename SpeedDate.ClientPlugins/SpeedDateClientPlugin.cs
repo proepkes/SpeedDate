@@ -15,7 +15,7 @@ namespace SpeedDate.ClientPlugins
         {
             Connection = connection;
         }
-        public void Loaded(IPluginProvider pluginProvider)
+        public virtual void Loaded(IPluginProvider pluginProvider)
         {
             
         }

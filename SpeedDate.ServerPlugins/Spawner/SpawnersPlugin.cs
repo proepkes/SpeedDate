@@ -33,10 +33,12 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         protected Dictionary<int, SpawnTask> SpawnTasks;
 
-        public Logger Logger = LogManager.GetLogger(typeof(SpawnersPlugin).Name, LogLevel.Warn);
+        private ILogger _logger;
 
-        public SpawnersPlugin(IServer server) : base(server)
+        public SpawnersPlugin(IServer server, ILogger logger) : base(server)
         {
+            _logger = logger;
+
             Spawners = new Dictionary<int, RegisteredSpawner>();
             SpawnTasks = new Dictionary<int, SpawnTask>();
 
@@ -110,6 +112,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             // Remove the spawner from all spawners
             Spawners.Remove(spawner.SpawnerId);
 
+            _logger.Info($"Spawner disconnected. ID: {spawner.SpawnerId}");
             // Invoke the event
             SpawnerDestroyed?.Invoke(spawner);
         }
@@ -130,7 +133,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             if (spawners.Count < 0)
             {
-                Logger.Warn("No spawner was returned after filtering. " + 
+                _logger.Warn("No spawner was returned after filtering. " + 
                     (string.IsNullOrEmpty(region) ? "" : "Region: " + region));
                 return null;
             }
@@ -158,7 +161,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             spawner.AddTaskToQueue(task);
 
-            Logger.Debug("Spawner was found, and spawn task created: " + task);
+            _logger.Debug("Spawner was found, and spawn task created: " + task);
 
             return task;
         }
@@ -223,7 +226,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                     }
                     catch (Exception e)
                     {
-                        Logger.Error(e);
+                        _logger.Error(e);
                     }
                 }
             }
@@ -342,6 +345,8 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             var spawner = CreateSpawner(message.Peer, options);
 
+            _logger.Info($"New Spawner registered. ID: {spawner.SpawnerId}");
+
             // Respond with spawner id
             message.Respond(spawner.SpawnerId, ResponseStatus.Success);
         }
@@ -360,14 +365,14 @@ namespace SpeedDate.ServerPlugins.Spawner
             if (task == null)
             {
                 message.Respond("Invalid spawn task", ResponseStatus.Failed);
-                Logger.Error("Process tried to register to an unknown task");
+                _logger.Error("Process tried to register to an unknown task");
                 return;
             }
 
             if (task.UniqueCode != data.SpawnCode)
             {
                 message.Respond("Unauthorized", ResponseStatus.Unauthorized);
-                Logger.Error("Spawned process tried to register, but failed due to mismaching unique code");
+                _logger.Error("Spawned process tried to register, but failed due to mismaching unique code");
                 return;
             }
 
@@ -387,14 +392,14 @@ namespace SpeedDate.ServerPlugins.Spawner
             if (task == null)
             {
                 message.Respond("Invalid spawn task", ResponseStatus.Failed);
-                Logger.Error("Process tried to complete to an unknown task");
+                _logger.Error("Process tried to complete to an unknown task");
                 return;
             }
 
             if (task.RegisteredPeer != message.Peer)
             {
                 message.Respond("Unauthorized", ResponseStatus.Unauthorized);
-                Logger.Error("Spawned process tried to complete spawn task, but it's not the same peer who registered to the task");
+                _logger.Error("Spawned process tried to complete spawn task, but it's not the same peer who registered to the task");
                 return;
             }
 

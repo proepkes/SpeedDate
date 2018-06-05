@@ -34,7 +34,11 @@ namespace SpeedDate.Network
             {
                 Connected?.Invoke();
             };
-            _listener.PeerDisconnectedEvent += (peer, info) => { Disconnected?.Invoke(); };
+            _listener.PeerDisconnectedEvent += (peer, info) =>
+            {
+                Disconnected?.Invoke();
+                _peer.NotifyDisconnectEvent();
+            };
             _listener.NetworkReceiveEvent += (peer, reader, method) =>
             {
                 _peer.HandleDataReceived(reader.Data, 0);

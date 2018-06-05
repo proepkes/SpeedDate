@@ -6,7 +6,7 @@ using SpeedDate.Logging;
 
 namespace SpeedDate.Client
 {
-    public class SpeedDateClient : IClient, ISpeedDateListener, IDisposable
+    public sealed class SpeedDateClient : IClient, ISpeedDateStartable, IDisposable
     {
         private const float MinTimeToConnect = 0.5f;
         private const float MaxTimeToConnect = 4f;
@@ -16,32 +16,25 @@ namespace SpeedDate.Client
         private string _serverIp;
         private float _timeToConnect = 0.5f;
 
+        public IClientSocket Connection { get; }
+
+        public event Action Started;
+        public event Action Stopped;
+
         public SpeedDateClient(IClientSocket clientSocket, ILogger logger)
         {
             _logger = logger;
             Connection = clientSocket;
         }
 
-        public IClientSocket Connection { get; }
-
-        public void Dispose()
-        {
-            Connection?.Disconnect();
-        }
-
-
-        public event Action Started;
-        public event Action Stopped;
-
-        public void OnSpeedDateStarted()
+        public void Start()
         {
             ConnectAsync(SpeedDateConfig.Network.IP, SpeedDateConfig.Network.Port);
-            Started?.Invoke();
         }
 
-        public void OnSpeedDateStopped()
+        public void Stop()
         {
-            Stopped?.Invoke();
+            Connection.Disconnect();
         }
 
         public async void ConnectAsync(string serverIp, int port)
@@ -78,12 +71,19 @@ namespace SpeedDate.Client
         private void Disconnected()
         {
             _timeToConnect = MinTimeToConnect;
+            Stopped?.Invoke();
         }
 
         private void Connected()
         {
             _timeToConnect = MinTimeToConnect;
             _logger.Info("Connected to: " + _serverIp + ":" + _port);
+            Started?.Invoke();
+        }
+
+        public void Dispose()
+        {
+            Connection.Disconnect();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.Client.Console.Example
 {
@@ -7,8 +8,14 @@ namespace SpeedDate.Client.Console.Example
     {
         static void Main(string[] args)
         {
-            var speedDate = new SpeedDate();
-            speedDate.Start("peer.json");
+
+            var spawner = new Spawner("spawner.json");
+            spawner.Start();
+
+
+            //var gameServer = new GameServer("gameserver.json");
+            //gameServer.Start();
+            
             System.Console.ReadLine();
             //using (var client = new MsfClient(SpeedDateConnection.Socket))
             //{

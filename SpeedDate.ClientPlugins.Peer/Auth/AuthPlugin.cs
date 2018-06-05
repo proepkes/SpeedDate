@@ -10,7 +10,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 {
     public class AuthPlugin : SpeedDateClientPlugin
     {
-        private SecurityPlugin _securityPlugin;
+        private readonly SecurityPlugin _securityPlugin;
 
         public delegate void LoginCallback(AccountInfoPacket accountInfo, string error);
 

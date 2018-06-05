@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Rooms;
 using SpeedDate.Interfaces;
 using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Packets.Lobbies;
@@ -10,7 +11,7 @@ using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.Peer.Lobbies
 {
-    public class LobbyPlugin : SpeedDateClientPlugin
+    public class LobbiesPlugin : SpeedDateClientPlugin
     {
         public delegate void JoinLobbyCallback(JoinedLobby lobby, string error);
         public delegate void CreateLobbyCallback(int? lobbyId, string error);
@@ -24,23 +25,26 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// Key is in format 'lobbyId:connectionPeerId' - this is to allow
         /// mocking multiple clients on the same client and same lobby
         /// </summary>
-        private Dictionary<string, JoinedLobby> _joinedLobbies;
+        private readonly Dictionary<string, JoinedLobby> _joinedLobbies;
 
         /// <summary>
         /// Instance of a lobby that was joined the last
         /// </summary>
         public JoinedLobby LastJoinedLobby;
 
-        private RoomsPlugin roomsServer;
+        private RoomsPlugin _roomsPlugin;
 
-        public LobbyPlugin(IClientSocket Connection) : base(Connection)
+        public LobbiesPlugin(IClientSocket connection) : base(connection)
         {
             _joinedLobbies = new Dictionary<string, JoinedLobby>();
-
-            //TODO PHB
-            roomsServer = new RoomsPlugin(Connection);
         }
 
+        public override void Loaded(IPluginProvider pluginProvider)
+        {
+            base.Loaded(pluginProvider);
+
+            _roomsPlugin = pluginProvider.Get<RoomsPlugin>();
+        }
 
         /// <summary>
         /// Sends a request to create a lobby and joins it
@@ -293,7 +297,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
                 var access = response.Deserialize(new RoomAccessPacket());
 
-                roomsServer.TriggerAccessReceivedEvent(access);
+                _roomsPlugin.TriggerAccessReceivedEvent(access);
 
                 callback.Invoke(access, null);
             });

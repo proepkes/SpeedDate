@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
 using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 
 namespace SpeedDate.Server
 {
-    sealed class SpeedDateServer : IServer, ISpeedDateListener, IDisposable
+    sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable
     {
         private const string InternalServerErrorMessage = "Internal Server Error";
 
@@ -17,8 +18,24 @@ namespace SpeedDate.Server
         private readonly Dictionary<long, IPeer> _connectedPeers;
         private readonly Dictionary<short, IPacketHandler> _handlers;
 
-        public event Action<int> Started;
+        public event Action Started;
         public event Action Stopped;
+
+        public void Start()
+        {
+            if (_socket.Listen(SpeedDateConfig.Network.Port))
+            {
+                _logger.Info("Started on port: " + SpeedDateConfig.Network.Port);
+                Started?.Invoke();
+            }
+        }
+
+        public void Stop()
+        {
+            _socket.Stop();
+            Stopped?.Invoke();
+        }
+
         public event PeerActionHandler PeerConnected;
         public event PeerActionHandler PeerDisconnected;
 
@@ -121,21 +138,6 @@ namespace SpeedDate.Server
             _socket.Connected -= Connected;
             _socket.Disconnected -= Disconnected;
 
-        }
-
-        public void OnSpeedDateStarted()
-        {
-            if (_socket.Listen(SpeedDateConfig.Network.Port))
-            {
-                Started?.Invoke(SpeedDateConfig.Network.Port);
-            }
-        }
-
-        public void OnSpeedDateStopped()
-        {
-            _socket.Stop();
-
-            Stopped?.Invoke();
         }
     }
 }

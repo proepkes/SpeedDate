@@ -8,7 +8,7 @@ namespace SpeedDate.Client
     {
         public override void Load()
         {
-            Bind<IClient, ISpeedDateListener>().To<SpeedDateClient>();
+            Bind<IClient, ISpeedDateStartable>().To<SpeedDateClient>();
         }
     }
 }

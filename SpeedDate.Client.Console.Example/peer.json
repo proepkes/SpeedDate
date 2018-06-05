@@ -4,10 +4,7 @@
 		"Port": 60125
 	},
 	"Plugins": {
-		"Enabled": true,
-		"CreateDirIfNotExists": true,
-		"SearchPath": "PeerPlugins/"
-	},
-	"PluginConfigs": {
+		"LoadAll": false,
+		"PluginsNamespace": "SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Peer"
 	}
 }

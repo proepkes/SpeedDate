@@ -9,7 +9,7 @@ namespace SpeedDate.Server
     {
         public override void Load()
         {
-            Bind<IServer, ISpeedDateListener>().To<SpeedDateServer>().InSingletonScope();
+            Bind<IServer, ISpeedDateStartable>().To<SpeedDateServer>().InSingletonScope();
         }
     }
 }

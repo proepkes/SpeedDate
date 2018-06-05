@@ -4,9 +4,6 @@ namespace SpeedDate.Interfaces.Network
 {
     public interface IServer : IMessageHandlerProvider
     {
-        event Action<int> Started;
-        event Action Stopped;
-
         event PeerActionHandler PeerConnected;
         event PeerActionHandler PeerDisconnected;
 

@@ -39,6 +39,7 @@ namespace SpeedDate.Network
             _listener.PeerDisconnectedEvent += (peer, info) =>
             {
                 Disconnected?.Invoke(_connections[peer.ConnectId]);
+                _connections[peer.ConnectId].NotifyDisconnectEvent();
                 _connections.Remove(peer.ConnectId);
             };
 

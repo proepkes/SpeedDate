@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Ninject;
 using Ninject.Extensions.Conventions;
@@ -14,76 +15,78 @@ namespace SpeedDate
 {
     public sealed class SpeedDate
     {
-        private readonly List<ISpeedDateListener> _listeners;
+        private readonly string _configFile;
 
-        public SpeedDate()
+        public event Action Started;
+        public event Action Stopped;
+
+        public IPluginProvider PluginProver
         {
-            _listeners = new List<ISpeedDateListener>();
+            get;
+            private set;
         }
 
-        public void Start(string configFile)
+        public SpeedDate(string configFile)
         {
-            SpeedDateConfig.Initialize(configFile);
+            _configFile = configFile;
+        }
+
+        public void Start()
+        {
+            SpeedDateConfig.Initialize(_configFile);
             var logger = LogManager.GetLogger("SpeedDate");
             var kernel = CreateKernel();
 
-            var pluginProver = kernel.Get<IPluginProvider>();
-            foreach (var plugin in kernel.GetAll<IPlugin>()) pluginProver.RegisterPlugin(plugin);
+            var startable = kernel.Get<ISpeedDateStartable>();
+            startable.Started += () => Started?.Invoke();
+            startable.Stopped += () => Stopped?.Invoke();
 
-            foreach (var plugin in pluginProver.GetAll())
+            PluginProver = kernel.Get<IPluginProvider>();
+
+            foreach (var plugin in kernel.GetAll<IPlugin>())
+                PluginProver.RegisterPlugin(plugin);
+
+            foreach (var plugin in PluginProver.GetAll())
             {
-                plugin.Loaded(pluginProver);
+                plugin.Loaded(PluginProver);
                 logger.Info($"Loaded {plugin.GetType().Name}");
             }
 
             var server = kernel.TryGet<IServer>();
             if (server != null)
-                logger.Info("Found servertype: " + server.GetType().Name);
+                logger.Info("Acting as server: " + server.GetType().Name);
 
             var client = kernel.TryGet<IClient>();
             if (client != null)
-                logger.Info("Found clienttype: " + client.GetType().Name);
+                logger.Info("Acting as client: " + client.GetType().Name);
 
-            _listeners.Clear();
-            foreach (var listener in kernel.GetAll<ISpeedDateListener>())
-            {
-                _listeners.Add(listener);
-
-                listener.OnSpeedDateStarted();
-            }
+            startable.Start();
         }
 
         public void Stop()
         {
-            foreach (var listener in _listeners)
-            {
-                listener.OnSpeedDateStopped();
-                ;
-            }
+            Stopped?.Invoke();
         }
 
         private static IKernel CreateKernel()
         {
-            if (SpeedDateConfig.Plugins.CreateDirIfNotExists && !Directory.Exists(SpeedDateConfig.Plugins.SearchPath))
-                Directory.CreateDirectory(SpeedDateConfig.Plugins.SearchPath);
-
             var kernel = new StandardKernel();
 
             try
             {
                 kernel.Load("*Server.dll"); //Loads all Ninject-Modules in all *Server.dll-files. Example: Binds IServer to SpeedDateServer
                 kernel.Load("*Client.dll"); 
-                kernel.Bind<IClientSocket>().To<ClientSocket>();
-                kernel.Bind<IServerSocket>().To<ServerSocket>();
-                kernel.Bind<ILogger>().ToMethod(context =>
-                    LogManager.GetLogger(context.Request.Target?.Member.DeclaringType?.Name));
-                kernel.Bind<IPluginProvider>().To<NinjectPluginProvier>();
+                kernel.Bind<IClientSocket>().To<ClientSocket>().InSingletonScope();
+                kernel.Bind<IServerSocket>().To<ServerSocket>().InSingletonScope();
+                kernel.Bind<ILogger>().ToMethod(context => LogManager.GetLogger(context.Request.Target?.Member.DeclaringType?.Name));
+                kernel.Bind<IPluginProvider>().To<NinjectPluginProvier>().InSingletonScope();
                 kernel.Bind(x =>
                 {
                     x.FromAssembliesMatching("*.dll")
                         .IncludingNonPublicTypes()
                         .SelectAllClasses()
                         .InheritedFrom<IPlugin>()
+                        .Where(type => SpeedDateConfig.Plugins.LoadAll || SpeedDateConfig.Plugins.PluginsNamespace.Split(';').Contains(type.Namespace))
                         .BindDefaultInterfaces()
                         .Configure(syntax => syntax.InSingletonScope());
                 });

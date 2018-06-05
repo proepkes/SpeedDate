@@ -22,7 +22,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         private readonly IClientSocket _connection;
 
-        private readonly LobbyPlugin _lobbiesServer;
+        private readonly LobbiesPlugin _lobbiesServer;
 
         public LobbyDataPacket Data { get; }
 
@@ -40,7 +40,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         public bool HasLeft { get; private set; }
 
-        public JoinedLobby(LobbyPlugin owner, LobbyDataPacket data, IClientSocket connection)
+        public JoinedLobby(LobbiesPlugin owner, LobbyDataPacket data, IClientSocket connection)
         {
             Data = data;
             _connection = connection;

@@ -12,19 +12,17 @@ namespace SpeedDate.ServerPlugins.Spawner
     {
         public delegate void KillRequestCallback(bool isKilled);
 
-        private readonly SpawnersPlugin _plugin;
-        public static int MaxConcurrentRequests = 8;
+        private const int MaxConcurrentRequests = 8;
 
         public int SpawnerId { get; set; }
         public IPeer Peer { get; set; }
         public SpawnerOptions Options { get; set; }
 
         private readonly Queue<SpawnTask> _queue;
-        private readonly HashSet<SpawnTask> _startingProcesses;
 
         public int ProcessesRunning { get; private set; }
 
-        private HashSet<SpawnTask> _beingSpawned;
+        private readonly HashSet<SpawnTask> _beingSpawned;
 
         public RegisteredSpawner(int spawnerId, IPeer peer, SpawnerOptions options)
         {
@@ -56,6 +54,8 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         public void AddTaskToQueue(SpawnTask task)
         {
+            _beingSpawned.Add(task);
+
             _queue.Enqueue(task);
         }
 

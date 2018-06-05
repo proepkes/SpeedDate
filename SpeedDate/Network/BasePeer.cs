@@ -169,9 +169,7 @@ namespace SpeedDate.Network
         /// <returns></returns>
         public object GetProperty(int id)
         {
-            object value;
-
-            _data.TryGetValue(id, out value);
+            _data.TryGetValue(id, out var value);
 
             return value;
         }
