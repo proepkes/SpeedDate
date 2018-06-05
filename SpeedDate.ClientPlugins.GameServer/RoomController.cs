@@ -23,9 +23,9 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         private RoomAccessProvider _accessProvider;
 
-        public static Logger Logger = LogManager.GetLogger(typeof(RoomController).Name, LogLevel.Warn);
+        public static readonly Logger Logger = LogManager.GetLogger(typeof(RoomController).Name, LogLevel.Warn);
 
-        private RoomsPlugin _roomsPlugin;
+        private readonly RoomsPlugin _roomsPlugin;
 
         public RoomController(RoomsPlugin owner, int roomId, IClientSocket connection, RoomOptions options)
         {

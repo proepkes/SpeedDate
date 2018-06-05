@@ -7,10 +7,5 @@ namespace SpeedDate.Server
         public int PermissionLevel;
         public string AesKey;
         public byte[] AesKeyEncrypted;
-
-        public PeerSecurityExtension()
-        {
-            
-        }
     }
 }

@@ -14,7 +14,7 @@ namespace SpeedDate.ClientPlugins.Spawner
     {
         private readonly Dictionary<int, SpawnerController> _locallyCreatedSpawners;
 
-        public int PortsStartFrom = 10000;
+        public const int PortsStartFrom = 10000;
 
         private readonly Queue<int> _freePorts;
         private int _lastPortTaken = -1;

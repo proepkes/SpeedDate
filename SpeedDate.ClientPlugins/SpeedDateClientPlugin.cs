@@ -11,7 +11,7 @@ namespace SpeedDate.ClientPlugins
     {
         protected readonly IClientSocket Connection;
 
-        public SpeedDateClientPlugin(IClientSocket connection)
+        protected SpeedDateClientPlugin(IClientSocket connection)
         {
             Connection = connection;
         }

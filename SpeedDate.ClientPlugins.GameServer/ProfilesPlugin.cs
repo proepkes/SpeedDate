@@ -19,9 +19,9 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public float ProfileUpdatesInterval = 0.1f;
 
-        private Dictionary<string, ObservableServerProfile> _profiles;
+        private readonly Dictionary<string, ObservableServerProfile> _profiles;
 
-        private HashSet<ObservableServerProfile> _modifiedProfiles;
+        private readonly HashSet<ObservableServerProfile> _modifiedProfiles;
 
         private Task _sendUpdatesCoroutine;
 

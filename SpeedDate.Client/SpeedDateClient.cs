@@ -37,35 +37,33 @@ namespace SpeedDate.Client
             Connection.Disconnect();
         }
 
-        public async void ConnectAsync(string serverIp, int port)
+        private async void ConnectAsync(string serverIp, int port)
         {
             _serverIp = serverIp;
             _port = port;
 
-            await Task.Factory.StartNew(StartConnection);
-        }
-
-        private async void StartConnection()
-        {
-            Connection.Connected += Connected;
-            Connection.Disconnected += Disconnected;
-
-            while (!Connection.IsConnected)
+            await Task.Factory.StartNew(async () =>
             {
-                // If we got here, we're not connected 
-                if (Connection.IsConnecting)
-                    _logger.Debug("Retrying to connect to server at: " + _serverIp + ":" + _port);
-                else
-                    _logger.Debug("Connecting to server at: " + _serverIp + ":" + _port);
+                Connection.Connected += Connected;
+                Connection.Disconnected += Disconnected;
 
-                Connection.Connect(_serverIp, _port);
+                while (!Connection.IsConnected)
+                {
+                    // If we got here, we're not connected 
+                    if (Connection.IsConnecting)
+                        _logger.Debug("Retrying to connect to server at: " + _serverIp + ":" + _port);
+                    else
+                        _logger.Debug("Connecting to server at: " + _serverIp + ":" + _port);
 
-                // Give a few seconds to try and connect
-                await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
+                    Connection.Connect(_serverIp, _port);
 
-                // If we're still not connected
-                if (!Connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
-            }
+                    // Give a few seconds to try and connect
+                    await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
+
+                    // If we're still not connected
+                    if (!Connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
+                }
+            });
         }
 
         private void Disconnected()

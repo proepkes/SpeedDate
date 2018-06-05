@@ -21,11 +21,11 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// </summary>
         public Dictionary<string, string> SpawnOptions;
 
-        private readonly SpawnRequestPlugin spawnServer;
+        private readonly SpawnRequestPlugin _spawnServer;
 
         public SpawnRequestController(SpawnRequestPlugin owner, int spawnId, IClientSocket connection, Dictionary<string, string> spawnOptions)
         {
-            spawnServer = owner;
+            _spawnServer = owner;
 
             _connection = connection;
             SpawnId = spawnId;
@@ -37,24 +37,24 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         public void Abort()
         {
-            spawnServer.AbortSpawn(SpawnId);
+            _spawnServer.AbortSpawn(SpawnId);
         }
 
         public void Abort(SpawnRequestPlugin.AbortSpawnHandler handler)
         {
-            spawnServer.AbortSpawn(SpawnId, handler);
+            _spawnServer.AbortSpawn(SpawnId, handler);
         }
 
         public void GetFinalizationData(SpawnRequestPlugin.FinalizationDataHandler handler)
         {
-            spawnServer.GetFinalizationData(SpawnId, handler, _connection);
+            _spawnServer.GetFinalizationData(SpawnId, handler, _connection);
         }
 
         private void HandleStatusUpdate(IIncommingMessage message)
         {
             var data = message.Deserialize(new SpawnStatusUpdatePacket());
 
-            var controller = spawnServer.GetRequestController(data.SpawnId);
+            var controller = _spawnServer.GetRequestController(data.SpawnId);
 
             if (controller == null)
                 return;

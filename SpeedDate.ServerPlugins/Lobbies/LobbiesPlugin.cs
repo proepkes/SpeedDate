@@ -17,13 +17,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     class LobbiesPlugin : ServerPluginBase, IGamesProvider
     {
+        private readonly ILogger _logger;
         public int CreateLobbiesPermissionLevel = 0;
 
         protected readonly Dictionary<string, ILobbyFactory> Factories;
 
         protected readonly Dictionary<int, ILobby> Lobbies;
-
-        public readonly Logger Logger = LogManager.GetLogger(typeof(LobbiesPlugin).Name, LogLevel.Warn);
 
         public bool DontAllowCreatingIfJoined = true;
         public int JoinedLobbiesLimit = 1;
@@ -33,8 +32,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public SpawnersPlugin SpawnersPlugin;
         public RoomsPlugin RoomsPlugin;
 
-        public LobbiesPlugin(IServer server) : base(server)
+        public LobbiesPlugin(IServer server, ILogger logger) : base(server)
         {
+            _logger = logger;
             Factories = new Dictionary<string, ILobbyFactory>();
             Lobbies = new Dictionary<int, ILobby>();
 
@@ -70,7 +70,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public void AddFactory(ILobbyFactory factory)
         {
             if (Factories.ContainsKey(factory.Id))
-                Logger.Warn("You are overriding a factory with same id");
+                _logger.Warn("You are overriding a factory with same id");
 
             Factories[factory.Id] = factory;
         }
@@ -79,7 +79,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             if (Lobbies.ContainsKey(lobby.Id))
             {
-                Logger.Error("Failed to add a lobby - lobby with same id already exists");
+                _logger.Error("Failed to add a lobby - lobby with same id already exists");
                 return false;
             }
 
@@ -162,7 +162,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 return;
             }
 
-            Logger.Info("Lobby created: " + newLobby.Id);
+            _logger.Info("Lobby created: " + newLobby.Id);
 
             // Respond with success and lobby id
             message.Respond(newLobby.Id, ResponseStatus.Success);

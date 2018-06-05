@@ -8,17 +8,17 @@ namespace SpeedDate.Client.Console.Example
     {
         static void Main(string[] args)
         {
-            //System.Console.WriteLine("------STARTING SPAWNER------");
-            //var spawner = new Spawner("spawner.json");
-            //spawner.Start();
-            //spawner.Connected += () => spawner.Spawn.RegisterSpawner(new SpawnerOptions(),
-            //    (controller, error) =>
-            //    {
-            //        System.Console.WriteLine("Registered spawner"); 
+            System.Console.WriteLine("------STARTING SPAWNER------");
+            var spawner = new Spawner("spawner.json");
+            spawner.Start();
+            spawner.Connected += () => spawner.Spawn.RegisterSpawner(new SpawnerOptions(),
+                (controller, error) =>
+                {
+                    System.Console.WriteLine("Registered spawner");
 
-            //    });
+                });
 
-            //This represents a player
+
             System.Console.WriteLine("------STARTING GAMECLIENT------");
             var gameClient = new GameClient("gameclient.json");
             gameClient.Start();
