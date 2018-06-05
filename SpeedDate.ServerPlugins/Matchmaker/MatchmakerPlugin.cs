@@ -13,12 +13,12 @@ namespace SpeedDate.ServerPlugins.Matchmaker
 {
     class MatchmakerPlugin : ServerPluginBase
     {
-        protected readonly HashSet<IGamesProvider> GameProviders;
+        private readonly HashSet<IGamesProvider> _gameProviders;
 
 
         public MatchmakerPlugin(IServer server) : base(server)
         {
-            GameProviders = new HashSet<IGamesProvider>();
+            _gameProviders = new HashSet<IGamesProvider>();
 
             // Add handlers
             Server.SetHandler((short)OpCodes.FindGames, HandleFindGames);
@@ -33,7 +33,7 @@ namespace SpeedDate.ServerPlugins.Matchmaker
 
         public void AddProvider(IGamesProvider provider)
         {
-            GameProviders.Add(provider);
+            _gameProviders.Add(provider);
         }
 
         private void HandleFindGames(IIncommingMessage message)
@@ -42,7 +42,7 @@ namespace SpeedDate.ServerPlugins.Matchmaker
 
             var filters = new Dictionary<string, string>().FromBytes(message.AsBytes());
 
-            foreach (var provider in GameProviders)
+            foreach (var provider in _gameProviders)
             {
                 list.AddRange(provider.GetPublicGames(message.Peer, filters));
             }

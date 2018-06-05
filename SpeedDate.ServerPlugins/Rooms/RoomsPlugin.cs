@@ -19,9 +19,9 @@ namespace SpeedDate.ServerPlugins.Rooms
         public int RegisterRoomPermissionLevel = 0;
 
 
-        protected readonly Dictionary<int, RegisteredRoom> Rooms;
+        private readonly Dictionary<int, RegisteredRoom> _rooms;
 
-        private int roomIdGenerator = 0;
+        private int _roomIdGenerator;
 
         public event Action<RegisteredRoom> RoomRegistered; 
         public event Action<RegisteredRoom> RoomDestroyed;
@@ -29,7 +29,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         public RoomsPlugin(IServer server) : base(server)
         {
-            Rooms = new Dictionary<int, RegisteredRoom>();
+            _rooms = new Dictionary<int, RegisteredRoom>();
 
             // Add handlers
             Server.SetHandler((short)OpCodes.RegisterRoom, HandleRegisterRoom);
@@ -57,7 +57,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         public int GenerateRoomId()
         {
-            return roomIdGenerator++;
+            return _roomIdGenerator++;
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             peerRooms[room.RoomId] = room;
 
             // Add the room to a list of all rooms
-            Rooms[room.RoomId] = room;
+            _rooms[room.RoomId] = room;
 
             // Invoke the event
             RoomRegistered?.Invoke(room);
@@ -114,7 +114,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             }
 
             // Remove the room from all rooms
-            Rooms.Remove(room.RoomId);
+            _rooms.Remove(room.RoomId);
 
             room.Destroy();
 
@@ -149,7 +149,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
-                foreach (var registeredRoom in Rooms.Values)
+                foreach (var registeredRoom in _rooms.Values)
                 {
                     registeredRoom.ClearTimedOutAccesses();
                 }
@@ -158,7 +158,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         public IEnumerable<GameInfoPacket> GetPublicGames(IPeer peer, Dictionary<string, string> filters)
         {
-            return Rooms.Values.Where(r => r.Options.IsPublic).Select(r => new GameInfoPacket()
+            return _rooms.Values.Where(r => r.Options.IsPublic).Select(r => new GameInfoPacket()
             {
                 Id = r.RoomId,
                 Address = r.Options.RoomIp + ":" + r.Options.RoomPort,
@@ -179,13 +179,13 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         public RegisteredRoom GetRoom(int roomId)
         {
-            Rooms.TryGetValue(roomId, out var room);
+            _rooms.TryGetValue(roomId, out var room);
             return room;
         }
 
         public IEnumerable<RegisteredRoom> GetAllRooms()
         {
-            return Rooms.Values;
+            return _rooms.Values;
         }
 
         #region Message Handlers
@@ -211,7 +211,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             var roomId = message.AsInt();
 
             RegisteredRoom room;
-            Rooms.TryGetValue(roomId, out room);
+            _rooms.TryGetValue(roomId, out room);
 
             if (room == null)
             {
@@ -235,7 +235,7 @@ namespace SpeedDate.ServerPlugins.Rooms
         {
             var data = message.Deserialize(new RoomAccessValidatePacket());
 
-            Rooms.TryGetValue(data.RoomId, out var room);
+            _rooms.TryGetValue(data.RoomId, out var room);
 
             if (room == null)
             {
@@ -277,7 +277,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             var data = message.Deserialize(new SaveRoomOptionsPacket());
 
             RegisteredRoom room;
-            Rooms.TryGetValue(data.RoomId, out room);
+            _rooms.TryGetValue(data.RoomId, out room);
 
             if (room == null)
             {
@@ -302,7 +302,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             var data = message.Deserialize(new RoomAccessRequestPacket());
 
             RegisteredRoom room;
-            Rooms.TryGetValue(data.RoomId, out room);
+            _rooms.TryGetValue(data.RoomId, out room);
 
             if (room == null)
             {
@@ -333,7 +333,7 @@ namespace SpeedDate.ServerPlugins.Rooms
         {
             var data = message.Deserialize(new PlayerLeftRoomPacket());
 
-            Rooms.TryGetValue(data.RoomId, out var room);
+            _rooms.TryGetValue(data.RoomId, out var room);
 
             if (room == null)
             {

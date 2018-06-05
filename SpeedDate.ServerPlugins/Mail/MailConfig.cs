@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.ServerPlugins.Authentication
+﻿namespace SpeedDate.ServerPlugins.Mail
 {
     class MailConfig
     {

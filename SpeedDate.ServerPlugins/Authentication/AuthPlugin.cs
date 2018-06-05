@@ -16,13 +16,6 @@ using SpeedDate.ServerPlugins.Mail;
 
 namespace SpeedDate.ServerPlugins.Authentication
 {
-    [Serializable]
-    internal class PermissionEntry
-    {
-        public string Key;
-        public int PermissionLevel;
-    }
-
     /// <summary>
     ///     Authentication module, which handles logging in and registration of accounts
     /// </summary>
