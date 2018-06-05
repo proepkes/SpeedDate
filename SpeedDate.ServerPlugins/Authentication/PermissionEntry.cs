@@ -2,10 +2,15 @@
 
 namespace SpeedDate.ServerPlugins.Authentication
 {
-    [Serializable]
     internal class PermissionEntry
     {
-        public string Key;
-        public int PermissionLevel;
+        public readonly string Key;
+        public readonly int PermissionLevel;
+
+        public PermissionEntry(string key, int permissionLevel)
+        {
+            Key = key;
+            PermissionLevel = permissionLevel;
+        }
     }
 }
