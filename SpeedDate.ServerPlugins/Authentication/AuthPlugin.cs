@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using SpeedDate.Interfaces;
+using System.Xml.Serialization;
 using SpeedDate.Interfaces.Network;
 using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
@@ -15,88 +16,88 @@ using SpeedDate.ServerPlugins.Mail;
 
 namespace SpeedDate.ServerPlugins.Authentication
 {
-
     [Serializable]
-    class PermissionEntry
+    internal class PermissionEntry
     {
         public string Key;
         public int PermissionLevel;
     }
 
     /// <summary>
-    /// Authentication module, which handles logging in and registration of accounts
+    ///     Authentication module, which handles logging in and registration of accounts
     /// </summary>
-    class AuthPlugin : ServerPluginBase
+    internal class AuthPlugin : ServerPluginBase
     {
         public delegate void AuthEventHandler(IUserExtension account);
 
-        private int _nextGuestId;
+        private readonly AuthConfig _config;
 
         /// <summary>
-        /// Collection of users who are currently logged in
+        ///     Collection of users who are currently logged in
         /// </summary>
         public readonly Dictionary<string, IUserExtension> LoggedInUsers;
 
-        /// <summary>
-        /// Invoked, when user logs in
-        /// </summary>
-        public event AuthEventHandler LoggedIn;
+        private CockroachDbPlugin _database;
 
-        /// <summary>
-        /// Invoked, when user logs out
-        /// </summary>
-        public event AuthEventHandler LoggedOut;
+        private MailPlugin _mailer;
 
-        /// <summary>
-        /// Invoked, when user successfully registers an account
-        /// </summary>
-        public event Action<IPeer, IAccountData> Registered;
-
-        /// <summary>
-        /// Invoked, when user successfully confirms his e-mail
-        /// </summary>
-        public event Action<IAccountData> EmailConfirmed;
-
-        public Mailer Mailer;
+        private int _nextGuestId;
 
         public string ActivationForm = "<h1>Activation</h1>" +
                                        "<p>Your email activation code is: <b>{0}</b> </p>";
 
         public string PasswordResetCode = "<h1>Password Reset Code</h1>" +
-                                       "<p>Your password reset code is: <b>{0}</b> </p>";
+                                          "<p>Your password reset code is: <b>{0}</b> </p>";
 
-        private readonly AuthConfig _config;
-        private CockroachDbPlugin _database;
-
-        public List<PermissionEntry> Permissions;
+        private readonly List<PermissionEntry> _permissions;
 
 
         public AuthPlugin(IServer server) : base(server)
         {
+            _permissions = new List<PermissionEntry>();
             _config = SpeedDateConfig.GetPluginConfig<AuthConfig>();
-
-            Mailer = Mailer ?? new Mailer();
 
             LoggedInUsers = new Dictionary<string, IUserExtension>();
 
             // Set handlers
-            Server.SetHandler((short)OpCodes.LogIn, HandleLogIn);
-            Server.SetHandler((short)OpCodes.RegisterAccount, HandleRegister);
-            Server.SetHandler((short)OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
-            Server.SetHandler((short)OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
-            Server.SetHandler((short)OpCodes.ConfirmEmail, HandleEmailConfirmation);
-            Server.SetHandler((short)OpCodes.GetLoggedInCount, HandleGetLoggedInCount);
-            Server.SetHandler((short)OpCodes.PasswordChange, HandlePasswordChange);
-            Server.SetHandler((short)OpCodes.GetPeerAccountInfo, HandleGetPeerAccountInfo);
+            Server.SetHandler((short) OpCodes.LogIn, HandleLogIn);
+            Server.SetHandler((short) OpCodes.RegisterAccount, HandleRegister);
+            Server.SetHandler((short) OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
+            Server.SetHandler((short) OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
+            Server.SetHandler((short) OpCodes.ConfirmEmail, HandleEmailConfirmation);
+            Server.SetHandler((short) OpCodes.GetLoggedInCount, HandleGetLoggedInCount);
+            Server.SetHandler((short) OpCodes.PasswordChange, HandlePasswordChange);
+            Server.SetHandler((short) OpCodes.GetPeerAccountInfo, HandleGetPeerAccountInfo);
 
             // AesKey handler
-            Server.SetHandler((short)OpCodes.AesKeyRequest, HandleAesKeyRequest);
-            Server.SetHandler((short)OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
+            Server.SetHandler((short) OpCodes.AesKeyRequest, HandleAesKeyRequest);
+            Server.SetHandler((short) OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
         }
-        
+
+        /// <summary>
+        ///     Invoked, when user logs in
+        /// </summary>
+        public event AuthEventHandler LoggedIn;
+
+        /// <summary>
+        ///     Invoked, when user logs out
+        /// </summary>
+        public event AuthEventHandler LoggedOut;
+
+        /// <summary>
+        ///     Invoked, when user successfully registers an account
+        /// </summary>
+        public event Action<IPeer, IAccountData> Registered;
+
+        /// <summary>
+        ///     Invoked, when user successfully confirms his e-mail
+        /// </summary>
+        public event Action<IAccountData> EmailConfirmed;
+
         public override void Loaded(IPluginProvider pluginProvider)
         {
             _database = pluginProvider.Get<CockroachDbPlugin>();
+            _mailer = pluginProvider.Get<MailPlugin>();
         }
 
         public string GenerateGuestUsername()
@@ -165,7 +166,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Triggers the <see cref="LoggedOut"/> event
+        ///     Triggers the <see cref="LoggedOut" /> event
         /// </summary>
         protected void TriggerLoggedOutEvent(IUserExtension user)
         {
@@ -173,7 +174,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Triggers the <see cref="LoggedIn"/> event
+        ///     Triggers the <see cref="LoggedIn" /> event
         /// </summary>
         protected void TriggerLoggedInEvent(IUserExtension user)
         {
@@ -181,7 +182,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Triggers the <see cref="Registered"/> event
+        ///     Triggers the <see cref="Registered" /> event
         /// </summary>
         protected void TriggerRegisteredEvent(IPeer peer, IAccountData account)
         {
@@ -189,7 +190,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Triggers the <see cref="EmailConfirmed"/> event
+        ///     Triggers the <see cref="EmailConfirmed" /> event
         /// </summary>
         protected void TriggerEmailConfirmed(IAccountData account)
         {
@@ -199,7 +200,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         #region Message Handlers
 
         /// <summary>
-        /// Handles client's request to change password
+        ///     Handles client's request to change password
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandlePasswordChange(IIncommingMessage message)
@@ -234,7 +235,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Handles a request to retrieve a number of logged in users
+        ///     Handles a request to retrieve a number of logged in users
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandleGetLoggedInCount(IIncommingMessage message)
@@ -243,7 +244,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Handles e-mail confirmation request
+        ///     Handles e-mail confirmation request
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandleEmailConfirmation(IIncommingMessage message)
@@ -298,7 +299,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Handles password reset request
+        ///     Handles password reset request
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandlePasswordResetRequest(IIncommingMessage message)
@@ -318,7 +319,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             db.SavePasswordResetCode(account, code);
 
-            if (!Mailer.SendMail(account.Email, "Password Reset Code", string.Format(PasswordResetCode, code)))
+            if (!_mailer.SendMail(account.Email, "Password Reset Code", string.Format(PasswordResetCode, code)))
             {
                 message.Respond("Couldn't send an activation code to your e-mail");
                 return;
@@ -351,7 +352,8 @@ namespace SpeedDate.ServerPlugins.Authentication
             Debug.WriteLine("SHOULD BE HERE");
             db.SaveEmailConfirmationCode(extension.AccountData.Email, code);
 
-            if (!Mailer.SendMail(extension.AccountData.Email, "E-mail confirmation", string.Format(ActivationForm, code)))
+            if (!_mailer.SendMail(extension.AccountData.Email, "E-mail confirmation",
+                string.Format(ActivationForm, code)))
             {
                 message.Respond("Couldn't send a confirmation code to your e-mail. Please contact support");
                 return;
@@ -362,7 +364,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Handles account registration request
+        ///     Handles account registration request
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandleRegister(IIncommingMessage message)
@@ -424,8 +426,8 @@ namespace SpeedDate.ServerPlugins.Authentication
             //    return;
             //}
 
-            if ((username.Length < _config.UsernameMinChars) ||
-                (username.Length > _config.UsernameMaxChars))
+            if (username.Length < _config.UsernameMinChars ||
+                username.Length > _config.UsernameMaxChars)
             {
                 // Check if username length is good
                 message.Respond("Invalid usernanme length".ToBytes(), ResponseStatus.Error);
@@ -465,7 +467,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Handles a request to retrieve account information
+        ///     Handles a request to retrieve account information
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandleGetPeerAccountInfo(IIncommingMessage message)
@@ -496,7 +498,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             var data = account.AccountData;
 
-            var packet = new PeerAccountInfoPacket()
+            var packet = new PeerAccountInfoPacket
             {
                 PeerId = peerId,
                 Properties = data.Properties,
@@ -507,7 +509,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
         /// <summary>
-        /// Handles a request to log in
+        ///     Handles a request to log in
         /// </summary>
         /// <param name="message"></param>
         protected virtual void HandleLogIn(IIncommingMessage message)
@@ -623,14 +625,12 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             var permissionClaimed = false;
 
-            foreach (var entry in Permissions)
-            {
+            foreach (var entry in _permissions)
                 if (entry.Key == key)
                 {
                     newLevel = entry.PermissionLevel;
                     permissionClaimed = true;
                 }
-            }
 
             extension.PermissionLevel = newLevel;
 
@@ -663,9 +663,9 @@ namespace SpeedDate.ServerPlugins.Authentication
             var clientsPublicKeyXml = message.AsString();
 
             // Deserialize public key
-            var sr = new System.IO.StringReader(clientsPublicKeyXml);
-            var xs = new System.Xml.Serialization.XmlSerializer(typeof(RSAParameters));
-            var clientsPublicKey = (RSAParameters)xs.Deserialize(sr);
+            var sr = new StringReader(clientsPublicKeyXml);
+            var xs = new XmlSerializer(typeof(RSAParameters));
+            var clientsPublicKey = (RSAParameters) xs.Deserialize(sr);
 
             using (var csp = new RSACryptoServiceProvider())
             {
@@ -679,6 +679,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                 message.Respond(encryptedAes, ResponseStatus.Success);
             }
         }
+
         #endregion
     }
 }
