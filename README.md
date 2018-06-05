@@ -12,4 +12,6 @@ Open for personal evaluation. Everything else is prohibited.
 
 ### Resources:
 
-https://github.com/alvyxaz/barebones-masterserver
+Based on: https://github.com/alvyxaz/barebones-masterserver
+
+Network-Library used: https://github.com/RevenantX/LiteNetLib

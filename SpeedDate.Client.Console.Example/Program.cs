@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using SpeedDate.Packets.Spawner;
 
@@ -18,7 +19,7 @@ namespace SpeedDate.Client.Console.Example
 
                 });
 
-
+            Thread.Sleep(TimeSpan.FromSeconds(1));
             System.Console.WriteLine("------STARTING GAMECLIENT------");
             var gameClient = new GameClient("gameclient.json");
             gameClient.Start();
@@ -27,9 +28,16 @@ namespace SpeedDate.Client.Console.Example
                 gameClient.Auth.LogInAsGuest((info, error) =>
                 {
                     System.Console.WriteLine($"Player logged in as : {info.Username}");
+
+                    gameClient.Spawn.RequestSpawn(new Dictionary<string, string>(), "EU", (controller, s) =>
+                    {
+                        System.Console.WriteLine("Spawned");
+                    });
                 });
             };
             System.Console.ReadLine();
+
+
         }
     }
 }
