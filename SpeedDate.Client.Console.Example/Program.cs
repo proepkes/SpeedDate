@@ -8,51 +8,28 @@ namespace SpeedDate.Client.Console.Example
     {
         static void Main(string[] args)
         {
+            //System.Console.WriteLine("------STARTING SPAWNER------");
+            //var spawner = new Spawner("spawner.json");
+            //spawner.Start();
+            //spawner.Connected += () => spawner.Spawn.RegisterSpawner(new SpawnerOptions(),
+            //    (controller, error) =>
+            //    {
+            //        System.Console.WriteLine("Registered spawner"); 
 
-            var spawner = new Spawner("spawner.json");
-            spawner.Start();
+            //    });
 
-
-            //var gameServer = new GameServer("gameserver.json");
-            //gameServer.Start();
-            
+            //This represents a player
+            System.Console.WriteLine("------STARTING GAMECLIENT------");
+            var gameClient = new GameClient("gameclient.json");
+            gameClient.Start();
+            gameClient.Connected += () =>
+            {
+                gameClient.Auth.LogInAsGuest((info, error) =>
+                {
+                    System.Console.WriteLine($"Player logged in as : {info.Username}");
+                });
+            };
             System.Console.ReadLine();
-            //using (var client = new MsfClient(SpeedDateConnection.Socket))
-            //{
-            //    client.ConnectAsync("127.0.0.1", 60125);
-
-            //    while (!client.ClientSocket.IsConnected)
-            //    {
-            //        System.Console.WriteLine("Connecting...");
-            //        Thread.Sleep(1000);
-            //    }
-
-
-            //    var input = "";
-            //    while (input != "x" && client.ClientSocket.IsConnected)
-            //    {
-            //        input = System.Console.ReadLine()?.ToLower();
-
-            //            switch (input)
-            //            {
-            //                case "register":
-            //                    client.Auth.Register(new Dictionary<string, string>
-            //                    {
-            //                        { "username", "proepkes" },
-            //                        {"password", "pass" },
-            //                        {"email", "myMail@mail.com" }
-            //                    }, (successful, error) =>
-            //                    {
-            //                        System.Console.WriteLine(successful);
-            //                        System.Console.WriteLine(error);
-            //                    });
-            //                    break;
-            //            }
-
-            //    }
-            //}
-
-
         }
     }
 }

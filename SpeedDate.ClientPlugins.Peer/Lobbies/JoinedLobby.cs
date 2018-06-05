@@ -22,7 +22,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         private readonly IClientSocket _connection;
 
-        private readonly LobbiesPlugin _lobbiesServer;
+        private readonly LobbyPlugin _lobbyServer;
 
         public LobbyDataPacket Data { get; }
 
@@ -40,7 +40,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         public bool HasLeft { get; private set; }
 
-        public JoinedLobby(LobbiesPlugin owner, LobbyDataPacket data, IClientSocket connection)
+        public JoinedLobby(LobbyPlugin owner, LobbyDataPacket data, IClientSocket connection)
         {
             Data = data;
             _connection = connection;
@@ -60,7 +60,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             Members = data.Players;
             Teams = data.Teams;
 
-            _lobbiesServer = owner;
+            _lobbyServer = owner;
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void Leave()
         {
-            _lobbiesServer.LeaveLobby(Id, () => { });
+            _lobbyServer.LeaveLobby(Id, () => { });
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="callback"></param>
         public void Leave(Action callback)
         {
-            _lobbiesServer.LeaveLobby(Id, callback);
+            _lobbyServer.LeaveLobby(Id, callback);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 {key, value}
             };
 
-            _lobbiesServer.SetLobbyProperties(Id, data, callback);
+            _lobbyServer.SetLobbyProperties(Id, data, callback);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void SetLobbyProperties(Dictionary<string, string> properties, SuccessCallback callback)
         {
-            _lobbiesServer.SetLobbyProperties(Id, properties, callback);
+            _lobbyServer.SetLobbyProperties(Id, properties, callback);
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 {key, value}
             };
 
-            _lobbiesServer.SetMyProperties(data, callback);
+            _lobbyServer.SetMyProperties(data, callback);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void SetMyProperties(Dictionary<string, string> properties, SuccessCallback callback)
         {
-            _lobbiesServer.SetMyProperties(properties, callback);
+            _lobbyServer.SetMyProperties(properties, callback);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="isReady"></param>
         public void SetReadyStatus(bool isReady)
         {
-            _lobbiesServer.SetReadyStatus(isReady, (successful, error) => { }, _connection);
+            _lobbyServer.SetReadyStatus(isReady, (successful, error) => { }, _connection);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void SetReadyStatus(bool isReady, SuccessCallback callback)
         {
-            _lobbiesServer.SetReadyStatus(isReady, callback, _connection);
+            _lobbyServer.SetReadyStatus(isReady, callback, _connection);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="message"></param>
         public void SendChatMessage(string message)
         {
-            _lobbiesServer.SendChatMessage(message);
+            _lobbyServer.SendChatMessage(message);
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="callback"></param>
         public void JoinTeam(string teamName, SuccessCallback callback)
         {
-            _lobbiesServer.JoinTeam(Id, teamName, callback);
+            _lobbyServer.JoinTeam(Id, teamName, callback);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="callback"></param>
         public void StartGame(SuccessCallback callback)
         {
-            _lobbiesServer.StartGame(callback);
+            _lobbyServer.StartGame(callback);
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="callback"></param>
         public void GetLobbyRoomAccess(RoomAccessCallback callback)
         {
-            _lobbiesServer.GetLobbyRoomAccess(new Dictionary<string, string>(), callback);
+            _lobbyServer.GetLobbyRoomAccess(new Dictionary<string, string>(), callback);
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback)
         {
-            _lobbiesServer.GetLobbyRoomAccess(properties, callback);
+            _lobbyServer.GetLobbyRoomAccess(properties, callback);
         }
 
         #region Handlers

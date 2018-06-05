@@ -5,9 +5,9 @@ using SpeedDate.Packets;
 
 namespace SpeedDate.ClientPlugins.Peer.Profiles
 {
-    public class ProfilesPlugin : SpeedDateClientPlugin
+    public class ProfilePlugin : SpeedDateClientPlugin
     {
-        public ProfilesPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public ProfilePlugin(IClientSocket clientSocket) : base(clientSocket)
         {
         }
 

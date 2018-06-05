@@ -17,7 +17,7 @@
     <None Update="gameserver.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="peer.json">
+    <None Update="gameclient.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="spawner.json">

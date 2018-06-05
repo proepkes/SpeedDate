@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
+﻿using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Network;
-using SpeedDate.Network.Utils.Conversion;
-using SpeedDate.Network.Utils.IO;
-using SpeedDate.Packets;
 
-namespace SpeedDate.ClientPlugins.GameServer
+namespace SpeedDate.ClientPlugins
 {
     public class LoggerPlugin : SpeedDateClientPlugin
     {

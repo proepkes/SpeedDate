@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Ninject;
 using Ninject.Extensions.Conventions;
 using SpeedDate.Interfaces;
@@ -86,7 +87,9 @@ namespace SpeedDate
                         .IncludingNonPublicTypes()
                         .SelectAllClasses()
                         .InheritedFrom<IPlugin>()
-                        .Where(type => SpeedDateConfig.Plugins.LoadAll || SpeedDateConfig.Plugins.PluginsNamespace.Split(';').Contains(type.Namespace))
+                        .Where(type => SpeedDateConfig.Plugins.LoadAll ||
+                                       type.Namespace != null && 
+                                       SpeedDateConfig.Plugins.PluginsNamespace.Split(';').FirstOrDefault(ns => Regex.IsMatch(type.Namespace, WildCardToRegular(ns))) != null)
                         .BindDefaultInterfaces()
                         .Configure(syntax => syntax.InSingletonScope());
                 });
@@ -103,6 +106,10 @@ namespace SpeedDate
             }
 
             return kernel;
+        }
+        private static string WildCardToRegular(string value)
+        {
+            return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
         }
     }
 }

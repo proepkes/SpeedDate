@@ -11,7 +11,7 @@ using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.Peer.Lobbies
 {
-    public class LobbiesPlugin : SpeedDateClientPlugin
+    public class LobbyPlugin : SpeedDateClientPlugin
     {
         public delegate void JoinLobbyCallback(JoinedLobby lobby, string error);
         public delegate void CreateLobbyCallback(int? lobbyId, string error);
@@ -32,9 +32,9 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public JoinedLobby LastJoinedLobby;
 
-        private RoomsPlugin _roomsPlugin;
+        private RoomPlugin _roomPlugin;
 
-        public LobbiesPlugin(IClientSocket connection) : base(connection)
+        public LobbyPlugin(IClientSocket connection) : base(connection)
         {
             _joinedLobbies = new Dictionary<string, JoinedLobby>();
         }
@@ -43,7 +43,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         {
             base.Loaded(pluginProvider);
 
-            _roomsPlugin = pluginProvider.Get<RoomsPlugin>();
+            _roomPlugin = pluginProvider.Get<RoomPlugin>();
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
                 var access = response.Deserialize(new RoomAccessPacket());
 
-                _roomsPlugin.TriggerAccessReceivedEvent(access);
+                _roomPlugin.TriggerAccessReceivedEvent(access);
 
                 callback.Invoke(access, null);
             });

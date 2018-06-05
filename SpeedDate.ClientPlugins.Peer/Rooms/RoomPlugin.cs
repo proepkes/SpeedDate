@@ -10,14 +10,14 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
 
     public delegate void RoomAccessReceivedHandler(RoomAccessPacket access);
 
-    public class RoomsPlugin : SpeedDateClientPlugin
+    public class RoomPlugin : SpeedDateClientPlugin
     {
         /// <summary>
         ///     An access, which was last received
         /// </summary>
         public RoomAccessPacket LastReceivedAccess { get; private set; }
 
-        public RoomsPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public RoomPlugin(IClientSocket clientSocket) : base(clientSocket)
         {
         }
 

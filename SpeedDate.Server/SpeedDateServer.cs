@@ -1,22 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using SpeedDate.Interfaces;
 using SpeedDate.Interfaces.Network;
-using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 
 namespace SpeedDate.Server
 {
-    sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable
+    internal sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable
     {
         private const string InternalServerErrorMessage = "Internal Server Error";
-
-        private readonly IServerSocket _socket;
-        private readonly ILogger _logger;
         private readonly Dictionary<long, IPeer> _connectedPeers;
         private readonly Dictionary<short, IPacketHandler> _handlers;
+        private readonly ILogger _logger;
+
+        private readonly IServerSocket _socket;
+
+
+        public SpeedDateServer(IServerSocket serverSocket, ILogger logger)
+        {
+            _connectedPeers = new Dictionary<long, IPeer>();
+            _handlers = new Dictionary<short, IPacketHandler>();
+
+            // Create the server 
+            _socket = serverSocket;
+            _logger = logger;
+
+            _socket.Connected += Connected;
+            _socket.Disconnected += Disconnected;
+        }
+
+        public void Dispose()
+        {
+            _socket.Connected -= Connected;
+            _socket.Disconnected -= Disconnected;
+        }
+
+        public event PeerActionHandler PeerConnected;
+        public event PeerActionHandler PeerDisconnected;
+
+        public void SetHandler(short opCode, IncommingMessageHandler handler)
+        {
+            _handlers[opCode] = new PacketHandler(opCode, handler);
+        }
+
+        public IPeer GetPeer(long peerId)
+        {
+            _connectedPeers.TryGetValue(peerId, out var peer);
+            return peer;
+        }
 
         public event Action Started;
         public event Action Stopped;
@@ -36,23 +68,6 @@ namespace SpeedDate.Server
             Stopped?.Invoke();
         }
 
-        public event PeerActionHandler PeerConnected;
-        public event PeerActionHandler PeerDisconnected;
-
-
-        public SpeedDateServer(IServerSocket serverSocket, ILogger logger)
-        {
-            _connectedPeers = new Dictionary<long, IPeer>();
-            _handlers = new Dictionary<short, IPacketHandler>();
-
-            // Create the server 
-            _socket = serverSocket;
-            _logger = logger;
-
-            _socket.Connected += Connected;
-            _socket.Disconnected += Disconnected;
-        }
-
         private void Connected(IPeer peer)
         {
             // Listen to messages
@@ -67,6 +82,7 @@ namespace SpeedDate.Server
             // Set default permission level
             extension.PermissionLevel = 0;
 
+            _logger.Info($"New Peer connected. ID: {peer.Id}");
             // Invoke the event
             PeerConnected?.Invoke(peer);
         }
@@ -91,13 +107,14 @@ namespace SpeedDate.Server
 
                 if (handler == null)
                 {
-                    _logger.Warn($"Handler for OpCode {message.OpCode} = {(OpCodes)message.OpCode} does not exist");
+                    _logger.Warn($"Handler for OpCode {message.OpCode} = {(OpCodes) message.OpCode} does not exist");
 
                     if (message.IsExpectingResponse)
                     {
                         message.Respond(InternalServerErrorMessage, ResponseStatus.NotHandled);
                         return;
                     }
+
                     return;
                 }
 
@@ -105,7 +122,8 @@ namespace SpeedDate.Server
             }
             catch (Exception e)
             {
-                _logger.Error($"Error while handling a message from Client. OpCode: {message.OpCode} = {(OpCodes)message.OpCode}");
+                _logger.Error(
+                    $"Error while handling a message from Client. OpCode: {message.OpCode} = {(OpCodes) message.OpCode}");
                 _logger.Error(e);
 
                 if (!message.IsExpectingResponse)
@@ -120,24 +138,6 @@ namespace SpeedDate.Server
                     Logs.Error(exception);
                 }
             }
-        }
-        
-        public void SetHandler(short opCode, IncommingMessageHandler handler)
-        {
-            _handlers[opCode] = new PacketHandler(opCode, handler);
-        }
-
-        public IPeer GetPeer(long peerId)
-        {
-            _connectedPeers.TryGetValue(peerId, out var peer);
-            return peer;
-        }
-        
-        public void Dispose()
-        {
-            _socket.Connected -= Connected;
-            _socket.Disconnected -= Disconnected;
-
         }
     }
 }

@@ -1,18 +1,19 @@
-﻿using SpeedDate.ClientPlugins.Spawner;
-using SpeedDate.Packets.Spawner;
+﻿using System;
+using SpeedDate.ClientPlugins.Spawner;
 
-namespace SpeedDate.Client
+namespace SpeedDate.Client.Console.Example
 {
     class Spawner
     {
         private readonly SpeedDate _speedDate;
+        public event Action Connected;
 
         public SpawnerPlugin Spawn { get; private set; }
 
         public Spawner(string configFile)
         {
             _speedDate = new SpeedDate(configFile);
-            _speedDate.Started += SpeedDateOnStarted;
+            _speedDate.Started += () => Connected?.Invoke();
         }
 
         /// <summary>
@@ -22,15 +23,6 @@ namespace SpeedDate.Client
         {
             _speedDate.Start();
             Spawn = _speedDate.PluginProver.Get<SpawnerPlugin>();
-        }
-
-        private void SpeedDateOnStarted()
-        {
-
-            Spawn.RegisterSpawner(new SpawnerOptions(), (controller, error) =>
-            {
-                System.Console.WriteLine(error);
-            });
         }
     }
 }
