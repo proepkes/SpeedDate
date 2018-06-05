@@ -450,7 +450,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             if (Properties.ContainsKey(OptionKeys.Region))
                 region = Properties[OptionKeys.Region];
 
-            var task = Plugin.SpawnersPlugin.Spawn(Properties, region, GenerateCmdArgs());
+            var task = Plugin.SpawnerPlugin.Spawn(Properties, region, GenerateCmdArgs());
 
             if (task == null)
             {

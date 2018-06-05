@@ -10,8 +10,8 @@ Set startup-project to "SpeedDate.Server.Console" -> Run
 ### License
 Open for personal evaluation. Everything else is prohibited.
 
-### Resources:
+### Credits:
 
-Based on: https://github.com/alvyxaz/barebones-masterserver
+https://github.com/alvyxaz/barebones-masterserver
 
-Network-Library used: https://github.com/RevenantX/LiteNetLib
+https://github.com/RevenantX/LiteNetLib

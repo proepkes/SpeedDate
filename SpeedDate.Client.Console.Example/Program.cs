@@ -12,7 +12,7 @@ namespace SpeedDate.Client.Console.Example
             System.Console.WriteLine("------STARTING SPAWNER------");
             var spawner = new Spawner("spawner.json");
             spawner.Start();
-            spawner.Connected += () => spawner.Spawn.RegisterSpawner(new SpawnerOptions(),
+            spawner.Connected += () => spawner.Spawn.RegisterSpawner(new SpawnerOptions { Region = "EU" },
                 (controller, error) =>
                 {
                     System.Console.WriteLine("Registered spawner");

@@ -29,7 +29,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         private int _nextLobbyId;
 
-        public SpawnersPlugin SpawnersPlugin;
+        public SpawnerPlugin SpawnerPlugin;
         public RoomsPlugin RoomsPlugin;
 
         public LobbiesPlugin(IServer server, ILogger logger) : base(server)
@@ -56,7 +56,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public override void Loaded(IPluginProvider pluginProvider)
         {
             // Get dependencies
-            SpawnersPlugin = pluginProvider.Get<SpawnersPlugin>();
+            SpawnerPlugin = pluginProvider.Get<SpawnerPlugin>();
             RoomsPlugin = pluginProvider.Get<RoomsPlugin>();
         }
 
