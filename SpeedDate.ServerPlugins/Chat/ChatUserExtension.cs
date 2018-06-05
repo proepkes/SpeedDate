@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
 
 namespace SpeedDate.ServerPlugins.Chat
 {

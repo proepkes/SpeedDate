@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SpeedDate.Logging;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     public sealed class AppTimer : IUpdatable
     {

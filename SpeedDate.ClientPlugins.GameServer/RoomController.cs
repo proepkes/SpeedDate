@@ -1,7 +1,8 @@
 ﻿using System;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.GameServer
@@ -24,11 +25,11 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         public static Logger Logger = LogManager.GetLogger(typeof(RoomController).Name, LogLevel.Warn);
 
-        private RoomsGameServerPlugin _roomsGameServerPlugin;
+        private RoomsPlugin _roomsPlugin;
 
-        public RoomController(RoomsGameServerPlugin owner, int roomId, IClientSocket connection, RoomOptions options)
+        public RoomController(RoomsPlugin owner, int roomId, IClientSocket connection, RoomOptions options)
         {
-            _roomsGameServerPlugin = owner;
+            _roomsPlugin = owner;
 
             Connection = connection;
             RoomId = roomId;
@@ -59,7 +60,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void Destroy(SuccessCallback callback)
         {
-            _roomsGameServerPlugin.DestroyRoom(RoomId, callback, Connection);
+            _roomsPlugin.DestroyRoom(RoomId, callback, Connection);
         }
 
         /// <summary>
@@ -92,7 +93,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void SaveOptions(RoomOptions options, SuccessCallback callback)
         {
-            _roomsGameServerPlugin.SaveOptions(RoomId, options, (successful, error) =>
+            _roomsPlugin.SaveOptions(RoomId, options, (successful, error) =>
             {
                 if (successful)
                     Options = options;
@@ -120,12 +121,12 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <param name="callback"></param>
         public void ValidateAccess(string token, RoomAccessValidateCallback callback)
         {
-            _roomsGameServerPlugin.ValidateAccess(RoomId, token, callback, Connection);
+            _roomsPlugin.ValidateAccess(RoomId, token, callback, Connection);
         }
 
         public void PlayerLeft(int peerId)
         {
-            _roomsGameServerPlugin.NotifyPlayerLeft(RoomId, peerId, (successful, error) =>
+            _roomsPlugin.NotifyPlayerLeft(RoomId, peerId, (successful, error) =>
             {
                 if (!successful)
                     Logger.Error(error);
@@ -177,7 +178,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         {
             var data = message.Deserialize(new RoomAccessProvideCheckPacket());
 
-            var roomController = _roomsGameServerPlugin.GetRoomController(data.RoomId);
+            var roomController = _roomsPlugin.GetRoomController(data.RoomId);
 
             if (roomController == null)
             {
@@ -218,13 +219,13 @@ namespace SpeedDate.ClientPlugins.GameServer
             });
 
             // Timeout the access provider
-            AppTimer.AfterSeconds(_roomsGameServerPlugin.AccessProviderTimeout, () =>
+            AppTimer.AfterSeconds(_roomsPlugin.AccessProviderTimeout, () =>
             {
                 if (!isProviderDone)
                 {
                     isProviderDone = true;
                     message.Respond("Timed out", ResponseStatus.Timeout);
-                    Logger.Error("Access provider took longer than " + _roomsGameServerPlugin.AccessProviderTimeout + " seconds to provide access. " +
+                    Logger.Error("Access provider took longer than " + _roomsPlugin.AccessProviderTimeout + " seconds to provide access. " +
                                "If it's intended, increase the threshold at Msf.Server.Rooms.AccessProviderTimeout");
                 }
             });

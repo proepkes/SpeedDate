@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     public class ServerSocket : IServerSocket, IUpdatable
     {

@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Authentication;
-using SpeedDate.Plugin;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Database.CockroachDb;
 using SpeedDate.ServerPlugins.Mail;
@@ -25,7 +26,7 @@ namespace SpeedDate.ServerPlugins.Authentication
     /// <summary>
     /// Authentication module, which handles logging in and registration of accounts
     /// </summary>
-    class AuthServerPlugin : ServerPluginBase
+    class AuthPlugin : ServerPluginBase
     {
         public delegate void AuthEventHandler(IUserExtension account);
 
@@ -65,12 +66,12 @@ namespace SpeedDate.ServerPlugins.Authentication
                                        "<p>Your password reset code is: <b>{0}</b> </p>";
 
         private readonly AuthConfig _config;
-        private CockroachDbServerPlugin _database;
+        private CockroachDbPlugin _database;
 
         public List<PermissionEntry> Permissions;
 
 
-        public AuthServerPlugin(IServer server) : base(server)
+        public AuthPlugin(IServer server) : base(server)
         {
             _config = SpeedDateConfig.GetPluginConfig<AuthConfig>();
 
@@ -95,7 +96,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         
         public override void Loaded(IPluginProvider pluginProvider)
         {
-            _database = pluginProvider.Get<CockroachDbServerPlugin>();
+            _database = pluginProvider.Get<CockroachDbPlugin>();
         }
 
         public string GenerateGuestUsername()

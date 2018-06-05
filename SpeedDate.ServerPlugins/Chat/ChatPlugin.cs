@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Chat;
-using SpeedDate.Plugin;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Chat
 {
-    class ChatServerPlugin : ServerPluginBase
+    class ChatPlugin : ServerPluginBase
     {
         public bool UseAuthModule = true;
 
@@ -23,14 +24,14 @@ namespace SpeedDate.ServerPlugins.Chat
         public int MinChannelNameLength = 2;
         public int MaxChannelNameLength = 25;
         
-        public readonly Logger Logger = LogManager.GetLogger(typeof(ChatServerPlugin).Name, LogLevel.Warn);
+        public readonly Logger Logger = LogManager.GetLogger(typeof(ChatPlugin).Name, LogLevel.Warn);
 
         public readonly Dictionary<string, ChatUserExtension> ChatUsers;
         public readonly Dictionary<string, ChatChannel> Channels;
 
 
 
-        public ChatServerPlugin(IServer server) : base(server)
+        public ChatPlugin(IServer server) : base(server)
         {
             ChatUsers = new Dictionary<string, ChatUserExtension>();
             Channels = new Dictionary<string, ChatChannel>();
@@ -50,7 +51,7 @@ namespace SpeedDate.ServerPlugins.Chat
         public override void Loaded(IPluginProvider pluginProvider)
         {
             //Setup auth dependencies
-           var auth = pluginProvider.Get<AuthServerPlugin>();
+           var auth = pluginProvider.Get<AuthPlugin>();
 
             if (UseAuthModule && auth != null)
             {

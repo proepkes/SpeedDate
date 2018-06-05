@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Chat;
 
 namespace SpeedDate.ClientPlugins.Peer.Chat
 {
-    public class ChatClientPlugin : SpeedDateClientPlugin
+    public class ChatPlugin : SpeedDateClientPlugin
     {
         public delegate void ChatChannelsCallback(List<string> channels, string error);
         public delegate void ChatUsersCallback(List<string> users, string error);
@@ -28,7 +29,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public event ChatMessageHandler MessageReceived;
 
-        public ChatClientPlugin(IClientSocket connection) : base(connection)
+        public ChatPlugin(IClientSocket connection) : base(connection)
         {
             connection.SetHandler((short)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
             connection.SetHandler((short)OpCodes.UserLeftChannel, HandleUserLeftChannel);

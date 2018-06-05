@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 
 namespace SpeedDate.ClientPlugins.GameServer
@@ -11,9 +12,9 @@ namespace SpeedDate.ClientPlugins.GameServer
         public int SpawnId { get; private set; }
         public Dictionary<string, string> Properties { get; private set; }
 
-        private readonly RoomsGameServerPlugin _spawnerClient;
+        private readonly RoomsPlugin _spawnerClient;
 
-        public SpawnTaskController(RoomsGameServerPlugin owner, int spawnId, Dictionary<string, string> properties, IClientSocket connection)
+        public SpawnTaskController(RoomsPlugin owner, int spawnId, Dictionary<string, string> properties, IClientSocket connection)
         {
             _spawnerClient = owner;
 

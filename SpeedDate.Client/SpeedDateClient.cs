@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 
 namespace SpeedDate.Client

@@ -1,5 +1,6 @@
 ﻿using Ninject.Modules;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 
 namespace SpeedDate.Client
 {

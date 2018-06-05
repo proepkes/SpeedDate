@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Ninject.Syntax;
+using SpeedDate.Interfaces.Plugins;
 
-namespace SpeedDate.Plugin
+namespace SpeedDate
 {
     class NinjectPluginProvier : IPluginProvider
     {

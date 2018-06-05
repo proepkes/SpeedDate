@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.Peer.Rooms
@@ -9,14 +10,14 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
 
     public delegate void RoomAccessReceivedHandler(RoomAccessPacket access);
 
-    public class RoomsClientPlugin : SpeedDateClientPlugin
+    public class RoomsPlugin : SpeedDateClientPlugin
     {
         /// <summary>
         ///     An access, which was last received
         /// </summary>
         public RoomAccessPacket LastReceivedAccess { get; private set; }
 
-        public RoomsClientPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public RoomsPlugin(IClientSocket clientSocket) : base(clientSocket)
         {
         }
 

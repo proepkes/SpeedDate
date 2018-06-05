@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
-using SpeedDate.Networking.Utils.Conversion;
-using SpeedDate.Networking.Utils.IO;
+using SpeedDate.Network;
+using SpeedDate.Network.Utils.Conversion;
+using SpeedDate.Network.Utils.IO;
 using SpeedDate.Packets;
-using SpeedDate.Plugin;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Database.CockroachDb;
@@ -24,7 +25,7 @@ namespace SpeedDate.ServerPlugins.Profiles
     /// clients of interest.
     /// Also, reads changes from game server, and applies them to players profile
     /// </summary>
-    class ProfilesServerPlugin : ServerPluginBase
+    class ProfilesPlugin : ServerPluginBase
     {
         /// <summary>
         /// Time to pass after logging out, until profile
@@ -47,13 +48,13 @@ namespace SpeedDate.ServerPlugins.Profiles
 
         private readonly Dictionary<string, ObservableServerProfile> profiles;
 
-        private AuthServerPlugin _authServer;
-        private CockroachDbServerPlugin database;
+        private AuthPlugin _auth;
+        private CockroachDbPlugin database;
 
         private readonly HashSet<string> _debouncedSaves;
         private readonly HashSet<string> debouncedClientUpdates;
 
-        protected readonly Logger Logger = LogManager.GetLogger(typeof(ProfilesServerPlugin).Name);
+        protected readonly Logger Logger = LogManager.GetLogger(typeof(ProfilesPlugin).Name);
 
         public bool IgnoreProfileMissmatchError = false;
 
@@ -64,7 +65,7 @@ namespace SpeedDate.ServerPlugins.Profiles
         /// </summary>
         public ProfileFactory ProfileFactory { get; set; }
 
-        public ProfilesServerPlugin(IServer server) : base(server)
+        public ProfilesPlugin(IServer server) : base(server)
         {
             profiles = new Dictionary<string, ObservableServerProfile>();
             _debouncedSaves = new HashSet<string>();
@@ -80,10 +81,10 @@ namespace SpeedDate.ServerPlugins.Profiles
         public override void Loaded(IPluginProvider pluginProvider)
         {
 
-            _authServer = pluginProvider.Get<AuthServerPlugin>();
-            _authServer.LoggedIn += OnLoggedIn;
+            _auth = pluginProvider.Get<AuthPlugin>();
+            _auth.LoggedIn += OnLoggedIn;
 
-            database = pluginProvider.Get<CockroachDbServerPlugin>();
+            database = pluginProvider.Get<CockroachDbPlugin>();
 
         }
 
@@ -254,7 +255,7 @@ namespace SpeedDate.ServerPlugins.Profiles
             await Task.Delay(TimeSpan.FromSeconds(delay));
 
             // If user is not actually logged in, remove the profile
-            if (_authServer.IsUserLoggedIn(username))
+            if (_auth.IsUserLoggedIn(username))
                 return;
 
             ObservableServerProfile profile;

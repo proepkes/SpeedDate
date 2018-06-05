@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Matchmaking;
 using SpeedDate.Packets.Rooms;
 using SpeedDate.Server;
@@ -13,7 +14,7 @@ using GameInfoType = SpeedDate.Packets.Matchmaking.GameInfoType;
 
 namespace SpeedDate.ServerPlugins.Rooms
 {
-    class RoomsServerPlugin : ServerPluginBase, IGamesProvider
+    class RoomsPlugin : ServerPluginBase, IGamesProvider
     {
         public int RegisterRoomPermissionLevel = 0;
 
@@ -26,7 +27,7 @@ namespace SpeedDate.ServerPlugins.Rooms
         public event Action<RegisteredRoom> RoomDestroyed;
 
 
-        public RoomsServerPlugin(IServer server) : base(server)
+        public RoomsPlugin(IServer server) : base(server)
         {
             Rooms = new Dictionary<int, RegisteredRoom>();
 

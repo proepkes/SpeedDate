@@ -1,7 +1,7 @@
 ﻿using System;
-using SpeedDate.Networking.Utils.IO;
+using SpeedDate.Network.Utils.IO;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     /// <summary>
     /// Quick, universal serializer

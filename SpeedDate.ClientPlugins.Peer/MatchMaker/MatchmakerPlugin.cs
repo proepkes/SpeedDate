@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Matchmaking;
 
 namespace SpeedDate.ClientPlugins.Peer.MatchMaker
 {
     public delegate void FindGamesCallback(List<GameInfoPacket> games);
 
-    public class MatchmakerClientPlugin : SpeedDateClientPlugin
+    public class MatchmakerPlugin : SpeedDateClientPlugin
     {
-        public MatchmakerClientPlugin(IClientSocket connection) : base(connection)
+        public MatchmakerPlugin(IClientSocket connection) : base(connection)
         {
         }
 

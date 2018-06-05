@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.Packets.Matchmaking;
-using SpeedDate.Plugin;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Matchmaker;
 using SpeedDate.ServerPlugins.Rooms;
@@ -14,7 +15,7 @@ using SpeedDate.ServerPlugins.Spawner;
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {
-    class LobbiesServerPlugin : ServerPluginBase, IGamesProvider
+    class LobbiesPlugin : ServerPluginBase, IGamesProvider
     {
         public int CreateLobbiesPermissionLevel = 0;
 
@@ -22,17 +23,17 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         protected readonly Dictionary<int, ILobby> Lobbies;
 
-        public readonly Logger Logger = LogManager.GetLogger(typeof(LobbiesServerPlugin).Name, LogLevel.Warn);
+        public readonly Logger Logger = LogManager.GetLogger(typeof(LobbiesPlugin).Name, LogLevel.Warn);
 
         public bool DontAllowCreatingIfJoined = true;
         public int JoinedLobbiesLimit = 1;
 
         private int _nextLobbyId;
 
-        public SpawnersServerPlugin SpawnersServerPlugin;
-        public RoomsServerPlugin RoomsServerPlugin;
+        public SpawnersPlugin SpawnersPlugin;
+        public RoomsPlugin RoomsPlugin;
 
-        public LobbiesServerPlugin(IServer server) : base(server)
+        public LobbiesPlugin(IServer server) : base(server)
         {
             Factories = new Dictionary<string, ILobbyFactory>();
             Lobbies = new Dictionary<int, ILobby>();
@@ -55,8 +56,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public override void Loaded(IPluginProvider pluginProvider)
         {
             // Get dependencies
-            SpawnersServerPlugin = pluginProvider.Get<SpawnersServerPlugin>();
-            RoomsServerPlugin = pluginProvider.Get<RoomsServerPlugin>();
+            SpawnersPlugin = pluginProvider.Get<SpawnersPlugin>();
+            RoomsPlugin = pluginProvider.Get<RoomsPlugin>();
         }
 
         protected virtual bool CheckIfHasPermissionToCreate(IPeer peer)

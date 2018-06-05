@@ -1,6 +1,6 @@
-﻿using SpeedDate.Interfaces;
+﻿using SpeedDate.Interfaces.Network;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     /// <summary>
     ///     Generic packet handler

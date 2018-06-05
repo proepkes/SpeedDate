@@ -1,5 +1,6 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Plugin;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 
 namespace SpeedDate.ServerPlugins
 {

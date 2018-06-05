@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using SpeedDate.Networking.Utils.Conversion;
-using SpeedDate.Networking.Utils.IO;
+using SpeedDate.Network.Utils.Conversion;
+using SpeedDate.Network.Utils.IO;
 
 namespace SpeedDate.Packets
 {

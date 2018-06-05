@@ -1,8 +1,8 @@
 ﻿using System;
-using SpeedDate.Interfaces;
-using SpeedDate.Networking.Utils.Conversion;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Utils.Conversion;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     /// <summary>
     ///     Represents an outgoing message.

@@ -1,17 +1,18 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
-    public class LobbiesGameServerPlugin : SpeedDateClientPlugin
+    public class LobbiesPlugin : SpeedDateClientPlugin
     {
         public delegate void LobbyMemberDataCallback(LobbyMemberData memberData, string error);
 
         public delegate void LobbyInfoCallback(LobbyDataPacket info, string error);
 
-        public LobbiesGameServerPlugin(IClientSocket connection) : base(connection)
+        public LobbiesPlugin(IClientSocket connection) : base(connection)
         {
         }
 

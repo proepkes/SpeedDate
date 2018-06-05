@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     /// <summary>
     ///     This is an abstract implementation of <see cref="IPeer" /> interface,

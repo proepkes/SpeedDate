@@ -1,5 +1,5 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {

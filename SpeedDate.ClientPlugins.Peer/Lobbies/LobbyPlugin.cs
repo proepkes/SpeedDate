@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Rooms;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.Peer.Lobbies
 {
-    public class LobbyClientPlugin : SpeedDateClientPlugin
+    public class LobbyPlugin : SpeedDateClientPlugin
     {
         public delegate void JoinLobbyCallback(JoinedLobby lobby, string error);
         public delegate void CreateLobbyCallback(int? lobbyId, string error);
@@ -30,14 +31,14 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public JoinedLobby LastJoinedLobby;
 
-        private RoomsClientPlugin roomsServer;
+        private RoomsPlugin roomsServer;
 
-        public LobbyClientPlugin(IClientSocket Connection) : base(Connection)
+        public LobbyPlugin(IClientSocket Connection) : base(Connection)
         {
             _joinedLobbies = new Dictionary<string, JoinedLobby>();
 
             //TODO PHB
-            roomsServer = new RoomsClientPlugin(Connection);
+            roomsServer = new RoomsPlugin(Connection);
         }
 
 

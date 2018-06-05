@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.Interfaces
+﻿namespace SpeedDate.Interfaces.Network
 {
     public delegate void PeerActionHandler(IPeer peer);
 

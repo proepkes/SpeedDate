@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SpeedDate.Networking.Utils.Conversion
+namespace SpeedDate.Network.Utils.Conversion
 {
     /// <summary>
     ///     Equivalent of System.BitConverter, but with either endianness.

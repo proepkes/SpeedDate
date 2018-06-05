@@ -1,10 +1,10 @@
 ﻿using System;
-using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
-using SpeedDate.Networking.Utils.Conversion;
+using SpeedDate.Network.Utils.Conversion;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     public class MessageFactory : IMessageFactory
     {

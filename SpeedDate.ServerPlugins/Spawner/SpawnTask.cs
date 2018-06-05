@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ServerPlugins.Spawner

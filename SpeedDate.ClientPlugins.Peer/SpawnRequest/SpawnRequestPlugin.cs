@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 {
     public delegate void ClientSpawnRequestCallback(SpawnRequestController controller, string error);
 
-    public class SpawnRequestClientPlugin : SpeedDateClientPlugin
+    public class SpawnRequestPlugin : SpeedDateClientPlugin
     {
         public delegate void AbortSpawnHandler(bool isSuccessful, string error);
 
@@ -16,7 +17,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         private readonly Dictionary<int, SpawnRequestController> _localSpawnRequests;
 
-        public SpawnRequestClientPlugin(IClientSocket connection) : base(connection)
+        public SpawnRequestPlugin(IClientSocket connection) : base(connection)
         {
             _localSpawnRequests = new Dictionary<int, SpawnRequestController>();
         }

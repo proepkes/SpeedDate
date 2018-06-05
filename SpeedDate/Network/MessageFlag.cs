@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.Networking
+﻿namespace SpeedDate.Network
 {
     public enum MessageFlag : byte
     {

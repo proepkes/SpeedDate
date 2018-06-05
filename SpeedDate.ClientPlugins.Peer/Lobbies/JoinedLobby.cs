@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Rooms;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 
@@ -21,7 +22,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         private readonly IClientSocket _connection;
 
-        private readonly LobbyClientPlugin _lobbiesServer;
+        private readonly LobbyPlugin _lobbiesServer;
 
         public LobbyDataPacket Data { get; }
 
@@ -39,7 +40,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         public bool HasLeft { get; private set; }
 
-        public JoinedLobby(LobbyClientPlugin owner, LobbyDataPacket data, IClientSocket connection)
+        public JoinedLobby(LobbyPlugin owner, LobbyDataPacket data, IClientSocket connection)
         {
             Data = data;
             _connection = connection;

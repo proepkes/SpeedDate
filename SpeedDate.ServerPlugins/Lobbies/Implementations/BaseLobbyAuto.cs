@@ -10,7 +10,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         public float WaitSecondsAfterMinPlayersReached = 10;
         public float WaitSecondsAfterFullTeams = 5;
 
-        public BaseLobbyAuto(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesServerPlugin serverPlugin, LobbyConfig config) : base(lobbyId, teams, serverPlugin, config)
+        public BaseLobbyAuto(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config) : base(lobbyId, teams, plugin, config)
         {
             config.EnableManualStart = true;
             config.PlayAgainEnabled = false;

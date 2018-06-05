@@ -1,4 +1,4 @@
-namespace SpeedDate.Networking.Utils.Conversion
+namespace SpeedDate.Network.Utils.Conversion
 {
     /// <summary>
     ///     Implementation of EndianBitConverter which converts to/from little-endian

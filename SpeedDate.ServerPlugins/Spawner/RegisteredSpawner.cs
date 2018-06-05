@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ServerPlugins.Spawner
@@ -11,7 +12,7 @@ namespace SpeedDate.ServerPlugins.Spawner
     {
         public delegate void KillRequestCallback(bool isKilled);
 
-        private readonly SpawnersServerPlugin _serverPlugin;
+        private readonly SpawnersPlugin _plugin;
         public static int MaxConcurrentRequests = 8;
 
         public int SpawnerId { get; set; }

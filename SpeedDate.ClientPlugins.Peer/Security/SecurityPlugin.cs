@@ -6,14 +6,15 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 
 namespace SpeedDate.ClientPlugins.Peer.Security
 {
     /// <summary>
     ///     Helper class, which implements means to encrypt and decrypt data
     /// </summary>
-    public class SecurityClientPlugin : SpeedDateClientPlugin
+    public class SecurityPlugin : SpeedDateClientPlugin
     {
         public delegate void PermissionLevelCallback(int? permissionLevel, string error);
 
@@ -23,7 +24,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
 
         public int CurrentPermissionLevel { get; private set; }
 
-        public SecurityClientPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public SecurityPlugin(IClientSocket clientSocket) : base(clientSocket)
         {
             _encryptionData = new Dictionary<IClientSocket, EncryptionData>();
         }

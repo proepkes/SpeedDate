@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Security;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Authentication;
 
 namespace SpeedDate.ClientPlugins.Peer.Auth
 {
-    public class AuthClientPlugin : SpeedDateClientPlugin
+    public class AuthPlugin : SpeedDateClientPlugin
     {
-        private SecurityClientPlugin _securityClientPlugin;
+        private SecurityPlugin _securityPlugin;
 
         public delegate void LoginCallback(AccountInfoPacket accountInfo, string error);
 
@@ -23,9 +24,9 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         public event Action Registered;
         public event Action LoggedOut;
 
-        public AuthClientPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public AuthPlugin(IClientSocket clientSocket) : base(clientSocket)
         {
-            _securityClientPlugin = new SecurityClientPlugin(clientSocket);
+            _securityPlugin = new SecurityPlugin(clientSocket);
         }
 
 
@@ -54,7 +55,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
             // We first need to get an aes key 
             // so that we can encrypt our login data
-            _securityClientPlugin.GetAesKey(aesKey =>
+            _securityPlugin.GetAesKey(aesKey =>
             {
                 if (aesKey == null)
                 {
@@ -145,7 +146,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
             // We first need to get an aes key 
             // so that we can encrypt our login data
-            _securityClientPlugin.GetAesKey(aesKey =>
+            _securityPlugin.GetAesKey(aesKey =>
             {
                 if (aesKey == null)
                 {

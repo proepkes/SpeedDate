@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.ServerPlugins.Authentication;
@@ -39,10 +40,10 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         protected RegisteredRoom Room;
 
         public BaseLobby(int lobbyId, IEnumerable<LobbyTeam> teams,
-            LobbiesServerPlugin serverPlugin, LobbyConfig config)
+            LobbiesPlugin plugin, LobbyConfig config)
         {
             Id = lobbyId;
-            ServerPlugin = serverPlugin;
+            Plugin = plugin;
             GameIp = "";
             GamePort = -1;
 
@@ -63,7 +64,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         public int PlayerCount { get { return Members.Count; } }
 
         public int Id { get; private set; }
-        protected LobbiesServerPlugin ServerPlugin { get; private set; }
+        protected LobbiesPlugin Plugin { get; private set; }
 
         public bool IsDestroyed { get; private set; }
 
@@ -454,7 +455,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             if (Properties.ContainsKey(OptionKeys.Region))
                 region = Properties[OptionKeys.Region];
 
-            var task = ServerPlugin.SpawnersServerPlugin.Spawn(Properties, region, GenerateCmdArgs());
+            var task = Plugin.SpawnersPlugin.Spawn(Properties, region, GenerateCmdArgs());
 
             if (task == null)
             {
@@ -566,7 +567,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             // Get room id from finalization data
             var roomId = int.Parse(data[OptionKeys.RoomId]);
-            var room = ServerPlugin.RoomsServerPlugin.GetRoom(roomId);
+            var room = Plugin.RoomsPlugin.GetRoom(roomId);
 
             if (room == null)
                 return;

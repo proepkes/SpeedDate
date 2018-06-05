@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
+using SpeedDate.Network;
 using SpeedDate.Packets.Matchmaking;
-using SpeedDate.Plugin;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Lobbies;
 using SpeedDate.ServerPlugins.Rooms;
 
 namespace SpeedDate.ServerPlugins.Matchmaker
 {
-    class MatchmakerServerPlugin : ServerPluginBase
+    class MatchmakerPlugin : ServerPluginBase
     {
         protected readonly HashSet<IGamesProvider> GameProviders;
 
 
-        public MatchmakerServerPlugin(IServer server) : base(server)
+        public MatchmakerPlugin(IServer server) : base(server)
         {
             GameProviders = new HashSet<IGamesProvider>();
 
@@ -26,8 +27,8 @@ namespace SpeedDate.ServerPlugins.Matchmaker
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
-            AddProvider(pluginProvider.Get<RoomsServerPlugin>());
-            AddProvider(pluginProvider.Get<LobbiesServerPlugin>());
+            AddProvider(pluginProvider.Get<RoomsPlugin>());
+            AddProvider(pluginProvider.Get<LobbiesPlugin>());
         }
 
         public void AddProvider(IGamesProvider provider)

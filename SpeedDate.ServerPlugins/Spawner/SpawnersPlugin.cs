@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
 using SpeedDate.Server;
 
 namespace SpeedDate.ServerPlugins.Spawner
 {
-    class SpawnersServerPlugin : ServerPluginBase
+    class SpawnersPlugin : ServerPluginBase
     {
         public delegate void SpawnedProcessRegistrationHandler(SpawnTask task, IPeer peer);
 
@@ -32,9 +33,9 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         protected Dictionary<int, SpawnTask> SpawnTasks;
 
-        public Logger Logger = LogManager.GetLogger(typeof(SpawnersServerPlugin).Name, LogLevel.Warn);
+        public Logger Logger = LogManager.GetLogger(typeof(SpawnersPlugin).Name, LogLevel.Warn);
 
-        public SpawnersServerPlugin(IServer server) : base(server)
+        public SpawnersPlugin(IServer server) : base(server)
         {
             Spawners = new Dictionary<int, RegisteredSpawner>();
             SpawnTasks = new Dictionary<int, SpawnTask>();

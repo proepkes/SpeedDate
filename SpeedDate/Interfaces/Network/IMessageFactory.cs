@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.Interfaces
+﻿namespace SpeedDate.Interfaces.Network
 {
     /// <summary>
     ///     Represents basic functionality of message factory

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.ServerPlugins.Lobbies.Implementations;
 
@@ -17,10 +17,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <summary>
         /// Creates a game lobby for 1 vs 1 game
         /// </summary>
-        /// <param name="serverPlugin"></param>
+        /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby OneVsOne(LobbiesServerPlugin serverPlugin, Dictionary<string, string> properties, IPeer creator)
+        public static ILobby OneVsOne(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var teamA = new LobbyTeam("Team Blue")
@@ -41,8 +41,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var config = new LobbyConfig();
 
             // Create the lobby
-            var lobby = new BaseLobby(serverPlugin.GenerateLobbyId(),
-                new[] { teamA, teamB }, serverPlugin, config)
+            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
+                new[] { teamA, teamB }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
             };
@@ -72,10 +72,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <summary>
         /// Creates a lobby for a deathmatch game with 10 players
         /// </summary>
-        /// <param name="serverPlugin"></param>
+        /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby Deathmatch(LobbiesServerPlugin serverPlugin, Dictionary<string, string> properties, IPeer creator)
+        public static ILobby Deathmatch(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var team = new LobbyTeam("")
@@ -87,8 +87,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var config = new LobbyConfig();
 
             // Create the lobby
-            var lobby = new BaseLobby(serverPlugin.GenerateLobbyId(),
-                new[] { team }, serverPlugin, config)
+            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
+                new[] { team }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
             };
@@ -111,10 +111,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// Creates a game for two vs two vs four. This example shows
         /// how you can setup different size teams, and add them different constraints.
         /// </summary>
-        /// <param name="serverPlugin"></param>
+        /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby TwoVsTwoVsFour(LobbiesServerPlugin serverPlugin, Dictionary<string, string> properties, IPeer creator)
+        public static ILobby TwoVsTwoVsFour(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var teamA = new LobbyTeam("Team Blue")
@@ -142,8 +142,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var config = new LobbyConfig();
 
             // Create the lobby
-            var lobby = new BaseLobby(serverPlugin.GenerateLobbyId(),
-                new[] { teamA, teamB, teamC }, serverPlugin, config)
+            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
+                new[] { teamA, teamB, teamC }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
             };
@@ -175,10 +175,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// it uses the <see cref="GameLobbyAuto"/>, which demonstrates how you 
         /// can extend game lobby functionality
         /// </summary>
-        /// <param name="serverPlugin"></param>
+        /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby ThreeVsThreeQueue(LobbiesServerPlugin serverPlugin, Dictionary<string, string> properties, IPeer creator)
+        public static ILobby ThreeVsThreeQueue(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var teamA = new LobbyTeam("Team Blue")
@@ -203,8 +203,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
             };
 
             // Create the lobby
-            var lobby = new BaseLobbyAuto(serverPlugin.GenerateLobbyId(),
-                new[] { teamA, teamB }, serverPlugin, config)
+            var lobby = new BaseLobbyAuto(plugin.GenerateLobbyId(),
+                new[] { teamA, teamB }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
             };

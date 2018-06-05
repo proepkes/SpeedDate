@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Text;
-using SpeedDate.Networking.Utils.Conversion;
+using SpeedDate.Network.Utils.Conversion;
 
-namespace SpeedDate.Networking.Utils.IO
+namespace SpeedDate.Network.Utils.IO
 {
     /// <summary>
     ///     Equivalent of System.IO.BinaryWriter, but with either endianness, depending on

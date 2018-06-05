@@ -1,14 +1,15 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Authentication;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
-    public class PeerInfoGameServerPlugin : SpeedDateClientPlugin
+    public class PeerInfoPlugin : SpeedDateClientPlugin
     {
         public delegate void PeerAccountInfoCallback(PeerAccountInfoPacket info, string error);
 
-        public PeerInfoGameServerPlugin(IClientSocket connection) : base(connection)
+        public PeerInfoPlugin(IClientSocket connection) : base(connection)
         {
         }
 

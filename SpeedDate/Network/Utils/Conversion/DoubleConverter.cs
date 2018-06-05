@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace SpeedDate.Networking.Utils.Conversion
+namespace SpeedDate.Network.Utils.Conversion
 {
     /// <summary>
     ///     A class to allow the conversion of doubles to string representations of

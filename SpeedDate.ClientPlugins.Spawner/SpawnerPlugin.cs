@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
 
@@ -9,7 +10,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 {
     public delegate void RegisterSpawnerCallback(SpawnerController spawner, string error);
 
-    public class SpawnerClientPlugin : SpeedDateClientPlugin
+    public class SpawnerPlugin : SpeedDateClientPlugin
     {
         private readonly Dictionary<int, SpawnerController> _locallyCreatedSpawners;
 
@@ -28,7 +29,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// </summary>
         public event Action<SpawnerController> SpawnerRegistered;
         
-        public SpawnerClientPlugin(IClientSocket connection) : base(connection)
+        public SpawnerPlugin(IClientSocket connection) : base(connection)
         {
             _locallyCreatedSpawners = new Dictionary<int, SpawnerController>();
             _freePorts = new Queue<int>();

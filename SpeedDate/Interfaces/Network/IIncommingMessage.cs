@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 
-namespace SpeedDate.Interfaces
+namespace SpeedDate.Interfaces.Network
 {
     public interface IIncommingMessage
     {

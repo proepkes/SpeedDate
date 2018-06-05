@@ -1,4 +1,4 @@
-﻿using SpeedDate.Networking.Utils.Conversion;
+﻿using SpeedDate.Network.Utils.Conversion;
 
 namespace SpeedDate.Packets
 {

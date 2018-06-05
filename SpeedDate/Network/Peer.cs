@@ -1,8 +1,8 @@
-﻿using SpeedDate.Interfaces;
+﻿using SpeedDate.Interfaces.Network;
 using SpeedDate.LiteNetLib;
 using SpeedDate.LiteNetLib.Utils;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     class Peer : BasePeer
     {

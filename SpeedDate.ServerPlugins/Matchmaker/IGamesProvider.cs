@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Packets.Matchmaking;
 
 namespace SpeedDate.ServerPlugins.Matchmaker

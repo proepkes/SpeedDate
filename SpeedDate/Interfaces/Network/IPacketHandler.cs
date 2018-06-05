@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.Interfaces
+﻿namespace SpeedDate.Interfaces.Network
 {
     /// <summary>
     ///     Represents an object that can handle packets

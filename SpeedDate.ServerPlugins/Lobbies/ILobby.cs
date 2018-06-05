@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Packets.Lobbies;
 
 namespace SpeedDate.ServerPlugins.Lobbies

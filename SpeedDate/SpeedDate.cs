@@ -5,9 +5,10 @@ using System.Reflection;
 using Ninject;
 using Ninject.Extensions.Conventions;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
-using SpeedDate.Plugin;
+using SpeedDate.Network;
 
 namespace SpeedDate
 {

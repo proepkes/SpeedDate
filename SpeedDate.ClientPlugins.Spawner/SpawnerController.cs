@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Spawner
@@ -36,11 +37,11 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         #endregion
 
-        private readonly SpawnerClientPlugin _spawnersClient;
+        private readonly SpawnerPlugin _spawners;
 
-        public SpawnerController(SpawnerClientPlugin owner, int spawnerId, IClientSocket connection, SpawnerOptions options)
+        public SpawnerController(SpawnerPlugin owner, int spawnerId, IClientSocket connection, SpawnerOptions options)
         {
-            _spawnersClient = owner;
+            _spawners = owner;
 
             Connection = connection;
             SpawnerId = spawnerId;
@@ -71,17 +72,17 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         public void NotifyProcessStarted(int spawnId, int processId, string cmdArgs)
         {
-            _spawnersClient.NotifyProcessStarted(spawnId, processId, cmdArgs);
+            _spawners.NotifyProcessStarted(spawnId, processId, cmdArgs);
         }
 
         public void NotifyProcessKilled(int spawnId)
         {
-            _spawnersClient.NotifyProcessKilled(spawnId);
+            _spawners.NotifyProcessKilled(spawnId);
         }
 
         public void UpdateProcessesCount(int count)
         {
-            _spawnersClient.UpdateProcessesCount(SpawnerId, count);
+            _spawners.UpdateProcessesCount(SpawnerId, count);
         }
 
         private void HandleSpawnRequest(SpawnRequestPacket packet, IIncommingMessage message)
@@ -110,7 +111,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         {
             var data = message.Deserialize(new SpawnRequestPacket());
 
-            var controller = _spawnersClient.GetController(data.SpawnerId);
+            var controller = _spawners.GetController(data.SpawnerId);
 
             if (controller == null)
             {
@@ -127,7 +128,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         {
             var data = message.Deserialize(new KillSpawnedProcessPacket());
 
-            var controller = _spawnersClient.GetController(data.SpawnerId);
+            var controller = _spawners.GetController(data.SpawnerId);
 
             if (controller == null)
             {
@@ -169,7 +170,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         {
             _logger.Debug("Default spawn handler started handling a request to spawn process");
 
-            var controller = _spawnersClient.GetController(packet.SpawnerId);
+            var controller = _spawners.GetController(packet.SpawnerId);
 
             if (controller == null)
             {
@@ -177,7 +178,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                 return;
             }
 
-            var port = _spawnersClient.GetAvailablePort();
+            var port = _spawners.GetAvailablePort();
 
             // Check if we're overriding an IP to master server
             var masterIp = string.IsNullOrEmpty(controller.DefaultSpawnerSettings.MasterIp) ?
@@ -290,7 +291,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                         AppTimer.ExecuteOnMainThread(() =>
                         {
                             // Release the port number
-                            _spawnersClient.ReleasePort(port);
+                            _spawners.ReleasePort(port);
 
                             _logger.Debug("Notifying about killed process with spawn id: " + packet.SpawnerId);
                             controller.NotifyProcessKilled(packet.SpawnId);

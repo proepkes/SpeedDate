@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SpeedDate.Networking
+namespace SpeedDate.Network
 {
     /// <summary>
     ///     This is an object which gets spawned into game once.

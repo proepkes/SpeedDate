@@ -1,7 +1,7 @@
 ﻿using SpeedDate.LiteNetLib;
-using SpeedDate.Networking;
+using SpeedDate.Network;
 
-namespace SpeedDate.Interfaces
+namespace SpeedDate.Interfaces.Network
 {
     public interface IMsgDispatcher
     {

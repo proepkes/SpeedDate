@@ -1,17 +1,18 @@
 ﻿using System;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
-using SpeedDate.Plugin;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Logging
 {
-    class LoggerServerPlugin : ServerPluginBase
+    class LoggerPlugin : ServerPluginBase
     {
         private readonly ILogger _logger;
 
-        public LoggerServerPlugin(IServer server, ILogger logger) : base(server)
+        public LoggerPlugin(IServer server, ILogger logger) : base(server)
         {
             _logger = logger;
             server.Started += ServerOnStarted;
@@ -27,7 +28,7 @@ namespace SpeedDate.ServerPlugins.Logging
         public override void Loaded(IPluginProvider pluginProvider)
         {
             base.Loaded(pluginProvider);
-            var auth = pluginProvider.Get<AuthServerPlugin>();
+            var auth = pluginProvider.Get<AuthPlugin>();
             auth.LoggedIn += AuthOnLoggedIn;
             auth.LoggedOut += AuthOnLoggedOut;
         }

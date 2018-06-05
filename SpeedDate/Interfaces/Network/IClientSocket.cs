@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpeedDate.Interfaces
+namespace SpeedDate.Interfaces.Network
 {
     public interface IClientSocket : IMsgDispatcher
     {

@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.Interfaces
+﻿namespace SpeedDate.Interfaces.Network
 {
     public interface IClient
     {

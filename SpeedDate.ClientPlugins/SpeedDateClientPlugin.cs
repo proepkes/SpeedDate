@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
-using SpeedDate.Plugin;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Interfaces.Plugins;
 
 namespace SpeedDate.ClientPlugins
 {

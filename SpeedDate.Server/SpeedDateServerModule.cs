@@ -1,6 +1,7 @@
 ﻿using System;
 using Ninject.Modules;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 
 namespace SpeedDate.Server
 {

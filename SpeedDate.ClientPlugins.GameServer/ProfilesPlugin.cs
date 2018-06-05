@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
-using SpeedDate.Networking.Utils.Conversion;
-using SpeedDate.Networking.Utils.IO;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
+using SpeedDate.Network.Utils.Conversion;
+using SpeedDate.Network.Utils.IO;
 using SpeedDate.Packets;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
-    public class ProfilesGameServerPlugin : SpeedDateClientPlugin
+    public class ProfilesPlugin : SpeedDateClientPlugin
     {
         /// <summary>
         /// Time, after which game server will try sending profile 
@@ -24,7 +25,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         private Task _sendUpdatesCoroutine;
 
-        public ProfilesGameServerPlugin(IClientSocket connection) : base(connection)
+        public ProfilesPlugin(IClientSocket connection) : base(connection)
         {
             _profiles = new Dictionary<string, ObservableServerProfile>();
             _modifiedProfiles = new HashSet<ObservableServerProfile>();

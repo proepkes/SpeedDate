@@ -1,4 +1,4 @@
-namespace SpeedDate.Networking.Utils.Conversion
+namespace SpeedDate.Network.Utils.Conversion
 {
     /// <summary>
     ///     Endianness of a converter

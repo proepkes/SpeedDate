@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SpeedDate.Plugin
+namespace SpeedDate.Interfaces.Plugins
 {
     public interface IPluginProvider
     {

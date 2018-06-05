@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets.Rooms;
 using SpeedDate.Packets.Spawner;
 
@@ -13,7 +14,7 @@ namespace SpeedDate.ClientPlugins.GameServer
     public delegate void RegisterSpawnedProcessCallback(SpawnTaskController taskController, string error);
     public delegate void CompleteSpawnedProcessCallback(bool isSuccessful, string error);
 
-    public class RoomsGameServerPlugin : SpeedDateClientPlugin
+    public class RoomsPlugin : SpeedDateClientPlugin
     {
         private static Dictionary<int, RoomController> _localCreatedRooms;
 
@@ -33,7 +34,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public event Action<RoomController> RoomDestroyed;
 
-        public RoomsGameServerPlugin(IClientSocket connection) : base(connection)
+        public RoomsPlugin(IClientSocket connection) : base(connection)
         {
             _localCreatedRooms = new Dictionary<int, RoomController>();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
@@ -20,9 +21,9 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// </summary>
         public Dictionary<string, string> SpawnOptions;
 
-        private readonly SpawnRequestClientPlugin spawnServer;
+        private readonly SpawnRequestPlugin spawnServer;
 
-        public SpawnRequestController(SpawnRequestClientPlugin owner, int spawnId, IClientSocket connection, Dictionary<string, string> spawnOptions)
+        public SpawnRequestController(SpawnRequestPlugin owner, int spawnId, IClientSocket connection, Dictionary<string, string> spawnOptions)
         {
             spawnServer = owner;
 
@@ -39,12 +40,12 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             spawnServer.AbortSpawn(SpawnId);
         }
 
-        public void Abort(SpawnRequestClientPlugin.AbortSpawnHandler handler)
+        public void Abort(SpawnRequestPlugin.AbortSpawnHandler handler)
         {
             spawnServer.AbortSpawn(SpawnId, handler);
         }
 
-        public void GetFinalizationData(SpawnRequestClientPlugin.FinalizationDataHandler handler)
+        public void GetFinalizationData(SpawnRequestPlugin.FinalizationDataHandler handler)
         {
             spawnServer.GetFinalizationData(SpawnId, handler, _connection);
         }

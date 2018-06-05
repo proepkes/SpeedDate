@@ -1,5 +1,5 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Packets.Authentication;
 
 namespace SpeedDate.ServerPlugins.Authentication

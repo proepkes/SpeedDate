@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using SpeedDate.Networking;
-using SpeedDate.Networking.Utils.IO;
+using SpeedDate.Network;
+using SpeedDate.Network.Utils.IO;
 
 namespace SpeedDate.Packets.Authentication
 {

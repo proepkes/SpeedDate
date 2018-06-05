@@ -1,12 +1,13 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Networking;
+using SpeedDate.Interfaces.Network;
+using SpeedDate.Network;
 using SpeedDate.Packets;
 
 namespace SpeedDate.ClientPlugins.Peer.Profiles
 {
-    public class ProfilesClientPlugin : SpeedDateClientPlugin
+    public class ProfilesPlugin : SpeedDateClientPlugin
     {
-        public ProfilesClientPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public ProfilesPlugin(IClientSocket clientSocket) : base(clientSocket)
         {
         }
 

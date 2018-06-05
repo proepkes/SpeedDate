@@ -1,5 +1,6 @@
 ﻿using Npgsql;
 using SpeedDate.Interfaces;
+using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
@@ -7,13 +8,13 @@ using SpeedDate.ServerPlugins.Profiles;
 
 namespace SpeedDate.ServerPlugins.Database.CockroachDb
 {
-    class CockroachDbServerPlugin : ServerPluginBase
+    class CockroachDbPlugin : ServerPluginBase
     {
         public readonly IAuthDatabase AuthDatabase;
 
         public readonly IProfilesDatabase ProfilesDatabase;
 
-        public CockroachDbServerPlugin(IServer server) : base(server)
+        public CockroachDbPlugin(IServer server) : base(server)
         {
             var config = SpeedDateConfig.GetPluginConfig<CockroachDbConfig>();
 
