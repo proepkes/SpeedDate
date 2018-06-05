@@ -1,4 +1,5 @@
 # Introduction
+[![Discord](https://img.shields.io/discord/413156098993029120.svg)](https://discord.gg/F9hJhcX) 
 SpeedDate is a plugin-based system for self-hosted MasterServer.
 
 # Getting Started
