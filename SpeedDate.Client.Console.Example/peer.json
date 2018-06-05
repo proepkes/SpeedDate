@@ -1,0 +1,13 @@
+﻿{
+	"Network": {
+		"IP": "127.0.0.1" ,
+		"Port": 60125
+	},
+	"Plugins": {
+		"Enabled": true,
+		"CreateDirIfNotExists": true,
+		"SearchPath": "PeerPlugins/"
+	},
+	"PluginConfigs": {
+	}
+}
