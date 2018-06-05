@@ -209,8 +209,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         {
             var username = TryGetUsername(playerExt.Peer);
 
-            LobbyMember member;
-            Members.TryGetValue(username, out member);
+            Members.TryGetValue(username, out var member);
 
             // If this player was never in the lobby
             if (member == null)
@@ -223,8 +222,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 playerExt.CurrentLobby = null;
 
             // Remove member from it's current team
-            if (member.Team != null)
-                member.Team.RemoveMember(member);
+            member.Team?.RemoveMember(member);
 
             // Change the game master
             if (GameMaster == member)
@@ -412,10 +410,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         {
             var userExt = peer.GetExtension<IUserExtension>();
 
-            if (userExt == null)
-                return null;
-
-            return userExt.Username;
+            return userExt?.Username;
         }
 
         /// <summary>
@@ -489,8 +484,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 GameSpawnTask.KillSpawnedProcess();
             }
 
-            if (Destroyed != null)
-                Destroyed.Invoke(this);
+            Destroyed?.Invoke(this);
         }
 
         protected virtual string GenerateCmdArgs()

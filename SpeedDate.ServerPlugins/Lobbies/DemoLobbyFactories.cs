@@ -12,7 +12,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
     /// </summary>
     class DemoLobbyFactories
     {
-        public static string DefaultName = "Untitled Lobby";
+        private const string DefaultName = "Untitled Lobby";
 
         /// <summary>
         /// Creates a game lobby for 1 vs 1 game
