@@ -18,20 +18,23 @@ namespace SpeedDate.Network
         ///     Default timeout, after which response callback is invoked with
         ///     timeout status.
         /// </summary>
-        public static int DefaultTimeoutSecs = 5;
+        public const int DefaultTimeoutSecs = 5;
 
         private readonly Dictionary<int, ResponseCallback> _acks;
 
         protected readonly List<long[]> _ackTimeoutQueue;
         private readonly Dictionary<int, object> _data;
 
-        private long _id = -1;
-
         private int _nextAckId = 1;
 
         private readonly IIncommingMessage _timeoutMessage;
 
         private readonly Dictionary<Type, object> _extensions;
+
+        /// <summary>
+        ///     Unique id
+        /// </summary>
+        public abstract long Id { get; }
 
         protected BasePeer()
         {
@@ -356,11 +359,6 @@ namespace SpeedDate.Network
         }
 
         #region Ack Disposal Stuff
-
-        /// <summary>
-        ///     Unique id
-        /// </summary>
-        public abstract long Id { get; }
 
         /// <summary>
         ///     Called when ack disposal thread ticks

@@ -1,34 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <LangVersion>7.2</LangVersion>
     <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
   </PropertyGroup>
-
   <ItemGroup>
     <ModuleFiles Include="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).pdb;$(TargetDir)Npgsql.dll" Exclude="$(TargetDir)System*.dll;$(TargetDir)Microsoft*.dll;" DestinationPath="$(SolutionDir)Deploy\Server\Plugins\%(Filename)%(Extension)">
     </ModuleFiles>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="4.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\SpeedDate.LiteNetLib\SpeedDate.LiteNetLib.csproj" />
     <ProjectReference Include="..\SpeedDate.Server\SpeedDate.Server.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
-
   <!--<Target Name="PublishModule" AfterTargets="Publish" Inputs="@(ModuleFiles)" Outputs="@(ModuleFiles->'%(DestinationPath)')">
     <Copy SourceFiles="@(ModuleFiles)" DestinationFiles="@(ModuleFiles->'%(DestinationPath)')" />
   </Target>-->
-
   <!--<WriteLinesToFile File="$(SolutionDir)src\[YOURAPP]\app_offline.htm" />-->
   <!--<Delete Files="$(SolutionDir)src\[YOURAPP]\app_offline.htm" />-->
   <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy /d /y  $(TargetDir)$(TargetName).dll $(SolutionDir)Deploy\Server\Plugins\&#xD;&#xA;xcopy /d /y  $(TargetDir)$(TargetName).pdb $(SolutionDir)Deploy\Server\Plugins\&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;" />
   </Target>-->
-
 </Project>

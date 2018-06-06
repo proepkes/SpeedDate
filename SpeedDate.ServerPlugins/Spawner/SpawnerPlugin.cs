@@ -222,6 +222,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                     catch (Exception e)
                     {
                         _logger.Error(e);
+                        return;
                     }
             }
         }
@@ -249,7 +250,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             }
 
             // Get the spawn task
-            var task = Spawn(data.Options, data.Region, "");
+            var task = Spawn(data.Options, data.Region);
 
             if (task == null)
             {
