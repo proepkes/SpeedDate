@@ -64,7 +64,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         }
 
         /// <summary>
-        /// Send's current options to master server
+        /// Sends current options to master server
         /// </summary>
         public void SaveOptions()
         {
@@ -72,7 +72,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         }
 
         /// <summary>
-        /// Send's new options to master server
+        /// Sends new options to master server
         /// </summary>
         public void SaveOptions(RoomOptions options)
         {
@@ -89,7 +89,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         }
 
         /// <summary>
-        /// Send's new options to master server
+        /// Sends new options to master server
         /// </summary>
         public void SaveOptions(RoomOptions options, SuccessCallback callback)
         {

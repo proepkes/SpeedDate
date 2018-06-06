@@ -123,7 +123,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
 
         /// <summary>
-        ///     Set's current player's properties
+        ///     Sets current player's properties
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
@@ -139,7 +139,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         }
 
         /// <summary>
-        ///     Set's current player's properties
+        ///     Sets current player's properties
         /// </summary>
         public void SetMyProperties(Dictionary<string, string> properties, SuccessCallback callback)
         {
@@ -147,7 +147,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         }
 
         /// <summary>
-        ///     Set's current player's ready status
+        ///     Sets current player's ready status
         /// </summary>
         /// <param name="isReady"></param>
         public void SetReadyStatus(bool isReady)
@@ -156,7 +156,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         }
 
         /// <summary>
-        ///     Set's current player's ready status
+        ///     Sets current player's ready status
         /// </summary>
         public void SetReadyStatus(bool isReady, SuccessCallback callback)
         {
@@ -164,7 +164,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         }
 
         /// <summary>
-        ///     Set's a lobby event listener
+        ///     Sets a lobby event listener
         /// </summary>
         /// <param name="listener"></param>
         public void SetListener(ILobbyListener listener)
@@ -176,7 +176,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         }
 
         /// <summary>
-        ///     Send's a lobby chat message
+        ///     Sends a lobby chat message
         /// </summary>
         /// <param name="message"></param>
         public void SendChatMessage(string message)

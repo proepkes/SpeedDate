@@ -20,10 +20,9 @@ namespace SpeedDate
             MasterPort = ExtractValueInt(Names.MasterPort, 60125);
             MasterIp = ExtractValue(Names.MasterIp);
             MachineIp = ExtractValue(Names.MachineIp);
-            DestroyUi = IsProvided(Names.DestroyUi);
 
-            SpawnId = ExtractValueInt(Names.SpawnId, -1);
-            AssignedPort = ExtractValueInt(Names.AssignedPort, -1);
+            SpawnId = ExtractValueInt(Names.SpawnId);
+            AssignedPort = ExtractValueInt(Names.AssignedPort);
             SpawnCode = ExtractValue(Names.SpawnCode);
             ExecutablePath = ExtractValue(Names.ExecutablePath);
             DontSpawnInBatchmode = IsProvided(Names.DontSpawnInBatchmode);
@@ -59,13 +58,6 @@ namespace SpeedDate
         /// Public ip of the machine, on which the process is running
         /// </summary>
         public static string MachineIp { get; private set; }
-
-        /// <summary>
-        /// If true, some of the Ui game objects will be destroyed.
-        /// (to avoid memory leaks)
-        /// </summary>
-        public static bool DestroyUi { get; private set; }
-
 
         /// <summary>
         /// SpawnId of the spawned process
@@ -153,24 +145,23 @@ namespace SpeedDate
 
         public class MsfArgNames
         {
-            public string StartMaster { get { return "-msfStartMaster"; } }
-            public string MasterPort { get { return "-msfMasterPort"; } }
-            public string MasterIp { get { return "-msfMasterIp"; } }
+            public string StartMaster => "-msfStartMaster";
+            public string MasterPort => "-msfMasterPort";
+            public string MasterIp => "-msfMasterIp";
 
-            public string StartSpawner { get { return "-msfStartSpawner"; } }
+            public string StartSpawner => "-msfStartSpawner";
 
-            public string SpawnId { get { return "-msfSpawnId"; } }
-            public string SpawnCode { get { return "-msfSpawnCode"; } }
-            public string AssignedPort { get { return "-msfAssignedPort"; } }
-            public string LoadScene { get { return "-msfLoadScene"; } }
-            public string MachineIp { get { return "-msfMachineIp"; } }
-            public string ExecutablePath { get { return "-msfExe"; } }
-            public string DbConnectionString { get { return "-msfDbConnectionString"; } }
-            public string LobbyId { get { return "-msfLobbyId"; } }
-            public string DontSpawnInBatchmode { get { return "-msfDontSpawnInBatchmode"; } }
-            public string MaxProcesses { get { return "-msfMaxProcesses"; } }
-            public string DestroyUi { get { return "-msfDestroyUi"; } }
-            public string WebGl { get { return "-msfWebgl"; } }
+            public string SpawnId => "-msfSpawnId";
+            public string SpawnCode => "-msfSpawnCode";
+            public string AssignedPort => "-msfAssignedPort";
+            public string LoadScene => "-msfLoadScene";
+            public string MachineIp => "-msfMachineIp";
+            public string ExecutablePath => "-msfExe";
+            public string DbConnectionString => "-msfDbConnectionString";
+            public string LobbyId => "-msfLobbyId";
+            public string DontSpawnInBatchmode => "-msfDontSpawnInBatchmode";
+            public string MaxProcesses => "-msfMaxProcesses";
+            public string WebGl => "-msfWebgl";
         }
     }
 }

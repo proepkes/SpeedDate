@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using SpeedDate.Interfaces;
 using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -11,7 +10,7 @@ using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Spawner
 {
-    public class SpawnerController
+    public partial class SpawnerController
     {
         public delegate void SpawnRequestHandler(SpawnRequestPacket packet, IIncommingMessage message);
         public delegate void KillSpawnedProcessHandler(int spawnId);
@@ -27,7 +26,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// <summary>
         /// Settings, which are used by the default spawn handler
         /// </summary>
-        public DefaultSpawnerConfig DefaultSpawnerSettings { get; private set; }
+        public SpawnerConfig SpawnerSettings { get; private set; }
 
         #region Default process spawn handling
 
@@ -47,13 +46,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             SpawnerId = spawnerId;
             Options = options;
 
-            DefaultSpawnerSettings = new DefaultSpawnerConfig()
-            {
-                MasterIp = connection.ConnectionIp,
-                MasterPort = connection.ConnectionPort,
-                MachineIp = options.MachineIp,
-                SpawnInBatchmode = CommandLineArgs.IsProvided("-batchmode")
-            };
+            SpawnerSettings = SpeedDateConfig.GetPluginConfig<SpawnerConfig>();
 
             // Add handlers
             connection.SetHandler((short) OpCodes.SpawnRequest, HandleSpawnRequest);
@@ -156,8 +149,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                     _processes.Remove(spawnId);
                 }
 
-                if (process != null)
-                    process.Kill();
+                process?.Kill();
             }
             catch (Exception e)
             {
@@ -179,20 +171,12 @@ namespace SpeedDate.ClientPlugins.Spawner
             }
 
             var port = _spawners.GetAvailablePort();
-
-            // Check if we're overriding an IP to master server
-            var masterIp = string.IsNullOrEmpty(controller.DefaultSpawnerSettings.MasterIp) ?
-                controller.Connection.ConnectionIp : controller.DefaultSpawnerSettings.MasterIp;
-
-            // Check if we're overriding a port to master server
-            var masterPort = controller.DefaultSpawnerSettings.MasterPort < 0 ?
-                controller.Connection.ConnectionPort : controller.DefaultSpawnerSettings.MasterPort;
-
+            
             // Machine Ip
-            var machineIp = controller.DefaultSpawnerSettings.MachineIp; 
+            var machineIp = controller.SpawnerSettings.MachineIp; 
 
             // Path to executable
-            var path = controller.DefaultSpawnerSettings.ExecutablePath;
+            var path = controller.SpawnerSettings.ExecutablePath;
             if (string.IsNullOrEmpty(path))
             {
                 path = File.Exists(Environment.GetCommandLineArgs()[0]) 
@@ -206,7 +190,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
             // Get the scene name
             var sceneNameArgument = packet.Properties.ContainsKey(OptionKeys.SceneName)
-                ? string.Format("{0} {1} ", CommandLineArgs.Names.LoadScene, packet.Properties[OptionKeys.SceneName])
+                ? $"{CommandLineArgs.Names.LoadScene} {packet.Properties[OptionKeys.SceneName]} "
                 : "";
 
             if (!string.IsNullOrEmpty(packet.OverrideExePath))
@@ -215,7 +199,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             }
 
             // If spawn in batchmode was set and `DontSpawnInBatchmode` arg is not provided
-            var spawnInBatchmode = controller.DefaultSpawnerSettings.SpawnInBatchmode
+            var spawnInBatchmode = controller.SpawnerSettings.SpawnInBatchmode
                                    && !CommandLineArgs.DontSpawnInBatchmode;
 
             var startProcessInfo = new ProcessStartInfo(path)
@@ -224,15 +208,14 @@ namespace SpeedDate.ClientPlugins.Spawner
                 UseShellExecute = false,
                 Arguments = " " +
                     (spawnInBatchmode ? "-batchmode -nographics " : "") +
-                    (controller.DefaultSpawnerSettings.AddWebGlFlag ? CommandLineArgs.Names.WebGl+" " : "") +
+                    (controller.SpawnerSettings.AddWebGlFlag ? CommandLineArgs.Names.WebGl+" " : "") +
                     sceneNameArgument +
-                    string.Format("{0} {1} ", CommandLineArgs.Names.MasterIp, masterIp) +
-                    string.Format("{0} {1} ", CommandLineArgs.Names.MasterPort, masterPort) +
-                    string.Format("{0} {1} ", CommandLineArgs.Names.SpawnId, packet.SpawnId) +
-                    string.Format("{0} {1} ", CommandLineArgs.Names.AssignedPort, port) +
-                    string.Format("{0} {1} ", CommandLineArgs.Names.MachineIp, machineIp) +
-                    (CommandLineArgs.DestroyUi ? CommandLineArgs.Names.DestroyUi + " " : "") +
-                    string.Format("{0} \"{1}\" ", CommandLineArgs.Names.SpawnCode, packet.SpawnCode) +
+                            $"{CommandLineArgs.Names.MasterIp} {controller.Connection.ConnectionIp} " +
+                            $"{CommandLineArgs.Names.MasterPort} {controller.Connection.ConnectionPort} " +
+                            $"{CommandLineArgs.Names.SpawnId} {packet.SpawnId} " +
+                            $"{CommandLineArgs.Names.AssignedPort} {port} " +
+                            $"{CommandLineArgs.Names.MachineIp} {machineIp} " +
+                            $"{CommandLineArgs.Names.SpawnCode} \"{packet.SpawnCode}\" " +
                     packet.CustomArgs
             };
 
@@ -322,16 +305,6 @@ namespace SpeedDate.ClientPlugins.Spawner
             {
                 process.Kill();
             }
-        }
-
-        public class DefaultSpawnerConfig
-        {
-            public string MachineIp = "127.0.0.1";
-            public bool SpawnInBatchmode = CommandLineArgs.IsProvided("-batchmode");
-            public string MasterIp = "";
-            public int MasterPort = -1;
-            public string ExecutablePath = "";
-            public bool AddWebGlFlag = false;
         }
 
         #endregion

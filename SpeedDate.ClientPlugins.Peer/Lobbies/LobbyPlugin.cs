@@ -207,7 +207,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         }
 
         /// <summary>
-        /// Set's lobby user properties (current player sets his own properties,
+        /// Sets lobby user properties (current player sets his own properties,
         ///  which can be accessed by game server and etc.)
         /// </summary>
         public void SetMyProperties(Dictionary<string, string> properties,
