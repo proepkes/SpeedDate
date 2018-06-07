@@ -3,29 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate", "SpeedDate\SpeedDate.csproj", "{7587D9D6-5368-4E6A-82F3-13CC263188E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate", "SpeedDate\SpeedDate.csproj", "{7587D9D6-5368-4E6A-82F3-13CC263188E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.Client", "SpeedDate.Client\SpeedDate.Client.csproj", "{E39B1665-106F-44F0-BE54-C58063CEC998}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Client", "SpeedDate.Client\SpeedDate.Client.csproj", "{E39B1665-106F-44F0-BE54-C58063CEC998}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.ClientPlugins", "SpeedDate.ClientPlugins\SpeedDate.ClientPlugins.csproj", "{073B9362-B71E-4C67-9794-EA377BCE90C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.ClientPlugins", "SpeedDate.ClientPlugins\SpeedDate.ClientPlugins.csproj", "{073B9362-B71E-4C67-9794-EA377BCE90C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.ClientPlugins.GameServer", "SpeedDate.ClientPlugins.GameServer\SpeedDate.ClientPlugins.GameServer.csproj", "{A96260DC-89C7-4537-812B-523EA2DCCCB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.ClientPlugins.GameServer", "SpeedDate.ClientPlugins.GameServer\SpeedDate.ClientPlugins.GameServer.csproj", "{A96260DC-89C7-4537-812B-523EA2DCCCB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.ClientPlugins.Peer", "SpeedDate.ClientPlugins.Peer\SpeedDate.ClientPlugins.Peer.csproj", "{E4E71F1C-11B0-405C-B596-9EC2EE09B2D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.ClientPlugins.Peer", "SpeedDate.ClientPlugins.Peer\SpeedDate.ClientPlugins.Peer.csproj", "{E4E71F1C-11B0-405C-B596-9EC2EE09B2D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.ClientPlugins.Spawner", "SpeedDate.ClientPlugins.Spawner\SpeedDate.ClientPlugins.Spawner.csproj", "{22D5A36E-5CA0-40AC-8446-1858586C02DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.ClientPlugins.Spawner", "SpeedDate.ClientPlugins.Spawner\SpeedDate.ClientPlugins.Spawner.csproj", "{22D5A36E-5CA0-40AC-8446-1858586C02DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.LiteNetLib", "SpeedDate.LiteNetLib\SpeedDate.LiteNetLib.csproj", "{7EE87BE5-54AE-4CEF-A9A5-64B52847D14D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.LiteNetLib", "SpeedDate.LiteNetLib\SpeedDate.LiteNetLib.csproj", "{7EE87BE5-54AE-4CEF-A9A5-64B52847D14D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.Logging", "SpeedDate.Logging\SpeedDate.Logging.csproj", "{63CD8F44-8C53-4663-A3AC-3410248008CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Logging", "SpeedDate.Logging\SpeedDate.Logging.csproj", "{63CD8F44-8C53-4663-A3AC-3410248008CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.ServerPlugins", "SpeedDate.ServerPlugins\SpeedDate.ServerPlugins.csproj", "{A0C4BC3E-C719-43D6-AFDD-96F0E1E3AFCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.ServerPlugins", "SpeedDate.ServerPlugins\SpeedDate.ServerPlugins.csproj", "{A0C4BC3E-C719-43D6-AFDD-96F0E1E3AFCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.Client.Console.Example", "SpeedDate.Client.Console.Example\SpeedDate.Client.Console.Example.csproj", "{BDEBD430-C663-4EFC-973C-0B445C61E785}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Client.Console.Example", "SpeedDate.Client.Console.Example\SpeedDate.Client.Console.Example.csproj", "{BDEBD430-C663-4EFC-973C-0B445C61E785}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.Server.Console", "SpeedDate.Server.Console\SpeedDate.Server.Console.csproj", "{6228061C-DFCC-4F19-B045-20C0EEBE6642}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Server.Console", "SpeedDate.Server.Console\SpeedDate.Server.Console.csproj", "{6228061C-DFCC-4F19-B045-20C0EEBE6642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedDate.Server", "SpeedDate.Server\SpeedDate.Server.csproj", "{5A1C9B8E-4F5A-4415-BE65-23DC7763E481}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Server", "SpeedDate.Server\SpeedDate.Server.csproj", "{5A1C9B8E-4F5A-4415-BE65-23DC7763E481}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleGame", "ConsoleGame\ConsoleGame.csproj", "{8346E3F6-B345-47B9-9774-4512D739C735}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{5A1C9B8E-4F5A-4415-BE65-23DC7763E481}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A1C9B8E-4F5A-4415-BE65-23DC7763E481}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A1C9B8E-4F5A-4415-BE65-23DC7763E481}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8346E3F6-B345-47B9-9774-4512D739C735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8346E3F6-B345-47B9-9774-4512D739C735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8346E3F6-B345-47B9-9774-4512D739C735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8346E3F6-B345-47B9-9774-4512D739C735}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

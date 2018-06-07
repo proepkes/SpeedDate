@@ -204,8 +204,8 @@ namespace SpeedDate.ClientPlugins.Spawner
 
             var startProcessInfo = new ProcessStartInfo(path)
             {
-                CreateNoWindow = false,
-                UseShellExecute = false,
+                CreateNoWindow = true,
+                UseShellExecute = true,
                 Arguments = " " +
                     (spawnInBatchmode ? "-batchmode -nographics " : "") +
                     (controller.SpawnerSettings.AddWebGlFlag ? CommandLineArgs.Names.WebGl+" " : "") +

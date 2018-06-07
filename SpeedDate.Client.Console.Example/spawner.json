@@ -5,11 +5,11 @@
 	},
 	"Plugins": {
 		"LoadAll": false,
-		"PluginsNamespace": "SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Spawner",
+		"PluginsNamespace": "SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Spawner*",
 					"Spawner": {
 						"MachineIp": "127.0.0.1",
 						"AddWebGlFlag": false,
-						"ExecutablePath": "",
+						"ExecutablePath": "E:\\Repositories\\SpeedDate\\ConsoleGame\\bin\\Debug\\ConsoleGame.exe",
 						"SpawnInBatchmode": true
 					}
 	}

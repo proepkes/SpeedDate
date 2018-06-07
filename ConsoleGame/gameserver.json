@@ -5,6 +5,6 @@
 	},
 	"Plugins": {
 		"LoadAll": false,
-		"PluginsNamespace": "SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.GameServer"
+		"PluginsNamespace": "SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.GameServer*"
 	}
 }

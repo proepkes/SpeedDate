@@ -1,10 +1,13 @@
-﻿using SpeedDate.ClientPlugins.GameServer;
+﻿using System;
+using SpeedDate.ClientPlugins.GameServer;
 
 namespace SpeedDate.Client.Console.Example
 {
     class GameServer
     {
         private readonly SpeedDate _speedDate;
+
+        public event Action ConnectedToMaster;
 
         public LobbiesPlugin Lobbies { get; private set; }
         public PeerInfoPlugin PeerInfo { get; private set; }
@@ -21,6 +24,7 @@ namespace SpeedDate.Client.Console.Example
         /// </summary>
         public void Start()
         {
+            _speedDate.Started += () => ConnectedToMaster?.Invoke();
             _speedDate.Start();
             Lobbies = _speedDate.PluginProver.Get<LobbiesPlugin>();
             PeerInfo = _speedDate.PluginProver.Get<PeerInfoPlugin>();

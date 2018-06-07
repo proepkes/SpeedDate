@@ -18,7 +18,7 @@ namespace SpeedDate.Network
         ///     Default timeout, after which response callback is invoked with
         ///     timeout status.
         /// </summary>
-        public const int DefaultTimeoutSecs = 5;
+        public const int DefaultTimeoutSecs = 60;
 
         private readonly Dictionary<int, ResponseCallback> _acks;
 
