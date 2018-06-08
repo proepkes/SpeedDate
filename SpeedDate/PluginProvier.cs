@@ -4,7 +4,7 @@ using SpeedDate.Interfaces.Plugins;
 
 namespace SpeedDate
 {
-    class NinjectPluginProvier : IPluginProvider
+    class PluginProvier : IPluginProvider
     {
         private readonly List<IPlugin> _loadedPlugins = new List<IPlugin>();
 

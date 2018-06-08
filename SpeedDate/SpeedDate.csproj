@@ -7,8 +7,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.0" />
-    <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="ninject.extensions.conventions" Version="3.3.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeedDate.LiteNetLib\SpeedDate.LiteNetLib.csproj" />
