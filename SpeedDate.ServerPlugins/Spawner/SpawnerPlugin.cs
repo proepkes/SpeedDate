@@ -47,7 +47,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             Server.SetHandler((short) OpCodes.UpdateSpawnerProcessesCount, HandleSpawnedProcessesCount);
 
             // Coroutines
-            Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
+           // Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
         }
 
         public event Action<RegisteredSpawner> SpawnerRegistered;

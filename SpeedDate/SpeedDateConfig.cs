@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using Microsoft.Extensions.Configuration;
+//using Microsoft.Extensions.Configuration;
 
 namespace SpeedDate
 {
     public sealed class SpeedDateConfig
     {
-        private static IConfigurationRoot _config;
+        //private static IConfigurationRoot _config;
 
         public static NetworkConfig Network;
 
@@ -15,10 +15,10 @@ namespace SpeedDate
 
         public static void Initialize(string configFile)
         {
-            _config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(configFile, false, true)
-                .AddEnvironmentVariables().Build();
+            //_config = new ConfigurationBuilder()
+            //    .SetBasePath(Directory.GetCurrentDirectory())
+            //    .AddJsonFile(configFile, false, true)
+            //    .AddEnvironmentVariables().Build();
 
 
             Plugins = Get<PluginsConfig>(nameof(Plugins));
@@ -32,11 +32,11 @@ namespace SpeedDate
 
         private static T Get<T>(string configPath)
         {
-            var section = _config.GetSection(configPath);
-            if (section != null)
-            {
-                return section.Get<T>();
-            }
+            //var section = _config.GetSection(configPath);
+            //if (section != null)
+            //{
+            //    return section.Get<T>();
+            //}
             return default(T);
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using LiteNetLib;
 using SpeedDate.Interfaces.Network;
-using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
 
 namespace SpeedDate.Network
@@ -13,7 +13,7 @@ namespace SpeedDate.Network
 
         public ServerSocket()
         {
-            _server = new NetManager(_listener, 5000 /* maximum clients */);
+            _server = new NetManager(_listener);
             
         }
         public event PeerActionHandler Connected;

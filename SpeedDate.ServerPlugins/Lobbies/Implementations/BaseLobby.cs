@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SpeedDate.Interfaces;
+using LiteNetLib;
 using SpeedDate.Interfaces.Network;
-using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Packets.Common;

@@ -3722,10 +3722,8 @@ namespace TinyIoC
 
         private object ResolveInternal(TypeRegistration registration, NamedParameterOverloads parameters, ResolveOptions options)
         {
-            ObjectFactoryBase factory;
-
             // Attempt container resolution
-            if (_RegisteredTypes.TryGetValue(registration, out factory))
+            if (_RegisteredTypes.TryGetValue(registration, out var factory))
             {
                 try
                 {

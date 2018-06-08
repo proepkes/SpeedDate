@@ -20,7 +20,7 @@ namespace SpeedDate.ServerPlugins.Mail
         {
             _logger = logger;
             _sendMailExceptions = new List<Exception>();
-            SetupSmtpClient();
+            //SetupSmtpClient();
             AppUpdater.Instance.Add(this);
         }
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using LiteNetLib;
 using SpeedDate.Interfaces;
 using SpeedDate.Interfaces.Network;
-using SpeedDate.LiteNetLib;
 using SpeedDate.Network;
 using SpeedDate.Packets.Chat;
 

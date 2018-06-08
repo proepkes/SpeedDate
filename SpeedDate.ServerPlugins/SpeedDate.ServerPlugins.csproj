@@ -13,7 +13,6 @@
     <PackageReference Include="Npgsql" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpeedDate.LiteNetLib\SpeedDate.LiteNetLib.csproj" />
     <ProjectReference Include="..\SpeedDate.Server\SpeedDate.Server.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -33,32 +35,31 @@ namespace SpeedDate
         {
             SpeedDateConfig.Initialize(_configFile);
             var logger = LogManager.GetLogger("SpeedDate");
-            //var kernel = CreateKernel();
 
-            //var startable = kernel.Get<ISpeedDateStartable>();
-            //startable.Started += () => Started?.Invoke();
-            //startable.Stopped += () => Stopped?.Invoke();
+            var kernel = CreateKernel();
 
-            //PluginProver = kernel.Get<IPluginProvider>();
+            var startable = kernel.Resolve<ISpeedDateStartable>();
+            startable.Started += () => Started?.Invoke();
+            startable.Stopped += () => Stopped?.Invoke();
 
-            //foreach (var plugin in kernel.GetAll<IPlugin>())
-            //    PluginProver.RegisterPlugin(plugin);
+            PluginProver = kernel.Resolve<IPluginProvider>();
 
-            //foreach (var plugin in PluginProver.GetAll())
-            //{
-            //    plugin.Loaded(PluginProver);
-            //    logger.Info($"Loaded {plugin.GetType().Name}");
-            //}
+            foreach (var plugin in kernel.ResolveAll<IPlugin>())
+                PluginProver.RegisterPlugin(plugin);
 
-            //var server = kernel.TryGet<IServer>();
-            //if (server != null)
-            //    logger.Info("Acting as server: " + server.GetType().Name);
+            foreach (var plugin in PluginProver.GetAll())
+            {
+                plugin.Loaded(PluginProver);
+                logger.Info($"Loaded {plugin.GetType().Name}");
+            }
 
-            //var client = kernel.TryGet<IClient>();
-            //if (client != null)
-            //    logger.Info("Acting as client: " + client.GetType().Name);
+            if(kernel.TryResolve(out IServer server))
+                logger.Info("Acting as server: " + server.GetType().Name);
 
-            //startable.Start();
+            if(kernel.TryResolve(out IClient client))
+                logger.Info("Acting as client: " + client.GetType().Name);
+
+            startable.Start();
         }
 
         public void Stop()
@@ -66,43 +67,34 @@ namespace SpeedDate
             Stopped?.Invoke();
         }
 
-        //private static IKernel CreateKernel()
-        //{
-        //    var kernel = new StandardKernel();
-        //    try
-        //    {
-        //        kernel.Load("*Server.dll"); //Loads all Ninject-Modules in all *Server.dll-files. Example: Binds IServer to SpeedDateServer
-        //        kernel.Load("*Client.dll"); 
-        //        kernel.Bind<IClientSocket>().To<ClientSocket>().InSingletonScope();
-        //        kernel.Bind<IServerSocket>().To<ServerSocket>().InSingletonScope();
-        //        kernel.Bind<ILogger>().ToMethod(context => LogManager.GetLogger(context.Request.Target?.Member.DeclaringType?.Name));
-        //        kernel.Bind<IPluginProvider>().To<PluginProvier>().InSingletonScope();
-        //        kernel.Bind(x =>
-        //        {
-        //            x.FromAssembliesMatching("*.dll")
-        //                .IncludingNonPublicTypes()
-        //                .SelectAllClasses()
-        //                .InheritedFrom<IPlugin>()
-        //                .Where(type => SpeedDateConfig.Plugins.LoadAll ||
-        //                               type.Namespace != null && 
-        //                               SpeedDateConfig.Plugins.PluginsNamespace.Split(';').FirstOrDefault(ns => Regex.IsMatch(type.Namespace, WildCardToRegular(ns))) != null)
-        //                .BindDefaultInterfaces()
-        //                .Configure(syntax => syntax.InSingletonScope());
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        if (ex is ReflectionTypeLoadException typeLoadException)
-        //        {
-        //            var loaderExceptions = typeLoadException.LoaderExceptions;
-        //            foreach (var loaderException in loaderExceptions) Console.WriteLine(loaderException);
-        //        }
+        private static TinyIoCContainer CreateKernel()
+        {
+            try
+            {
+                foreach (var dllFile in
+                    Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "*.dll"))
+                {
+                    var assembly = Assembly.LoadFrom(dllFile);
+                    foreach (var pluginAssembly in assembly.DefinedTypes.Where(info =>
+                        !info.IsAbstract && !info.IsInterface && typeof(ISpeedDateModule).IsAssignableFrom(info)))
+                    {
+                        ((ISpeedDateModule)Activator.CreateInstance(pluginAssembly)).Load(TinyIoCContainer.Current);
+                    }
+                }
 
-        //        throw;
-        //    }
+                TinyIoCContainer.Current.Register<IClientSocket, ClientSocket>();
+                TinyIoCContainer.Current.Register<IServerSocket, ServerSocket>();
+                TinyIoCContainer.Current.Register<IPluginProvider, PluginProvider>();
+                TinyIoCContainer.Current.Register<ILogger>((container, overloads) => LogManager.GetLogger("Test"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
 
-        //    return kernel;
-        //}
+            return TinyIoCContainer.Current;
+        }
         private static string WildCardToRegular(string value)
         {
             return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";

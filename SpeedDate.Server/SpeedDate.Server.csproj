@@ -4,7 +4,6 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpeedDate.Logging\SpeedDate.Logging.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
 </Project>

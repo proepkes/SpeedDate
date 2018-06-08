@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using LiteNetLib;
 using SpeedDate.Interfaces.Network;
-using SpeedDate.LiteNetLib;
 using SpeedDate.Logging;
 
 namespace SpeedDate.Network
