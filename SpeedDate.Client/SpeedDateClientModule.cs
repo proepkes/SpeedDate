@@ -1,6 +1,5 @@
 ﻿
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 
 namespace SpeedDate.Client
 {

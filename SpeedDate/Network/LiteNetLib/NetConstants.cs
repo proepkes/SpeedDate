@@ -1,4 +1,4 @@
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     /// <summary>
     /// Sending method type

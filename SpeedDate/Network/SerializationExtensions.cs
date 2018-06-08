@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.Utils.Conversion;
 using SpeedDate.Network.Utils.IO;
 

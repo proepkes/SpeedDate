@@ -1,11 +1,11 @@
 ﻿using System;
 using SpeedDate.ClientPlugins.GameServer;
 
-namespace SpeedDate.Client.Console.Example
+namespace ConsoleGame
 {
     class GameServer
     {
-        private readonly SpeedDate _speedDate;
+        private readonly SpeedDate.SpeedDate _speedDate;
 
         public event Action ConnectedToMaster;
 
@@ -16,7 +16,7 @@ namespace SpeedDate.Client.Console.Example
 
         public GameServer(string configFile)
         {
-            _speedDate = new SpeedDate(configFile);
+            _speedDate = new SpeedDate.SpeedDate(configFile);
         }
 
         /// <summary>

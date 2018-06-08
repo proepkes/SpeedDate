@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     /// <summary>
     /// Address type that you want to receive from NetUtils.GetLocalIp method

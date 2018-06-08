@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Spawner

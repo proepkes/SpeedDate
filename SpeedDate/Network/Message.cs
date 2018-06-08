@@ -1,5 +1,5 @@
 ﻿using System;
-using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.Utils.Conversion;
 
 namespace SpeedDate.Network

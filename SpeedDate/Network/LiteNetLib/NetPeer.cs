@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using LiteNetLib.Utils;
+using SpeedDate.Network.LiteNetLib.Utils;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     /// <summary>
     /// Peer connection state

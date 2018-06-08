@@ -1,5 +1,6 @@
 ﻿using System;
-namespace LiteNetLib
+
+namespace SpeedDate.Network.LiteNetLib
 {
     public class InvalidPacketException: ArgumentException
     {

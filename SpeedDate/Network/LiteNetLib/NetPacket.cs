@@ -1,7 +1,7 @@
 using System;
-using LiteNetLib.Utils;
+using SpeedDate.Network.LiteNetLib.Utils;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     internal enum PacketProperty : byte
     {

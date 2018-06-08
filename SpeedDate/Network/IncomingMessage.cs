@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using LiteNetLib;
-using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Network.Utils.Conversion;
 
 namespace SpeedDate.Network

@@ -6,8 +6,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 
 namespace SpeedDate.ClientPlugins.Peer.Security
 {

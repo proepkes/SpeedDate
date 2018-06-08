@@ -1,8 +1,8 @@
 ﻿using System;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Interfaces.Plugins;
-using TinyIoC;
+using SpeedDate.Network.Interfaces;
+using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.Server
 {

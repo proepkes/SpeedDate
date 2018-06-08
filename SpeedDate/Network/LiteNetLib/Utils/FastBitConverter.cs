@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace LiteNetLib.Utils
+namespace SpeedDate.Network.LiteNetLib.Utils
 {
     public static class FastBitConverter
     {

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Reflection;
 using SpeedDate.Interfaces.Plugins;
+using SpeedDate.Plugin.Interfaces;
 using SpeedDate.ServerPlugins.Lobbies;
 using SpeedDate.ServerPlugins.Rooms;
-using TinyIoC;
 
 namespace SpeedDate.ServerPlugins
 {

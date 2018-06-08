@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Text;
 
-namespace LiteNetLib.Utils
+namespace SpeedDate.Network.LiteNetLib.Utils
 {
     public class NetDataWriter
     {

@@ -1,5 +1,5 @@
 ﻿using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets;
 
 namespace SpeedDate.ServerPlugins.Profiles

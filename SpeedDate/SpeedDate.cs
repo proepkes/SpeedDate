@@ -5,11 +5,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
 using SpeedDate.Network;
-using TinyIoC;
+using SpeedDate.Network.Interfaces;
+using SpeedDate.Plugin;
+using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate
 {

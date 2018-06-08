@@ -1,7 +1,7 @@
 using System.Net;
-using LiteNetLib.Utils;
+using SpeedDate.Network.LiteNetLib.Utils;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     /// <summary>
     /// Type of message that you receive in OnNetworkReceiveUnconnected event

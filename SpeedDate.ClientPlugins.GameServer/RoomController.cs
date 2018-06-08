@@ -1,8 +1,8 @@
 ﻿using System;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.GameServer

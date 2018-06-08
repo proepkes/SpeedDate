@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
+using System.Reflection;
+
 #if NETCORE
 using System.Linq;
 #endif
 
-namespace LiteNetLib.Utils
+namespace SpeedDate.Network.LiteNetLib.Utils
 {
     public sealed class NetSerializer
     {

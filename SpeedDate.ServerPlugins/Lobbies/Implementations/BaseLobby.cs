@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using LiteNetLib;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.ServerPlugins.Authentication;

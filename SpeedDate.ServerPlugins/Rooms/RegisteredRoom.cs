@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Rooms;
 using SpeedDate.ServerPlugins.Authentication;
 

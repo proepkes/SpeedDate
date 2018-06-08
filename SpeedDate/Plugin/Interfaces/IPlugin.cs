@@ -1,4 +1,6 @@
 ﻿
+using SpeedDate.Plugin.Interfaces;
+
 namespace SpeedDate.Interfaces.Plugins
 {
     public interface IPlugin

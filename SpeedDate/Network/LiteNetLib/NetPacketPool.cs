@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     internal sealed class NetPacketPool
     {

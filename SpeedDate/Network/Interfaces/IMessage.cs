@@ -1,6 +1,4 @@
-﻿using SpeedDate.Network;
-
-namespace SpeedDate.Interfaces.Network
+﻿namespace SpeedDate.Network.Interfaces
 {
     /// <summary>
     ///     Represents functionality of a basic outgoing message

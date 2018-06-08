@@ -1,4 +1,4 @@
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     internal sealed class SequencedChannel : BaseChannel
     {

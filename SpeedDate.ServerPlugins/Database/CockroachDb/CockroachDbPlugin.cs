@@ -1,7 +1,7 @@
 ﻿using Npgsql;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Profiles;

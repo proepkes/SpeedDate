@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
+using SpeedDate.Network.Interfaces;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Rooms;
 using SpeedDate.Packets.Spawner;
 

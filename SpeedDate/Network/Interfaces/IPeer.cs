@@ -1,8 +1,7 @@
 ﻿using System;
-using LiteNetLib;
-using SpeedDate.Network;
+using SpeedDate.Network.LiteNetLib;
 
-namespace SpeedDate.Interfaces.Network
+namespace SpeedDate.Network.Interfaces
 {
     public delegate void IncommingMessageHandler(IIncommingMessage message);
 

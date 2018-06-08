@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.ServerPlugins.Lobbies.Implementations;
 

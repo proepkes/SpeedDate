@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.Utils.Conversion;
 using SpeedDate.Network.Utils.IO;
 

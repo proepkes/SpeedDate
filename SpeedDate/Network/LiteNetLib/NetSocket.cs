@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     internal sealed class NetSocket
     {

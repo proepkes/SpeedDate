@@ -1,6 +1,4 @@
-﻿using TinyIoC;
-
-namespace SpeedDate.Interfaces.Plugins
+﻿namespace SpeedDate.Plugin.Interfaces
 {
     public interface ISpeedDateModule
     {

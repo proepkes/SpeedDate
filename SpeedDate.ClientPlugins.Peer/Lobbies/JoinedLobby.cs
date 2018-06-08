@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Rooms;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 

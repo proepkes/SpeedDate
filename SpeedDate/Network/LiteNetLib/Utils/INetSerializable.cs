@@ -1,4 +1,4 @@
-﻿namespace LiteNetLib.Utils
+﻿namespace SpeedDate.Network.LiteNetLib.Utils
 {
     public interface INetSerializable
     {

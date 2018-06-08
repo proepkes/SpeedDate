@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Security;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;
 
 namespace SpeedDate.ClientPlugins.Peer.Auth

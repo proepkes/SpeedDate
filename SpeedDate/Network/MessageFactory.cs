@@ -1,7 +1,7 @@
 ﻿using System;
-using LiteNetLib;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Logging;
+using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Network.Utils.Conversion;
 
 namespace SpeedDate.Network

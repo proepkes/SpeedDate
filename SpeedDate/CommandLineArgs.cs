@@ -139,19 +139,19 @@ namespace SpeedDate
 
         public class MsfArgNames
         {
-            public string MasterPort => "-msfMasterPort";
-            public string MasterIp => "-msfMasterIp";
-            public string SpawnId => "-msfSpawnId";
-            public string SpawnCode => "-msfSpawnCode";
-            public string AssignedPort => "-msfAssignedPort";
-            public string LoadScene => "-msfLoadScene";
-            public string MachineIp => "-msfMachineIp";
-            public string ExecutablePath => "-msfExe";
-            public string DbConnectionString => "-msfDbConnectionString";
-            public string LobbyId => "-msfLobbyId";
-            public string DontSpawnInBatchmode => "-msfDontSpawnInBatchmode";
-            public string MaxProcesses => "-msfMaxProcesses";
-            public string WebGl => "-msfWebgl";
+            public string MasterPort => "-sdMasterPort";
+            public string MasterIp => "-sdMasterIp";
+            public string SpawnId => "-sdSpawnId";
+            public string SpawnCode => "-sdSpawnCode";
+            public string AssignedPort => "-sdAssignedPort";
+            public string LoadScene => "-sdLoadScene";
+            public string MachineIp => "-sdMachineIp";
+            public string ExecutablePath => "-sdExe";
+            public string DbConnectionString => "-sdDbConnectionString";
+            public string LobbyId => "-sdLobbyId";
+            public string DontSpawnInBatchmode => "-sdDontSpawnInBatchmode";
+            public string MaxProcesses => "-sdMaxProcesses";
+            public string WebGl => "-sdWebgl";
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
-using LiteNetLib.Utils;
+using SpeedDate.Network.LiteNetLib.Utils;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     public enum ConnectionRequestResult
     {

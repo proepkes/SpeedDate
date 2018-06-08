@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using LiteNetLib;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Network;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Packets.Chat;
 
 namespace SpeedDate.ServerPlugins.Chat

@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
-using LiteNetLib.Utils;
+using SpeedDate.Network.LiteNetLib.Utils;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     /// <summary>
     /// Main class for all network operations. Can be used as client and/or server.

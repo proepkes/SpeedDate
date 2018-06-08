@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using LiteNetLib.Utils;
+using SpeedDate.Network.LiteNetLib.Utils;
 
 //Some code parts taken from lidgren-network-gen3
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     public interface INatPunchListener
     {

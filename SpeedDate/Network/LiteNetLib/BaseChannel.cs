@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LiteNetLib
+namespace SpeedDate.Network.LiteNetLib
 {
     internal abstract class BaseChannel
     {

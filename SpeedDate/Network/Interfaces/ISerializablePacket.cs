@@ -1,7 +1,7 @@
 ﻿
 using SpeedDate.Network.Utils.IO;
 
-namespace SpeedDate.Network
+namespace SpeedDate.Network.Interfaces
 {
     public interface ISerializablePacket
     {

@@ -1,6 +1,6 @@
-﻿using LiteNetLib;
-using LiteNetLib.Utils;
-using SpeedDate.Interfaces.Network;
+﻿using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
+using SpeedDate.Network.LiteNetLib.Utils;
 
 namespace SpeedDate.Network
 {
