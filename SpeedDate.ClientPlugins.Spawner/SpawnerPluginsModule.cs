@@ -1,11 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using SpeedDate.Plugin.Interfaces;
 
-namespace SpeedDate.ServerPlugins
+namespace SpeedDate.ClientPlugins.Spawner
 {
-    public class ServerPluginsModule : ISpeedDateModule
+    public class SpawnerPluginsModule : ISpeedDateModule
     {
         public void Load(TinyIoCContainer container)
         {

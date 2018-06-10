@@ -45,7 +45,12 @@ namespace SpeedDate
             PluginProver = kernel.Resolve<IPluginProvider>();
 
             foreach (var plugin in kernel.ResolveAll<IPlugin>())
-                PluginProver.RegisterPlugin(plugin);
+            {
+                if (SpeedDateConfig.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
+                {
+                    PluginProver.RegisterPlugin(plugin);
+                }
+            }
 
             foreach (var plugin in PluginProver.GetAll())
             {
@@ -54,10 +59,14 @@ namespace SpeedDate
             }
 
             if(kernel.TryResolve(out IServer server))
+            {
                 logger.Info("Acting as server: " + server.GetType().Name);
+            }
 
-            if(kernel.TryResolve(out IClient client))
+            if (kernel.TryResolve(out IClient client))
+            {
                 logger.Info("Acting as client: " + client.GetType().Name);
+            }
 
             startable.Start();
         }
@@ -85,7 +94,7 @@ namespace SpeedDate
                 TinyIoCContainer.Current.Register<IClientSocket, ClientSocket>();
                 TinyIoCContainer.Current.Register<IServerSocket, ServerSocket>();
                 TinyIoCContainer.Current.Register<IPluginProvider, PluginProvider>();
-                TinyIoCContainer.Current.Register<ILogger>((container, overloads) => LogManager.GetLogger("Test"));
+                TinyIoCContainer.Current.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
             }
             catch (Exception ex)
             {
@@ -95,6 +104,7 @@ namespace SpeedDate
 
             return TinyIoCContainer.Current;
         }
+
         private static string WildCardToRegular(string value)
         {
             return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";

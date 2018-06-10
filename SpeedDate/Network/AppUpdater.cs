@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SpeedDate.Network
@@ -31,14 +32,22 @@ namespace SpeedDate.Network
             {
                 while (true)
                 {
-                    if (_addList.Count > 0)
+                    try
                     {
-                        _runnables.AddRange(_addList);
-                        _addList.Clear();
-                    }
+                        if (_addList.Count > 0)
+                        {
+                            _runnables.AddRange(_addList);
+                            _addList.Clear();
+                        }
 
-                    foreach (var runnable in _runnables)
-                        runnable.Update();
+                        foreach (var runnable in _runnables)
+                            runnable.Update();
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
 
                     await Task.Delay(100);
                 }

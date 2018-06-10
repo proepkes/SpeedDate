@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
+using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
@@ -12,6 +13,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
     public class SpawnerPlugin : SpeedDateClientPlugin
     {
+        private readonly ILogger _logger;
         private readonly Dictionary<int, SpawnerController> _locallyCreatedSpawners;
 
         public const int PortsStartFrom = 10000;
@@ -29,8 +31,9 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// </summary>
         public event Action<SpawnerController> SpawnerRegistered;
         
-        public SpawnerPlugin(IClientSocket connection) : base(connection)
+        public SpawnerPlugin(IClientSocket connection, ILogger logger) : base(connection)
         {
+            _logger = logger;
             _locallyCreatedSpawners = new Dictionary<int, SpawnerController>();
             _freePorts = new Queue<int>();
 
@@ -42,6 +45,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// </summary>
         public void RegisterSpawner(SpawnerOptions options, RegisterSpawnerCallback callback)
         {
+            _logger.Info("Registering Spawner...");
             if (!Connection.IsConnected)
             {
                 callback.Invoke(null, "Not connected");

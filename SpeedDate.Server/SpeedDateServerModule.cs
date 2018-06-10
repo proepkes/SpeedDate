@@ -9,8 +9,8 @@ namespace SpeedDate.Server
     {
         public void Load(TinyIoCContainer container)
         {
-            container.Register<IServer, SpeedDateServer>();
             container.Register<ISpeedDateStartable, SpeedDateServer>();
+            container.Register((c, p, t) => c.Resolve<ISpeedDateStartable>() as IServer);
         }
     }
 }

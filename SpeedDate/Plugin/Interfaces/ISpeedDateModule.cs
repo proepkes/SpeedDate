@@ -1,4 +1,6 @@
-﻿namespace SpeedDate.Plugin.Interfaces
+﻿using System;
+
+namespace SpeedDate.Plugin.Interfaces
 {
     public interface ISpeedDateModule
     {

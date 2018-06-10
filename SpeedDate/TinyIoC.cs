@@ -1552,7 +1552,7 @@ namespace SpeedDate
         /// <param name="registerType">Type to register</param>
         /// <param name="factory">Factory/lambda that returns an instance of RegisterType</param>
         /// <returns>RegisterOptions for fluent API</returns>
-        public RegisterOptions Register(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, object> factory)
+        public RegisterOptions Register(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, Type, object> factory)
         {
             return RegisterInternal(registerType, string.Empty, new DelegateFactory(registerType, factory));
         }
@@ -1564,7 +1564,7 @@ namespace SpeedDate
         /// <param name="factory">Factory/lambda that returns an instance of RegisterType</param>
         /// <param name="name">Name of registation</param>
         /// <returns>RegisterOptions for fluent API</returns>
-        public RegisterOptions Register(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, object> factory, string name)
+        public RegisterOptions Register(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, Type, object> factory, string name)
         {
             return RegisterInternal(registerType, name, new DelegateFactory(registerType, factory));
         }
@@ -1679,7 +1679,7 @@ namespace SpeedDate
         /// <typeparam name="RegisterType">Type to register</typeparam>
         /// <param name="factory">Factory/lambda that returns an instance of RegisterType</param>
         /// <returns>RegisterOptions for fluent API</returns>
-        public RegisterOptions Register<RegisterType>(Func<TinyIoCContainer, NamedParameterOverloads, RegisterType> factory)
+        public RegisterOptions Register<RegisterType>(Func<TinyIoCContainer, NamedParameterOverloads, Type, RegisterType> factory)
             where RegisterType : class
         {
             if (factory == null)
@@ -1687,7 +1687,7 @@ namespace SpeedDate
                 throw new ArgumentNullException("factory");
             }
 
-            return this.Register(typeof(RegisterType), (c, o) => factory(c, o));
+            return this.Register(typeof(RegisterType), (c, o, t) => factory(c, o, t));
         }
 
         /// <summary>
@@ -1697,7 +1697,7 @@ namespace SpeedDate
         /// <param name="factory">Factory/lambda that returns an instance of RegisterType</param>
         /// <param name="name">Name of registation</param>
         /// <returns>RegisterOptions for fluent API</returns>
-        public RegisterOptions Register<RegisterType>(Func<TinyIoCContainer, NamedParameterOverloads, RegisterType> factory, string name)
+        public RegisterOptions Register<RegisterType>(Func<TinyIoCContainer, NamedParameterOverloads, Type, RegisterType> factory, string name)
             where RegisterType : class
         {
             if (factory == null)
@@ -1705,7 +1705,7 @@ namespace SpeedDate
                 throw new ArgumentNullException("factory");
             }
 
-            return this.Register(typeof(RegisterType), (c, o) => factory(c, o), name);
+            return this.Register(typeof(RegisterType), (c, o, t) => factory(c, o, t), name);
         }
 
         /// <summary>
@@ -2775,7 +2775,7 @@ namespace SpeedDate
             /// <param name="parameters">Any user parameters passed</param>
             /// <param name="options"></param>
             /// <returns></returns>
-            public abstract object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options);
+            public abstract object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null);
 
             public virtual ObjectFactoryBase SingletonVariant
             {
@@ -2850,7 +2850,7 @@ namespace SpeedDate
                 this.registerImplementation = registerImplementation;
             }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 try
                 {
@@ -2891,17 +2891,17 @@ namespace SpeedDate
         {
             private readonly Type registerType;
 
-            private Func<TinyIoCContainer, NamedParameterOverloads, object> _factory;
+            private Func<TinyIoCContainer, NamedParameterOverloads, Type, object> _factory;
 
             public override bool AssumeConstruction { get { return true; } }
 
             public override Type CreatesType { get { return this.registerType; } }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 try
                 {
-                    return _factory.Invoke(container, parameters);
+                    return _factory.Invoke(container, parameters, requestType);
                 }
                 catch (Exception ex)
                 {
@@ -2909,7 +2909,7 @@ namespace SpeedDate
                 }
             }
 
-            public DelegateFactory(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, object> factory)
+            public DelegateFactory(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, Type, object> factory)
             {
                 if (factory == null)
                     throw new ArgumentNullException("factory");
@@ -2955,7 +2955,7 @@ namespace SpeedDate
 
             public override Type CreatesType { get { return this.registerType; } }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 var factory = _factory.Target as Func<TinyIoCContainer, NamedParameterOverloads, object>;
 
@@ -2972,7 +2972,7 @@ namespace SpeedDate
                 }
             }
 
-            public WeakDelegateFactory(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, object> factory)
+            public WeakDelegateFactory(Type registerType, Func<TinyIoCContainer, NamedParameterOverloads, Type, object> factory)
             {
                 if (factory == null)
                     throw new ArgumentNullException("factory");
@@ -2986,7 +2986,7 @@ namespace SpeedDate
             {
                 get
                 {
-                    var factory = _factory.Target as Func<TinyIoCContainer, NamedParameterOverloads, object>;
+                    var factory = _factory.Target as Func<TinyIoCContainer, NamedParameterOverloads, Type, object>;
 
                     if (factory == null)
                         throw new TinyIoCWeakReferenceException(this.registerType);
@@ -3035,7 +3035,7 @@ namespace SpeedDate
                 get { return this.registerImplementation; }
             }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 return _instance;
             }
@@ -3101,7 +3101,7 @@ namespace SpeedDate
                 get { return this.registerImplementation; }
             }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 var instance = _instance.Target;
 
@@ -3185,7 +3185,7 @@ namespace SpeedDate
                 get { return this.registerImplementation; }
             }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 if (parameters.Count != 0)
                     throw new ArgumentException("Cannot specify parameters for singleton types");
@@ -3274,7 +3274,7 @@ namespace SpeedDate
                 get { return this.registerImplementation; }
             }
 
-            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
+            public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
             {
                 object current;
 
@@ -3719,14 +3719,14 @@ namespace SpeedDate
             return _Parent.GetParentObjectFactory(registration);
         }
 
-        private object ResolveInternal(TypeRegistration registration, NamedParameterOverloads parameters, ResolveOptions options)
+        private object ResolveInternal(TypeRegistration registration, NamedParameterOverloads parameters, ResolveOptions options, Type requestType = null)
         {
             // Attempt container resolution
             if (_RegisteredTypes.TryGetValue(registration, out var factory))
             {
                 try
                 {
-                    return factory.GetObject(registration.Type, this, parameters, options);
+                    return factory.GetObject(registration.Type, this, parameters, options, requestType);
                 }
                 catch (TinyIoCResolutionException)
                 {
@@ -4017,7 +4017,7 @@ namespace SpeedDate
                 throw new TinyIoCResolutionException(typeToConstruct);
 
             var ctorParams = constructor.GetParameters();
-            object[] args = new object[ctorParams.Count()];
+            object[] args = new object[ctorParams.Length];
 
             for (int parameterIndex = 0; parameterIndex < ctorParams.Count(); parameterIndex++)
             {
@@ -4030,7 +4030,7 @@ namespace SpeedDate
                                             ResolveInternal(
                                                 new TypeRegistration(currentParam.ParameterType),
                                                 NamedParameterOverloads.Default,
-                                                options);
+                                                options, implementationType);
                 }
                 catch (TinyIoCResolutionException ex)
                 {

@@ -12,10 +12,10 @@
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="gameclient.json">
+    <None Update="GameClientConfig.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="spawner.json">
+    <None Update="SpawnerConfig.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

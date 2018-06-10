@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <Network Address="127.0.0.1" Port="60125"/>
+  <Plugins LoadAll="false" PluginsNamespaces="SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Spawner*"/>
+  <SpawnerPlugin 
+    MachineIp="127.0.0.1"
+    AddWebGlFlag="false"
+    ExecutablePath="E:\\Repositories\\SpeedDate\\ConsoleGame\\bin\\Debug\\ConsoleGame.exe"
+    SpawnInBatchMode="true" />
+</configuration>
