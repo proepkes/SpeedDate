@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -34,7 +33,7 @@ namespace SpeedDate
 
         public void Start()
         {
-            SpeedDateConfig.Initialize(_configFile);
+            SpeedDateConfig.FromXml(_configFile);
             var logger = LogManager.GetLogger("SpeedDate");
 
             var kernel = CreateKernel();

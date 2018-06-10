@@ -20,7 +20,7 @@ namespace SpeedDate.ServerPlugins.Mail
         {
             _logger = logger;
             _sendMailExceptions = new List<Exception>();
-            //SetupSmtpClient();
+            SetupSmtpClient();
             AppUpdater.Instance.Add(this);
         }
 
@@ -39,7 +39,7 @@ namespace SpeedDate.ServerPlugins.Mail
 
         private void SetupSmtpClient()
         {
-            var config = SpeedDateConfig.GetPluginConfig<MailConfig>();
+            var config = SpeedDateConfig.Get<MailConfig>();
             // Configure mail client
             _smtpClient = new SmtpClient(config.SmtpHost, config.SmtpPort)
             {
@@ -63,7 +63,7 @@ namespace SpeedDate.ServerPlugins.Mail
 
         public bool SendMail(string to, string subject, string body)
         {
-            var config = SpeedDateConfig.GetPluginConfig<MailConfig>();
+            var config = SpeedDateConfig.Get<MailConfig>();
 
             // Create the mail message (from, to, subject, body)
             var mailMessage = new MailMessage {From = new MailAddress(config.EmailFrom, config.SenderDisplayName)};

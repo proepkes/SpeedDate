@@ -29,7 +29,7 @@ namespace SpeedDate.Client
 
         public void Start()
         {
-            ConnectAsync(SpeedDateConfig.Network.IP, SpeedDateConfig.Network.Port);
+            ConnectAsync(SpeedDateConfig.Network.Address, SpeedDateConfig.Network.Port);
         }
 
         public void Stop()

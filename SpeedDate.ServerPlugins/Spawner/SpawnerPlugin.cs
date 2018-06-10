@@ -30,7 +30,7 @@ namespace SpeedDate.ServerPlugins.Spawner
         public SpawnerPlugin(IServer server, ILogger logger) : base(server)
         {
             _logger = logger;
-            _config = SpeedDateConfig.GetPluginConfig<SpawnerConfig>();
+            _config = SpeedDateConfig.Get<SpawnerConfig>();
 
             _spawners = new Dictionary<int, RegisteredSpawner>();
             _spawnTasks = new Dictionary<int, SpawnTask>();
@@ -212,7 +212,7 @@ namespace SpeedDate.ServerPlugins.Spawner
         {
             while (true)
             {
-                await Task.Delay(TimeSpan.FromSeconds(_config.QueueUpdateFrequency));
+                await Task.Delay(TimeSpan.FromMilliseconds(_config.QueueUpdateFrequency));
 
                 foreach (var spawner in _spawners.Values)
                     try

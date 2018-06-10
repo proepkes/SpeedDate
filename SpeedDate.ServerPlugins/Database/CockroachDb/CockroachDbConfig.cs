@@ -1,5 +1,8 @@
-﻿namespace SpeedDate.ServerPlugins.Database.CockroachDb
+﻿using SpeedDate.Configuration;
+
+namespace SpeedDate.ServerPlugins.Database.CockroachDb
 {
+    [PluginConfiguration(typeof(CockroachDbPlugin))]
     public class CockroachDbConfig
     {
         public bool CheckConnectionOnStartup { get; set; }

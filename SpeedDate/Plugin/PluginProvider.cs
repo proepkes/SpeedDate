@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.Plugin

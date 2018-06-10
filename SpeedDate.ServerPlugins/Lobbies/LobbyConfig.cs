@@ -1,5 +1,8 @@
-﻿namespace SpeedDate.ServerPlugins.Lobbies
+﻿using SpeedDate.Configuration;
+
+namespace SpeedDate.ServerPlugins.Lobbies
 {
+    [PluginConfiguration(typeof(LobbiesPlugin))]
     public class LobbyConfig
     {
         /// <summary>

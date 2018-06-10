@@ -5,7 +5,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
-using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -37,19 +36,13 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         private int _nextGuestId;
 
-        public string ActivationForm = "<h1>Activation</h1>" +
-                                       "<p>Your email activation code is: <b>{0}</b> </p>";
-
-        public string PasswordResetCode = "<h1>Password Reset Code</h1>" +
-                                          "<p>Your password reset code is: <b>{0}</b> </p>";
-
         private readonly List<PermissionEntry> _permissions;
 
 
         public AuthPlugin(IServer server) : base(server)
         {
             _permissions = new List<PermissionEntry>();
-            _config = SpeedDateConfig.GetPluginConfig<AuthConfig>();
+            _config = SpeedDateConfig.Get<AuthConfig>();
 
             LoggedInUsers = new Dictionary<string, IUserExtension>();
 
@@ -313,7 +306,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             db.SavePasswordResetCode(account, code);
 
-            if (!_mailer.SendMail(account.Email, "Password Reset Code", string.Format(PasswordResetCode, code)))
+            if (!_mailer.SendMail(account.Email, "Password Reset Code", string.Format(_config.PasswordResetEmailBody, code)))
             {
                 message.Respond("Couldn't send an activation code to your e-mail");
                 return;
@@ -326,7 +319,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         {
             var extension = message.Peer.GetExtension<IUserExtension>();
 
-            if (extension == null || extension.AccountData == null)
+            if (extension?.AccountData == null)
             {
                 message.Respond("Invalid session", ResponseStatus.Unauthorized);
                 return;
@@ -347,7 +340,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             db.SaveEmailConfirmationCode(extension.AccountData.Email, code);
 
             if (!_mailer.SendMail(extension.AccountData.Email, "E-mail confirmation",
-                string.Format(ActivationForm, code)))
+                string.Format(_config.ConfirmEmailBody, code)))
             {
                 message.Respond("Couldn't send a confirmation code to your e-mail. Please contact support");
                 return;
@@ -448,8 +441,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             {
                 db.InsertNewAccount(account);
 
-                if (Registered != null)
-                    Registered.Invoke(message.Peer, account);
+                Registered?.Invoke(message.Peer, account);
 
                 message.Respond(ResponseStatus.Success);
             }

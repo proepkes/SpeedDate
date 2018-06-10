@@ -16,7 +16,7 @@ namespace SpeedDate.Server.Console
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            var speedDate = new SpeedDate("appsettings.json");
+            var speedDate = new SpeedDate("ServerConfig.xml");
             speedDate.Start();
 
             System.Console.ReadLine();

@@ -30,6 +30,13 @@ namespace SpeedDate.Network.LiteNetLib
         NewConnection  //when peer was disconnected
     }
 
+    internal enum DisconnectResult
+    {
+        None,
+        Reject,
+        Disconnect
+    }
+
     /// <summary>
     /// Network peer. Main purpose is sending messages to specific peer.
     /// </summary>
@@ -60,7 +67,16 @@ namespace SpeedDate.Network.LiteNetLib
 
         internal NetPeer NextPeer;
         internal NetPeer PrevPeer;
-        internal byte ConnectionNum { get { return _connectNum;} }
+
+        internal byte ConnectionNum
+        {
+            get { return _connectNum; }
+            private set
+            {
+                _connectNum = value;
+                _mergeData.ConnectionNumber = value;
+            }
+        }
  
         //Channels
         private ReliableChannel _reliableOrderedChannel;
@@ -182,19 +198,21 @@ namespace SpeedDate.Network.LiteNetLib
         }
 
         //"Connect to" constructor
-        internal NetPeer(NetManager netManager, IPEndPoint remoteEndPoint, NetDataWriter connectData) : this(netManager, remoteEndPoint)
+        internal NetPeer(NetManager netManager, IPEndPoint remoteEndPoint, byte connectNum, NetDataWriter connectData) : this(netManager, remoteEndPoint)
         {
             Initialize();
             _connectId = DateTime.UtcNow.Ticks;
             _connectionState = ConnectionState.InProgress;
+            ConnectionNum = connectNum;
 
             //Make initial packet
             _connectRequestPacket = NetConnectRequestPacket.Make(connectData, _connectId);
+            _connectRequestPacket.ConnectionNumber = connectNum;
 
             //Send request
             _netManager.SendRaw(_connectRequestPacket, _remoteEndPoint);
 
-            NetUtils.DebugWrite(ConsoleColor.Cyan, "[CC] ConnectId: {0}", _connectId);
+            NetUtils.DebugWrite(ConsoleColor.Cyan, "[CC] ConnectId: {0}, ConnectNum: {1}", _connectId, connectNum);
         }
 
         //"Accept" incoming constructor
@@ -203,10 +221,7 @@ namespace SpeedDate.Network.LiteNetLib
             Initialize();
             _connectId = connectId;
             _connectionState = ConnectionState.Connected;
-            _connectNum = connectNum;
-
-            //set connection number to merge data
-            _mergeData.ConnectionNumber = connectNum;
+            ConnectionNum = connectNum;
 
             //Make initial packet
             _connectAcceptPacket = NetConnectAcceptPacket.Make(_connectId, connectNum, false);
@@ -228,7 +243,7 @@ namespace SpeedDate.Network.LiteNetLib
                 return false;
             }
             //check connect num
-            _connectNum = packet.ConnectionNumber;
+            ConnectionNum = packet.ConnectionNumber;
 
             NetUtils.DebugWrite(ConsoleColor.Cyan, "[NC] Received connection accept");
             _timeSinceLastPacket = 0;
@@ -428,6 +443,28 @@ namespace SpeedDate.Network.LiteNetLib
             _netManager.DisconnectPeer(this);
         }
 
+        internal DisconnectResult ProcessDisconnect(NetPacket packet)
+        {
+            switch (_connectionState)
+            {
+                case ConnectionState.Connected:
+                case ConnectionState.InProgress:
+                    if (packet.Size >= 9 &&
+                        BitConverter.ToInt64(packet.RawData, 1) == _connectId &&
+                        packet.ConnectionNumber == _connectNum)
+                    {
+                        DisconnectResult result = _connectionState == ConnectionState.Connected 
+                            ? DisconnectResult.Disconnect 
+                            : DisconnectResult.Reject;
+
+                        _connectionState = ConnectionState.Disconnected;
+                        return result;
+                    }
+                    break;
+            }
+            return DisconnectResult.None;
+        }
+
         internal bool Shutdown(byte[] data, int start, int length, bool force)
         {
             lock (this)
@@ -609,7 +646,7 @@ namespace SpeedDate.Network.LiteNetLib
                     {
                         //Change connect id
                         _connectId = connRequest.ConnectionId;
-                        _connectNum = connRequest.ConnectionNumber;
+                        ConnectionNum = connRequest.ConnectionNumber;
                     }
                     return _connectionState == ConnectionState.InProgress 
                         ? ConnectRequestResult.P2PConnection 
@@ -644,7 +681,8 @@ namespace SpeedDate.Network.LiteNetLib
         internal void ProcessPacket(NetPacket packet)
         {
             _timeSinceLastPacket = 0;
-            if (packet.ConnectionNumber != ConnectionNum)
+            if (packet.ConnectionNumber != _connectNum && 
+                packet.Property != PacketProperty.ShutdownOk) //withou connectionNum
             {
                 NetUtils.DebugWrite(ConsoleColor.Red, "[RR]Old packet");
                 _packetPool.Recycle(packet);
@@ -744,8 +782,8 @@ namespace SpeedDate.Network.LiteNetLib
                     break;
 
                 case PacketProperty.ShutdownOk:
-                case PacketProperty.Disconnect:
-                    _connectionState = ConnectionState.Disconnected;
+                    if(_connectionState == ConnectionState.ShutdownRequested)
+                        _connectionState = ConnectionState.Disconnected;
                     _packetPool.Recycle(packet);
                     break;            
                 
@@ -757,7 +795,7 @@ namespace SpeedDate.Network.LiteNetLib
 
         internal void SendRawData(NetPacket packet)
         {
-            packet.ConnectionNumber = ConnectionNum;
+            packet.ConnectionNumber = _connectNum;
             //2 - merge byte + minimal packet size + datalen(ushort)
             if (_netManager.MergeEnabled && _mergePos + packet.Size + NetConstants.HeaderSize*2 + 2 < _mtu)
             {
@@ -796,7 +834,7 @@ namespace SpeedDate.Network.LiteNetLib
                 {
                     if (_mergeCount > 1)
                     {
-                        NetUtils.DebugWrite("Send merged: " + _mergePos + ", count: " + _mergeCount);
+                        NetUtils.DebugWrite("[P]Send merged: " + _mergePos + ", count: " + _mergeCount);
                         _netManager.SendRaw(_mergeData.RawData, 0, NetConstants.HeaderSize + _mergePos, _remoteEndPoint);
 #if STATS_ENABLED
                         Statistics.PacketsSent++;

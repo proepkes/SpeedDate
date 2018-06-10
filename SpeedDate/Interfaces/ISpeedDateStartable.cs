@@ -1,5 +1,4 @@
 ﻿using System;
-using SpeedDate.Interfaces.Plugins;
 
 namespace SpeedDate.Interfaces
 {

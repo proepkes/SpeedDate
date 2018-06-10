@@ -1,5 +1,8 @@
-﻿namespace SpeedDate.ServerPlugins.Mail
+﻿using SpeedDate.Configuration;
+
+namespace SpeedDate.ServerPlugins.Mail
 {
+    [PluginConfiguration(typeof(MailPlugin))]
     class MailConfig
     {
         public string SmtpHost { get; set; }

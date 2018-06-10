@@ -1,6 +1,5 @@
 ﻿using System;
 using SpeedDate.Interfaces;
-using SpeedDate.Interfaces.Plugins;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Plugin.Interfaces;
 

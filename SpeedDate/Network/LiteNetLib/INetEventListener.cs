@@ -23,7 +23,8 @@ namespace SpeedDate.Network.LiteNetLib
         Timeout,
         SocketSendError,
         RemoteConnectionClose,
-        DisconnectPeerCalled
+        DisconnectPeerCalled,
+        ConnectionRejected
     }
 
     /// <summary>

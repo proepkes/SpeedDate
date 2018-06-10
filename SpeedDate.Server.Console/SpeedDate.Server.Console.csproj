@@ -10,9 +10,10 @@
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="appsettings.json">
+    <None Remove="ServerConfig.xml" />
+    <Content Include="ServerConfig.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   </Target>
