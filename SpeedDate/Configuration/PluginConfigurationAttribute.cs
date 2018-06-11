@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SpeedDate.Configuration
 {
-    public class PluginConfigurationAttribute : Attribute
+    public sealed class PluginConfigurationAttribute : Attribute
     {
+        public Type PluginType { get; }
+
         public PluginConfigurationAttribute(Type pluginType)
         {
             PluginType = pluginType;
         }
-
-        public Type PluginType { get; }
     }
 }

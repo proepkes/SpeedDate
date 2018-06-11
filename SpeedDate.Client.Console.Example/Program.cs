@@ -9,17 +9,6 @@ namespace SpeedDate.Client.Console.Example
     {
         static void Main(string[] args)
         {
-            System.Console.WriteLine("------STARTING SPAWNER------");
-            var spawner = new Spawner("SpawnerConfig.xml");
-            spawner.Start();
-            spawner.Connected += () => spawner.Spawn.RegisterSpawner(new SpawnerOptions { Region = "EU" },
-                (controller, error) =>
-                {
-                    System.Console.WriteLine("Registered spawner");
-
-                });
-
-            Thread.Sleep(TimeSpan.FromSeconds(1));
             System.Console.WriteLine("------STARTING GAMECLIENT------");
             var gameClient = new GameClient("GameClientConfig.xml");
             gameClient.Start();

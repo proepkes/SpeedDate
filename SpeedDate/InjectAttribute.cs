@@ -2,7 +2,7 @@
 
 namespace SpeedDate
 {
-    public class InjectAttribute : Attribute
+    public sealed class InjectAttribute : Attribute
     {
         
     }

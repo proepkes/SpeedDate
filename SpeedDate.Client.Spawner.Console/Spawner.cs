@@ -1,14 +1,14 @@
 ﻿using System;
 using SpeedDate.ClientPlugins.Spawner;
 
-namespace SpeedDate.Client.Console.Example
+namespace SpeedDate.Client.Spawner.Console
 {
     class Spawner
     {
         private readonly SpeedDate _speedDate;
         public event Action Connected;
 
-        public SpawnerPlugin Spawn { get; private set; }
+        public SpawnerPlugin SpawnApi { get; private set; }
 
         public Spawner(string configFile)
         {
@@ -22,7 +22,7 @@ namespace SpeedDate.Client.Console.Example
         public void Start()
         {
             _speedDate.Start();
-            Spawn = _speedDate.PluginProver.Get<SpawnerPlugin>();
+            SpawnApi = _speedDate.PluginProver.Get<SpawnerPlugin>();
         }
     }
 }

@@ -36,7 +36,6 @@ namespace SpeedDate.ServerPlugins.Spawner
             _spawners = new Dictionary<int, RegisteredSpawner>();
             _spawnTasks = new Dictionary<int, SpawnTask>();
 
-            // Coroutines
             Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
         }
 
