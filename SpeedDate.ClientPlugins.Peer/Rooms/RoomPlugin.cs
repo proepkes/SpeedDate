@@ -17,10 +17,6 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
         /// </summary>
         public RoomAccessPacket LastReceivedAccess { get; private set; }
 
-        public RoomPlugin(IClientSocket clientSocket) : base(clientSocket)
-        {
-        }
-
         /// <summary>
         ///     Event, invoked when an access is received
         /// </summary>

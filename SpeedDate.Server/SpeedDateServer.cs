@@ -12,19 +12,18 @@ namespace SpeedDate.Server
         private const string InternalServerErrorMessage = "Internal Server Error";
         private readonly Dictionary<long, IPeer> _connectedPeers;
         private readonly Dictionary<short, IPacketHandler> _handlers;
-        private readonly ILogger _logger;
 
-        private readonly IServerSocket _socket;
+        [Inject] private ILogger _logger;
+
+        [Inject] private IServerSocket _socket;
 
 
-        public SpeedDateServer(IServerSocket serverSocket, ILogger logger)
+        public SpeedDateServer()
         {
             _connectedPeers = new Dictionary<long, IPeer>();
             _handlers = new Dictionary<short, IPacketHandler>();
 
             // Create the server 
-            _socket = serverSocket;
-            _logger = logger;
 
             _socket.Connected += Connected;
             _socket.Disconnected += Disconnected;

@@ -25,7 +25,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         private Task _sendUpdatesCoroutine;
 
-        public ProfilesPlugin(IClientSocket connection) : base(connection)
+        public ProfilesPlugin()
         {
             _profiles = new Dictionary<string, ObservableServerProfile>();
             _modifiedProfiles = new HashSet<ObservableServerProfile>();

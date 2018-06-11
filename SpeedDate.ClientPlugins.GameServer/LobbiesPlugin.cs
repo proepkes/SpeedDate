@@ -11,11 +11,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         public delegate void LobbyMemberDataCallback(LobbyMemberData memberData, string error);
 
         public delegate void LobbyInfoCallback(LobbyDataPacket info, string error);
-
-        public LobbiesPlugin(IClientSocket connection) : base(connection)
-        {
-        }
-
+        
         /// <summary>
         /// Retrieves lobby member data of user, who has connected to master server with
         /// a specified peerId

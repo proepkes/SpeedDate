@@ -17,7 +17,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         private readonly Dictionary<int, SpawnRequestController> _localSpawnRequests;
 
-        public SpawnRequestPlugin(IClientSocket connection) : base(connection)
+        public SpawnRequestPlugin()
         {
             _localSpawnRequests = new Dictionary<int, SpawnRequestController>();
         }

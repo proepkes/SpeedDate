@@ -9,12 +9,9 @@ namespace SpeedDate.ClientPlugins
 {
     public abstract class SpeedDateClientPlugin : IPlugin
     {
+        [Inject]
         protected readonly IClientSocket Connection;
 
-        protected SpeedDateClientPlugin(IClientSocket connection)
-        {
-            Connection = connection;
-        }
         public virtual void Loaded(IPluginProvider pluginProvider)
         {
             

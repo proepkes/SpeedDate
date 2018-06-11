@@ -58,12 +58,12 @@ namespace SpeedDate
                 logger.Info($"Loaded {plugin.GetType().Name}");
             }
 
-            if(kernel.TryResolve(out IServer server))
+            if(startable is IServer server)
             {
                 logger.Info("Acting as server: " + server.GetType().Name);
             }
 
-            if (kernel.TryResolve(out IClient client))
+            if (startable is IClient client)
             {
                 logger.Info("Acting as client: " + client.GetType().Name);
             }
@@ -80,21 +80,34 @@ namespace SpeedDate
         {
             try
             {
-                foreach (var dllFile in
-                    Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "*.dll"))
-                {
-                    var assembly = Assembly.LoadFrom(dllFile);
-                    foreach (var pluginAssembly in assembly.DefinedTypes.Where(info =>
-                        !info.IsAbstract && !info.IsInterface && typeof(ISpeedDateModule).IsAssignableFrom(info)))
-                    {
-                        ((ISpeedDateModule)Activator.CreateInstance(pluginAssembly)).Load(TinyIoCContainer.Current);
-                    }
-                }
-
+                //Register possible plugin-dependencies
                 TinyIoCContainer.Current.Register<IClientSocket, ClientSocket>();
                 TinyIoCContainer.Current.Register<IServerSocket, ServerSocket>();
                 TinyIoCContainer.Current.Register<IPluginProvider, PluginProvider>();
                 TinyIoCContainer.Current.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
+
+                //Register plugins
+                foreach (var dllFile in
+                    Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "*.dll"))
+                {
+                    var assembly = Assembly.LoadFrom(dllFile);
+
+                    foreach (var startableType in assembly.DefinedTypes.Where(info =>
+                        !info.IsAbstract && !info.IsInterface && typeof(ISpeedDateStartable).IsAssignableFrom(info)))
+                    {
+                        var startableInstance = (ISpeedDateStartable)Activator.CreateInstance(startableType);
+                        TinyIoCContainer.Current.BuildUp(startableInstance);
+                        TinyIoCContainer.Current.Register(startableInstance);
+                    }
+
+                    foreach (var pluginType in assembly.DefinedTypes.Where(info =>
+                        !info.IsAbstract && !info.IsInterface && typeof(IPlugin).IsAssignableFrom(info)))
+                    {
+                        var pluginInstance = (IPlugin)Activator.CreateInstance(pluginType);
+                        TinyIoCContainer.Current.BuildUp(pluginInstance);
+                        TinyIoCContainer.Current.Register(pluginInstance, pluginType.FullName);
+                    }
+                }
             }
             catch (Exception ex)
             {

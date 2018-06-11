@@ -4101,7 +4101,7 @@ namespace SpeedDate
             //							 select property;
             //#else
             var properties = from property in input.GetType().GetProperties()
-                             where (property.GetGetMethod() != null) && (property.GetSetMethod() != null) && !property.PropertyType.IsValueType()
+                             where (property.GetGetMethod() != null) && (property.GetSetMethod() != null) && !property.PropertyType.IsValueType() && Attribute.IsDefined(property, typeof(InjectAttribute))
                              select property;
             //#endif
 
@@ -4111,7 +4111,27 @@ namespace SpeedDate
                 {
                     try
                     {
-                        property.SetValue(input, ResolveInternal(new TypeRegistration(property.PropertyType), NamedParameterOverloads.Default, resolveOptions), null);
+                        property.SetValue(input, ResolveInternal(new TypeRegistration(property.PropertyType), NamedParameterOverloads.Default, resolveOptions, input.GetType()), null);
+                    }
+                    catch (TinyIoCResolutionException)
+                    {
+                        // Catch any resolution errors and ignore them
+                    }
+                }
+            }
+
+            var fields = from field in input.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                where (!field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute)))
+                select field;
+            //#endif
+
+            foreach (var field in fields)
+            {
+                if (field.GetValue(input) == null)
+                {
+                    try
+                    {
+                        field.SetValue(input, ResolveInternal(new TypeRegistration(field.FieldType), NamedParameterOverloads.Default, resolveOptions, input.GetType()));
                     }
                     catch (TinyIoCResolutionException)
                     {

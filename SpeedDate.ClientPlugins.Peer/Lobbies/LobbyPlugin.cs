@@ -34,7 +34,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
         private RoomPlugin _roomPlugin;
 
-        public LobbyPlugin(IClientSocket connection) : base(connection)
+        public LobbyPlugin()
         {
             _joinedLobbies = new Dictionary<string, JoinedLobby>();
         }

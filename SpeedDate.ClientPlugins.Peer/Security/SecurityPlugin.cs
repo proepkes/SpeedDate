@@ -24,7 +24,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
 
         public int CurrentPermissionLevel { get; private set; }
 
-        public SecurityPlugin(IClientSocket clientSocket) : base(clientSocket)
+        public SecurityPlugin()
         {
             _encryptionData = new Dictionary<IClientSocket, EncryptionData>();
         }

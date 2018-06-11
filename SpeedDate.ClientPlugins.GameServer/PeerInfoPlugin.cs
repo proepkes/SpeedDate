@@ -8,11 +8,7 @@ namespace SpeedDate.ClientPlugins.GameServer
     public class PeerInfoPlugin : SpeedDateClientPlugin
     {
         public delegate void PeerAccountInfoCallback(PeerAccountInfoPacket info, string error);
-
-        public PeerInfoPlugin(IClientSocket connection) : base(connection)
-        {
-        }
-
+        
         /// <summary>
         /// Gets account information of a client, who is connected to master server, 
         /// and who's peer id matches the one provided

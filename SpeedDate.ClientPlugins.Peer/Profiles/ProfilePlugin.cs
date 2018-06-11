@@ -7,10 +7,6 @@ namespace SpeedDate.ClientPlugins.Peer.Profiles
 {
     public class ProfilePlugin : SpeedDateClientPlugin
     {
-        public ProfilePlugin(IClientSocket clientSocket) : base(clientSocket)
-        {
-        }
-
         /// <summary>
         ///     Sends a request to server, retrieves all profile values, and applies them to a provided
         ///     profile

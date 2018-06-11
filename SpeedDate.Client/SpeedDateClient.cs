@@ -11,21 +11,16 @@ namespace SpeedDate.Client
         private const float MinTimeToConnect = 0.5f;
         private const float MaxTimeToConnect = 4f;
 
-        private readonly ILogger _logger;
+        [Inject] private ILogger _logger;
         private int _port;
         private string _serverIp;
         private float _timeToConnect = 0.5f;
 
-        public IClientSocket Connection { get; }
+        [Inject] public IClientSocket Connection { get; set; }
 
         public event Action Started;
         public event Action Stopped;
 
-        public SpeedDateClient(IClientSocket clientSocket, ILogger logger)
-        {
-            _logger = logger;
-            Connection = clientSocket;
-        }
 
         public void Start()
         {

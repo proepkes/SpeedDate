@@ -3,6 +3,7 @@ using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Chat;
+using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.ClientPlugins.Peer.Chat
 {
@@ -29,13 +30,14 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public event ChatMessageHandler MessageReceived;
 
-        public ChatPlugin(IClientSocket connection) : base(connection)
-        {
-            connection.SetHandler((short)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
-            connection.SetHandler((short)OpCodes.UserLeftChannel, HandleUserLeftChannel);
-            connection.SetHandler((short)OpCodes.ChatMessage, HandleChatMessage);
-        }
 
+        public override void Loaded(IPluginProvider pluginProvider)
+        {
+            base.Loaded(pluginProvider);
+            Connection.SetHandler((short)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
+            Connection.SetHandler((short)OpCodes.UserLeftChannel, HandleUserLeftChannel);
+            Connection.SetHandler((short)OpCodes.ChatMessage, HandleChatMessage);
+        }
 
         /// <summary>
         /// Sends a request to set chat username

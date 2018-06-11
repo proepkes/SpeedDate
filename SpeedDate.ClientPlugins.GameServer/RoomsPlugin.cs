@@ -34,7 +34,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public event Action<RoomController> RoomDestroyed;
 
-        public RoomsPlugin(IClientSocket connection) : base(connection)
+        public RoomsPlugin()
         {
             _localCreatedRooms = new Dictionary<int, RoomController>();
         }

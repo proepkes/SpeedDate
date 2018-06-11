@@ -5,12 +5,13 @@ using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;
+using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.ClientPlugins.Peer.Auth
 {
     public class AuthPlugin : SpeedDateClientPlugin
     {
-        private readonly SecurityPlugin _securityPlugin;
+        private SecurityPlugin _securityPlugin;
 
         public delegate void LoginCallback(AccountInfoPacket accountInfo, string error);
 
@@ -24,11 +25,12 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         public event Action Registered;
         public event Action LoggedOut;
 
-        public AuthPlugin(IClientSocket clientSocket) : base(clientSocket)
-        {
-            _securityPlugin = new SecurityPlugin(clientSocket);
-        }
 
+        public override void Loaded(IPluginProvider pluginProvider)
+        {
+            base.Loaded(pluginProvider);
+            _securityPlugin = pluginProvider.Get<SecurityPlugin>();
+        }
 
         /// <summary>
         /// Sends a registration request to given connection

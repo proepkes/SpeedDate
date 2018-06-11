@@ -12,11 +12,6 @@ namespace SpeedDate.ClientPlugins.Peer.MatchMaker
 
     public class MatchmakerPlugin : SpeedDateClientPlugin
     {
-        public MatchmakerPlugin(IClientSocket connection) : base(connection)
-        {
-        }
-
-
         /// <summary>
         ///     Retrieves a list of public games, which pass a provided filter.
         ///     (You can implement your own filtering by extending modules or "classes"
