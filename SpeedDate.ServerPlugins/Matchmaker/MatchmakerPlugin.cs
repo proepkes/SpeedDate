@@ -15,20 +15,18 @@ namespace SpeedDate.ServerPlugins.Matchmaker
     {
         private readonly HashSet<IGamesProvider> _gameProviders;
 
-
-        public MatchmakerPlugin(IServer server) : base(server)
+        public MatchmakerPlugin()
         {
             _gameProviders = new HashSet<IGamesProvider>();
-
-            // Add handlers
-            Server.SetHandler((short)OpCodes.FindGames, HandleFindGames);
-
         }
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
             AddProvider(pluginProvider.Get<RoomsPlugin>());
             AddProvider(pluginProvider.Get<LobbiesPlugin>());
+
+            // Add handlers
+            Server.SetHandler((short)OpCodes.FindGames, HandleFindGames);
         }
 
         public void AddProvider(IGamesProvider provider)

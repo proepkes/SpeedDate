@@ -46,7 +46,7 @@ namespace SpeedDate
 
             foreach (var plugin in kernel.ResolveAll<IPlugin>())
             {
-                if (SpeedDateConfig.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
+                if (SpeedDateConfig.Plugins.LoadAll || SpeedDateConfig.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
                 {
                     PluginProver.RegisterPlugin(plugin);
                 }
@@ -56,16 +56,6 @@ namespace SpeedDate
             {
                 plugin.Loaded(PluginProver);
                 logger.Info($"Loaded {plugin.GetType().Name}");
-            }
-
-            if(startable is IServer server)
-            {
-                logger.Info("Acting as server: " + server.GetType().Name);
-            }
-
-            if (startable is IClient client)
-            {
-                logger.Info("Acting as client: " + client.GetType().Name);
             }
 
             startable.Start();
@@ -96,6 +86,19 @@ namespace SpeedDate
                         !info.IsAbstract && !info.IsInterface && typeof(ISpeedDateStartable).IsAssignableFrom(info)))
                     {
                         var startableInstance = (ISpeedDateStartable)Activator.CreateInstance(startableType);
+
+                        if(startableInstance is IServer)
+                        {
+                            TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
+                                (IServer) startableInstance);
+                        }
+
+                        if (startableInstance is IClient)
+                        {
+                            TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
+                                (IClient) startableInstance);
+                        }
+                        
                         TinyIoCContainer.Current.BuildUp(startableInstance);
                         TinyIoCContainer.Current.Register(startableInstance);
                     }

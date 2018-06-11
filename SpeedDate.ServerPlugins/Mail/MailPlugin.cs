@@ -11,14 +11,13 @@ namespace SpeedDate.ServerPlugins.Mail
 {
     public sealed class MailPlugin : ServerPluginBase, IUpdatable
     {
-        private readonly ILogger _logger;
+        [Inject] private readonly ILogger _logger;
         private readonly List<Exception> _sendMailExceptions;
         private SmtpClient _smtpClient;
 
 
-        public MailPlugin(IServer server, ILogger logger) : base(server)
+        public MailPlugin()
         {
-            _logger = logger;
             _sendMailExceptions = new List<Exception>();
             SetupSmtpClient();
             AppUpdater.Instance.Add(this);

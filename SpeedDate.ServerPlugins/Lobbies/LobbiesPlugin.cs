@@ -17,7 +17,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     class LobbiesPlugin : ServerPluginBase, IGamesProvider
     {
-        private readonly ILogger _logger;
+        [Inject] private readonly ILogger _logger;
         public int CreateLobbiesPermissionLevel = 0;
 
         protected readonly Dictionary<string, ILobbyFactory> Factories;
@@ -32,11 +32,17 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public SpawnerPlugin SpawnerPlugin;
         public RoomsPlugin RoomsPlugin;
 
-        public LobbiesPlugin(IServer server, ILogger logger) : base(server)
+        public LobbiesPlugin()
         {
-            _logger = logger;
             Factories = new Dictionary<string, ILobbyFactory>();
             Lobbies = new Dictionary<int, ILobby>();
+        }
+
+        public override void Loaded(IPluginProvider pluginProvider)
+        {
+            // Get dependencies
+            SpawnerPlugin = pluginProvider.Get<SpawnerPlugin>();
+            RoomsPlugin = pluginProvider.Get<RoomsPlugin>();
 
             Server.SetHandler((short)OpCodes.CreateLobby, HandleCreateLobby);
             Server.SetHandler((short)OpCodes.JoinLobby, HandleJoinLobby);
@@ -51,13 +57,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             Server.SetHandler((short)OpCodes.GetLobbyMemberData, HandleGetLobbyMemberData);
             Server.SetHandler((short)OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
-        }
-
-        public override void Loaded(IPluginProvider pluginProvider)
-        {
-            // Get dependencies
-            SpawnerPlugin = pluginProvider.Get<SpawnerPlugin>();
-            RoomsPlugin = pluginProvider.Get<RoomsPlugin>();
         }
 
         protected virtual bool CheckIfHasPermissionToCreate(IPeer peer)

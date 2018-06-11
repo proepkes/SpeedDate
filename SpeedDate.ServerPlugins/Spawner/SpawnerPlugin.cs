@@ -7,6 +7,7 @@ using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
+using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 
 namespace SpeedDate.ServerPlugins.Spawner
@@ -15,6 +16,7 @@ namespace SpeedDate.ServerPlugins.Spawner
     {
         public delegate void SpawnedProcessRegistrationHandler(SpawnTask task, IPeer peer);
 
+        [Inject]
         private readonly ILogger _logger;
 
         private readonly Dictionary<int, RegisteredSpawner> _spawners;
@@ -27,27 +29,29 @@ namespace SpeedDate.ServerPlugins.Spawner
         private readonly SpawnerConfig _config;
 
 
-        public SpawnerPlugin(IServer server, ILogger logger) : base(server)
+        public SpawnerPlugin()
         {
-            _logger = logger;
             _config = SpeedDateConfig.Get<SpawnerConfig>();
 
             _spawners = new Dictionary<int, RegisteredSpawner>();
             _spawnTasks = new Dictionary<int, SpawnTask>();
 
-            // Add handlers
-            Server.SetHandler((short) OpCodes.RegisterSpawner, HandleRegisterSpawner);
-            Server.SetHandler((short) OpCodes.ClientsSpawnRequest, HandleClientsSpawnRequest);
-            Server.SetHandler((short) OpCodes.RegisterSpawnedProcess, HandleRegisterSpawnedProcess);
-            Server.SetHandler((short) OpCodes.CompleteSpawnProcess, HandleCompleteSpawnProcess);
-            Server.SetHandler((short) OpCodes.ProcessStarted, HandleProcessStarted);
-            Server.SetHandler((short) OpCodes.ProcessKilled, HandleProcessKilled);
-            Server.SetHandler((short) OpCodes.AbortSpawnRequest, HandleAbortSpawnRequest);
-            Server.SetHandler((short) OpCodes.GetSpawnFinalizationData, HandleGetCompletionData);
-            Server.SetHandler((short) OpCodes.UpdateSpawnerProcessesCount, HandleSpawnedProcessesCount);
-
             // Coroutines
-           // Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
+        }
+
+        public override void Loaded(IPluginProvider pluginProvider)
+        {
+            // Add handlers
+            Server.SetHandler((short)OpCodes.RegisterSpawner, HandleRegisterSpawner);
+            Server.SetHandler((short)OpCodes.ClientsSpawnRequest, HandleClientsSpawnRequest);
+            Server.SetHandler((short)OpCodes.RegisterSpawnedProcess, HandleRegisterSpawnedProcess);
+            Server.SetHandler((short)OpCodes.CompleteSpawnProcess, HandleCompleteSpawnProcess);
+            Server.SetHandler((short)OpCodes.ProcessStarted, HandleProcessStarted);
+            Server.SetHandler((short)OpCodes.ProcessKilled, HandleProcessKilled);
+            Server.SetHandler((short)OpCodes.AbortSpawnRequest, HandleAbortSpawnRequest);
+            Server.SetHandler((short)OpCodes.GetSpawnFinalizationData, HandleGetCompletionData);
+            Server.SetHandler((short)OpCodes.UpdateSpawnerProcessesCount, HandleSpawnedProcessesCount);
         }
 
         public event Action<RegisteredSpawner> SpawnerRegistered;

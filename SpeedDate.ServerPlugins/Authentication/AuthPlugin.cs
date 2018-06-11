@@ -39,27 +39,14 @@ namespace SpeedDate.ServerPlugins.Authentication
         private readonly List<PermissionEntry> _permissions;
 
 
-        public AuthPlugin(IServer server) : base(server)
+        public AuthPlugin()
         {
             _permissions = new List<PermissionEntry>();
             _config = SpeedDateConfig.Get<AuthConfig>();
 
             LoggedInUsers = new Dictionary<string, IUserExtension>();
-
-            // Set handlers
-            Server.SetHandler((short) OpCodes.LogIn, HandleLogIn);
-            Server.SetHandler((short) OpCodes.RegisterAccount, HandleRegister);
-            Server.SetHandler((short) OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
-            Server.SetHandler((short) OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
-            Server.SetHandler((short) OpCodes.ConfirmEmail, HandleEmailConfirmation);
-            Server.SetHandler((short) OpCodes.GetLoggedInCount, HandleGetLoggedInCount);
-            Server.SetHandler((short) OpCodes.PasswordChange, HandlePasswordChange);
-            Server.SetHandler((short) OpCodes.GetPeerAccountInfo, HandleGetPeerAccountInfo);
-
-            // AesKey handler
-            Server.SetHandler((short) OpCodes.AesKeyRequest, HandleAesKeyRequest);
-            Server.SetHandler((short) OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
         }
+
 
         /// <summary>
         ///     Invoked, when user logs in
@@ -85,6 +72,20 @@ namespace SpeedDate.ServerPlugins.Authentication
         {
             _database = pluginProvider.Get<CockroachDbPlugin>();
             _mailer = pluginProvider.Get<MailPlugin>();
+
+            // Set handlers
+            Server.SetHandler((short)OpCodes.LogIn, HandleLogIn);
+            Server.SetHandler((short)OpCodes.RegisterAccount, HandleRegister);
+            Server.SetHandler((short)OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
+            Server.SetHandler((short)OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
+            Server.SetHandler((short)OpCodes.ConfirmEmail, HandleEmailConfirmation);
+            Server.SetHandler((short)OpCodes.GetLoggedInCount, HandleGetLoggedInCount);
+            Server.SetHandler((short)OpCodes.PasswordChange, HandlePasswordChange);
+            Server.SetHandler((short)OpCodes.GetPeerAccountInfo, HandleGetPeerAccountInfo);
+
+            // AesKey handler
+            Server.SetHandler((short)OpCodes.AesKeyRequest, HandleAesKeyRequest);
+            Server.SetHandler((short)OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
         }
 
         public string GenerateGuestUsername()

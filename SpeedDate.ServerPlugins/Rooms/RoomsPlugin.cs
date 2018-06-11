@@ -7,6 +7,7 @@ using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Matchmaking;
 using SpeedDate.Packets.Rooms;
+using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Matchmaker;
@@ -27,10 +28,16 @@ namespace SpeedDate.ServerPlugins.Rooms
         public event Action<RegisteredRoom> RoomDestroyed;
 
 
-        public RoomsPlugin(IServer server) : base(server)
+        public RoomsPlugin()
         {
             _rooms = new Dictionary<int, RegisteredRoom>();
 
+            // Maintain unconfirmed accesses
+            Task.Factory.StartNew(CleanUnconfirmedAccesses, TaskCreationOptions.LongRunning);
+        }
+
+        public override void Loaded(IPluginProvider pluginProvider)
+        {
             // Add handlers
             Server.SetHandler((short)OpCodes.RegisterRoom, HandleRegisterRoom);
             Server.SetHandler((short)OpCodes.DestroyRoom, HandleDestroyRoom);
@@ -38,11 +45,8 @@ namespace SpeedDate.ServerPlugins.Rooms
             Server.SetHandler((short)OpCodes.GetRoomAccess, HandleGetRoomAccess);
             Server.SetHandler((short)OpCodes.ValidateRoomAccess, HandleValidateRoomAccess);
             Server.SetHandler((short)OpCodes.PlayerLeftRoom, HandlePlayerLeftRoom);
-
-            // Maintain unconfirmed accesses
-            Task.Factory.StartNew(CleanUnconfirmedAccesses, TaskCreationOptions.LongRunning);
         }
-        
+
         /// <summary>
         /// Returns true, if peer has permissions to register a game server
         /// </summary>

@@ -24,26 +24,17 @@ namespace SpeedDate.ServerPlugins.Chat
         public int MinChannelNameLength = 2;
         public int MaxChannelNameLength = 25;
         
-        public readonly Logger Logger = LogManager.GetLogger(typeof(ChatPlugin).Name, LogLevel.Warn);
+        [Inject] private ILogger logger;
 
         public readonly Dictionary<string, ChatUserExtension> ChatUsers;
         public readonly Dictionary<string, ChatChannel> Channels;
 
 
 
-        public ChatPlugin(IServer server) : base(server)
+        public ChatPlugin()
         {
             ChatUsers = new Dictionary<string, ChatUserExtension>();
             Channels = new Dictionary<string, ChatChannel>();
-
-            // Set handlers
-            Server.SetHandler((short)OpCodes.PickUsername, HandlePickUsername);
-            Server.SetHandler((short)OpCodes.JoinChannel, HandleJoinChannel);
-            Server.SetHandler((short)OpCodes.LeaveChannel, HandleLeaveChannel);
-            Server.SetHandler((short)OpCodes.GetCurrentChannels, HandeGetCurrentChannels);
-            Server.SetHandler((short)OpCodes.ChatMessage, HandleSendChatMessage);
-            Server.SetHandler((short)OpCodes.GetUsersInChannel, HandleGetUsersInChannel);
-            Server.SetHandler((short)OpCodes.SetDefaultChannel, HandleSetDefaultChannel);
             
             
         }
@@ -58,6 +49,15 @@ namespace SpeedDate.ServerPlugins.Chat
                 auth.LoggedIn += OnUserLoggedIn;
                 auth.LoggedOut += OnUserLoggedOut;
             }
+
+            // Set handlers
+            Server.SetHandler((short)OpCodes.PickUsername, HandlePickUsername);
+            Server.SetHandler((short)OpCodes.JoinChannel, HandleJoinChannel);
+            Server.SetHandler((short)OpCodes.LeaveChannel, HandleLeaveChannel);
+            Server.SetHandler((short)OpCodes.GetCurrentChannels, HandeGetCurrentChannels);
+            Server.SetHandler((short)OpCodes.ChatMessage, HandleSendChatMessage);
+            Server.SetHandler((short)OpCodes.GetUsersInChannel, HandleGetUsersInChannel);
+            Server.SetHandler((short)OpCodes.SetDefaultChannel, HandleSetDefaultChannel);
         }
 
         protected virtual bool AddChatUser(ChatUserExtension user)

@@ -6,13 +6,7 @@ namespace SpeedDate.ServerPlugins
 {
     public abstract class ServerPluginBase : IPlugin
     {
-        protected readonly IServer Server;
-
-        protected ServerPluginBase(IServer server)
-        {
-            Server = server;
-        }
-
+        [Inject] protected readonly IServer Server;
 
         public virtual void Loaded(IPluginProvider pluginProvider)
         {

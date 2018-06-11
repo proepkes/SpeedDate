@@ -65,17 +65,11 @@ namespace SpeedDate.ServerPlugins.Profiles
         /// </summary>
         public ProfileFactory ProfileFactory { get; set; }
 
-        public ProfilesPlugin(IServer server) : base(server)
+        public ProfilesPlugin()
         {
             profiles = new Dictionary<string, ObservableServerProfile>();
             _debouncedSaves = new HashSet<string>();
             debouncedClientUpdates = new HashSet<string>();
-
-            Server.SetHandler((short)OpCodes.ClientProfileRequest, HandleClientProfileRequest);
-
-            // Games dependency setup
-            Server.SetHandler((short)OpCodes.ServerProfileRequest, HandleGameServerProfileRequest);
-            Server.SetHandler((short)OpCodes.UpdateServerProfile, HandleProfileUpdates);
         }
 
         public override void Loaded(IPluginProvider pluginProvider)
@@ -85,6 +79,12 @@ namespace SpeedDate.ServerPlugins.Profiles
             _auth.LoggedIn += OnLoggedIn;
 
             database = pluginProvider.Get<CockroachDbPlugin>();
+
+            Server.SetHandler((short)OpCodes.ClientProfileRequest, HandleClientProfileRequest);
+
+            // Games dependency setup
+            Server.SetHandler((short)OpCodes.ServerProfileRequest, HandleGameServerProfileRequest);
+            Server.SetHandler((short)OpCodes.UpdateServerProfile, HandleProfileUpdates);
 
         }
 

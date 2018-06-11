@@ -14,7 +14,7 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
 
         public readonly IProfilesDatabase ProfilesDatabase;
 
-        public CockroachDbPlugin(IServer server) : base(server)
+        public CockroachDbPlugin()
         {
             var config = SpeedDateConfig.Get<CockroachDbConfig>();
 

@@ -22,11 +22,6 @@ namespace SpeedDate.Server
         {
             _connectedPeers = new Dictionary<long, IPeer>();
             _handlers = new Dictionary<short, IPacketHandler>();
-
-            // Create the server 
-
-            _socket.Connected += Connected;
-            _socket.Disconnected += Disconnected;
         }
 
         public void Dispose()
@@ -54,6 +49,9 @@ namespace SpeedDate.Server
 
         public void Start()
         {
+            _socket.Connected += Connected;
+            _socket.Disconnected += Disconnected;
+
             if (_socket.Listen(SpeedDateConfig.Network.Port))
             {
                 _logger.Info("Started on port: " + SpeedDateConfig.Network.Port);
@@ -65,6 +63,9 @@ namespace SpeedDate.Server
         {
             _socket.Stop();
             Stopped?.Invoke();
+
+            _socket.Connected -= Connected;
+            _socket.Disconnected -= Disconnected;
         }
 
         private void Connected(IPeer peer)
