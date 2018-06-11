@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.Configuration.Validation
+﻿namespace SpeedDate.Configuration.SmartConf.Validation
 {
     /// <summary>
     /// Validate an object.

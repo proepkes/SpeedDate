@@ -1,4 +1,5 @@
-﻿using SpeedDate.Interfaces;
+﻿
+using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets;

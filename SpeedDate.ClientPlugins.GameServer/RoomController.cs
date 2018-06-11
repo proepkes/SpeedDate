@@ -1,5 +1,4 @@
 ﻿using System;
-using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;

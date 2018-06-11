@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeedDate.Configuration
+namespace SpeedDate.Configuration.SmartConf
 {
     /// <summary>
     /// A source for creating configuration objects of

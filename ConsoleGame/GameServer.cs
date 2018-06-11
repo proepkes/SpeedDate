@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using SpeedDate.ClientPlugins.GameServer;
 
 namespace ConsoleGame
@@ -16,7 +18,7 @@ namespace ConsoleGame
 
         public GameServer(string configFile)
         {
-            _speedDate = new SpeedDate.SpeedDate(configFile);
+            _speedDate = new SpeedDate.SpeedDate($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}");
         }
 
         /// <summary>

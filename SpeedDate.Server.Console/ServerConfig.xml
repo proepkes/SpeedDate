@@ -26,7 +26,7 @@
     CreateSpawnerPermissionLevel="0" />
 
   <CockroachDbPlugin 
-    CheckConnectionOnStartup="true"
+    CheckConnectionOnStartup="false"
     Host="localhost" 
     Port="26257" 
     Username="root" 

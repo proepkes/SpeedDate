@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpeedDate.Configuration.Validation
+namespace SpeedDate.Configuration.SmartConf.Validation
 {
     /// <summary>
     /// Thrown when validation fails.

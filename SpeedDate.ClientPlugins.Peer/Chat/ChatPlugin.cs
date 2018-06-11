@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Chat;

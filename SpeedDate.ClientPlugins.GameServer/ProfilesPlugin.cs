@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+
 using SpeedDate.Interfaces;
 using SpeedDate.Network;
-using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.Utils.Conversion;
 using SpeedDate.Network.Utils.IO;
 using SpeedDate.Packets;

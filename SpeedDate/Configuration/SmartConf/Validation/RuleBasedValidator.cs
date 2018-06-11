@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SpeedDate.Configuration.Validation
+namespace SpeedDate.Configuration.SmartConf.Validation
 {
     /// <summary>
     /// Rule where validation status is based 

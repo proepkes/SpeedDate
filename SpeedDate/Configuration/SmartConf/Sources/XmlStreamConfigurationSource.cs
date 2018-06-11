@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace SpeedDate.Configuration.Sources
+namespace SpeedDate.Configuration.SmartConf.Sources
 {
     /// <summary>
     /// Load the configuration object from an XML stream.

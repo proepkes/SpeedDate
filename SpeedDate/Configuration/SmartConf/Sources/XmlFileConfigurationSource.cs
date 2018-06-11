@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace SpeedDate.Configuration.Sources
+namespace SpeedDate.Configuration.SmartConf.Sources
 {
     /// <summary>
     /// An IConfigurationSource fed from an XML file,

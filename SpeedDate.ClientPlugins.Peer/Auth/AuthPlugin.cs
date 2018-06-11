@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Security;
-using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpeedDate.Configuration.Validation
+namespace SpeedDate.Configuration.SmartConf.Validation
 {
     /// <summary>
     /// Exception indicating that an object failed to validate.

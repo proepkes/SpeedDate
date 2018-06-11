@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using SpeedDate.Configuration.Sources;
-using SpeedDate.Configuration.Validation;
+using SpeedDate.Configuration.SmartConf.Sources;
+using SpeedDate.Configuration.SmartConf.Validation;
 
-namespace SpeedDate.Configuration
+namespace SpeedDate.Configuration.SmartConf
 {
     /// <summary>
     /// A configuration manager that loads and merges settings from

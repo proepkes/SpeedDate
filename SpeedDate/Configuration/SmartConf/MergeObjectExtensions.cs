@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace SpeedDate.Configuration
+namespace SpeedDate.Configuration.SmartConf
 {
     /// <summary>
     ///     Extension class for merging objects.
