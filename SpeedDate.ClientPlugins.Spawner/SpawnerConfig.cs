@@ -1,5 +1,8 @@
-﻿namespace SpeedDate.ClientPlugins.Spawner
+﻿using SpeedDate.Configuration;
+
+namespace SpeedDate.ClientPlugins.Spawner
 {
+        [PluginConfiguration(typeof(SpawnerPlugin))]
         public class SpawnerConfig
         {
             public string MachineIp { get; set; }

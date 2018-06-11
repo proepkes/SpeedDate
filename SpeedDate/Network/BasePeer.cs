@@ -350,7 +350,7 @@ namespace SpeedDate.Network
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Failed parsing an incomming message: " + e);
+                Console.WriteLine("Failed parsing an incomming message: " + e);
 
                 return;
             }

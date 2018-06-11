@@ -2,6 +2,5 @@
 {
     public interface IClient
     {
-        IClientSocket Connection { get; }
     }
 }

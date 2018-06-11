@@ -12,11 +12,16 @@ namespace SpeedDate.Client
         private const float MaxTimeToConnect = 4f;
 
         [Inject] private ILogger _logger;
+        [Inject] private IClientSocket _connection;
         private int _port;
         private string _serverIp;
         private float _timeToConnect = 0.5f;
 
-        [Inject] public IClientSocket Connection { get; set; }
+
+        public void Dispose()
+        {
+            _connection.Disconnect();
+        }
 
         public event Action Started;
         public event Action Stopped;
@@ -29,7 +34,7 @@ namespace SpeedDate.Client
 
         public void Stop()
         {
-            Connection.Disconnect();
+            _connection.Disconnect();
         }
 
         private async void ConnectAsync(string serverIp, int port)
@@ -39,24 +44,24 @@ namespace SpeedDate.Client
 
             await Task.Factory.StartNew(async () =>
             {
-                Connection.Connected += Connected;
-                Connection.Disconnected += Disconnected;
+                _connection.Connected += Connected;
+                _connection.Disconnected += Disconnected;
 
-                while (!Connection.IsConnected)
+                while (!_connection.IsConnected)
                 {
                     // If we got here, we're not connected 
-                    if (Connection.IsConnecting)
+                    if (_connection.IsConnecting)
                         _logger.Debug("Retrying to connect to server at: " + _serverIp + ":" + _port);
                     else
                         _logger.Debug("Connecting to server at: " + _serverIp + ":" + _port);
 
-                    Connection.Connect(_serverIp, _port);
+                    _connection.Connect(_serverIp, _port);
 
                     // Give a few seconds to try and connect
                     await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
 
                     // If we're still not connected
-                    if (!Connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
+                    if (!_connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
                 }
             });
         }
@@ -72,11 +77,6 @@ namespace SpeedDate.Client
             _timeToConnect = MinTimeToConnect;
             _logger.Info("Connected to: " + _serverIp + ":" + _port);
             Started?.Invoke();
-        }
-
-        public void Dispose()
-        {
-            Connection.Disconnect();
         }
     }
 }
