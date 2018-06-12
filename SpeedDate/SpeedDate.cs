@@ -48,6 +48,7 @@ namespace SpeedDate
             {
                 if (SpeedDateConfig.Plugins.LoadAll || SpeedDateConfig.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
                 {
+                    kernel.BuildUp(plugin);
                     PluginProver.RegisterPlugin(plugin);
                 }
             }
@@ -107,7 +108,6 @@ namespace SpeedDate
                         !info.IsAbstract && !info.IsInterface && typeof(IPlugin).IsAssignableFrom(info)))
                     {
                         var pluginInstance = (IPlugin)Activator.CreateInstance(pluginType);
-                        TinyIoCContainer.Current.BuildUp(pluginInstance);
                         TinyIoCContainer.Current.Register(pluginInstance, pluginType.FullName);
                     }
                 }

@@ -8,7 +8,7 @@ using SpeedDate.ServerPlugins.Profiles;
 
 namespace SpeedDate.ServerPlugins.Database.CockroachDb
 {
-    internal class CockroachDbPlugin : ServerPluginBase
+    internal class CockroachDbPlugin : SpeedDateServerPlugin
     {
         public readonly IAuthDatabase AuthDatabase;
 

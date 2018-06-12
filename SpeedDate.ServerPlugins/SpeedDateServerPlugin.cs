@@ -4,7 +4,7 @@ using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.ServerPlugins
 {
-    public abstract class ServerPluginBase : IPlugin
+    public abstract class SpeedDateServerPlugin : IPlugin
     {
         [Inject] protected readonly IServer Server;
 

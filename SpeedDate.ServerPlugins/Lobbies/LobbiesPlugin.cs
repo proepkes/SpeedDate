@@ -16,7 +16,7 @@ using SpeedDate.ServerPlugins.Spawner;
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {
-    class LobbiesPlugin : ServerPluginBase, IGamesProvider
+    class LobbiesPlugin : SpeedDateServerPlugin, IGamesProvider
     {
         [Inject] private readonly ILogger _logger;
         public int CreateLobbiesPermissionLevel = 0;

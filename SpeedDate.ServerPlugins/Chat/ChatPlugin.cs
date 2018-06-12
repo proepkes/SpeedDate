@@ -12,7 +12,7 @@ using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Chat
 {
-    class ChatPlugin : ServerPluginBase
+    class ChatPlugin : SpeedDateServerPlugin
     {
         public bool UseAuthModule = true;
 

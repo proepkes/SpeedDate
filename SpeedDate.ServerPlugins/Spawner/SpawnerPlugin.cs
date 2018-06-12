@@ -13,7 +13,7 @@ using SpeedDate.Server;
 
 namespace SpeedDate.ServerPlugins.Spawner
 {
-    internal class SpawnerPlugin : ServerPluginBase
+    internal class SpawnerPlugin : SpeedDateServerPlugin
     {
         public delegate void SpawnedProcessRegistrationHandler(SpawnTask task, IPeer peer);
 

@@ -16,7 +16,7 @@ using GameInfoType = SpeedDate.Packets.Matchmaking.GameInfoType;
 
 namespace SpeedDate.ServerPlugins.Rooms
 {
-    class RoomsPlugin : ServerPluginBase, IGamesProvider
+    class RoomsPlugin : SpeedDateServerPlugin, IGamesProvider
     {
         public int RegisterRoomPermissionLevel = 0;
 

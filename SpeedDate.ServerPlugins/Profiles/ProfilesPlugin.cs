@@ -26,7 +26,7 @@ namespace SpeedDate.ServerPlugins.Profiles
     /// clients of interest.
     /// Also, reads changes from game server, and applies them to players profile
     /// </summary>
-    class ProfilesPlugin : ServerPluginBase
+    class ProfilesPlugin : SpeedDateServerPlugin
     {
         /// <summary>
         /// Time to pass after logging out, until profile

@@ -20,7 +20,7 @@ namespace SpeedDate.ServerPlugins.Authentication
     /// <summary>
     ///     Authentication module, which handles logging in and registration of accounts
     /// </summary>
-    internal class AuthPlugin : ServerPluginBase
+    internal class AuthPlugin : SpeedDateServerPlugin
     {
         public delegate void AuthEventHandler(IUserExtension account);
 

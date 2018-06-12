@@ -12,7 +12,7 @@ using SpeedDate.ServerPlugins.Rooms;
 
 namespace SpeedDate.ServerPlugins.Matchmaker
 {
-    class MatchmakerPlugin : ServerPluginBase
+    class MatchmakerPlugin : SpeedDateServerPlugin
     {
         private readonly HashSet<IGamesProvider> _gameProviders;
 

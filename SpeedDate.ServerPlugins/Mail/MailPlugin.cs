@@ -9,7 +9,7 @@ using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Mail
 {
-    public sealed class MailPlugin : ServerPluginBase, IUpdatable
+    public sealed class MailPlugin : SpeedDateServerPlugin, IUpdatable
     {
         [Inject] private readonly ILogger _logger;
         private readonly List<Exception> _sendMailExceptions;
