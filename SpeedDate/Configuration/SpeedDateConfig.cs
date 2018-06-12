@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using SpeedDate.Configuration;
@@ -9,17 +8,17 @@ namespace SpeedDate
 {
     public sealed class SpeedDateConfig
     {
-        private static string _configFile;
+        private static string _configuration;
 
-        public static NetworkConfig Network = new NetworkConfig();
+        public static readonly NetworkConfig Network = new NetworkConfig();
 
-        public static PluginsConfig Plugins = new PluginsConfig();
+        public static readonly PluginsConfig Plugins = new PluginsConfig();
 
         public static void FromXml(string configFile)
         {
-            _configFile = configFile;
+            _configuration = File.ReadAllText(configFile);
 
-            var xmlParser = new XmlParser(new StreamReader(configFile));
+            var xmlParser = new XmlParser(_configuration);
             xmlParser.Search("Network", () =>
             {
                 Network.Address = xmlParser["Address"];
@@ -43,7 +42,7 @@ namespace SpeedDate
             }
 
             var instance = new T();
-            var xmlParser = new XmlParser(new StreamReader(_configFile));
+            var xmlParser = new XmlParser(_configuration);
             xmlParser.Search(attribute.PluginType.Name, () =>
             {
                 foreach (var property in typeof(T).GetProperties())

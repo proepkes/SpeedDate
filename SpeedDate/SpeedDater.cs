@@ -20,6 +20,8 @@ namespace SpeedDate
         public event Action Started;
         public event Action Stopped;
 
+        public bool IsStarted { get; set; } = false;
+
         public IPluginProvider PluginProver
         {
             get;
@@ -39,8 +41,16 @@ namespace SpeedDate
             var kernel = CreateKernel();
 
             var startable = kernel.Resolve<ISpeedDateStartable>();
-            startable.Started += () => Started?.Invoke();
-            startable.Stopped += () => Stopped?.Invoke();
+            startable.Started += () =>
+            {
+                IsStarted = true;
+                Started?.Invoke();
+            };
+            startable.Stopped += () =>
+            {
+                IsStarted = false;
+                Stopped?.Invoke();
+            };
 
             PluginProver = kernel.Resolve<IPluginProvider>();
 
