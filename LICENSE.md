@@ -1,0 +1,1 @@
+Open for personal evaluation. Everything else is prohibited until further notice.

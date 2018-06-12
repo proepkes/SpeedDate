@@ -4,14 +4,12 @@
 
 SpeedDate is a plugin-based system for self-hosted MasterServer.
 
-### Getting Started
-Set startup-project to "SpeedDate.Server.Console" -> Run
-
-### License
-Open for personal evaluation. Everything else is prohibited.
+[Getting Started](https://github.com/proepkes/SpeedDate/wiki/Getting-started)
 
 ### Credits:
 
 https://github.com/alvyxaz/barebones-masterserver
 
 https://github.com/RevenantX/LiteNetLib
+
+https://github.com/nemec/smartconf
