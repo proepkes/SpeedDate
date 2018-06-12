@@ -12,7 +12,7 @@ namespace SpeedDate.Client.Console.Example
 {
     class GameClient
     {
-        private readonly SpeedDate _speedDate;
+        private readonly SpeedDater _speedDater;
 
         public event Action Connected;
 
@@ -27,8 +27,8 @@ namespace SpeedDate.Client.Console.Example
 
         public GameClient(string configFile)
         {
-            _speedDate = new SpeedDate(configFile);
-            _speedDate.Started += () => Connected?.Invoke();
+            _speedDater = new SpeedDater(configFile);
+            _speedDater.Started += () => Connected?.Invoke();
         }
 
         /// <summary>
@@ -36,15 +36,15 @@ namespace SpeedDate.Client.Console.Example
         /// </summary>
         public void Start()
         {
-            _speedDate.Start();
-            Auth = _speedDate.PluginProver.Get<AuthPlugin>();
-            Chat = _speedDate.PluginProver.Get<ChatPlugin>();
-            Lobby = _speedDate.PluginProver.Get<LobbyPlugin>();
-            Matchmaker = _speedDate.PluginProver.Get<MatchmakerPlugin>();
-            Profile = _speedDate.PluginProver.Get<ProfilePlugin>();
-            Room = _speedDate.PluginProver.Get<RoomPlugin>();
-            Security = _speedDate.PluginProver.Get<SecurityPlugin>();
-            Spawn = _speedDate.PluginProver.Get<SpawnRequestPlugin>();
+            _speedDater.Start();
+            Auth = _speedDater.PluginProver.Get<AuthPlugin>();
+            Chat = _speedDater.PluginProver.Get<ChatPlugin>();
+            Lobby = _speedDater.PluginProver.Get<LobbyPlugin>();
+            Matchmaker = _speedDater.PluginProver.Get<MatchmakerPlugin>();
+            Profile = _speedDater.PluginProver.Get<ProfilePlugin>();
+            Room = _speedDater.PluginProver.Get<RoomPlugin>();
+            Security = _speedDater.PluginProver.Get<SecurityPlugin>();
+            Spawn = _speedDater.PluginProver.Get<SpawnRequestPlugin>();
         }
     }
 }

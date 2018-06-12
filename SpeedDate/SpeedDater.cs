@@ -13,7 +13,7 @@ using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate
 {
-    public sealed class SpeedDate
+    public sealed class SpeedDater
     {
         private readonly string _configFile;
 
@@ -26,7 +26,7 @@ namespace SpeedDate
             private set;
         }
 
-        public SpeedDate(string configFile)
+        public SpeedDater(string configFile)
         {
             _configFile = configFile;
         }

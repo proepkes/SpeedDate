@@ -7,7 +7,7 @@ namespace ConsoleGame
 {
     class GameServer
     {
-        private readonly SpeedDate.SpeedDate _speedDate;
+        private readonly SpeedDate.SpeedDater _speedDater;
 
         public event Action ConnectedToMaster;
 
@@ -18,7 +18,7 @@ namespace ConsoleGame
 
         public GameServer(string configFile)
         {
-            _speedDate = new SpeedDate.SpeedDate($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}");
+            _speedDater = new SpeedDate.SpeedDater($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}");
         }
 
         /// <summary>
@@ -26,12 +26,12 @@ namespace ConsoleGame
         /// </summary>
         public void Start()
         {
-            _speedDate.Started += () => ConnectedToMaster?.Invoke();
-            _speedDate.Start();
-            Lobbies = _speedDate.PluginProver.Get<LobbiesPlugin>();
-            PeerInfo = _speedDate.PluginProver.Get<PeerInfoPlugin>();
-            Profiles = _speedDate.PluginProver.Get<ProfilesPlugin>();
-            Rooms = _speedDate.PluginProver.Get<RoomsPlugin>();
+            _speedDater.Started += () => ConnectedToMaster?.Invoke();
+            _speedDater.Start();
+            Lobbies = _speedDater.PluginProver.Get<LobbiesPlugin>();
+            PeerInfo = _speedDater.PluginProver.Get<PeerInfoPlugin>();
+            Profiles = _speedDater.PluginProver.Get<ProfilesPlugin>();
+            Rooms = _speedDater.PluginProver.Get<RoomsPlugin>();
         }
     }
 }

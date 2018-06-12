@@ -5,15 +5,15 @@ namespace SpeedDate.Client.Spawner.Console
 {
     class Spawner
     {
-        private readonly SpeedDate _speedDate;
+        private readonly SpeedDater _speedDater;
         public event Action Connected;
 
         public SpawnerPlugin SpawnApi { get; private set; }
 
         public Spawner(string configFile)
         {
-            _speedDate = new SpeedDate(configFile);
-            _speedDate.Started += () => Connected?.Invoke();
+            _speedDater = new SpeedDater(configFile);
+            _speedDater.Started += () => Connected?.Invoke();
         }
 
         /// <summary>
@@ -21,8 +21,8 @@ namespace SpeedDate.Client.Spawner.Console
         /// </summary>
         public void Start()
         {
-            _speedDate.Start();
-            SpawnApi = _speedDate.PluginProver.Get<SpawnerPlugin>();
+            _speedDater.Start();
+            SpawnApi = _speedDater.PluginProver.Get<SpawnerPlugin>();
         }
     }
 }
