@@ -39,7 +39,7 @@ namespace SpeedDate
         {
             if (!(typeof(T).GetCustomAttribute(typeof(PluginConfigurationAttribute)) is PluginConfigurationAttribute attribute))
             {
-                throw new InvalidDataContractException("Configuration-classes requires the [PluginConfiguration]-Attribute");
+                throw new InvalidDataContractException("Configuration-classes require the [PluginConfiguration]-Attribute");
             }
 
             var instance = new T();
