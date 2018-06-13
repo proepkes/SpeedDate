@@ -47,7 +47,7 @@ namespace SpeedDate.Network
         /// <param name="writer"></param>
         public void WriteSmallArray(float[] data, EndianBinaryWriter writer)
         {
-            writer.Write((byte) (data != null ? data.Length : 0));
+            writer.Write((byte) (data?.Length ?? 0));
 
             if (data != null)
                 foreach (var val in data)
