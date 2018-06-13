@@ -70,10 +70,7 @@ namespace SpeedDate.Network
             return this;
         }
 
-        /// <summary>
-        ///     Serializes message to byte array
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public byte[] ToBytes()
         {
             var converter = EndianBitConverter.Big;
@@ -102,20 +99,19 @@ namespace SpeedDate.Network
             Array.Copy(Data, 0, messagePacket, pointer, dataLength);
             pointer += dataLength; // Data
 
-            if (isAckRequest)
+            if (isAckRequest && AckRequestId.HasValue)
             {
                 converter.CopyBytes(AckRequestId.Value, messagePacket, pointer);
                 pointer += 4;
             }
 
-            if (isAckResponse)
+            if (isAckResponse && AckResponseId.HasValue)
             {
                 converter.CopyBytes(AckResponseId.Value, messagePacket, pointer);
                 pointer += 4;
 
                 // Status code
                 messagePacket[pointer] = (byte)Status;
-                pointer++;
             }
 
             return messagePacket;
