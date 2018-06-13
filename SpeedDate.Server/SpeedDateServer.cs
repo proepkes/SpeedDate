@@ -83,13 +83,15 @@ namespace SpeedDate.Server
             // Set default permission level
             extension.PermissionLevel = 0;
 
-            _logger.Info($"New Peer connected. ID: {peer.Id}");
+            _logger.Info($"Client {peer.Id} connected.");
             // Invoke the event
             PeerConnected?.Invoke(peer);
         }
 
         private void Disconnected(IPeer peer)
         {
+            _logger.Info($"Client {peer.Id} disconnected.");
+
             // Remove listener to messages
             peer.MessageReceived -= OnMessageReceived;
 

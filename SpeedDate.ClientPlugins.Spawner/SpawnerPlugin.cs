@@ -145,10 +145,5 @@ namespace SpeedDate.ClientPlugins.Spawner
 
             Connection.SendMessage((short)OpCodes.ProcessKilled, spawnId);
         }
-
-        public void Loaded(IPluginProvider pluginProvider)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
