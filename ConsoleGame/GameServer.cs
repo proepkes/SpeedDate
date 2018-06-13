@@ -33,5 +33,10 @@ namespace ConsoleGame
             Profiles = _speedDater.PluginProver.Get<ProfilesPlugin>();
             Rooms = _speedDater.PluginProver.Get<RoomsPlugin>();
         }
+
+        public void Stop()
+        {
+            _speedDater.Stop();
+        }
     }
 }

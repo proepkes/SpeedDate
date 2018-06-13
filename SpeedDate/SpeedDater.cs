@@ -16,6 +16,7 @@ namespace SpeedDate
     public sealed class SpeedDater
     {
         private readonly string _configFile;
+        private TinyIoCContainer _kernel;
 
         public event Action Started;
         public event Action Stopped;
@@ -38,9 +39,9 @@ namespace SpeedDate
             SpeedDateConfig.FromXml(_configFile);
             var logger = LogManager.GetLogger("SpeedDate");
 
-            var kernel = CreateKernel();
+            _kernel = CreateKernel();
 
-            var startable = kernel.Resolve<ISpeedDateStartable>();
+            var startable = _kernel.Resolve<ISpeedDateStartable>();
             startable.Started += () =>
             {
                 IsStarted = true;
@@ -52,13 +53,13 @@ namespace SpeedDate
                 Stopped?.Invoke();
             };
 
-            PluginProver = kernel.Resolve<IPluginProvider>();
+            PluginProver = _kernel.Resolve<IPluginProvider>();
 
-            foreach (var plugin in kernel.ResolveAll<IPlugin>())
+            foreach (var plugin in _kernel.ResolveAll<IPlugin>())
             {
                 if (SpeedDateConfig.Plugins.LoadAll || SpeedDateConfig.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
                 {
-                    kernel.BuildUp(plugin);
+                    _kernel.BuildUp(plugin);
                     PluginProver.RegisterPlugin(plugin);
                 }
             }
@@ -74,7 +75,8 @@ namespace SpeedDate
 
         public void Stop()
         {
-            Stopped?.Invoke();
+            _kernel.TryResolve<ISpeedDateStartable>(out var startable);
+            startable.Stop();
         }
 
         private static TinyIoCContainer CreateKernel()
