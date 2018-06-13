@@ -5,7 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
-
+using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -75,18 +75,18 @@ namespace SpeedDate.ServerPlugins.Authentication
             _mailer = pluginProvider.Get<MailPlugin>();
 
             // Set handlers
-            Server.SetHandler((short)OpCodes.LogIn, HandleLogIn);
-            Server.SetHandler((short)OpCodes.RegisterAccount, HandleRegister);
-            Server.SetHandler((short)OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
-            Server.SetHandler((short)OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
-            Server.SetHandler((short)OpCodes.ConfirmEmail, HandleEmailConfirmation);
-            Server.SetHandler((short)OpCodes.GetLoggedInCount, HandleGetLoggedInCount);
-            Server.SetHandler((short)OpCodes.PasswordChange, HandlePasswordChange);
-            Server.SetHandler((short)OpCodes.GetPeerAccountInfo, HandleGetPeerAccountInfo);
+            Server.SetHandler((ushort)OpCodes.LogIn, HandleLogIn);
+            Server.SetHandler((ushort)OpCodes.RegisterAccount, HandleRegister);
+            Server.SetHandler((ushort)OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
+            Server.SetHandler((ushort)OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
+            Server.SetHandler((ushort)OpCodes.ConfirmEmail, HandleEmailConfirmation);
+            Server.SetHandler((ushort)OpCodes.GetLoggedInCount, HandleGetLoggedInCount);
+            Server.SetHandler((ushort)OpCodes.PasswordChange, HandlePasswordChange);
+            Server.SetHandler((ushort)OpCodes.GetPeerAccountInfo, HandleGetPeerAccountInfo);
 
             // AesKey handler
-            Server.SetHandler((short)OpCodes.AesKeyRequest, HandleAesKeyRequest);
-            Server.SetHandler((short)OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
+            Server.SetHandler((ushort)OpCodes.AesKeyRequest, HandleAesKeyRequest);
+            Server.SetHandler((ushort)OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
         }
 
         public string GenerateGuestUsername()

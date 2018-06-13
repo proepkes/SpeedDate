@@ -66,7 +66,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                 var encryptedData = Util.EncryptAES(data.ToBytes(), aesKey);
 
-                Connection.SendMessage((short)OpCodes.RegisterAccount, encryptedData, (status, response) =>
+                Connection.SendMessage((ushort)OpCodes.RegisterAccount, encryptedData, (status, response) =>
                 {
 
                     if (status != ResponseStatus.Success)
@@ -158,7 +158,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                 var encryptedData = Util.EncryptAES(data.ToBytes(), aesKey);
 
-                Connection.SendMessage((short) OpCodes.LogIn, encryptedData, (status, response) =>
+                Connection.SendMessage((ushort) OpCodes.LogIn, encryptedData, (status, response) =>
                 {
                     _isLoggingIn = false;
 
@@ -197,7 +197,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.ConfirmEmail, code, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.ConfirmEmail, code, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -226,7 +226,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.RequestEmailConfirmCode, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.RequestEmailConfirmCode, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -249,7 +249,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.PasswordResetCodeRequest, email, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.PasswordResetCodeRequest, email, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -280,7 +280,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 {"password", data.NewPassword }
             };
 
-            Connection.SendMessage((short)OpCodes.PasswordChange, dictionary.ToBytes(), (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.PasswordChange, dictionary.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

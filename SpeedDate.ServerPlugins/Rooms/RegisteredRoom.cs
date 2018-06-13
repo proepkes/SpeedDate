@@ -135,7 +135,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             // Add to pending list
             _requestsInProgress.Add(peer.Id);
 
-            Peer.SendMessage((short) OpCodes.ProvideRoomAccessCheck, packet, (status, response) =>
+            Peer.SendMessage((ushort) OpCodes.ProvideRoomAccessCheck, packet, (status, response) =>
             {
                 // Remove from pending list
                 _requestsInProgress.Remove(peer.Id);

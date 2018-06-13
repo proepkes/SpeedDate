@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -12,7 +12,7 @@ namespace SpeedDate.Server
     {
         private const string InternalServerErrorMessage = "Internal Server Error";
         private readonly Dictionary<long, IPeer> _connectedPeers;
-        private readonly Dictionary<short, IPacketHandler> _handlers;
+        private readonly Dictionary<ushort, IPacketHandler> _handlers;
 
         [Inject] private ILogger _logger;
 
@@ -22,7 +22,7 @@ namespace SpeedDate.Server
         public SpeedDateServer()
         {
             _connectedPeers = new Dictionary<long, IPeer>();
-            _handlers = new Dictionary<short, IPacketHandler>();
+            _handlers = new Dictionary<ushort, IPacketHandler>();
         }
 
         public void Dispose()
@@ -34,9 +34,14 @@ namespace SpeedDate.Server
         public event PeerActionHandler PeerConnected;
         public event PeerActionHandler PeerDisconnected;
 
-        public void SetHandler(short opCode, IncommingMessageHandler handler)
+        public void SetHandler(ushort opCode, IncommingMessageHandler handler)
         {
             _handlers[opCode] = new PacketHandler(opCode, handler);
+        }
+
+        public void SetHandler(OpCodes opCode, IncommingMessageHandler handler)
+        {
+            SetHandler((ushort)opCode, handler);
         }
 
         public IPeer GetPeer(long peerId)

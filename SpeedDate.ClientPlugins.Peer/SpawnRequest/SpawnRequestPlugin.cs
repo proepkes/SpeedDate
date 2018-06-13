@@ -40,7 +40,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 Region = region
             };
 
-            Connection.SendMessage((short) OpCodes.ClientsSpawnRequest, packet, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.ClientsSpawnRequest, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -91,7 +91,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 return;
             }
 
-            connection.SendMessage((short)OpCodes.AbortSpawnRequest, spawnId, (status, response) =>
+            connection.SendMessage((ushort)OpCodes.AbortSpawnRequest, spawnId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -126,7 +126,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 return;
             }
 
-            connection.SendMessage((short)OpCodes.GetSpawnFinalizationData, spawnId, (status, response) =>
+            connection.SendMessage((ushort)OpCodes.GetSpawnFinalizationData, spawnId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

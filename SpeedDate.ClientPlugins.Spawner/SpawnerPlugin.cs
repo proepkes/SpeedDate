@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -55,7 +55,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                 return;
             }
 
-            Connection.SendMessage((short) OpCodes.RegisterSpawner, options, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.RegisterSpawner, options, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -87,7 +87,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                 A = spawnerId,
                 B = count
             };
-            Connection.SendMessage((short)OpCodes.UpdateSpawnerProcessesCount, packet);
+            Connection.SendMessage((ushort)OpCodes.UpdateSpawnerProcessesCount, packet);
         }
 
         public SpawnerController GetController(int spawnerId)
@@ -130,7 +130,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             if (!Connection.IsConnected)
                 return;
 
-            Connection.SendMessage((short)OpCodes.ProcessStarted, new SpawnedProcessStartedPacket()
+            Connection.SendMessage((ushort)OpCodes.ProcessStarted, new SpawnedProcessStartedPacket()
             {
                 CmdArgs = cmdArgs,
                 ProcessId = processId,
@@ -143,7 +143,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             if (!Connection.IsConnected)
                 return;
 
-            Connection.SendMessage((short)OpCodes.ProcessKilled, spawnId);
+            Connection.SendMessage((ushort)OpCodes.ProcessKilled, spawnId);
         }
     }
 }

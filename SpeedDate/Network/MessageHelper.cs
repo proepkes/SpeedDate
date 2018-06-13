@@ -16,11 +16,11 @@ namespace SpeedDate.Network
     {
         private static IMessageFactory _factory;
 
-        private static readonly EndianBitConverter _converter;
+        private static readonly EndianBitConverter Converter;
 
         static MessageHelper()
         {
-            _converter = EndianBitConverter.Big;
+            Converter = EndianBitConverter.Big;
             _factory = new MessageFactory();
         }
 
@@ -79,7 +79,7 @@ namespace SpeedDate.Network
         /// </summary>
         /// <param name="opCode"></param>
         /// <returns></returns>
-        public static IMessage Create(short opCode)
+        public static IMessage Create(ushort opCode)
         {
             return _factory.Create(opCode);
         }
@@ -90,7 +90,7 @@ namespace SpeedDate.Network
         /// <param name="opCode"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static IMessage Create(short opCode, byte[] data)
+        public static IMessage Create(ushort opCode, byte[] data)
         {
             return _factory.Create(opCode, data);
         }
@@ -101,7 +101,7 @@ namespace SpeedDate.Network
         /// <param name="opCode"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IMessage Create(short opCode, string message)
+        public static IMessage Create(ushort opCode, string message)
         {
             return _factory.Create(opCode, Encoding.UTF8.GetBytes(message));
         }
@@ -112,14 +112,14 @@ namespace SpeedDate.Network
         /// <param name="opCode"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static IMessage Create(short opCode, int value)
+        public static IMessage Create(ushort opCode, int value)
         {
             var bytes = new byte[4];
-            _converter.CopyBytes(value, bytes, 0);
+            Converter.CopyBytes(value, bytes, 0);
             return _factory.Create(opCode, bytes);
         }
         
-        public static IMessage Create(short opCode, ISerializablePacket packet)
+        public static IMessage Create(ushort opCode, ISerializablePacket packet)
         {
             return Create(opCode, packet.ToBytes());
         }

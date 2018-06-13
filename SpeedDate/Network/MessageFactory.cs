@@ -8,12 +8,12 @@ namespace SpeedDate.Network
 {
     public class MessageFactory : IMessageFactory
     {
-        public IMessage Create(short opCode)
+        public IMessage Create(ushort opCode)
         {
             return new Message(opCode);
         }
 
-        public IMessage Create(short opCode, byte[] data)
+        public IMessage Create(ushort opCode, byte[] data)
         {
             return new Message(opCode, data);
         }
@@ -31,7 +31,7 @@ namespace SpeedDate.Network
             {
                 var converter = EndianBitConverter.Big;
                 var flags = buffer[start];
-                var opCode = converter.ToInt16(buffer, start + 1);
+                var opCode = converter.ToUInt16(buffer, start + 1);
                 var pointer = start + 3;
 
                 var dataLength = converter.ToInt32(buffer, pointer);

@@ -10,13 +10,13 @@ namespace SpeedDate.Network
     /// </summary>
     public class Message : IMessage
     {
-        public Message(short opCode) : this(opCode, new byte[0])
+        public Message(ushort opCode) : this(opCode, new byte[0])
         {
             OpCode = opCode;
             Status = 0;
         }
 
-        public Message(short opCode, byte[] data)
+        public Message(ushort opCode, byte[] data)
         {
             OpCode = opCode;
             Status = 0;
@@ -28,7 +28,7 @@ namespace SpeedDate.Network
         /// <summary>
         ///     Operation code, a.k.a message type
         /// </summary>
-        public short OpCode { get; private set; }
+        public ushort OpCode { get; private set; }
 
         /// <summary>
         ///     Content of the message

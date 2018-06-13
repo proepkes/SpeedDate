@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="opCode"></param>
         /// <returns></returns>
-        IMessage Create(short opCode);
+        IMessage Create(ushort opCode);
 
         /// <summary>
         ///     Creates a message filled with data
@@ -18,7 +18,7 @@
         /// <param name="opCode"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        IMessage Create(short opCode, byte[] data);
+        IMessage Create(ushort opCode, byte[] data);
 
         /// <summary>
         ///     Reconstructs message bytes into an incomming message

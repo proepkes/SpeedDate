@@ -35,7 +35,7 @@ namespace SpeedDate.ClientPlugins.GameServer
             Options = options;
 
             // Add handlers
-            connection.SetHandler((short) OpCodes.ProvideRoomAccessCheck, HandleProvideRoomAccessCheck);
+            connection.SetHandler((ushort) OpCodes.ProvideRoomAccessCheck, HandleProvideRoomAccessCheck);
         }
 
         /// <summary>

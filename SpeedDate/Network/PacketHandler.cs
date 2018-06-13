@@ -8,18 +8,15 @@ namespace SpeedDate.Network
     public class PacketHandler : IPacketHandler
     {
         private readonly IncommingMessageHandler _handler;
-        private readonly short _opCode;
+        private readonly ushort _opCode;
 
-        public PacketHandler(short opCode, IncommingMessageHandler handler)
+        public PacketHandler(ushort opCode, IncommingMessageHandler handler)
         {
             _opCode = opCode;
             _handler = handler;
         }
 
-        public short OpCode
-        {
-            get { return _opCode; }
-        }
+        public ushort OpCode => _opCode;
 
         public void Handle(IIncommingMessage message)
         {

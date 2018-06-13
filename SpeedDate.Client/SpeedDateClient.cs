@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;

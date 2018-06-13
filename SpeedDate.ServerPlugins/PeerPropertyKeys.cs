@@ -1,6 +1,6 @@
 ﻿namespace SpeedDate.ServerPlugins
 {
-    public enum PeerPropertyKeys : short
+    public enum PeerPropertyKeys : ushort
     {
         Start = 32000,
 

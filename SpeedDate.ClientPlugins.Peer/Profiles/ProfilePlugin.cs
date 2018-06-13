@@ -20,7 +20,7 @@ namespace SpeedDate.ClientPlugins.Peer.Profiles
                 return;
             }
 
-            Connection.SendMessage((short) OpCodes.ClientProfileRequest, profile.PropertyCount, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.ClientProfileRequest, profile.PropertyCount, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -32,7 +32,7 @@ namespace SpeedDate.ClientPlugins.Peer.Profiles
                 profile.FromBytes(response.AsBytes());
 
                 // Listen to profile updates, and apply them
-                Connection.SetHandler((short) OpCodes.UpdateClientProfile,
+                Connection.SetHandler((ushort) OpCodes.UpdateClientProfile,
                     message => { profile.ApplyUpdates(message.AsBytes()); });
 
                 callback.Invoke(true, null);

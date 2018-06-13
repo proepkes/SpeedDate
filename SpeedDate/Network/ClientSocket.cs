@@ -12,7 +12,7 @@ namespace SpeedDate.Network
         private readonly NetManager _client;
 
         private Peer _peer;
-        private readonly Dictionary<short, IPacketHandler> _handlers;
+        private readonly Dictionary<ushort, IPacketHandler> _handlers;
 
         public long PeerId => _peer.Id;
 
@@ -28,7 +28,7 @@ namespace SpeedDate.Network
 
         public ClientSocket()
         {
-            _handlers = new Dictionary<short, IPacketHandler>();
+            _handlers = new Dictionary<ushort, IPacketHandler>();
 
             _listener.PeerConnectedEvent += peer =>
             {
@@ -121,7 +121,7 @@ namespace SpeedDate.Network
             return handler;
         }
 
-        public IPacketHandler SetHandler(short opCode, IncommingMessageHandler handlerMethod)
+        public IPacketHandler SetHandler(ushort opCode, IncommingMessageHandler handlerMethod)
         {
             var handler = new PacketHandler(opCode, handlerMethod);
             return SetHandler(handler);

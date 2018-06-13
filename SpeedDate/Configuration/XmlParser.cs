@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace SpeedDate
+namespace SpeedDate.Configuration
 {
     internal class XmlParser : IDisposable
     {

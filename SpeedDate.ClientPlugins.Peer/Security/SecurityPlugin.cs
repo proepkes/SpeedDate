@@ -34,7 +34,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
 
         public void RequestPermissionLevel(string key, PermissionLevelCallback callback)
         {
-            Connection.SendMessage((short) OpCodes.RequestPermissionLevel, key, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.RequestPermissionLevel, key, (status, response) =>
             {
                 if (status != ResponseStatus.Success) callback.Invoke(null, response.AsString("Unknown error"));
 
@@ -80,7 +80,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
             xs.Serialize(sw, data.ClientsPublicKey);
 
             // Send the request
-            Connection.SendMessage((short) OpCodes.AesKeyRequest, sw.ToString(), (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.AesKeyRequest, sw.ToString(), (status, response) =>
             {
                 if (data.ClientAesKey != null)
                 {

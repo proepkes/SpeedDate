@@ -43,7 +43,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 return;
             }
 
-            Connection.SendMessage((short) OpCodes.ServerProfileRequest, profile.Username, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.ServerProfileRequest, profile.Username, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -117,7 +117,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                         profile.ClearUpdates();
                     }
 
-                    Connection.SendMessage((short) OpCodes.UpdateServerProfile, ms.ToArray());
+                    Connection.SendMessage((ushort) OpCodes.UpdateServerProfile, ms.ToArray());
                 }
 
                 _modifiedProfiles.Clear();

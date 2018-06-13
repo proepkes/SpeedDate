@@ -88,7 +88,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
             properties[OptionKeys.LobbyFactoryId] = factory;
 
-            Connection.SendMessage((short) OpCodes.CreateLobby, properties.ToBytes(), (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.CreateLobby, properties.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -114,7 +114,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             }
 
             // Send the message
-            Connection.SendMessage((short) OpCodes.JoinLobby, lobbyId, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.JoinLobby, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -151,7 +151,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void LeaveLobby(int lobbyId, Action callback)
         {
-            Connection.SendMessage((short)OpCodes.LeaveLobby, lobbyId, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.LeaveLobby, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                     Logs.Error(response.AsString("Something went wrong when trying to leave a lobby"));
@@ -171,7 +171,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 return;
             }
 
-            Connection.SendMessage((short) OpCodes.LobbySetReady, isReady ? 1 : 0, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.LobbySetReady, isReady ? 1 : 0, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -195,7 +195,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 Properties = properties
             };
 
-            Connection.SendMessage((short) OpCodes.SetLobbyProperties, packet, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.SetLobbyProperties, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -214,7 +214,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         public void SetMyProperties(Dictionary<string, string> properties,
             SuccessCallback callback)
         {
-            Connection.SendMessage((short)OpCodes.SetMyLobbyProperties, properties.ToBytes(),
+            Connection.SendMessage((ushort)OpCodes.SetMyLobbyProperties, properties.ToBytes(),
                 (status, response) =>
                 {
                     if (status != ResponseStatus.Success)
@@ -238,7 +238,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 TeamName = teamName
             };
 
-            Connection.SendMessage((short)OpCodes.JoinLobbyTeam, packet,
+            Connection.SendMessage((ushort)OpCodes.JoinLobbyTeam, packet,
                 (status, response) =>
                 {
                     if (status != ResponseStatus.Success)
@@ -257,7 +257,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void SendChatMessage(string message)
         {
-            Connection.SendMessage((short) OpCodes.LobbySendChatMessage, message);
+            Connection.SendMessage((ushort) OpCodes.LobbySendChatMessage, message);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         public void StartGame(SuccessCallback callback)
         {
-            Connection.SendMessage((short) OpCodes.LobbyStartGame, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.LobbyStartGame, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -288,7 +288,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.GetLobbyRoomAccess, properties.ToBytes(), (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.GetLobbyRoomAccess, properties.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

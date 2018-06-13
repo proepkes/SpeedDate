@@ -27,7 +27,7 @@ namespace SpeedDate.ServerPlugins.Matchmaker
             AddProvider(pluginProvider.Get<LobbiesPlugin>());
 
             // Add handlers
-            Server.SetHandler((short)OpCodes.FindGames, HandleFindGames);
+            Server.SetHandler((ushort)OpCodes.FindGames, HandleFindGames);
         }
 
         public void AddProvider(IGamesProvider provider)

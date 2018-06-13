@@ -1,9 +1,9 @@
 ﻿namespace SpeedDate
 {
-    public enum OpCodes : short
+    public enum OpCodes : ushort
     {
         // Standard error code
-        Error = -1,
+        Error = 0,
 
         MsfStart = 32000,
 

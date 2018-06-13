@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -43,15 +43,15 @@ namespace SpeedDate.ServerPlugins.Spawner
         public override void Loaded(IPluginProvider pluginProvider)
         {
             // Add handlers
-            Server.SetHandler((short)OpCodes.RegisterSpawner, HandleRegisterSpawner);
-            Server.SetHandler((short)OpCodes.ClientsSpawnRequest, HandleClientsSpawnRequest);
-            Server.SetHandler((short)OpCodes.RegisterSpawnedProcess, HandleRegisterSpawnedProcess);
-            Server.SetHandler((short)OpCodes.CompleteSpawnProcess, HandleCompleteSpawnProcess);
-            Server.SetHandler((short)OpCodes.ProcessStarted, HandleProcessStarted);
-            Server.SetHandler((short)OpCodes.ProcessKilled, HandleProcessKilled);
-            Server.SetHandler((short)OpCodes.AbortSpawnRequest, HandleAbortSpawnRequest);
-            Server.SetHandler((short)OpCodes.GetSpawnFinalizationData, HandleGetCompletionData);
-            Server.SetHandler((short)OpCodes.UpdateSpawnerProcessesCount, HandleSpawnedProcessesCount);
+            Server.SetHandler(OpCodes.RegisterSpawner, HandleRegisterSpawner);
+            Server.SetHandler(OpCodes.ClientsSpawnRequest, HandleClientsSpawnRequest);
+            Server.SetHandler(OpCodes.RegisterSpawnedProcess, HandleRegisterSpawnedProcess);
+            Server.SetHandler(OpCodes.CompleteSpawnProcess, HandleCompleteSpawnProcess);
+            Server.SetHandler(OpCodes.ProcessStarted, HandleProcessStarted);
+            Server.SetHandler(OpCodes.ProcessKilled, HandleProcessKilled);
+            Server.SetHandler(OpCodes.AbortSpawnRequest, HandleAbortSpawnRequest);
+            Server.SetHandler(OpCodes.GetSpawnFinalizationData, HandleGetCompletionData);
+            Server.SetHandler(OpCodes.UpdateSpawnerProcessesCount, HandleSpawnedProcessesCount);
         }
 
         public event Action<RegisteredSpawner> SpawnerRegistered;
@@ -271,7 +271,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             task.StatusChanged += status =>
             {
                 // Send status update
-                var msg = MessageHelper.Create((short) OpCodes.SpawnRequestStatusChange, new SpawnStatusUpdatePacket
+                var msg = MessageHelper.Create((ushort) OpCodes.SpawnRequestStatusChange, new SpawnStatusUpdatePacket
                 {
                     SpawnId = task.SpawnId,
                     Status = status

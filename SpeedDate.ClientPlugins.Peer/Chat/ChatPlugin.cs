@@ -33,9 +33,9 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         public override void Loaded(IPluginProvider pluginProvider)
         {
             base.Loaded(pluginProvider);
-            Connection.SetHandler((short)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
-            Connection.SetHandler((short)OpCodes.UserLeftChannel, HandleUserLeftChannel);
-            Connection.SetHandler((short)OpCodes.ChatMessage, HandleChatMessage);
+            Connection.SetHandler((ushort)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
+            Connection.SetHandler((ushort)OpCodes.UserLeftChannel, HandleUserLeftChannel);
+            Connection.SetHandler((ushort)OpCodes.ChatMessage, HandleChatMessage);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.PickUsername, username, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.PickUsername, username, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -72,7 +72,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
                 return;
             }
 
-            Connection.SendMessage((short) OpCodes.JoinChannel, channel, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.JoinChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -96,7 +96,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.LeaveChannel, channel, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.LeaveChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -120,7 +120,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.SetDefaultChannel, channel, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.SetDefaultChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -143,7 +143,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.GetCurrentChannels, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.GetCurrentChannels, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -168,7 +168,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
                 return;
             }
 
-            Connection.SendMessage((short)OpCodes.GetUsersInChannel, channel, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.GetUsersInChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -234,7 +234,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void SendMessage(ChatMessagePacket packet, SuccessCallback callback)
         {
-            Connection.SendMessage((short)OpCodes.ChatMessage, packet, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.ChatMessage, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

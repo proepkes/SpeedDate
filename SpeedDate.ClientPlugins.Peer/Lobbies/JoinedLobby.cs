@@ -45,17 +45,17 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         {
             Data = data;
             _connection = connection;
-            connection.SetHandler((short) OpCodes.LobbyMemberPropertyChanged, HandleMemberPropertyChanged);
-            connection.SetHandler((short) OpCodes.LeftLobby, HandleLeftLobbyMsg);
-            connection.SetHandler((short) OpCodes.LobbyChatMessage, HandleLobbyChatMessageMsg);
-            connection.SetHandler((short) OpCodes.LobbyMemberJoined, HandleLobbyMemberJoinedMsg);
-            connection.SetHandler((short) OpCodes.LobbyMemberLeft, HandleLobbyMemberLeftMsg);
-            connection.SetHandler((short) OpCodes.LobbyStateChange, HandleLobbyStateChangeMsg);
-            connection.SetHandler((short) OpCodes.LobbyStatusTextChange, HandleLobbyStatusTextChangeMsg);
-            connection.SetHandler((short) OpCodes.LobbyMemberChangedTeam, HandlePlayerTeamChangeMsg);
-            connection.SetHandler((short) OpCodes.LobbyMemberReadyStatusChange, HandleLobbyMemberReadyStatusChangeMsg);
-            connection.SetHandler((short) OpCodes.LobbyMasterChange, HandleLobbyMasterChangeMsg);
-            connection.SetHandler((short) OpCodes.LobbyPropertyChanged, HandleLobbyPropertyChanged);
+            connection.SetHandler((ushort) OpCodes.LobbyMemberPropertyChanged, HandleMemberPropertyChanged);
+            connection.SetHandler((ushort) OpCodes.LeftLobby, HandleLeftLobbyMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyChatMessage, HandleLobbyChatMessageMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyMemberJoined, HandleLobbyMemberJoinedMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyMemberLeft, HandleLobbyMemberLeftMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyStateChange, HandleLobbyStateChangeMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyStatusTextChange, HandleLobbyStatusTextChangeMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyMemberChangedTeam, HandlePlayerTeamChangeMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyMemberReadyStatusChange, HandleLobbyMemberReadyStatusChangeMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyMasterChange, HandleLobbyMasterChangeMsg);
+            connection.SetHandler((ushort) OpCodes.LobbyPropertyChanged, HandleLobbyPropertyChanged);
 
             Properties = data.LobbyProperties;
             Members = data.Players;

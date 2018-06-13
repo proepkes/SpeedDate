@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-
+using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -50,8 +50,8 @@ namespace SpeedDate.ClientPlugins.Spawner
             SpawnerSettings = SpeedDateConfig.Get<SpawnerConfig>();
 
             // Add handlers
-            connection.SetHandler((short) OpCodes.SpawnRequest, HandleSpawnRequest);
-            connection.SetHandler((short) OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
+            connection.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);
+            connection.SetHandler((ushort) OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
         }
 
         public void SetSpawnRequestHandler(SpawnRequestHandler handler)

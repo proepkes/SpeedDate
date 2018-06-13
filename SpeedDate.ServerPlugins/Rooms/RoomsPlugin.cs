@@ -40,12 +40,12 @@ namespace SpeedDate.ServerPlugins.Rooms
         public override void Loaded(IPluginProvider pluginProvider)
         {
             // Add handlers
-            Server.SetHandler((short)OpCodes.RegisterRoom, HandleRegisterRoom);
-            Server.SetHandler((short)OpCodes.DestroyRoom, HandleDestroyRoom);
-            Server.SetHandler((short)OpCodes.SaveRoomOptions, HandleSaveRoomOptions);
-            Server.SetHandler((short)OpCodes.GetRoomAccess, HandleGetRoomAccess);
-            Server.SetHandler((short)OpCodes.ValidateRoomAccess, HandleValidateRoomAccess);
-            Server.SetHandler((short)OpCodes.PlayerLeftRoom, HandlePlayerLeftRoom);
+            Server.SetHandler((ushort)OpCodes.RegisterRoom, HandleRegisterRoom);
+            Server.SetHandler((ushort)OpCodes.DestroyRoom, HandleDestroyRoom);
+            Server.SetHandler((ushort)OpCodes.SaveRoomOptions, HandleSaveRoomOptions);
+            Server.SetHandler((ushort)OpCodes.GetRoomAccess, HandleGetRoomAccess);
+            Server.SetHandler((ushort)OpCodes.ValidateRoomAccess, HandleValidateRoomAccess);
+            Server.SetHandler((ushort)OpCodes.PlayerLeftRoom, HandlePlayerLeftRoom);
         }
 
         /// <summary>

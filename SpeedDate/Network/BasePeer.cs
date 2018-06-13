@@ -45,7 +45,7 @@ namespace SpeedDate.Network
 
             AppTimer.Instance.OnTick += HandleAckDisposalTick;
 
-            _timeoutMessage = new IncommingMessage(-1, 0, "Time out".ToBytes(), DeliveryMethod.ReliableUnordered, this)
+            _timeoutMessage = new IncommingMessage(OpCodes.Error, 0, "Time out".ToBytes(), DeliveryMethod.ReliableUnordered, this)
             {
                 Status = ResponseStatus.Timeout
             };
@@ -55,83 +55,83 @@ namespace SpeedDate.Network
         public event PeerActionHandler Disconnected;
 
 
-        public void SendMessage(short opCode)
+        public void SendMessage(ushort opCode)
         {
             SendMessage(MessageHelper.Create(opCode), DeliveryMethod.ReliableUnordered);
         }
 
-        public void SendMessage(short opCode, ISerializablePacket packet)
+        public void SendMessage(ushort opCode, ISerializablePacket packet)
         {
             SendMessage(MessageHelper.Create(opCode, packet), DeliveryMethod.ReliableUnordered);
         }
 
-        public void SendMessage(short opCode, ISerializablePacket packet, DeliveryMethod method)
+        public void SendMessage(ushort opCode, ISerializablePacket packet, DeliveryMethod method)
         {
             SendMessage(MessageHelper.Create(opCode, packet), method);
         }
 
-        public void SendMessage(short opCode, ISerializablePacket packet, ResponseCallback responseCallback)
+        public void SendMessage(ushort opCode, ISerializablePacket packet, ResponseCallback responseCallback)
         {
             var message = MessageHelper.Create(opCode, packet.ToBytes());
             SendMessage(message, responseCallback);
         }
 
-        public void SendMessage(short opCode, ISerializablePacket packet, ResponseCallback responseCallback, int timeoutSecs)
+        public void SendMessage(ushort opCode, ISerializablePacket packet, ResponseCallback responseCallback, int timeoutSecs)
         {
             var message = MessageHelper.Create(opCode, packet.ToBytes());
             SendMessage(message, responseCallback, timeoutSecs, DeliveryMethod.ReliableUnordered);
         }
-        public void SendMessage(short opCode, ResponseCallback responseCallback)
+        public void SendMessage(ushort opCode, ResponseCallback responseCallback)
         {
             SendMessage(MessageHelper.Create(opCode), responseCallback);
         }
 
-        public void SendMessage(short opCode, byte[] data)
+        public void SendMessage(ushort opCode, byte[] data)
         {
             SendMessage(MessageHelper.Create(opCode, data), DeliveryMethod.ReliableUnordered);
         }
 
-        public void SendMessage(short opCode, byte[] data, ResponseCallback ackCallback)
+        public void SendMessage(ushort opCode, byte[] data, ResponseCallback ackCallback)
         {
             var message = MessageHelper.Create(opCode, data);
             SendMessage(message, ackCallback);
         }
 
-        public void SendMessage(short opCode, byte[] data, ResponseCallback responseCallback, int timeoutSecs)
+        public void SendMessage(ushort opCode, byte[] data, ResponseCallback responseCallback, int timeoutSecs)
         {
             var message = MessageHelper.Create(opCode, data);
             SendMessage(message, responseCallback, timeoutSecs);
         }
 
-        public void SendMessage(short opCode, string data)
+        public void SendMessage(ushort opCode, string data)
         {
             SendMessage(MessageHelper.Create(opCode, data), DeliveryMethod.ReliableUnordered);
         }
 
-        public void SendMessage(short opCode, string data, ResponseCallback responseCallback)
+        public void SendMessage(ushort opCode, string data, ResponseCallback responseCallback)
         {
             var message = MessageHelper.Create(opCode, data);
             SendMessage(message, responseCallback);
         }
 
-        public void SendMessage(short opCode, string data, ResponseCallback responseCallback, int timeoutSecs)
+        public void SendMessage(ushort opCode, string data, ResponseCallback responseCallback, int timeoutSecs)
         {
             var message = MessageHelper.Create(opCode, data);
             SendMessage(message, responseCallback, timeoutSecs);
         }
 
-        public void SendMessage(short opCode, int data)
+        public void SendMessage(ushort opCode, int data)
         {
             SendMessage(MessageHelper.Create(opCode, data), DeliveryMethod.ReliableUnordered);
         }
 
-        public void SendMessage(short opCode, int data, ResponseCallback responseCallback)
+        public void SendMessage(ushort opCode, int data, ResponseCallback responseCallback)
         {
             var message = MessageHelper.Create(opCode, data);
             SendMessage(message, responseCallback);
         }
 
-        public void SendMessage(short opCode, int data, ResponseCallback responseCallback, int timeoutSecs)
+        public void SendMessage(ushort opCode, int data, ResponseCallback responseCallback, int timeoutSecs)
         {
             var message = MessageHelper.Create(opCode, data);
             SendMessage(message, responseCallback, timeoutSecs);

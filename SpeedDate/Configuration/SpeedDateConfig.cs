@@ -2,9 +2,8 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
-using SpeedDate.Configuration;
 
-namespace SpeedDate
+namespace SpeedDate.Configuration
 {
     public sealed class SpeedDateConfig
     {

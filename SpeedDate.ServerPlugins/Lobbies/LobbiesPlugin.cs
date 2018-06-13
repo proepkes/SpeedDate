@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -45,19 +45,19 @@ namespace SpeedDate.ServerPlugins.Lobbies
             SpawnerPlugin = pluginProvider.Get<SpawnerPlugin>();
             RoomsPlugin = pluginProvider.Get<RoomsPlugin>();
 
-            Server.SetHandler((short)OpCodes.CreateLobby, HandleCreateLobby);
-            Server.SetHandler((short)OpCodes.JoinLobby, HandleJoinLobby);
-            Server.SetHandler((short)OpCodes.LeaveLobby, HandleLeaveLobby);
-            Server.SetHandler((short)OpCodes.SetLobbyProperties, HandleSetLobbyProperties);
-            Server.SetHandler((short)OpCodes.SetMyLobbyProperties, HandleSetMyProperties);
-            Server.SetHandler((short)OpCodes.JoinLobbyTeam, HandleJoinTeam);
-            Server.SetHandler((short)OpCodes.LobbySendChatMessage, HandleSendChatMessage);
-            Server.SetHandler((short)OpCodes.LobbySetReady, HandleSetReadyStatus);
-            Server.SetHandler((short)OpCodes.LobbyStartGame, HandleStartGame);
-            Server.SetHandler((short)OpCodes.GetLobbyRoomAccess, HandleGetLobbyRoomAccess);
+            Server.SetHandler((ushort)OpCodes.CreateLobby, HandleCreateLobby);
+            Server.SetHandler((ushort)OpCodes.JoinLobby, HandleJoinLobby);
+            Server.SetHandler((ushort)OpCodes.LeaveLobby, HandleLeaveLobby);
+            Server.SetHandler((ushort)OpCodes.SetLobbyProperties, HandleSetLobbyProperties);
+            Server.SetHandler((ushort)OpCodes.SetMyLobbyProperties, HandleSetMyProperties);
+            Server.SetHandler((ushort)OpCodes.JoinLobbyTeam, HandleJoinTeam);
+            Server.SetHandler((ushort)OpCodes.LobbySendChatMessage, HandleSendChatMessage);
+            Server.SetHandler((ushort)OpCodes.LobbySetReady, HandleSetReadyStatus);
+            Server.SetHandler((ushort)OpCodes.LobbyStartGame, HandleStartGame);
+            Server.SetHandler((ushort)OpCodes.GetLobbyRoomAccess, HandleGetLobbyRoomAccess);
 
-            Server.SetHandler((short)OpCodes.GetLobbyMemberData, HandleGetLobbyMemberData);
-            Server.SetHandler((short)OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
+            Server.SetHandler((ushort)OpCodes.GetLobbyMemberData, HandleGetLobbyMemberData);
+            Server.SetHandler((ushort)OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
         }
 
         protected virtual bool CheckIfHasPermissionToCreate(IPeer peer)

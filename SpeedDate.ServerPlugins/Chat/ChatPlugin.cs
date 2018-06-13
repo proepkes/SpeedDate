@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -52,13 +52,13 @@ namespace SpeedDate.ServerPlugins.Chat
             }
 
             // Set handlers
-            Server.SetHandler((short)OpCodes.PickUsername, HandlePickUsername);
-            Server.SetHandler((short)OpCodes.JoinChannel, HandleJoinChannel);
-            Server.SetHandler((short)OpCodes.LeaveChannel, HandleLeaveChannel);
-            Server.SetHandler((short)OpCodes.GetCurrentChannels, HandeGetCurrentChannels);
-            Server.SetHandler((short)OpCodes.ChatMessage, HandleSendChatMessage);
-            Server.SetHandler((short)OpCodes.GetUsersInChannel, HandleGetUsersInChannel);
-            Server.SetHandler((short)OpCodes.SetDefaultChannel, HandleSetDefaultChannel);
+            Server.SetHandler((ushort)OpCodes.PickUsername, HandlePickUsername);
+            Server.SetHandler((ushort)OpCodes.JoinChannel, HandleJoinChannel);
+            Server.SetHandler((ushort)OpCodes.LeaveChannel, HandleLeaveChannel);
+            Server.SetHandler((ushort)OpCodes.GetCurrentChannels, HandeGetCurrentChannels);
+            Server.SetHandler((ushort)OpCodes.ChatMessage, HandleSendChatMessage);
+            Server.SetHandler((ushort)OpCodes.GetUsersInChannel, HandleGetUsersInChannel);
+            Server.SetHandler((ushort)OpCodes.SetDefaultChannel, HandleSetDefaultChannel);
         }
 
         protected virtual bool AddChatUser(ChatUserExtension user)
@@ -257,7 +257,7 @@ namespace SpeedDate.ServerPlugins.Chat
                         return true;
                     }
 
-                    receiver.Peer.SendMessage((short)OpCodes.ChatMessage, message);
+                    receiver.Peer.SendMessage((ushort)OpCodes.ChatMessage, message);
                     rawMessage.Respond(ResponseStatus.Success);
                     return true;
             }

@@ -81,11 +81,11 @@ namespace SpeedDate.ServerPlugins.Profiles
 
             database = pluginProvider.Get<CockroachDbPlugin>();
 
-            Server.SetHandler((short)OpCodes.ClientProfileRequest, HandleClientProfileRequest);
+            Server.SetHandler((ushort)OpCodes.ClientProfileRequest, HandleClientProfileRequest);
 
             // Games dependency setup
-            Server.SetHandler((short)OpCodes.ServerProfileRequest, HandleGameServerProfileRequest);
-            Server.SetHandler((short)OpCodes.UpdateServerProfile, HandleProfileUpdates);
+            Server.SetHandler((ushort)OpCodes.ServerProfileRequest, HandleGameServerProfileRequest);
+            Server.SetHandler((ushort)OpCodes.UpdateServerProfile, HandleProfileUpdates);
 
         }
 
@@ -239,7 +239,7 @@ namespace SpeedDate.ServerPlugins.Profiles
                     profile.ClearUpdates();
                 }
 
-                profile.ClientPeer.SendMessage(MessageHelper.Create((short) OpCodes.UpdateClientProfile, ms.ToArray()),
+                profile.ClientPeer.SendMessage(MessageHelper.Create((ushort) OpCodes.UpdateClientProfile, ms.ToArray()),
                     DeliveryMethod.ReliableOrdered);
             }
         }

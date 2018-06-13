@@ -33,7 +33,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             SpawnOptions = spawnOptions;
 
             // Set handlers
-            connection.SetHandler((short) OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);
+            connection.SetHandler((ushort) OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);
         }
 
         public void Abort()

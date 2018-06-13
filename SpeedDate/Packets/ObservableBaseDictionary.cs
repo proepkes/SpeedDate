@@ -13,13 +13,9 @@ namespace SpeedDate.Packets
 
         private Dictionary<TKey, TValue> _values;
 
-        private Queue<UpdateEntry> _updates;
+        private readonly Queue<UpdateEntry> _updates;
 
-        public ObservableBaseDictionary(short key) : this(key, null)
-        {
-        }
-
-        public ObservableBaseDictionary(short key, Dictionary<TKey, TValue> defaultValues) : base(key)
+        public ObservableBaseDictionary(short key, Dictionary<TKey, TValue> defaultValues = null) : base(key)
         {
             _updates = new Queue<UpdateEntry>();
 
@@ -30,26 +26,17 @@ namespace SpeedDate.Packets
         /// <summary>
         /// Returns an immutable list of values
         /// </summary>
-        public IEnumerable<TValue> Values
-        {
-            get { return _values.Values; }
-        }
+        public IEnumerable<TValue> Values => _values.Values;
 
         /// <summary>
         /// Returns an immutable list of key-value pairs
         /// </summary>
-        public IEnumerable<KeyValuePair<TKey, TValue>> Pairs
-        {
-            get { return _values.ToList(); }
-        }
+        public IEnumerable<KeyValuePair<TKey, TValue>> Pairs => _values.ToList();
 
         /// <summary>
         /// Returns a mutable dictionary
         /// </summary>
-        public Dictionary<TKey, TValue> UnderlyingDictionary
-        {
-            get { return _values; }
-        }
+        public Dictionary<TKey, TValue> UnderlyingDictionary => _values;
 
         public void SetValue(TKey key, TValue value)
         {
@@ -91,8 +78,7 @@ namespace SpeedDate.Packets
 
         public TValue GetValue(TKey key)
         {
-            TValue result;
-            _values.TryGetValue(key, out result);
+            _values.TryGetValue(key, out var result);
             return result;
         }
 

@@ -48,7 +48,7 @@ namespace SpeedDate.ServerPlugins.Chat
         protected virtual void OnJoined(ChatUserExtension newUser)
         {
             var data = new List<string>() {Name, newUser.Username};
-            var msg = MessageHelper.Create((short) OpCodes.UserJoinedChannel, data.ToBytes());
+            var msg = MessageHelper.Create((ushort) OpCodes.UserJoinedChannel, data.ToBytes());
 
             foreach (var user in _users.Values)
             {
@@ -62,7 +62,7 @@ namespace SpeedDate.ServerPlugins.Chat
         protected virtual void OnLeft(ChatUserExtension removedUser)
         {
             var data = new List<string>() { Name, removedUser.Username };
-            var msg = MessageHelper.Create((short)OpCodes.UserLeftChannel, data.ToBytes());
+            var msg = MessageHelper.Create((ushort)OpCodes.UserLeftChannel, data.ToBytes());
 
             foreach (var user in _users.Values)
             {
@@ -118,7 +118,7 @@ namespace SpeedDate.ServerPlugins.Chat
             // Override name to be in a "standard" format (uppercase letters and etc.)
             packet.Receiver = Name;
 
-            var msg = MessageHelper.Create((short) OpCodes.ChatMessage, packet);
+            var msg = MessageHelper.Create((ushort) OpCodes.ChatMessage, packet);
 
             foreach (var user in _users.Values)
             {

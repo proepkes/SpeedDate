@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
+using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Mail

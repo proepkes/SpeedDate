@@ -13,7 +13,7 @@ namespace SpeedDate.Network.Interfaces
         /// <summary>
         ///     Operation code (message type)
         /// </summary>
-        short OpCode { get; }
+        ushort OpCode { get; }
 
         /// <summary>
         ///     Sender

@@ -85,7 +85,7 @@ namespace SpeedDate.Network.Interfaces
         /// Adds a packet handler, which will be invoked when a message of
         /// specific operation code is received
         /// </summary>
-        IPacketHandler SetHandler(short opCode, IncommingMessageHandler handlerMethod);
+        IPacketHandler SetHandler(ushort opCode, IncommingMessageHandler handlerMethod);
 
         /// <summary>
         /// Removes the packet handler, but only if this exact handler
