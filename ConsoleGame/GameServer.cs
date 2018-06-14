@@ -1,13 +1,11 @@
 ﻿using System;
-using System.IO;
-using System.Reflection;
-using SpeedDate.ClientPlugins.GameServer;
+using SpeedDate;
 
 namespace ConsoleGame
 {
     class GameServer
     {
-        private readonly SpeedDate.SpeedDater _speedDater;
+        private readonly SpeedDater _speedDater;
 
         public event Action ConnectedToMaster;
 
@@ -18,7 +16,7 @@ namespace ConsoleGame
 
         public GameServer(string configFile)
         {
-            _speedDater = new SpeedDate.SpeedDater($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}");
+            _speedDater = new SpeedDater($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}");
         }
 
         /// <summary>
