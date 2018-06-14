@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using SpeedDate;
+using SpeedDate.ClientPlugins.GameServer;
 
 namespace ConsoleGame
 {
