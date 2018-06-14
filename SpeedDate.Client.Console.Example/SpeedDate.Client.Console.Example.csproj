@@ -5,9 +5,7 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpeedDate.ClientPlugins.GameServer\SpeedDate.ClientPlugins.GameServer.csproj" />
     <ProjectReference Include="..\SpeedDate.ClientPlugins.Peer\SpeedDate.ClientPlugins.Peer.csproj" />
-    <ProjectReference Include="..\SpeedDate.ClientPlugins.Spawner\SpeedDate.ClientPlugins.Spawner.csproj" />
     <ProjectReference Include="..\SpeedDate.Client\SpeedDate.Client.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
