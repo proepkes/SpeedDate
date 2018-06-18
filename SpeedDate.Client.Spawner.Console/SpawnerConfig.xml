@@ -2,7 +2,7 @@
 <configuration>
   <Network Address="127.0.0.1" Port="60125"/>
   <Plugins LoadAll="false" PluginsNamespaces="SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Spawner*"/>
-  <SpawnerPlugin 
+  <SpawnerConfig
     MachineIp="127.0.0.1"
     AddWebGlFlag="false"
     ExecutablePath="E:\\Repositories\\SpeedDate\\ConsoleGame\\bin\\Debug\\ConsoleGame.exe"
