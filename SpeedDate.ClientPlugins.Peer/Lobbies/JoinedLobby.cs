@@ -88,28 +88,28 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="value"></param>
         public void SetLobbyProperty(string key, string value)
         {
-            SetLobbyProperty(key, value, (successful, error) => { });
+            SetLobbyProperty(key, value, () => { }, reason => {});
         }
 
         /// <summary>
         ///     Sets a lobby property to a specified value
         /// </summary>
-        public void SetLobbyProperty(string key, string value, SuccessCallback callback)
+        public void SetLobbyProperty(string key, string value, SuccessCallback callback, ErrorCallback errorCallback)
         {
             var data = new Dictionary<string, string>
             {
                 {key, value}
             };
 
-            _lobbyServer.SetLobbyProperties(Id, data, callback);
+            _lobbyServer.SetLobbyProperties(Id, data, callback, errorCallback);
         }
 
         /// <summary>
         ///     Sets a lobby properties to values, provided within a dictionary
         /// </summary>
-        public void SetLobbyProperties(Dictionary<string, string> properties, SuccessCallback callback)
+        public void SetLobbyProperties(Dictionary<string, string> properties, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.SetLobbyProperties(Id, properties, callback);
+            _lobbyServer.SetLobbyProperties(Id, properties, callback, errorCallback);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="value"></param>
         public void SetMyProperty(string key, string value)
         {
-            SetMyProperty(key, value, (successful, error) => { });
+            SetMyProperty(key, value, () => { }, reason => {});
         }
 
 
@@ -129,22 +129,22 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <param name="callback"></param>
-        public void SetMyProperty(string key, string value, SuccessCallback callback)
+        public void SetMyProperty(string key, string value, SuccessCallback callback, ErrorCallback errorCallback)
         {
             var data = new Dictionary<string, string>
             {
                 {key, value}
             };
 
-            _lobbyServer.SetMyProperties(data, callback);
+            _lobbyServer.SetMyProperties(data, callback, errorCallback);
         }
 
         /// <summary>
         ///     Sets current player's properties
         /// </summary>
-        public void SetMyProperties(Dictionary<string, string> properties, SuccessCallback callback)
+        public void SetMyProperties(Dictionary<string, string> properties, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.SetMyProperties(properties, callback);
+            _lobbyServer.SetMyProperties(properties, callback, errorCallback);
         }
 
         /// <summary>
@@ -153,15 +153,15 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <param name="isReady"></param>
         public void SetReadyStatus(bool isReady)
         {
-            _lobbyServer.SetReadyStatus(isReady, (successful, error) => { }, _connection);
+            _lobbyServer.SetReadyStatus(isReady, () => { }, reason => {}, _connection);
         }
 
         /// <summary>
         ///     Sets current player's ready status
         /// </summary>
-        public void SetReadyStatus(bool isReady, SuccessCallback callback)
+        public void SetReadyStatus(bool isReady, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.SetReadyStatus(isReady, callback, _connection);
+            _lobbyServer.SetReadyStatus(isReady, callback, errorCallback, _connection);
         }
 
         /// <summary>
@@ -190,18 +190,18 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// </summary>
         /// <param name="teamName"></param>
         /// <param name="callback"></param>
-        public void JoinTeam(string teamName, SuccessCallback callback)
+        public void JoinTeam(string teamName, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.JoinTeam(Id, teamName, callback);
+            _lobbyServer.JoinTeam(Id, teamName, callback, errorCallback);
         }
 
         /// <summary>
         ///     Sends a request to server to start a match
         /// </summary>
         /// <param name="callback"></param>
-        public void StartGame(SuccessCallback callback)
+        public void StartGame(SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.StartGame(callback);
+            _lobbyServer.StartGame(callback, errorCallback);
         }
 
         /// <summary>

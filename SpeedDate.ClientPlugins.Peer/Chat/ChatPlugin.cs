@@ -41,11 +41,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <summary>
         /// Sends a request to set chat username
         /// </summary>
-        public void PickUsername(string username, SuccessCallback callback)
+        public void PickUsername(string username, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -53,22 +53,22 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
         /// <summary>
         /// Sends a request to join a specified channel
         /// </summary>
-        public void JoinChannel(string channel, SuccessCallback callback)
+        public void JoinChannel(string channel, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -76,11 +76,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -88,11 +88,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <summary>
         /// Sends a request to leave a specified channel
         /// </summary>
-        public void LeaveChannel(string channel, SuccessCallback callback)
+        public void LeaveChannel(string channel, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -100,11 +100,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -112,11 +112,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// Sets a default channel to the specified channel.
         /// Messages, that have no channel, will be sent to default channel
         /// </summary>
-        public void SetDefaultChannel(string channel, SuccessCallback callback)
+        public void SetDefaultChannel(string channel, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -124,11 +124,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -187,14 +187,14 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         /// <param name="message"></param>
         /// <param name="callback"></param>
-        public void SendToDefaultChannel(string message, SuccessCallback callback)
+        public void SendToDefaultChannel(string message, SuccessCallback callback, ErrorCallback errorCallback)
         {
             SendMessage(new ChatMessagePacket()
             {
                 Receiver = "",
                 Message = message,
                 Type = ChatMessagePacket.ChannelMessage
-            }, callback);
+            }, callback, errorCallback);
         }
 
         /// <summary>
@@ -203,14 +203,14 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <param name="channel"></param>
         /// <param name="message"></param>
         /// <param name="callback"></param>
-        public void SendChannelMessage(string channel, string message, SuccessCallback callback)
+        public void SendChannelMessage(string channel, string message, SuccessCallback callback, ErrorCallback errorCallback)
         {
             SendMessage(new ChatMessagePacket()
             {
                 Receiver = channel,
                 Message = message,
                 Type = ChatMessagePacket.ChannelMessage
-            }, callback);
+            }, callback, errorCallback);
         }
 
         /// <summary>
@@ -219,30 +219,30 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <param name="receiver"></param>
         /// <param name="message"></param>
         /// <param name="callback"></param>
-        public void SendPrivateMessage(string receiver, string message, SuccessCallback callback)
+        public void SendPrivateMessage(string receiver, string message, SuccessCallback callback, ErrorCallback errorCallback)
         {
             SendMessage(new ChatMessagePacket()
             {
                 Receiver = receiver,
                 Message = message,
                 Type = ChatMessagePacket.PrivateMessage
-            }, callback);
+            }, callback, errorCallback);
         }
 
         /// <summary>
         /// Sends a generic message packet to server
         /// </summary>
-        public void SendMessage(ChatMessagePacket packet, SuccessCallback callback)
+        public void SendMessage(ChatMessagePacket packet, SuccessCallback callback, ErrorCallback errorCallback)
         {
             Connection.SendMessage((ushort)OpCodes.ChatMessage, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 

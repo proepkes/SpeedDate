@@ -43,23 +43,20 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void Destroy()
         {
-            Destroy((successful, error) =>
+            Destroy(() =>
             {
-                if (!successful)
-                    Logger.Error(error);
-                else
                 {
                     Logger.Debug("Unregistered room successfully: " + RoomId);
                 }
-            });
+            }, reason => Logger.Error(reason));
         }
 
         /// <summary>
         /// Destroys and unregisters the room
         /// </summary>
-        public void Destroy(SuccessCallback callback)
+        public void Destroy(SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _roomsPlugin.DestroyRoom(RoomId, callback, Connection);
+            _roomsPlugin.DestroyRoom(RoomId, callback, errorCallback, Connection);
         }
 
         /// <summary>
@@ -75,31 +72,28 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void SaveOptions(RoomOptions options)
         {
-            SaveOptions(options, (successful, error) =>
+            SaveOptions(options, () =>
             {
-                if (!successful)
-                    Logger.Error(error);
-                else
-                {
-                    Logger.Debug("Room "+ RoomId + " options changed successfully");
-                    Options = options;
-                }
+                Logger.Debug("Room "+ RoomId + " options changed successfully");
+                Options = options;
+            }, reason =>
+            {
+                Logger.Error(reason);
             });
         }
 
         /// <summary>
         /// Sends new options to master server
         /// </summary>
-        public void SaveOptions(RoomOptions options, SuccessCallback callback)
+        public void SaveOptions(RoomOptions options, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _roomsPlugin.SaveOptions(RoomId, options, (successful, error) =>
+            _roomsPlugin.SaveOptions(RoomId, options, () =>
             {
-                if (successful)
-                    Options = options;
+                Options = options;
 
-                callback.Invoke(successful, error);
+                callback.Invoke();
 
-            }, Connection);
+            }, errorCallback.Invoke, Connection);
         }
 
         /// <summary>
@@ -125,11 +119,13 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         public void PlayerLeft(int peerId)
         {
-            _roomsPlugin.NotifyPlayerLeft(RoomId, peerId, (successful, error) =>
-            {
-                if (!successful)
-                    Logger.Error(error);
-            });
+            _roomsPlugin.NotifyPlayerLeft(RoomId, peerId, 
+                () =>{ }, 
+                reason =>
+                {
+                    Logger.Error(reason);
+                    
+                });
         }
 
         /// <summary>
@@ -165,9 +161,9 @@ namespace SpeedDate.ClientPlugins.GameServer
         public void MakePublic(Action callback)
         {
             Options.IsPublic = true;
-            SaveOptions(Options, (successful, error) =>
+            SaveOptions(Options, callback.Invoke, reason =>
             {
-                callback.Invoke();
+                
             });
         }
 

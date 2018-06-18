@@ -34,23 +34,23 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// <summary>
         /// Sends a registration request to given connection
         /// </summary>
-        public void Register(Dictionary<string, string> data, SuccessCallback callback)
+        public void Register(Dictionary<string, string> data, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
             if (_isLoggingIn)
             {
-                callback.Invoke(false, "Log in is already in progress");
+                errorCallback.Invoke("Log in is already in progress");
                 return;
             }
 
             if (IsLoggedIn)
             {
-                callback.Invoke(false, "Already logged in");
+                errorCallback.Invoke("Already logged in");
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
             {
                 if (aesKey == null)
                 {
-                    callback.Invoke(false, "Failed to register due to security issues");
+                    errorCallback.Invoke("Failed to register due to security issues");
                     return;
                 }
 
@@ -71,11 +71,11 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                     if (status != ResponseStatus.Success)
                     {
-                        callback.Invoke(false, response.AsString("Unknown error"));
+                        errorCallback.Invoke(response.AsString("Unknown error"));
                         return;
                     }
 
-                    callback.Invoke(true, null);
+                    callback.Invoke();
 
                     Registered?.Invoke();
                 });
@@ -183,17 +183,17 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// <summary>
         /// Sends an e-mail confirmation code to the server
         /// </summary>
-        public void ConfirmEmail(string code, SuccessCallback callback)
+        public void ConfirmEmail(string code, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
             if (!IsLoggedIn)
             {
-                callback.Invoke(false, "You're not logged in");
+                errorCallback.Invoke("You're not logged in");
                 return;
             }
 
@@ -201,28 +201,28 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
         
         /// <summary>
         /// Sends a request to server, to ask for an e-mail confirmation code
         /// </summary>
-        public void RequestEmailConfirmationCode(SuccessCallback callback, IClientSocket Connection)
+        public void RequestEmailConfirmationCode(SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
             if (!IsLoggedIn)
             {
-                callback.Invoke(false, "You're not logged in");
+                errorCallback.Invoke("You're not logged in");
                 return;
             }
 
@@ -230,22 +230,22 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
         /// <summary>
         /// Sends a request to server, to ask for a password reset
         /// </summary>
-        public void RequestPasswordReset(string email, SuccessCallback callback)
+        public void RequestPasswordReset(string email, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
@@ -253,11 +253,11 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -265,11 +265,11 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// <summary>
         /// Sends a new password to server
         /// </summary>
-        public void ChangePassword(PasswordChangeData data, SuccessCallback callback)
+        public void ChangePassword(PasswordChangeData data, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
@@ -284,11 +284,11 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
     }

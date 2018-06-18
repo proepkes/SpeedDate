@@ -75,19 +75,19 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <summary>
         /// Sends a request to destroy a room of a given room id
         /// </summary>
-        public void DestroyRoom(int roomId, SuccessCallback callback)
+        public void DestroyRoom(int roomId, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            DestroyRoom(roomId, callback, Connection);
+            DestroyRoom(roomId, callback, errorCallback, Connection);
         }
 
         /// <summary>
         /// Sends a request to destroy a room of a given room id
         /// </summary>
-        public void DestroyRoom(int roomId, SuccessCallback callback, IClientSocket connection)
+        public void DestroyRoom(int roomId, SuccessCallback successCallback, ErrorCallback errorCallback, IClientSocket connection)
         {
             if (!connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -95,14 +95,14 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
                 _localCreatedRooms.TryGetValue(roomId, out var destroyedRoom);
                 _localCreatedRooms.Remove(roomId);
                 
-                callback.Invoke(true, null);
+                successCallback.Invoke();
 
                 // Invoke event
                 if (destroyedRoom != null)
@@ -155,20 +155,20 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         /// <param name="roomId"></param>
         /// <param name="options"></param>
-        /// <param name="callback"></param>
-        public void SaveOptions(int roomId, RoomOptions options, SuccessCallback callback)
+        /// <param name="successCallback"></param>
+        public void SaveOptions(int roomId, RoomOptions options, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
-            SaveOptions(roomId, options, callback, Connection);
+            SaveOptions(roomId, options, successCallback, errorCallback, Connection);
         }
 
         /// <summary>
         /// Updates the options of the registered room
         /// </summary>
-        public void SaveOptions(int roomId, RoomOptions options, SuccessCallback callback, IClientSocket connection)
+        public void SaveOptions(int roomId, RoomOptions options, SuccessCallback successCallback, ErrorCallback errorCallback, IClientSocket connection)
         {
             if (!connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -182,11 +182,11 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                successCallback.Invoke();
             });
         }
 
@@ -196,19 +196,11 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <param name="roomId"></param>
         /// <param name="peerId"></param>
         /// <param name="callback"></param>
-        public void NotifyPlayerLeft(int roomId, int peerId, SuccessCallback callback)
+        public void NotifyPlayerLeft(int roomId, int peerId, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            NotifyPlayerLeft(roomId, peerId, callback, Connection);
-        }
-
-        /// <summary>
-        /// Notifies master server that a user with a given peer id has left the room
-        /// </summary>
-        public void NotifyPlayerLeft(int roomId, int peerId, SuccessCallback callback, IClientSocket connection)
-        {
-            if (!connection.IsConnected)
+            if (!Connection.IsConnected)
             {
-                callback.Invoke(false, null);
+                errorCallback.Invoke("NotConnected");
                 return;
             }
 
@@ -218,9 +210,16 @@ namespace SpeedDate.ClientPlugins.GameServer
                 RoomId = roomId
             };
 
-            connection.SendMessage((ushort) OpCodes.PlayerLeftRoom, packet, (status, response) =>
+            Connection.SendMessage((ushort) OpCodes.PlayerLeftRoom, packet, (status, response) =>
             {
-                callback.Invoke(status == ResponseStatus.Success, null);
+                if (status == ResponseStatus.Success)
+                {
+                    callback.Invoke();
+                }
+                else
+                {
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
+                }
             });
         }
 

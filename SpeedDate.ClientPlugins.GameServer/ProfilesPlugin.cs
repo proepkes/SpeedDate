@@ -35,11 +35,11 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// Sends a request to server, retrieves all profile values, and applies them to a provided
         /// profile
         /// </summary>
-        public void FillProfileValues(ObservableServerProfile profile, SuccessCallback callback)
+        public void FillProfileValues(ObservableServerProfile profile, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
@@ -65,7 +65,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 profile.Disposed += OnProfileDisposed;
 
-                callback.Invoke(true, null);
+                successCallback.Invoke();
             });
         }
 

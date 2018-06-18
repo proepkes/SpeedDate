@@ -12,11 +12,11 @@ namespace SpeedDate.ClientPlugins.Peer.Profiles
         ///     Sends a request to server, retrieves all profile values, and applies them to a provided
         ///     profile
         /// </summary>
-        public void GetProfileValues(ObservableProfile profile, SuccessCallback callback)
+        public void GetProfileValues(ObservableProfile profile, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -24,7 +24,7 @@ namespace SpeedDate.ClientPlugins.Peer.Profiles
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
@@ -35,7 +35,7 @@ namespace SpeedDate.ClientPlugins.Peer.Profiles
                 Connection.SetHandler((ushort) OpCodes.UpdateClientProfile,
                     message => { profile.ApplyUpdates(message.AsBytes()); });
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
     }

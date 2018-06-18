@@ -163,11 +163,11 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <summary>
         /// Sets a ready status of current player
         /// </summary>
-        public void SetReadyStatus(bool isReady, SuccessCallback callback, IClientSocket Connection)
+        public void SetReadyStatus(bool isReady, SuccessCallback callback, ErrorCallback errorCallback, IClientSocket Connection)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -175,11 +175,11 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -187,7 +187,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// Sets lobby properties of a specified lobby id
         /// </summary>
         public void SetLobbyProperties(int lobbyId, Dictionary<string, string> properties,
-            SuccessCallback callback)
+            SuccessCallback callback, ErrorCallback errorCallback)
         {
             var packet = new LobbyPropertiesSetPacket()
             {
@@ -199,11 +199,11 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -212,25 +212,25 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         ///  which can be accessed by game server and etc.)
         /// </summary>
         public void SetMyProperties(Dictionary<string, string> properties,
-            SuccessCallback callback)
+            SuccessCallback callback, ErrorCallback errorCallback)
         {
             Connection.SendMessage((ushort)OpCodes.SetMyLobbyProperties, properties.ToBytes(),
                 (status, response) =>
                 {
                     if (status != ResponseStatus.Success)
                     {
-                        callback.Invoke(false, response.AsString("unknown error"));
+                        errorCallback.Invoke(response.AsString("unknown error"));
                         return;
                     }
 
-                    callback.Invoke(true, null);
+                    callback.Invoke();
                 });
         }
 
         /// <summary>
         /// Current player sends a request to join a team
         /// </summary>
-        public void JoinTeam(int lobbyId, string teamName, SuccessCallback callback)
+        public void JoinTeam(int lobbyId, string teamName, SuccessCallback callback, ErrorCallback errorCallback)
         {
             var packet = new LobbyJoinTeamPacket()
             {
@@ -243,11 +243,11 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 {
                     if (status != ResponseStatus.Success)
                     {
-                        callback.Invoke(false, response.AsString("unknown error"));
+                        errorCallback.Invoke(response.AsString("unknown error"));
                         return;
                     }
 
-                    callback.Invoke(true, null);
+                    callback.Invoke();
                 });
         }
 
@@ -263,17 +263,17 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <summary>
         /// Sends a request to start a game
         /// </summary>
-        public void StartGame(SuccessCallback callback)
+        public void StartGame(SuccessCallback callback, ErrorCallback errorCallback)
         {
             Connection.SendMessage((ushort) OpCodes.LobbyStartGame, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
