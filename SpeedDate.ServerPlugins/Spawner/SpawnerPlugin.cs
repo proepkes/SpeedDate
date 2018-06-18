@@ -20,25 +20,15 @@ namespace SpeedDate.ServerPlugins.Spawner
         [Inject]
         private readonly ILogger _logger;
 
-        private readonly Dictionary<int, RegisteredSpawner> _spawners;
+        [Inject]
+        private readonly SpawnerConfig _config;
 
-        private readonly Dictionary<int, SpawnTask> _spawnTasks;
+        private readonly Dictionary<int, RegisteredSpawner> _spawners = new Dictionary<int, RegisteredSpawner>();
+
+        private readonly Dictionary<int, SpawnTask> _spawnTasks = new Dictionary<int, SpawnTask>();
 
         private int _spawnerId;
         private int _spawnTaskId;
-
-        private readonly SpawnerConfig _config;
-
-
-        public SpawnerPlugin()
-        {
-            _config = SpeedDateConfig.Get<SpawnerConfig>();
-
-            _spawners = new Dictionary<int, RegisteredSpawner>();
-            _spawnTasks = new Dictionary<int, SpawnTask>();
-
-            Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
-        }
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
@@ -52,6 +42,8 @@ namespace SpeedDate.ServerPlugins.Spawner
             Server.SetHandler(OpCodes.AbortSpawnRequest, HandleAbortSpawnRequest);
             Server.SetHandler(OpCodes.GetSpawnFinalizationData, HandleGetCompletionData);
             Server.SetHandler(OpCodes.UpdateSpawnerProcessesCount, HandleSpawnedProcessesCount);
+
+            Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
         }
 
         public event Action<RegisteredSpawner> SpawnerRegistered;

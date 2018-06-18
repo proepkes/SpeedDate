@@ -24,12 +24,10 @@ namespace SpeedDate.ServerPlugins.Authentication
     {
         public delegate void AuthEventHandler(IUserExtension account);
 
+        [Inject]
         private readonly AuthConfig _config;
 
-        /// <summary>
-        ///     Collection of users who are currently logged in
-        /// </summary>
-        public readonly Dictionary<string, IUserExtension> LoggedInUsers;
+        private readonly Dictionary<string, IUserExtension> _loggedInUsers = new Dictionary<string, IUserExtension>();
 
         private CockroachDbPlugin _database;
 
@@ -37,17 +35,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         private int _nextGuestId;
 
-        private readonly List<PermissionEntry> _permissions;
-
-
-        public AuthPlugin()
-        {
-            _permissions = new List<PermissionEntry>();
-            _config = SpeedDateConfig.Get<AuthConfig>();
-
-            LoggedInUsers = new Dictionary<string, IUserExtension>();
-        }
-
+        private readonly List<PermissionEntry> _permissions = new List<PermissionEntry>();
 
         /// <summary>
         ///     Invoked, when user logs in
@@ -104,7 +92,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             extension.Peer.Disconnected += OnUserDisconnect;
 
             // Add to lookup of logged in users
-            LoggedInUsers.Add(extension.Username.ToLower(), extension);
+            _loggedInUsers.Add(extension.Username.ToLower(), extension);
 
             // Trigger the login event
             LoggedIn?.Invoke(extension);
@@ -117,7 +105,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             if (extension == null)
                 return;
 
-            LoggedInUsers.Remove(extension.Username.ToLower());
+            _loggedInUsers.Remove(extension.Username.ToLower());
 
             peer.Disconnected -= OnUserDisconnect;
 
@@ -126,7 +114,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         public IUserExtension GetLoggedInUser(string username)
         {
-            LoggedInUsers.TryGetValue(username.ToLower(), out var extension);
+            _loggedInUsers.TryGetValue(username.ToLower(), out var extension);
             return extension;
         }
 
@@ -151,7 +139,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         public bool IsUserLoggedIn(string username)
         {
-            return LoggedInUsers.ContainsKey(username);
+            return _loggedInUsers.ContainsKey(username);
         }
 
         /// <summary>
@@ -229,7 +217,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         /// <param name="message"></param>
         protected virtual void HandleGetLoggedInCount(IIncommingMessage message)
         {
-            message.Respond(LoggedInUsers.Count, ResponseStatus.Success);
+            message.Respond(_loggedInUsers.Count, ResponseStatus.Success);
         }
 
         /// <summary>

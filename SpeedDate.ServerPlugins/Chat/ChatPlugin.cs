@@ -25,7 +25,8 @@ namespace SpeedDate.ServerPlugins.Chat
         public int MinChannelNameLength = 2;
         public int MaxChannelNameLength = 25;
         
-        [Inject] private ILogger logger;
+        [Inject] 
+        private ILogger logger;
 
         public readonly Dictionary<string, ChatUserExtension> ChatUsers;
         public readonly Dictionary<string, ChatChannel> Channels;

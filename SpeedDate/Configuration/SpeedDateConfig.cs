@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -7,64 +9,21 @@ namespace SpeedDate.Configuration
 {
     public sealed class SpeedDateConfig
     {
-        private static string _configuration;
+        private readonly List<IConfig> _pluginConfigs = new List<IConfig>();
 
-        public static readonly NetworkConfig Network = new NetworkConfig();
+        public NetworkConfig Network { get; internal set; }
 
-        public static readonly PluginsConfig Plugins = new PluginsConfig();
+        public PluginsConfig Plugins { get; internal set; }
 
-        public static void FromXml(string configFile)
+        public void Add(IConfig config)
         {
-            _configuration = File.ReadAllText(configFile);
-
-            var xmlParser = new XmlParser(_configuration);
-            xmlParser.Search("Network", () =>
-            {
-                Network.Address = xmlParser["Address"];
-                Network.Port = Convert.ToInt32(xmlParser["Port"]);
-            });
-
-            xmlParser.Search("Plugins",  () =>
-            {
-                Plugins.LoadAll = Convert.ToBoolean(xmlParser["LoadAll"]);
-                Plugins.PluginsNamespaces = xmlParser["PluginsNamespaces"];
-            });
-
-       
+            _pluginConfigs.Add(config);
         }
 
-        public static T Get<T>() where T : class, new()
+        public bool TryGetConfig(string typeName, out IConfig result)
         {
-            if (!(typeof(T).GetCustomAttribute(typeof(PluginConfigurationAttribute)) is PluginConfigurationAttribute attribute))
-            {
-                throw new InvalidDataContractException("Configuration-classes require the [PluginConfiguration]-Attribute");
-            }
-
-            var instance = new T();
-            var xmlParser = new XmlParser(_configuration);
-            xmlParser.Search(attribute.PluginType.Name, () =>
-            {
-                foreach (var property in typeof(T).GetProperties())
-                {
-                    var configValue = xmlParser[property.Name];
-                    if (configValue != null)
-                    {
-                        switch (Type.GetTypeCode(property.PropertyType))
-                        {
-                            case TypeCode.Boolean:
-                                property.SetValue(instance, bool.Parse(configValue));
-                                break;
-                            case TypeCode.Int32:
-                                property.SetValue(instance, int.Parse(configValue));
-                                break;
-                            default:
-                                property.SetValue(instance, configValue);
-                                break;
-                        }
-                    }
-                }
-            });
-            return instance;
+            result = _pluginConfigs.FirstOrDefault(config => config.GetType().FullName.Equals(typeName));
+            return result != null;
         }
     }
 
@@ -72,11 +31,23 @@ namespace SpeedDate.Configuration
     {
         public bool LoadAll { get; set; }
         public string PluginsNamespaces { get; set; }
+
+        public PluginsConfig(bool loadAll = default(bool), string pluginsNamespaces = default(string))
+        {
+            LoadAll = loadAll;
+            PluginsNamespaces = pluginsNamespaces;
+        }
     }
 
     public class NetworkConfig
     {
         public string Address { get; set; }
         public int Port { get; set; }
+
+        public NetworkConfig(string address = default(string) , int port = default(int))
+        {
+            Address = address;
+            Port = port;
+        }
     }
 }

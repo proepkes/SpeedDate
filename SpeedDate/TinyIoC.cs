@@ -3711,8 +3711,7 @@ namespace SpeedDate
             if (_Parent == null)
                 return null;
 
-            ObjectFactoryBase factory;
-            if (_Parent._RegisteredTypes.TryGetValue(registration, out factory))
+            if (_Parent._RegisteredTypes.TryGetValue(registration, out var factory))
             {
                 return factory.GetFactoryForChildContainer(registration.Type, _Parent, this);
             }
@@ -4064,8 +4063,7 @@ namespace SpeedDate
 #if USE_OBJECT_CONSTRUCTOR
         private static ObjectConstructor CreateObjectConstructionDelegateWithCache(ConstructorInfo constructor)
         {
-            ObjectConstructor objectConstructor;
-            if (_ObjectConstructorCache.TryGetValue(constructor, out objectConstructor))
+            if (_ObjectConstructorCache.TryGetValue(constructor, out var objectConstructor))
                 return objectConstructor;
 
             // We could lock the cache here, but there's no real side
@@ -4096,15 +4094,10 @@ namespace SpeedDate
 
         private void BuildUpInternal(object input, ResolveOptions resolveOptions)
         {
-            //#if NETFX_CORE
-            //			var properties = from property in input.GetType().GetTypeInfo().DeclaredProperties
-            //							 where (property.GetMethod != null) && (property.SetMethod != null) && !property.PropertyType.GetTypeInfo().IsValueType
-            //							 select property;
-            //#else
+            //Inject >>properties<<
             var properties = from property in input.GetType().GetProperties()
                              where (property.GetGetMethod() != null) && (property.GetSetMethod() != null) && !property.PropertyType.IsValueType() && Attribute.IsDefined(property, typeof(InjectAttribute))
                              select property;
-            //#endif
 
             foreach (var property in properties)
             {
@@ -4121,10 +4114,10 @@ namespace SpeedDate
                 }
             }
 
+            //Inject >>fields<<
             var fields = from field in input.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
                 where (!field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute)))
                 select field;
-            //#endif
 
             foreach (var field in fields)
             {
@@ -4132,7 +4125,9 @@ namespace SpeedDate
                 {
                     try
                     {
-                        field.SetValue(input, ResolveInternal(new TypeRegistration(field.FieldType), NamedParameterOverloads.Default, resolveOptions, input.GetType()));
+                        var value = ResolveInternal(new TypeRegistration(field.FieldType),
+                            NamedParameterOverloads.Default, resolveOptions, input.GetType());
+                        field.SetValue(input, value);
                     }
                     catch (TinyIoCResolutionException)
                     {

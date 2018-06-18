@@ -1,4 +1,6 @@
-﻿using SpeedDate.Packets.Spawner;
+﻿using SpeedDate.ClientPlugins.Spawner;
+using SpeedDate.Configuration;
+using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.Client.Spawner.Console
 {
@@ -7,14 +9,32 @@ namespace SpeedDate.Client.Spawner.Console
         static void Main(string[] args)
         {
             System.Console.WriteLine("------STARTING SPAWNER------");
-            var spawner = new Spawner("SpawnerConfig.xml");
-            spawner.Start();
+            var spawner = new Spawner();
+            
             spawner.Connected += () => spawner.SpawnApi.RegisterSpawner(new SpawnerOptions { Region = "EU" },
                 (controller, error) =>
                 {
                     System.Console.WriteLine("Registered spawner");
 
                 });
+            
+            //Example configuring in code
+//            spawner.Start(
+//                new DefaultConfigProvider(
+//                    new NetworkConfig("127.0.0.1", 60125), 
+//                    new PluginsConfig(false, "SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Spawner*"), 
+//                    new IConfig[] { 
+//                        new SpawnerConfig
+//                        {
+//                            AddWebGlFlag = false,
+//                            ExecutablePath = "E:\\Repositories\\SpeedDate\\ConsoleGame\\bin\\Debug\\ConsoleGame.exe",
+//                            MachineIp = "127.0.0.1",
+//                            SpawnInBatchmode = true
+//                        }, })
+//            );
+            
+            
+            spawner.Start(new FileConfigProvider("SpawnerConfig.xml"));
             System.Console.ReadLine();
 
 

@@ -2,8 +2,7 @@
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {
-    [PluginConfiguration(typeof(LobbiesPlugin))]
-    public class LobbyConfig
+    public class LobbyConfig : IConfig
     {
         /// <summary>
         /// If true, players will be able to switch teams

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,13 +16,13 @@ namespace SpeedDate
 {
     public sealed class SpeedDater
     {
-        private readonly string _configFile;
+        private SpeedDateConfig _config;
         private TinyIoCContainer _kernel;
 
         public event Action Started;
         public event Action Stopped;
 
-        public bool IsStarted { get; set; } = false;
+        public bool IsStarted { get; set; }
 
         public IPluginProvider PluginProver
         {
@@ -29,19 +30,17 @@ namespace SpeedDate
             private set;
         }
 
-        public SpeedDater(string configFile)
-        {
-            _configFile = configFile;
-        }
 
-        public void Start()
+        public void Start(IConfigProvider configProvider)
         {
-            SpeedDateConfig.FromXml(_configFile);
             var logger = LogManager.GetLogger("SpeedDate");
 
             _kernel = CreateKernel();
+            
+            _config = configProvider.Create(_kernel.ResolveAll<IConfig>());
 
             var startable = _kernel.Resolve<ISpeedDateStartable>();
+            _kernel.BuildUp(startable);
             startable.Started += () =>
             {
                 IsStarted = true;
@@ -57,9 +56,25 @@ namespace SpeedDate
 
             foreach (var plugin in _kernel.ResolveAll<IPlugin>())
             {
-                if (SpeedDateConfig.Plugins.LoadAll || SpeedDateConfig.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
+                if (_config.Plugins.LoadAll || _config.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
                 {
+                    //Inject configs, cannot use _kernel because the configProvider may have added additional IConfigs
+                    var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                        where !field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute))
+                        select field;
+
+                    foreach (var field in fields)
+                    {
+                        if (field.GetValue(plugin) == null && _config.TryGetConfig(field.FieldType.FullName, out var config))
+                        {
+                            field.SetValue(plugin, config);
+                        }
+                    }
+
+                    //Inject ILogger & other possible dependencies, Configs are already set above and will not be overwritten
                     _kernel.BuildUp(plugin);
+
+
                     PluginProver.RegisterPlugin(plugin);
                 }
             }
@@ -70,7 +85,7 @@ namespace SpeedDate
                 logger.Info($"Loaded {plugin.GetType().Name}");
             }
 
-            startable.Start();
+            startable.Start(_config.Network);
         }
 
         public void Stop()
@@ -89,38 +104,45 @@ namespace SpeedDate
                 TinyIoCContainer.Current.Register<IPluginProvider, PluginProvider>();
                 TinyIoCContainer.Current.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
 
-                //Register plugins
+                //Register configs & plugins
                 foreach (var dllFile in
                     Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "*.dll"))
                 {
                     var assembly = Assembly.LoadFrom(dllFile);
+                    
+                    //Register Configurations
+                    foreach (var pluginConfigType in assembly.DefinedTypes.Where(info =>
+                        !info.IsAbstract && !info.IsInterface && typeof(IConfig).IsAssignableFrom(info)))
+                    {
+                        var pluginConfig = (IConfig)Activator.CreateInstance(pluginConfigType);
+                        TinyIoCContainer.Current.Register(pluginConfig, pluginConfigType.FullName);
+                    }
 
                     foreach (var startableType in assembly.DefinedTypes.Where(info =>
                         !info.IsAbstract && !info.IsInterface && typeof(ISpeedDateStartable).IsAssignableFrom(info)))
                     {
                         var startableInstance = (ISpeedDateStartable)Activator.CreateInstance(startableType);
 
-                        if(startableInstance is IServer)
+                        switch (startableInstance)
                         {
-                            TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
-                                (IServer) startableInstance);
-                        }
-
-                        if (startableInstance is IClient)
-                        {
-                            TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
-                                (IClient) startableInstance);
+                            case IServer _:
+                                TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
+                                    (IServer) startableInstance);
+                                break;
+                            case IClient _:
+                                TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
+                                    (IClient) startableInstance);
+                                break;
                         }
                         
-                        TinyIoCContainer.Current.BuildUp(startableInstance);
                         TinyIoCContainer.Current.Register(startableInstance);
                     }
 
                     foreach (var pluginType in assembly.DefinedTypes.Where(info =>
                         !info.IsAbstract && !info.IsInterface && typeof(IPlugin).IsAssignableFrom(info)))
                     {
-                        var pluginInstance = (IPlugin)Activator.CreateInstance(pluginType);
-                        TinyIoCContainer.Current.Register(pluginInstance, pluginType.FullName);
+                        var plugin = (IPlugin)Activator.CreateInstance(pluginType);
+                        TinyIoCContainer.Current.Register(plugin, pluginType.FullName);
                     }
                 }
             }

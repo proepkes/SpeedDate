@@ -1,5 +1,6 @@
 ﻿using System;
 using SpeedDate.ClientPlugins.Spawner;
+using SpeedDate.Configuration;
 
 namespace SpeedDate.Client.Spawner.Console
 {
@@ -10,18 +11,18 @@ namespace SpeedDate.Client.Spawner.Console
 
         public SpawnerPlugin SpawnApi { get; private set; }
 
-        public Spawner(string configFile)
+        public Spawner()
         {
-            _speedDater = new SpeedDater(configFile);
+            _speedDater = new SpeedDater();
             _speedDater.Started += () => Connected?.Invoke();
         }
 
         /// <summary>
         /// Connects to Master and loads the Plugins
         /// </summary>
-        public void Start()
+        public void Start(IConfigProvider configProvider)
         {
-            _speedDater.Start();
+            _speedDater.Start(configProvider);
             SpawnApi = _speedDater.PluginProver.Get<SpawnerPlugin>();
         }
     }

@@ -6,6 +6,7 @@ using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 
@@ -13,14 +14,14 @@ namespace SpeedDate.ServerPlugins.Mail
 {
     public sealed class MailPlugin : SpeedDateServerPlugin, IUpdatable
     {
-        [Inject] private readonly ILogger _logger;
-        private readonly List<Exception> _sendMailExceptions;
+        [Inject] private ILogger _logger;
+        [Inject] private MailConfig config;
+        private readonly List<Exception> _sendMailExceptions = new List<Exception>();
         private SmtpClient _smtpClient;
 
-
-        public MailPlugin()
+        public override void Loaded(IPluginProvider pluginProvider)
         {
-            _sendMailExceptions = new List<Exception>();
+            base.Loaded(pluginProvider);
             SetupSmtpClient();
             AppUpdater.Instance.Add(this);
         }
@@ -40,7 +41,6 @@ namespace SpeedDate.ServerPlugins.Mail
 
         private void SetupSmtpClient()
         {
-            var config = SpeedDateConfig.Get<MailConfig>();
             // Configure mail client
             _smtpClient = new SmtpClient(config.SmtpHost, config.SmtpPort)
             {
@@ -64,8 +64,6 @@ namespace SpeedDate.ServerPlugins.Mail
 
         public bool SendMail(string to, string subject, string body)
         {
-            var config = SpeedDateConfig.Get<MailConfig>();
-
             // Create the mail message (from, to, subject, body)
             var mailMessage = new MailMessage {From = new MailAddress(config.EmailFrom, config.SenderDisplayName)};
             mailMessage.To.Add(to);

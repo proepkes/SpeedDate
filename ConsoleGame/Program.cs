@@ -13,7 +13,7 @@ namespace ConsoleGame
         {
             Console.WriteLine($"Starting game with arguments: {string.Join(", ", args)}...");
 
-            var server = new GameServer("GameServerConfig.xml");
+            var server = new GameServer();
             server.ConnectedToMaster += () =>
             {
                 Console.WriteLine("Connected to Master");
@@ -26,7 +26,7 @@ namespace ConsoleGame
                     });
             };
 
-            server.Start();
+            server.Start("GameServerConfig.xml");
 
             Console.ReadLine();
         }

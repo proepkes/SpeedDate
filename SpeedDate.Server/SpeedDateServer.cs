@@ -53,14 +53,14 @@ namespace SpeedDate.Server
         public event Action Started;
         public event Action Stopped;
 
-        public void Start()
+        public void Start(NetworkConfig config)
         {
             _socket.Connected += Connected;
             _socket.Disconnected += Disconnected;
 
-            if (_socket.Listen(SpeedDateConfig.Network.Port))
+            if (_socket.Listen(config.Port))
             {
-                _logger.Info("Started on port: " + SpeedDateConfig.Network.Port);
+                _logger.Info("Started on port: " + config.Port);
                 Started?.Invoke();
             }
         }

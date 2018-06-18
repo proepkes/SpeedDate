@@ -14,12 +14,7 @@ namespace SpeedDate.ServerPlugins.Matchmaker
 {
     class MatchmakerPlugin : SpeedDateServerPlugin
     {
-        private readonly HashSet<IGamesProvider> _gameProviders;
-
-        public MatchmakerPlugin()
-        {
-            _gameProviders = new HashSet<IGamesProvider>();
-        }
+        private readonly HashSet<IGamesProvider> _gameProviders = new HashSet<IGamesProvider>();
 
         public override void Loaded(IPluginProvider pluginProvider)
         {

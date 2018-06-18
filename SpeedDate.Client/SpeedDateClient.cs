@@ -28,9 +28,9 @@ namespace SpeedDate.Client
         public event Action Stopped;
 
 
-        public void Start()
+        public void Start(NetworkConfig config)
         {
-            ConnectAsync(SpeedDateConfig.Network.Address, SpeedDateConfig.Network.Port);
+            ConnectAsync(config.Address, config.Port);
         }
 
         public void Stop()

@@ -18,12 +18,14 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     class LobbiesPlugin : SpeedDateServerPlugin, IGamesProvider
     {
-        [Inject] private readonly ILogger _logger;
+        [Inject] 
+        private readonly ILogger _logger;
+        
         public int CreateLobbiesPermissionLevel = 0;
 
-        protected readonly Dictionary<string, ILobbyFactory> Factories;
+        protected readonly Dictionary<string, ILobbyFactory> Factories = new Dictionary<string, ILobbyFactory>();
 
-        protected readonly Dictionary<int, ILobby> Lobbies;
+        protected readonly Dictionary<int, ILobby> Lobbies = new Dictionary<int, ILobby>();
 
         public bool DontAllowCreatingIfJoined = true;
         public int JoinedLobbiesLimit = 1;
@@ -32,12 +34,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public SpawnerPlugin SpawnerPlugin;
         public RoomsPlugin RoomsPlugin;
-
-        public LobbiesPlugin()
-        {
-            Factories = new Dictionary<string, ILobbyFactory>();
-            Lobbies = new Dictionary<int, ILobby>();
-        }
 
         public override void Loaded(IPluginProvider pluginProvider)
         {

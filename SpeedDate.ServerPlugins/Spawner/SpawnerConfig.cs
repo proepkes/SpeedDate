@@ -2,8 +2,7 @@
 
 namespace SpeedDate.ServerPlugins.Spawner
 {
-    [PluginConfiguration(typeof(SpawnerPlugin))]
-    class SpawnerConfig
+    class SpawnerConfig : IConfig
     {
         public int CreateSpawnerPermissionLevel { get; set; }
 

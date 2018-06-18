@@ -21,21 +21,12 @@ namespace SpeedDate.ServerPlugins.Rooms
         public int RegisterRoomPermissionLevel = 0;
 
 
-        private readonly Dictionary<int, RegisteredRoom> _rooms;
+        private readonly Dictionary<int, RegisteredRoom> _rooms = new Dictionary<int, RegisteredRoom>();
 
         private int _roomIdGenerator;
 
         public event Action<RegisteredRoom> RoomRegistered; 
         public event Action<RegisteredRoom> RoomDestroyed;
-
-
-        public RoomsPlugin()
-        {
-            _rooms = new Dictionary<int, RegisteredRoom>();
-
-            // Maintain unconfirmed accesses
-            Task.Factory.StartNew(CleanUnconfirmedAccesses, TaskCreationOptions.LongRunning);
-        }
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
@@ -46,6 +37,9 @@ namespace SpeedDate.ServerPlugins.Rooms
             Server.SetHandler((ushort)OpCodes.GetRoomAccess, HandleGetRoomAccess);
             Server.SetHandler((ushort)OpCodes.ValidateRoomAccess, HandleValidateRoomAccess);
             Server.SetHandler((ushort)OpCodes.PlayerLeftRoom, HandlePlayerLeftRoom);
+            
+            // Maintain unconfirmed accesses
+            Task.Factory.StartNew(CleanUnconfirmedAccesses, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>

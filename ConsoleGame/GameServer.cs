@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using SpeedDate;
 using SpeedDate.ClientPlugins.GameServer;
+using SpeedDate.Configuration;
 
 namespace ConsoleGame
 {
@@ -17,18 +18,18 @@ namespace ConsoleGame
         public ProfilesPlugin Profiles { get; private set; }
         public RoomsPlugin Rooms { get; private set; }
 
-        public GameServer(string configFile)
+        public GameServer()
         {
-            _speedDater = new SpeedDater($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}");
+            _speedDater = new SpeedDater();
         }
 
         /// <summary>
         /// Connects to Master and loads the Plugins
         /// </summary>
-        public void Start()
+        public void Start(string configFile)
         {
             _speedDater.Started += () => ConnectedToMaster?.Invoke();
-            _speedDater.Start();
+            _speedDater.Start(new FileConfigProvider($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}"));
             Lobbies = _speedDater.PluginProver.Get<LobbiesPlugin>();
             PeerInfo = _speedDater.PluginProver.Get<PeerInfoPlugin>();
             Profiles = _speedDater.PluginProver.Get<ProfilesPlugin>();

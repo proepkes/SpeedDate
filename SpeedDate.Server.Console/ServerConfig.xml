@@ -3,7 +3,7 @@
   <Network Address="0.0.0.0" Port="60125" />
   <Plugins LoadAll="true" />
 
-  <AuthPlugin
+  <AuthConfig
     EnableGuestLogin="true"
     GuestPrefix="Guest-"
     PeerDataPermissionsLevel="0"
@@ -12,7 +12,7 @@
     ConfirmEmailBody="&lt;h1&gt;Activation&lt;/h1&gt;&lt;p&gt;Your email activation code is: &lt;b&gt;{0}&lt;/b&gt; &lt;/p&gt;" 
     PasswordResetEmailBody="&lt;h1&gt;Password Reset Code&lt;/h1&gt;&lt;p&gt;Your password reset code is: &lt;b&gt;{0}&lt;/b&gt; &lt;/p&gt;" />
 
-  <MailPlugin 
+  <MailConfig
     SmtpHost="smtp.gmail.com" 
     SmtpPort="587" 
     SmtpUsername="MySmtpUsername@gmail.com" 
@@ -20,12 +20,12 @@
     SenderDisplayName="MySenderDisplayName" 
     EmailFrom="MySenderEmail@gmail.com"/>
 
-  <SpawnerPlugin
+  <SpawnerConfig
     QueueUpdateFrequency="100"
     EnableClientSpawnRequests="true"
     CreateSpawnerPermissionLevel="0" />
 
-  <CockroachDbPlugin 
+  <CockroachDbConfig
     CheckConnectionOnStartup="false"
     Host="localhost" 
     Port="26257" 

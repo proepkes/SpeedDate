@@ -2,8 +2,7 @@
 
 namespace SpeedDate.ServerPlugins.Mail
 {
-    [PluginConfiguration(typeof(MailPlugin))]
-    class MailConfig
+    class MailConfig : IConfig
     {
         public string SmtpHost { get; set; }
         public int SmtpPort { get; set; }

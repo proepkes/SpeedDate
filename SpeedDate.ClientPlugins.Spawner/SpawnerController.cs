@@ -47,7 +47,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             SpawnerId = spawnerId;
             Options = options;
 
-            SpawnerSettings = SpeedDateConfig.Get<SpawnerConfig>();
+            //SpawnerSettings = SpeedDateConfig.Get<SpawnerConfig>();
 
             // Add handlers
             connection.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);

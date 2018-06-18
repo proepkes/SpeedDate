@@ -2,8 +2,7 @@
 
 namespace SpeedDate.ServerPlugins.Authentication
 {
-    [PluginConfiguration(typeof(AuthPlugin))]
-    class AuthConfig
+    class AuthConfig : IConfig
     {
         public bool EnableGuestLogin { get; set; }
         public string GuestPrefix { get; set; }

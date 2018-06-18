@@ -2,8 +2,7 @@
 
 namespace SpeedDate.ClientPlugins.Spawner
 {
-        [PluginConfiguration(typeof(SpawnerPlugin))]
-        public class SpawnerConfig
+        public class SpawnerConfig : IConfig
         {
             public string MachineIp { get; set; }
             public bool SpawnInBatchmode {get; set; }

@@ -9,9 +9,4 @@
     <ProjectReference Include="..\SpeedDate.Client\SpeedDate.Client.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Update="GameClientConfig.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

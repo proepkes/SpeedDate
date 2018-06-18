@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using SpeedDate.Configuration;
 
 namespace SpeedDate.Server.Console
 {
@@ -16,8 +17,8 @@ namespace SpeedDate.Server.Console
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            var speedDate = new SpeedDater("ServerConfig.xml");
-            speedDate.Start();
+            var speedDate = new SpeedDater();
+            speedDate.Start(new FileConfigProvider("ServerConfig.xml"));
 
             System.Console.ReadLine();
 

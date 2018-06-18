@@ -47,13 +47,13 @@ namespace SpeedDate.ServerPlugins.Profiles
 
         public int EditProfilePermissionLevel = 0;
 
-        private readonly Dictionary<string, ObservableServerProfile> profiles;
+        private readonly Dictionary<string, ObservableServerProfile> profiles = new Dictionary<string, ObservableServerProfile>();
 
         private AuthPlugin _auth;
         private CockroachDbPlugin database;
 
-        private readonly HashSet<string> _debouncedSaves;
-        private readonly HashSet<string> debouncedClientUpdates;
+        private readonly HashSet<string> _debouncedSaves = new HashSet<string>();
+        private readonly HashSet<string> debouncedClientUpdates = new HashSet<string>();
 
         protected readonly Logger Logger = LogManager.GetLogger(typeof(ProfilesPlugin).Name);
 
@@ -66,16 +66,8 @@ namespace SpeedDate.ServerPlugins.Profiles
         /// </summary>
         public ProfileFactory ProfileFactory { get; set; }
 
-        public ProfilesPlugin()
-        {
-            profiles = new Dictionary<string, ObservableServerProfile>();
-            _debouncedSaves = new HashSet<string>();
-            debouncedClientUpdates = new HashSet<string>();
-        }
-
         public override void Loaded(IPluginProvider pluginProvider)
         {
-
             _auth = pluginProvider.Get<AuthPlugin>();
             _auth.LoggedIn += OnLoggedIn;
 

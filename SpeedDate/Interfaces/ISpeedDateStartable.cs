@@ -1,4 +1,5 @@
 ﻿using System;
+using SpeedDate.Configuration;
 
 namespace SpeedDate.Interfaces
 {
@@ -7,7 +8,7 @@ namespace SpeedDate.Interfaces
         event Action Started;
         event Action Stopped;
 
-        void Start();
+        void Start(NetworkConfig networkConfig);
         void Stop();
     }
 }
