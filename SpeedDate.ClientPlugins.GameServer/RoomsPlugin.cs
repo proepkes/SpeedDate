@@ -7,11 +7,11 @@ using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
-    public delegate void RoomCreationCallback(RoomController controller, string error);
-    public delegate void RoomAccessValidateCallback(UsernameAndPeerIdPacket usernameAndPeerId, string error);
+    public delegate void RoomCreationCallback(RoomController controller);
+    public delegate void RoomAccessValidateCallback(UsernameAndPeerIdPacket usernameAndPeerId);
 
-    public delegate void RegisterSpawnedProcessCallback(SpawnTaskController taskController, string error);
-    public delegate void CompleteSpawnedProcessCallback(bool isSuccessful, string error);
+    public delegate void RegisterSpawnedProcessCallback(SpawnTaskController taskController);
+    public delegate void CompleteSpawnedProcessCallback();
 
     public class RoomsPlugin : SpeedDateClientPlugin
     {
@@ -41,11 +41,11 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <summary>
         /// Sends a request to register a room to master server
         /// </summary>
-        public void RegisterRoom(RoomOptions options, RoomCreationCallback callback)
+        public void RegisterRoom(RoomOptions options, RoomCreationCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -54,7 +54,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 if (status != ResponseStatus.Success)
                 {
                     // Failed to register room
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -65,7 +65,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 // Save the reference
                 _localCreatedRooms[roomId] = controller;
 
-                callback.Invoke(controller, null);
+                callback.Invoke(controller);
 
                 // Invoke event
                 RoomRegistered?.Invoke(controller);
@@ -116,19 +116,12 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <param name="roomId"></param>
         /// <param name="token"></param>
         /// <param name="callback"></param>
-        public void ValidateAccess(int roomId, string token, RoomAccessValidateCallback callback)
+        /// <param name="errorCallback"></param>
+        public void ValidateAccess(int roomId, string token, RoomAccessValidateCallback callback, ErrorCallback errorCallback)
         {
-            ValidateAccess(roomId, token, callback, Connection);
-        }
-
-        /// <summary>
-        /// Sends a request to master server, to see if a given token is valid
-        /// </summary>
-        public void ValidateAccess(int roomId, string token, RoomAccessValidateCallback callback, IClientSocket connection)
-        {
-            if (!connection.IsConnected)
+            if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -138,15 +131,15 @@ namespace SpeedDate.ClientPlugins.GameServer
                 Token = token
             };
 
-            connection.SendMessage((ushort)OpCodes.ValidateRoomAccess, packet, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.ValidateRoomAccess, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
-                callback.Invoke(response.Deserialize(new UsernameAndPeerIdPacket()), null);
+                callback.Invoke(response.Deserialize(new UsernameAndPeerIdPacket()));
             });
         }
 
@@ -250,11 +243,11 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// On successfull registration, callback contains <see cref="SpawnTaskController"/>, which 
         /// has a dictionary of properties, that were given when requesting a process to be spawned
         /// </summary>
-        public void RegisterSpawnedProcess(int spawnId, string spawnCode, RegisterSpawnedProcessCallback callback)
+        public void RegisterSpawnedProcess(int spawnId, string spawnCode, RegisterSpawnedProcessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -268,7 +261,7 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -276,7 +269,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 var process = new SpawnTaskController(this, spawnId, properties, Connection);
 
-                callback.Invoke(process, null);
+                callback.Invoke(process);
             });
         }
 
@@ -284,11 +277,11 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// This method should be called, when spawn process is finalized (finished spawning).
         /// For example, when spawned game server fully starts
         /// </summary>
-        public void FinalizeSpawnedProcess(int spawnId, CompleteSpawnedProcessCallback callback, Dictionary<string, string> finalizationData = null)
+        public void FinalizeSpawnedProcess(int spawnId, CompleteSpawnedProcessCallback callback, ErrorCallback errorCallback, Dictionary<string, string> finalizationData = null)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -302,11 +295,11 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
     }

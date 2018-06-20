@@ -667,16 +667,13 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             var requestData = new Dictionary<string, string>().FromBytes(message.AsBytes());
 
-            Room.GetAccess(message.Peer, requestData, (access, error) =>
+            Room.GetAccess(message.Peer, requestData, (access) =>
             {
-                if (access == null)
-                {
-                    message.Respond(error ?? "Failed to get access to game", ResponseStatus.Failed);
-                    return;
-                }
-
                 // Send back the access
                 message.Respond(access, ResponseStatus.Success);
+            }, error =>
+            {
+                message.Respond($"Failed to get access to game: {error}", ResponseStatus.Failed);
             });
         }
 

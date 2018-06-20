@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.ClientPlugins
+﻿namespace SpeedDate
 {
     /// <summary>
     /// Generic success callback declaration.

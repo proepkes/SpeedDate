@@ -17,7 +17,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
     /// </summary>
     public class SecurityPlugin : SpeedDateClientPlugin
     {
-        public delegate void PermissionLevelCallback(int? permissionLevel, string error);
+        public delegate void PermissionLevelCallback(int? permissionLevel);
 
         private const int RsaKeySize = 512;
 
@@ -32,17 +32,18 @@ namespace SpeedDate.ClientPlugins.Peer.Security
 
         public event Action PermissionsLevelChanged;
 
-        public void RequestPermissionLevel(string key, PermissionLevelCallback callback)
+        public void RequestPermissionLevel(string key, PermissionLevelCallback callback, ErrorCallback errorCallback)
         {
             Connection.SendMessage((ushort) OpCodes.RequestPermissionLevel, key, (status, response) =>
             {
-                if (status != ResponseStatus.Success) callback.Invoke(null, response.AsString("Unknown error"));
+                if (status != ResponseStatus.Success) 
+                    errorCallback.Invoke(response.AsString("Unknown error"));
 
                 CurrentPermissionLevel = response.AsInt();
 
                 PermissionsLevelChanged?.Invoke();
 
-                callback.Invoke(CurrentPermissionLevel, null);
+                callback.Invoke(CurrentPermissionLevel);
             });
         }
 

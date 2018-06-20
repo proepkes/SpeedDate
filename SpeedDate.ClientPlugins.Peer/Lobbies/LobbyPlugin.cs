@@ -14,8 +14,8 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 {
     public class LobbyPlugin : SpeedDateClientPlugin
     {
-        public delegate void JoinLobbyCallback(JoinedLobby lobby, string error);
-        public delegate void CreateLobbyCallback(int? lobbyId, string error);
+        public delegate void JoinLobbyCallback(JoinedLobby lobby);
+        public delegate void CreateLobbyCallback(int lobbyId);
 
         /// <summary>
         /// Invoked, when user joins a lobby
@@ -51,38 +51,26 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// Sends a request to create a lobby and joins it
         /// </summary>
         public void CreateAndJoin(string factory, Dictionary<string, string> properties, 
-            JoinLobbyCallback callback)
+            JoinLobbyCallback callback, ErrorCallback errorCallback)
         {
-            CreateLobby(factory, properties, (id, error) =>
+            CreateLobby(factory, properties, id =>
             {
-                if (!id.HasValue)
+                JoinLobby(id, callback.Invoke, error =>
                 {
-                    callback.Invoke(null, "Failed to create lobby: " + error);
-                    return;
-                }
-
-                JoinLobby(id.Value, (lobby, joinError) =>
-                {
-                    if (lobby == null)
-                    {
-                        callback.Invoke(null, "Failed to join the lobby: " + joinError);
-                        return;
-                    }
-
-                    callback.Invoke(lobby, null);
+                    errorCallback.Invoke("Failed to join the lobby: " + error);
                 });
-            });
+            }, error => errorCallback.Invoke("Failed to create lobby: " + error));
         }
 
         /// <summary>
         /// Sends a request to create a lobby, using a specified factory
         /// </summary>
         public void CreateLobby(string factory, Dictionary<string, string> properties, 
-            CreateLobbyCallback callback)
+            CreateLobbyCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");   
+                errorCallback.Invoke("Not connected");   
                 return;
             }
 
@@ -92,24 +80,24 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
                 var lobbyId = response.AsInt();
 
-                callback.Invoke(lobbyId, null);
+                callback.Invoke(lobbyId);
             });
         }
 
         /// <summary>
         /// Sends a request to join a lobby
         /// </summary>
-        public void JoinLobby(int lobbyId, JoinLobbyCallback callback)
+        public void JoinLobby(int lobbyId, JoinLobbyCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -118,7 +106,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -129,7 +117,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 if (_joinedLobbies.ContainsKey(key))
                 {
                     // If there's already a lobby
-                    callback.Invoke(_joinedLobbies[key], null);
+                    callback.Invoke(_joinedLobbies[key]);
                     return;
                 }
 
@@ -140,7 +128,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
                 // Save the lobby
                 _joinedLobbies[key] = joinedLobby;
 
-                callback.Invoke(joinedLobby, null);
+                callback.Invoke(joinedLobby);
 
                 LobbyJoined?.Invoke(joinedLobby);
             });
@@ -280,11 +268,11 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         /// <summary>
         /// Sends a request to get access to room, which is assigned to this lobby
         /// </summary>
-        public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback)
+        public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -292,7 +280,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -300,7 +288,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
 
                 _roomPlugin.TriggerAccessReceivedEvent(access);
 
-                callback.Invoke(access, null);
+                callback.Invoke(access);
             });
         }
     }

@@ -20,10 +20,10 @@ namespace ConsoleGame
                 server.Rooms.RegisterSpawnedProcess(
                     CommandLineArgs.SpawnId,
                     CommandLineArgs.SpawnCode,
-                    (controller, error) =>
+                    (controller) =>
                     {
-                        Console.WriteLine(error ?? "Registered to Master");
-                    });
+                        Console.WriteLine("Registered to Master");
+                    }, Console.WriteLine);
             };
 
             server.Start("GameServerConfig.xml");

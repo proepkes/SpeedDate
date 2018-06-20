@@ -6,8 +6,8 @@ using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
-    public delegate void RoomAccessProviderCallback(RoomAccessPacket access, string error);
-    public delegate void RoomAccessProvider(UsernameAndPeerIdPacket requester, RoomAccessProviderCallback giveAccess);
+    public delegate void RoomAccessProviderCallback(RoomAccessPacket access);
+    public delegate void RoomAccessProvider(UsernameAndPeerIdPacket requester, RoomAccessProviderCallback giveAccess, ErrorCallback errorCallback);
 
     /// <summary>
     /// Instance of this class will be created when room registration is completed.
@@ -112,9 +112,9 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         /// <param name="token"></param>
         /// <param name="callback"></param>
-        public void ValidateAccess(string token, RoomAccessValidateCallback callback)
+        public void ValidateAccess(string token, RoomAccessValidateCallback callback, ErrorCallback errorCallback)
         {
-            _roomsPlugin.ValidateAccess(RoomId, token, callback, Connection);
+            _roomsPlugin.ValidateAccess(RoomId, token, callback, errorCallback);
         }
 
         public void PlayerLeft(int peerId)
@@ -133,9 +133,9 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         /// <param name="peerId"></param>
         /// <param name="callback"></param>
-        public void DefaultAccessProvider(UsernameAndPeerIdPacket requester, RoomAccessProviderCallback callback)
+        public void DefaultAccessProvider(UsernameAndPeerIdPacket requester, RoomAccessProviderCallback callback, ErrorCallback errorCallback)
         {
-            callback.Invoke(new RoomAccessPacket()
+            callback.Invoke(new RoomAccessPacket
             {
                RoomIp = Options.RoomIp,
                RoomPort = Options.RoomPort,
@@ -143,7 +143,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                RoomId = RoomId,
                Token = Guid.NewGuid().ToString(),
                SceneName = "SceneName"
-            }, null);
+            });
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace SpeedDate.ClientPlugins.GameServer
             };
 
             // Invoke the access provider
-            accessProvider.Invoke(requester, (access, error) =>
+            accessProvider.Invoke(requester, (access) =>
             {
                 // In case provider timed out
                 if (isProviderDone)
@@ -199,18 +199,20 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 isProviderDone = true;
 
-                if (access == null)
-                {
-                    // If access is not provided
-                    message.Respond(error ?? "", ResponseStatus.Failed);
-                    return;
-                }
-
                 message.Respond(access, ResponseStatus.Success);
 
                 if (Logger.IsLogging(LogLevel.Trace))
                     Logger.Trace("Room controller gave address to peer " + data.PeerId + ":" + access);
 
+            }, error =>
+            {
+                // In case provider timed out
+                if (isProviderDone)
+                    return;
+
+                isProviderDone = true;
+                
+                message.Respond(error, ResponseStatus.Failed);
             });
 
             // Timeout the access provider

@@ -12,7 +12,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
     {
         private SecurityPlugin _securityPlugin;
 
-        public delegate void LoginCallback(AccountInfoPacket accountInfo, string error);
+        public delegate void LoginCallback(AccountInfoPacket accountInfo);
 
         private bool _isLoggingIn;
 
@@ -112,34 +112,34 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// <summary>
         /// Sends a request to server, to log in as a guest
         /// </summary>
-        public void LogInAsGuest(LoginCallback callback)
+        public void LogInAsGuest(LoginCallback callback, ErrorCallback errorCallback)
         {
             LogIn(new Dictionary<string, string>()
             {
                 {"guest", "" }
-            }, callback);
+            }, callback, errorCallback);
         }
 
         /// <summary>
         /// Sends a login request, using given credentials
         /// </summary>
-        public void LogIn(string username, string password, LoginCallback callback)
+        public void LogIn(string username, string password, LoginCallback callback, ErrorCallback errorCallback)
         {
             LogIn(new Dictionary<string, string>
             {
                 {"username", username},
                 {"password", password}
-            }, callback);
+            }, callback, errorCallback);
         }
 
         /// <summary>
         /// Sends a generic login request
         /// </summary>
-        public void LogIn(Dictionary<string, string> data, LoginCallback callback)
+        public void LogIn(Dictionary<string, string> data, LoginCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
@@ -152,7 +152,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 if (aesKey == null)
                 {
                     _isLoggingIn = false;
-                    callback.Invoke(null, "Failed to log in due to security issues");
+                    errorCallback.Invoke("Failed to log in due to security issues");
                     return;
                 }
 
@@ -164,7 +164,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                     if (status != ResponseStatus.Success)
                     {
-                        callback.Invoke(null, response.AsString("Unknown error"));
+                        errorCallback.Invoke(response.AsString("Unknown error"));
                         return;
                     }
 
@@ -172,7 +172,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                     AccountInfo = response.Deserialize(new AccountInfoPacket());
 
-                    callback.Invoke(AccountInfo, null);
+                    callback.Invoke(AccountInfo);
 
                     LoggedIn?.Invoke();
                 });

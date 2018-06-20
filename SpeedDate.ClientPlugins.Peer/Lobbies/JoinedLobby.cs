@@ -208,17 +208,17 @@ namespace SpeedDate.ClientPlugins.Peer.Lobbies
         ///     Retrieves an access to room, which is assigned to this lobby
         /// </summary>
         /// <param name="callback"></param>
-        public void GetLobbyRoomAccess(RoomAccessCallback callback)
+        public void GetLobbyRoomAccess(RoomAccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.GetLobbyRoomAccess(new Dictionary<string, string>(), callback);
+            _lobbyServer.GetLobbyRoomAccess(new Dictionary<string, string>(), callback, errorCallback);
         }
 
         /// <summary>
         ///     Retrieves an access to room, which is assigned to this lobby
         /// </summary>
-        public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback)
+        public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.GetLobbyRoomAccess(properties, callback);
+            _lobbyServer.GetLobbyRoomAccess(properties, callback, errorCallback);
         }
 
         #region Handlers

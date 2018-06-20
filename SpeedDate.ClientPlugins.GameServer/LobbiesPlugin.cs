@@ -6,15 +6,15 @@ namespace SpeedDate.ClientPlugins.GameServer
 {
     public class LobbiesPlugin : SpeedDateClientPlugin
     {
-        public delegate void LobbyMemberDataCallback(LobbyMemberData memberData, string error);
+        public delegate void LobbyMemberDataCallback(LobbyMemberData memberData);
 
-        public delegate void LobbyInfoCallback(LobbyDataPacket info, string error);
+        public delegate void LobbyInfoCallback(LobbyDataPacket info);
         
         /// <summary>
         /// Retrieves lobby member data of user, who has connected to master server with
         /// a specified peerId
         /// </summary>
-        public void GetMemberData(int lobbyId, int peerId, LobbyMemberDataCallback callback)
+        public void GetMemberData(int lobbyId, int peerId, LobbyMemberDataCallback callback, ErrorCallback errorCallback)
         {
             var packet = new IntPairPacket
             {
@@ -26,30 +26,30 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
                 var memberData = response.Deserialize(new LobbyMemberData());
-                callback.Invoke(memberData, null);
+                callback.Invoke(memberData);
             });
         }
         
         /// <summary>
         /// Retrieves information about the lobby
         /// </summary>
-        public void GetLobbyInfo(int lobbyId, LobbyInfoCallback callback)
+        public void GetLobbyInfo(int lobbyId, LobbyInfoCallback callback, ErrorCallback errorCallback)
         {
             Connection.SendMessage((ushort)OpCodes.GetLobbyInfo, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
                 var memberData = response.Deserialize(new LobbyDataPacket());
-                callback.Invoke(memberData, null);
+                callback.Invoke(memberData);
             });
         }
     }

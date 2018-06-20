@@ -12,10 +12,13 @@ namespace SpeedDate.Client.Spawner.Console
             var spawner = new Spawner();
             
             spawner.Connected += () => spawner.SpawnApi.RegisterSpawner(new SpawnerOptions { Region = "EU" },
-                (controller, error) =>
+                controller =>
                 {
                     System.Console.WriteLine("Registered spawner");
 
+                }, reason =>
+                {
+                    System.Console.WriteLine($"Registered failed: {reason}");
                 });
             
             //Example configuring in code

@@ -18,12 +18,11 @@ namespace SpeedDate.ClientPlugins.Peer.MatchMaker
         ///     (You can implement your own filtering by extending modules or "classes"
         ///     that implement <see cref="IGamesProvider" />)
         /// </summary>
-        public void FindGames(Dictionary<string, string> filter, FindGamesCallback callback)
+        public void FindGames(Dictionary<string, string> filter, FindGamesCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                Logs.Error("Not connected");
-                callback.Invoke(new List<GameInfoPacket>());
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -31,8 +30,7 @@ namespace SpeedDate.ClientPlugins.Peer.MatchMaker
             {
                 if (status != ResponseStatus.Success)
                 {
-                    Logs.Error(response.AsString("Unknown error while requesting a list of games"));
-                    callback.Invoke(new List<GameInfoPacket>());
+                    errorCallback.Invoke(response.AsString("Unknown error while requesting a list of games"));
                     return;
                 }
 

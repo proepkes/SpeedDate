@@ -8,13 +8,13 @@ using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 {
-    public delegate void ClientSpawnRequestCallback(SpawnRequestController controller, string error);
+    public delegate void ClientSpawnRequestCallback(SpawnRequestController controller);
 
     public class SpawnRequestPlugin : SpeedDateClientPlugin
     {
-        public delegate void AbortSpawnHandler(bool isSuccessful, string error);
+        public delegate void AbortSpawnHandler();
 
-        public delegate void FinalizationDataHandler(Dictionary<string, string> data, string error);
+        public delegate void FinalizationDataHandler(Dictionary<string, string> data);
 
         private readonly Dictionary<int, SpawnRequestController> _localSpawnRequests;
 
@@ -26,11 +26,11 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// <summary>
         /// Sends a request to master server, to spawn a process in a given region, and with given options
         /// </summary>
-        public void RequestSpawn(Dictionary<string, string> options, string region, ClientSpawnRequestCallback callback)
+        public void RequestSpawn(Dictionary<string, string> options, string region, ClientSpawnRequestCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -44,7 +44,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
@@ -55,7 +55,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
                 _localSpawnRequests[controller.SpawnId] = controller;
 
-                callback.Invoke(controller, null);
+                callback.Invoke(controller);
             });
         }
 
@@ -65,41 +65,35 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// <param name="spawnId"></param>
         public void AbortSpawn(int spawnId)
         {
-            AbortSpawn(spawnId, (successful, error) =>
+            AbortSpawn(spawnId, () =>
+            {
+            }, error =>
             {
                 if (error != null)
                     Logs.Error(error);
-            }, Connection);
+            });
         }
 
         /// <summary>
         /// Sends a request to abort spawn request, which was not yet finalized
         /// </summary>
-        public void AbortSpawn(int spawnId, AbortSpawnHandler callback)
+        public void AbortSpawn(int spawnId, AbortSpawnHandler callback, ErrorCallback errorCallback)
         {
-            AbortSpawn(spawnId, callback, Connection);
-        }
-
-        /// <summary>
-        /// Sends a request to abort spawn request, which was not yet finalized
-        /// </summary>
-        public void AbortSpawn(int spawnId, AbortSpawnHandler callback, IClientSocket connection)
-        {
-            if (!connection.IsConnected)
+            if (!Connection.IsConnected)
             {
-                callback.Invoke(false, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
-            connection.SendMessage((ushort)OpCodes.AbortSpawnRequest, spawnId, (status, response) =>
+            Connection.SendMessage((ushort)OpCodes.AbortSpawnRequest, spawnId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(false, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(true, null);
+                callback.Invoke();
             });
         }
 
@@ -107,22 +101,11 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// Retrieves data, which was given to master server by a spawned process,
         /// which was finalized
         /// </summary>
-        /// <param name="spawnId"></param>
-        /// <param name="callback"></param>
-        public void GetFinalizationData(int spawnId, FinalizationDataHandler callback)
-        {
-            GetFinalizationData(spawnId, callback, Connection);
-        }
-
-        /// <summary>
-        /// Retrieves data, which was given to master server by a spawned process,
-        /// which was finalized
-        /// </summary>
-        public void GetFinalizationData(int spawnId, FinalizationDataHandler callback, IClientSocket connection)
+        public void GetFinalizationData(int spawnId, FinalizationDataHandler callback, ErrorCallback errorCallback, IClientSocket connection)
         {
             if (!connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -130,11 +113,11 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
-                callback.Invoke(new Dictionary<string, string>().FromBytes(response.AsBytes()), null);
+                callback.Invoke(new Dictionary<string, string>().FromBytes(response.AsBytes()));
             });
         }
 
@@ -145,8 +128,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// <returns></returns>
         public SpawnRequestController GetRequestController(int spawnId)
         {
-            SpawnRequestController controller;
-            _localSpawnRequests.TryGetValue(spawnId, out controller);
+            _localSpawnRequests.TryGetValue(spawnId, out var controller);
 
             return controller;
         }

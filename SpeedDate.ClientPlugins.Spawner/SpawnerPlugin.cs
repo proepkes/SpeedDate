@@ -11,7 +11,7 @@ using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.ClientPlugins.Spawner
 {
-    public delegate void RegisterSpawnerCallback(SpawnerController spawner, string error);
+    public delegate void RegisterSpawnerCallback(SpawnerController spawner);
 
     public class SpawnerPlugin : SpeedDateClientPlugin
     {
@@ -46,12 +46,12 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// <summary>
         /// Sends a request to master server, to register an existing spawner with given options
         /// </summary>
-        public void RegisterSpawner(SpawnerOptions options, RegisterSpawnerCallback callback)
+        public void RegisterSpawner(SpawnerOptions options, RegisterSpawnerCallback callback, ErrorCallback errorCallback)
         {
             _logger.Info("Registering Spawner...");
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -70,7 +70,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                 // Save reference
                 _locallyCreatedSpawners[spawnerId] = controller;
 
-                callback.Invoke(controller, null);
+                callback.Invoke(controller);
                 
                 // Invoke the event
                 SpawnerRegistered?.Invoke(controller);

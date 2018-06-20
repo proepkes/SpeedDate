@@ -8,17 +8,17 @@ namespace SpeedDate.ClientPlugins.GameServer
 {
     public class PeerInfoPlugin : SpeedDateClientPlugin
     {
-        public delegate void PeerAccountInfoCallback(PeerAccountInfoPacket info, string error);
+        public delegate void PeerAccountInfoCallback(PeerAccountInfoPacket info);
         
         /// <summary>
         /// Gets account information of a client, who is connected to master server, 
         /// and who's peer id matches the one provided
         /// </summary>
-        public void GetPeerAccountInfo(int peerId, PeerAccountInfoCallback callback)
+        public void GetPeerAccountInfo(int peerId, PeerAccountInfoCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected to server");
+                errorCallback.Invoke("Not connected to server");
                 return;
             }
 
@@ -26,13 +26,13 @@ namespace SpeedDate.ClientPlugins.GameServer
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
                 var data = response.Deserialize(new PeerAccountInfoPacket());
 
-                callback.Invoke(data, null);
+                callback.Invoke(data);
             });
         }
     }

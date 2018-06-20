@@ -7,7 +7,7 @@ using SpeedDate.Packets.Rooms;
 
 namespace SpeedDate.ClientPlugins.Peer.Rooms
 {
-    public delegate void RoomAccessCallback(RoomAccessPacket access, string error);
+    public delegate void RoomAccessCallback(RoomAccessPacket access);
 
     public delegate void RoomAccessReceivedHandler(RoomAccessPacket access);
 
@@ -28,11 +28,11 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
         ///     and some other properties, which will be visible to the room (game server)
         /// </summary>
         public void GetAccess(int roomId, RoomAccessCallback callback, string password,
-            Dictionary<string, string> properties)
+            Dictionary<string, string> properties, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(null, "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -55,7 +55,7 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
 
                 LastReceivedAccess = access;
 
-                callback.Invoke(access, null);
+                callback.Invoke(access);
 
                 AccessReceived?.Invoke(access);
 

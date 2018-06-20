@@ -25,12 +25,10 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         public void FinalizeTask(Dictionary<string, string> finalizationData, Action callback)
         {
-            _spawnerClient.FinalizeSpawnedProcess(SpawnId, (successful, error) =>
+            _spawnerClient.FinalizeSpawnedProcess(SpawnId, callback.Invoke, error =>
             {
                 if (error != null)
                     Logs.Error("Error while completing the spawn task: " + error);
-
-                callback.Invoke();
             }, finalizationData);
         }
     }

@@ -316,15 +316,12 @@ namespace SpeedDate.ServerPlugins.Rooms
             }
 
             // Send room access request to peer who owns it
-            room.GetAccess(message.Peer, data.Properties, (packet, error) =>
+            room.GetAccess(message.Peer, data.Properties, (packet) =>
             {
-                if (packet == null)
-                {
-                    message.Respond(error, ResponseStatus.Unauthorized);
-                    return;
-                }
-
                 message.Respond(packet, ResponseStatus.Success);
+            }, err =>
+            {
+                message.Respond(err, ResponseStatus.Unauthorized);
             });
         }
 

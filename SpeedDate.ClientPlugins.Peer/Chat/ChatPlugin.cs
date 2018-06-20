@@ -8,8 +8,8 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
 {
     public class ChatPlugin : SpeedDateClientPlugin
     {
-        public delegate void ChatChannelsCallback(List<string> channels, string error);
-        public delegate void ChatUsersCallback(List<string> users, string error);
+        public delegate void ChatChannelsCallback(List<string> channels);
+        public delegate void ChatUsersCallback(List<string> users);
 
         public delegate void ChatUserHandler(string channel, string user);
         public delegate void ChatMessageHandler(ChatMessagePacket message);
@@ -135,11 +135,11 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <summary>
         /// Retrieves a list of channels, which user has joined
         /// </summary>
-        public void GetMyChannels(ChatChannelsCallback callback)
+        public void GetMyChannels(ChatChannelsCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(new List<string>(), "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -147,24 +147,24 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(new List<string>(), response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
                 var list = new List<string>().FromBytes(response.AsBytes());
 
-                callback.Invoke(list, null);
+                callback.Invoke(list);
             });
         }
         
         /// <summary>
         /// Retrieves a list of users in a channel
         /// </summary>
-        public void GetUsersInChannel(string channel, ChatUsersCallback callback)
+        public void GetUsersInChannel(string channel, ChatUsersCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
-                callback.Invoke(new List<string>(), "Not connected");
+                errorCallback.Invoke("Not connected");
                 return;
             }
 
@@ -172,13 +172,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
             {
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(new List<string>(), response.AsString("Unknown error"));
+                    errorCallback.Invoke(response.AsString("Unknown error"));
                     return;
                 }
 
                 var list = new List<string>().FromBytes(response.AsBytes());
 
-                callback.Invoke(list, null);
+                callback.Invoke(list);
             });
         }
 
@@ -187,6 +187,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         /// <param name="message"></param>
         /// <param name="callback"></param>
+        /// <param name="errorCallback"></param>
         public void SendToDefaultChannel(string message, SuccessCallback callback, ErrorCallback errorCallback)
         {
             SendMessage(new ChatMessagePacket()
@@ -203,6 +204,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <param name="channel"></param>
         /// <param name="message"></param>
         /// <param name="callback"></param>
+        /// <param name="errorCallback"></param>
         public void SendChannelMessage(string channel, string message, SuccessCallback callback, ErrorCallback errorCallback)
         {
             SendMessage(new ChatMessagePacket()
@@ -219,6 +221,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <param name="receiver"></param>
         /// <param name="message"></param>
         /// <param name="callback"></param>
+        /// <param name="errorCallback"></param>
         public void SendPrivateMessage(string receiver, string message, SuccessCallback callback, ErrorCallback errorCallback)
         {
             SendMessage(new ChatMessagePacket()

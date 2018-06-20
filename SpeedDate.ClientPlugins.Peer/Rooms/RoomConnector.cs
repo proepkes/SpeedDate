@@ -10,8 +10,6 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
     /// </summary>
     public abstract class RoomConnector
     {
-        public delegate void RoomConnectHandler(bool isSuccessful);
-
         /// <summary>
         ///     Latest access data. When switching scenes, if this is set,
         ///     connector should most likely try to use this data to connect to game server

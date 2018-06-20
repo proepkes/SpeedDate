@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -15,7 +14,7 @@ namespace SpeedDate.ServerPlugins.Rooms
     /// </summary>
     public class RegisteredRoom
     {
-        public delegate void GetAccessCallback(RoomAccessPacket access, string error);
+        public delegate void GetAccessCallback(RoomAccessPacket access);
 
         private readonly Dictionary<long, RoomAccessPacket> _accessesInUse;
 
@@ -68,28 +67,28 @@ namespace SpeedDate.ServerPlugins.Rooms
         /// </summary>
         /// <param name="peer"></param>
         /// <param name="callback"></param>
-        public void GetAccess(IPeer peer, GetAccessCallback callback)
+        public void GetAccess(IPeer peer, GetAccessCallback callback, ErrorCallback errorCallback)
         {
-            GetAccess(peer, new Dictionary<string, string>(), callback);
+            GetAccess(peer, new Dictionary<string, string>(), callback, errorCallback);
         }
 
         /// <summary>
         /// Sends a request to room, to retrieve an access to it for a specified peer, 
         /// with some extra properties
         /// </summary>
-        public void GetAccess(IPeer peer, Dictionary<string, string> properties, GetAccessCallback callback)
+        public void GetAccess(IPeer peer, Dictionary<string, string> properties, GetAccessCallback callback, ErrorCallback errorCallback)
         {
             // If request is already pending
             if (_requestsInProgress.Contains(peer.Id))
             {
-                callback.Invoke(null, "You've already requested an access to this room");
+                errorCallback.Invoke("You've already requested an access to this room");
                 return;
             }
 
             // If player is already in the game
             if (_players.ContainsKey(peer.Id))
             {
-                callback.Invoke(null, "You are already in this room");
+                errorCallback.Invoke("You are already in this room");
                 return;
             }
 
@@ -101,7 +100,7 @@ namespace SpeedDate.ServerPlugins.Rooms
                 // Restore the timeout
                 currentAccess.Timeout = DateTime.Now.AddSeconds(Options.AccessTimeoutPeriod);
 
-                callback.Invoke(currentAccess.Access, null);
+                callback.Invoke(currentAccess.Access);
                 return;
             }
 
@@ -114,7 +113,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
                 if (playerSlotsTaken >= Options.MaxPlayers)
                 {
-                    callback.Invoke(null, "Room is already full");
+                    errorCallback.Invoke("Room is already full");
                     return;
                 }
             }
@@ -142,7 +141,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
                 if (status != ResponseStatus.Success)
                 {
-                    callback.Invoke(null, response.AsString("Unknown Error"));
+                    errorCallback.Invoke(response.AsString("Unknown Error"));
                     return;
                 }
 
@@ -158,7 +157,7 @@ namespace SpeedDate.ServerPlugins.Rooms
                 // Save the access
                 _unconfirmedAccesses[access.Access.Token] = access;
 
-                callback.Invoke(access.Access, null);
+                callback.Invoke(access.Access);
             });
         }
 

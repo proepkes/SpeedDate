@@ -41,14 +41,14 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             _spawnServer.AbortSpawn(SpawnId);
         }
 
-        public void Abort(SpawnRequestPlugin.AbortSpawnHandler handler)
+        public void Abort(SpawnRequestPlugin.AbortSpawnHandler handler, ErrorCallback errorCallback)
         {
-            _spawnServer.AbortSpawn(SpawnId, handler);
+            _spawnServer.AbortSpawn(SpawnId, handler, errorCallback);
         }
 
-        public void GetFinalizationData(SpawnRequestPlugin.FinalizationDataHandler handler)
+        public void GetFinalizationData(SpawnRequestPlugin.FinalizationDataHandler handler, ErrorCallback errorCallback)
         {
-            _spawnServer.GetFinalizationData(SpawnId, handler, _connection);
+            _spawnServer.GetFinalizationData(SpawnId, handler, errorCallback,  _connection);
         }
 
         private void HandleStatusUpdate(IIncommingMessage message)
