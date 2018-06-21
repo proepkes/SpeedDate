@@ -16,8 +16,7 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
 
         public IProfilesDatabase ProfilesDatabase;
 
-        [Inject] 
-        private CockroachDbConfig config;
+        [Inject] private CockroachDbConfig _config;
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
@@ -26,18 +25,18 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
             {
                 var connStringBuilder = new NpgsqlConnectionStringBuilder
                 {
-                    Host = config.Host,
-                    Port = config.Port,
-                    Username = config.Username,
-                    Password = config.Password,
-                    Database = config.Database
+                    Host = _config.Host,
+                    Port = _config.Port,
+                    Username = _config.Username,
+                    Password = _config.Password,
+                    Database = _config.Database
                 };
 
                 var connectionString = CommandLineArgs.IsProvided(CommandLineArgs.Names.DbConnectionString)
                     ? CommandLineArgs.DbConnectionString
                     : connStringBuilder.ConnectionString;
 
-                if (config.CheckConnectionOnStartup)
+                if (_config.CheckConnectionOnStartup)
                 {
                     using (var con = new NpgsqlConnection(connectionString))
                     {

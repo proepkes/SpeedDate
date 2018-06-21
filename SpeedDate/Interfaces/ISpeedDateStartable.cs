@@ -8,7 +8,7 @@ namespace SpeedDate.Interfaces
         event Action Started;
         event Action Stopped;
 
-        void Start(NetworkConfig networkConfig);
+        void Start(IConfigProvider configProvider);
         void Stop();
     }
 }

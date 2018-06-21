@@ -16,7 +16,7 @@ namespace SpeedDate.Configuration
             _configFile = configFile;
         }
 
-        public SpeedDateConfig Create(IEnumerable<IConfig> configInstances)
+        public SpeedDateConfig Configure(IEnumerable<IConfig> configInstances)
         {
             var result = new SpeedDateConfig();
 
@@ -38,8 +38,7 @@ namespace SpeedDate.Configuration
             {
                 result.Plugins = new PluginsConfig
                 {
-                    LoadAll = Convert.ToBoolean(xmlParser["LoadAll"]),
-                    PluginsNamespaces = xmlParser["PluginsNamespaces"]
+                    Namespaces = xmlParser["Namespaces"]
                 };
             });
 

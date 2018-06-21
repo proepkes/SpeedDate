@@ -82,7 +82,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// </summary>
         public void UpdateProcessesCount(int spawnerId, int count)
         {
-            var packet = new IntPairPacket()
+            var packet = new IntPairPacket
             {
                 A = spawnerId,
                 B = count
@@ -130,7 +130,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             if (!Connection.IsConnected)
                 return;
 
-            Connection.SendMessage((ushort)OpCodes.ProcessStarted, new SpawnedProcessStartedPacket()
+            Connection.SendMessage((ushort)OpCodes.ProcessStarted, new SpawnedProcessStartedPacket
             {
                 CmdArgs = cmdArgs,
                 ProcessId = processId,

@@ -10,8 +10,8 @@ namespace SpeedDate.Server.Console
     {
         static void Main(string[] args)
         {
-            var speedDate = new SpeedDater();
-            speedDate.Start(new FileConfigProvider("ServerConfig.xml"));
+            var server = new SpeedDateServer();
+            server.Start(new FileConfigProvider("ServerConfig.xml"));
 
             System.Console.ReadLine();
         }

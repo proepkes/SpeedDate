@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
   <Network Address="0.0.0.0" Port="60125" />
-  <Plugins LoadAll="true" />
+  <Plugins Namespaces="*" />
 
   <AuthConfig
     EnableGuestLogin="true"

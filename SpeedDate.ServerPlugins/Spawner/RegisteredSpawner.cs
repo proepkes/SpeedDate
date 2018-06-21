@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
-using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -15,9 +13,9 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         private const int MaxConcurrentRequests = 8;
 
-        public int SpawnerId { get; set; }
-        public IPeer Peer { get; set; }
-        public SpawnerOptions Options { get; set; }
+        public int SpawnerId { get; }
+        public IPeer Peer { get; }
+        public SpawnerOptions Options { get; }
 
         private readonly Queue<SpawnTask> _queue;
 
@@ -42,15 +40,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         public bool CanSpawnAnotherProcess()
         {
-            // Unlimited
-            if (Options.MaxProcesses == 0)
-                return true;
-
-            // Spawner is busy
-            if (_queue.Count + ProcessesRunning >= Options.MaxProcesses)
-                return false;
-
-            return true;
+            return Options.MaxProcesses == 0 || _queue.Count + ProcessesRunning < Options.MaxProcesses;
         }
 
         public void AddTaskToQueue(SpawnTask task)
@@ -86,7 +76,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             var task = _queue.Dequeue();
 
-            var data = new SpawnRequestPacket()
+            var data = new SpawnRequestPacket
             {
                 SpawnerId = SpawnerId,
                 CustomArgs = task.CustomArgs,
@@ -95,34 +85,33 @@ namespace SpeedDate.ServerPlugins.Spawner
                 SpawnCode = task.UniqueCode
             };
 
-            var msg = MessageHelper.Create((ushort) OpCodes.SpawnRequest, data);
-            Peer.SendMessage(msg, (status, response) =>
+            Peer.SendMessage(MessageHelper.Create((ushort)OpCodes.SpawnRequest, data), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
                     task.Abort();
                     Logs.Error("Spawn request was not handled. Status: " + status + " | " + response.AsString("Unknown Error"));
-                    return;
                 }
             });
         }
 
         public void SendKillRequest(int spawnId, KillRequestCallback callback)
         {
-            var packet = new KillSpawnedProcessPacket()
+            var packet = new KillSpawnedProcessPacket
             {
                 SpawnerId = SpawnerId,
                 SpawnId = spawnId
             };
+
             Peer.SendMessage((ushort) OpCodes.KillSpawnedProcess, packet, (status, response) =>
             {
                 callback.Invoke(status == ResponseStatus.Success);
             });
         }
 
-        public void UpdateProcessesCount(int packetB)
+        public void UpdateProcessesCount(int value)
         {
-            ProcessesRunning = packetB;
+            ProcessesRunning = value;
         }
 
         public void OnProcessKilled()

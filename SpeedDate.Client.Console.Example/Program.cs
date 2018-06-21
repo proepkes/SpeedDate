@@ -16,12 +16,12 @@ namespace SpeedDate.Client.Console.Example
                         System.Console.WriteLine($"Player logged in as : {info.Username}");
 
                         gameClient.Spawn.RequestSpawn(new Dictionary<string, string>(), "EU",
-                            (controller) => { System.Console.WriteLine("Spawned"); }, System.Console.WriteLine);
+                            controller => { System.Console.WriteLine("Spawned"); }, System.Console.WriteLine);
                     },
                     error => { });
             };
 
-            gameClient.Start(new DefaultConfigProvider(new NetworkConfig("localhost", 60125), new PluginsConfig(true)));
+            gameClient.Start(new DefaultConfigProvider(new NetworkConfig("localhost", 60125), PluginsConfig.LoadAllPlugins));
             System.Console.ReadLine();
         }
     }

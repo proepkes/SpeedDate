@@ -47,16 +47,6 @@ namespace SpeedDate.ServerPlugins.Authentication
         /// </summary>
         public event AuthEventHandler LoggedOut;
 
-        /// <summary>
-        ///     Invoked, when user successfully registers an account
-        /// </summary>
-        public event Action<IPeer, IAccountData> Registered;
-
-        /// <summary>
-        ///     Invoked, when user successfully confirms his e-mail
-        /// </summary>
-        public event Action<IAccountData> EmailConfirmed;
-
         public override void Loaded(IPluginProvider pluginProvider)
         {
             _database = pluginProvider.Get<CockroachDbPlugin>();
@@ -140,38 +130,6 @@ namespace SpeedDate.ServerPlugins.Authentication
         public bool IsUserLoggedIn(string username)
         {
             return _loggedInUsers.ContainsKey(username);
-        }
-
-        /// <summary>
-        ///     Triggers the <see cref="LoggedOut" /> event
-        /// </summary>
-        protected void TriggerLoggedOutEvent(IUserExtension user)
-        {
-            LoggedOut?.Invoke(user);
-        }
-
-        /// <summary>
-        ///     Triggers the <see cref="LoggedIn" /> event
-        /// </summary>
-        protected void TriggerLoggedInEvent(IUserExtension user)
-        {
-            LoggedIn?.Invoke(user);
-        }
-
-        /// <summary>
-        ///     Triggers the <see cref="Registered" /> event
-        /// </summary>
-        protected void TriggerRegisteredEvent(IPeer peer, IAccountData account)
-        {
-            Registered?.Invoke(peer, account);
-        }
-
-        /// <summary>
-        ///     Triggers the <see cref="EmailConfirmed" /> event
-        /// </summary>
-        protected void TriggerEmailConfirmed(IAccountData account)
-        {
-            EmailConfirmed?.Invoke(account);
         }
 
         #region Message Handlers
@@ -269,10 +227,6 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             // Respond with success
             message.Respond(ResponseStatus.Success);
-
-            // Invoke the event
-            if (EmailConfirmed != null)
-                EmailConfirmed.Invoke(extension.AccountData);
         }
 
         /// <summary>
@@ -430,8 +384,6 @@ namespace SpeedDate.ServerPlugins.Authentication
             try
             {
                 db.InsertNewAccount(account);
-
-                Registered?.Invoke(message.Peer, account);
 
                 message.Respond(ResponseStatus.Success);
             }

@@ -52,8 +52,7 @@ namespace SpeedDate.Packets.Spawner
 
             properties = "[" + properties + "]";
 
-            return string.Format("PublicIp: {0}, MaxProcesses: {1}, Region: {2}, Properties: {3}",
-                MachineIp, MaxProcesses, Region, properties);
+            return $"PublicIp: {MachineIp}, MaxProcesses: {MaxProcesses}, Region: {Region}, Properties: {properties}";
         }
     }
 }

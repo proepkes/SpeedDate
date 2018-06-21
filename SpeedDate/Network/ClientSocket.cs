@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.LiteNetLib;
@@ -62,7 +63,7 @@ namespace SpeedDate.Network
             return this;
         }
 
-        public void WaitConnection(Action<IClientSocket> connectionCallback, float timeoutSeconds)
+        public void WaitForConnection(Action<IClientSocket> connectionCallback, float timeoutSeconds)
         {
             if (IsConnected)
             {
@@ -97,9 +98,9 @@ namespace SpeedDate.Network
             });
         }
 
-        public void WaitConnection(Action<IClientSocket> connectionCallback)
+        public void WaitForConnection(Action<IClientSocket> connectionCallback)
         {
-            WaitConnection(connectionCallback, 10);
+            WaitForConnection(connectionCallback, 10);
         }
 
         public void AddConnectionListener(Action callback, bool invokeInstantlyIfConnected = true)

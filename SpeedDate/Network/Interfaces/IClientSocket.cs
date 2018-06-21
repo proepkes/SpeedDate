@@ -51,14 +51,14 @@ namespace SpeedDate.Network.Interfaces
         /// </summary>
         /// <param name="connectionCallback"></param>
         /// <param name="timeoutSeconds"></param>
-        void WaitConnection(Action<IClientSocket> connectionCallback, float timeoutSeconds);
+        void WaitForConnection(Action<IClientSocket> connectionCallback, float timeoutSeconds);
 
         /// <summary>
         /// Invokes a callback when connection is established, or after the timeout
         /// (even if failed to connect). If already connected, callback is invoked instantly
         /// </summary>
         /// <param name="connectionCallback"></param>
-        void WaitConnection(Action<IClientSocket> connectionCallback);
+        void WaitForConnection(Action<IClientSocket> connectionCallback);
 
         /// <summary>
         /// Adds a listener, which is invoked when connection is established,

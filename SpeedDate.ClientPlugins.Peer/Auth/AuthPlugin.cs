@@ -19,12 +19,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         public bool IsLoggedIn { get; protected set; }
 
         public AccountInfoPacket AccountInfo;
-
-        public event Action LoggedIn;
-        public event Action Registered;
-        public event Action LoggedOut;
-
-
+        
         public override void Loaded(IPluginProvider pluginProvider)
         {
             base.Loaded(pluginProvider);
@@ -76,8 +71,6 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                     }
 
                     callback.Invoke();
-
-                    Registered?.Invoke();
                 });
             });
         }
@@ -88,25 +81,14 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void LogOut()
         {
-            LogOut(Connection);
-        }
-
-        /// <summary>
-        ///     Initiates a log out. In the process, disconnects and connects
-        ///     back to the server to ensure no state data is left on the server.
-        /// </summary>
-        public void LogOut(IClientSocket connection)
-        {
             if (!IsLoggedIn)
                 return;
 
             IsLoggedIn = false;
             AccountInfo = null;
 
-            if ((connection != null) && connection.IsConnected)
-                connection.Reconnect();
-
-            LoggedOut?.Invoke();
+            if (Connection != null && Connection.IsConnected)
+                Connection.Reconnect();
         }
 
         /// <summary>
@@ -173,8 +155,6 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                     AccountInfo = response.Deserialize(new AccountInfoPacket());
 
                     callback.Invoke(AccountInfo);
-
-                    LoggedIn?.Invoke();
                 });
             });
         }

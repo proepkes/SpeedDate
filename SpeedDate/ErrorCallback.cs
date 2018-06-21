@@ -3,6 +3,6 @@
     /// <summary>
     /// Generic error callback declaration.
     /// </summary>
-    /// <param name="reason"></param>
-    public delegate void ErrorCallback(string reason);
+    /// <param name="error"></param>
+    public delegate void ErrorCallback(string error);
 }

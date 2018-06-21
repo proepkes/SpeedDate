@@ -8,19 +8,25 @@ using SpeedDate.Network.Interfaces;
 
 namespace SpeedDate.Server
 {
-    internal sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable
+    public sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable
     {
         private const string InternalServerErrorMessage = "Internal Server Error";
+
+        private readonly SpeedDateKernel _kernel;
         private readonly Dictionary<long, IPeer> _connectedPeers;
         private readonly Dictionary<ushort, IPacketHandler> _handlers;
 
         [Inject] private ILogger _logger;
-
         [Inject] private IServerSocket _socket;
 
+        public event Action Started;
+        public event Action Stopped;
+        public event PeerActionHandler PeerConnected;
+        public event PeerActionHandler PeerDisconnected;
 
         public SpeedDateServer()
         {
+            _kernel = new SpeedDateKernel();
             _connectedPeers = new Dictionary<long, IPeer>();
             _handlers = new Dictionary<ushort, IPacketHandler>();
         }
@@ -30,9 +36,6 @@ namespace SpeedDate.Server
             _socket.Connected -= Connected;
             _socket.Disconnected -= Disconnected;
         }
-
-        public event PeerActionHandler PeerConnected;
-        public event PeerActionHandler PeerDisconnected;
 
         public void SetHandler(ushort opCode, IncommingMessageHandler handler)
         {
@@ -50,24 +53,25 @@ namespace SpeedDate.Server
             return peer;
         }
 
-        public event Action Started;
-        public event Action Stopped;
-
-        public void Start(NetworkConfig config)
+        public void Start(IConfigProvider configProvider)
         {
-            _socket.Connected += Connected;
-            _socket.Disconnected += Disconnected;
-
-            if (_socket.Listen(config.Port))
+            _kernel.Load(this, configProvider, config =>
             {
-                _logger.Info("Started on port: " + config.Port);
-                Started?.Invoke();
-            }
+                _socket.Connected += Connected;
+                _socket.Disconnected += Disconnected;
+
+                if (_socket.Listen(config.Network.Port))
+                {
+                    _logger.Info($"Listening on: {config.Network.Port}");
+                    Started?.Invoke();
+                }
+            });
         }
 
         public void Stop()
         {
             _socket.Stop();
+            _kernel.Stop();
             Stopped?.Invoke();
 
             _socket.Connected -= Connected;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -29,13 +30,12 @@ namespace SpeedDate.Configuration
 
     public class PluginsConfig
     {
-        public bool LoadAll { get; set; }
-        public string PluginsNamespaces { get; set; }
+        public static readonly PluginsConfig LoadAllPlugins = new PluginsConfig();
+        public string Namespaces { get; set; }
 
-        public PluginsConfig(bool loadAll = default(bool), string pluginsNamespaces = default(string))
+        public PluginsConfig(string namespaces = "*")
         {
-            LoadAll = loadAll;
-            PluginsNamespaces = pluginsNamespaces;
+            Namespaces = namespaces;
         }
     }
 
@@ -44,9 +44,19 @@ namespace SpeedDate.Configuration
         public string Address { get; set; }
         public int Port { get; set; }
 
+        public override string ToString()
+        {
+            return $"{Address}:{Port}";
+        }
+
         public NetworkConfig(string address = default(string) , int port = default(int))
         {
             Address = address;
+            Port = port;
+        }
+        public NetworkConfig(IPAddress address, int port = default(int))
+        {
+            Address = address.ToString();
             Port = port;
         }
     }

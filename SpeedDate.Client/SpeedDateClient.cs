@@ -4,6 +4,7 @@ using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.Client
 {
@@ -14,28 +15,34 @@ namespace SpeedDate.Client
 
         [Inject] private ILogger _logger;
         [Inject] private IClientSocket _connection;
+
         private int _port;
         private string _serverIp;
         private float _timeToConnect = 0.5f;
-
-
-        public void Dispose()
-        {
-            _connection.Disconnect();
-        }
+        private readonly SpeedDateKernel _kernel;
 
         public event Action Started;
         public event Action Stopped;
 
+        public bool IsConnected => _connection.IsConnected;
 
-        public void Start(NetworkConfig config)
+        public SpeedDateClient()
         {
-            ConnectAsync(config.Address, config.Port);
+            _kernel = new SpeedDateKernel();
+        }
+
+        public void Start(IConfigProvider configProvider)
+        {
+            _kernel.Load(this, configProvider, config =>
+            {
+                ConnectAsync(config.Network.Address, config.Network.Port);
+            });   
         }
 
         public void Stop()
         {
             _connection.Disconnect();
+            _kernel.Stop();
         }
 
         private async void ConnectAsync(string serverIp, int port)
@@ -66,6 +73,10 @@ namespace SpeedDate.Client
                 }
             });
         }
+        public void Dispose()
+        {
+            _connection.Disconnect();
+        }
 
         private void Disconnected()
         {
@@ -78,6 +89,11 @@ namespace SpeedDate.Client
             _timeToConnect = MinTimeToConnect;
             _logger.Info("Connected to: " + _serverIp + ":" + _port);
             Started?.Invoke();
+        }
+
+        public T GetPlugin<T>() where T : class, IPlugin
+        {
+            return _kernel.PluginProvider.Get<T>();
         }
     }
 }

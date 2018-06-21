@@ -14,8 +14,6 @@ namespace SpeedDate.ServerPlugins.Chat
 {
     class ChatPlugin : SpeedDateServerPlugin
     {
-        public bool UseAuthModule = true;
-
         public bool SetFirstChannelAsLocal = true;
 
         public bool SetLastChannelAsLocal = true;
@@ -44,13 +42,9 @@ namespace SpeedDate.ServerPlugins.Chat
         public override void Loaded(IPluginProvider pluginProvider)
         {
             //Setup auth dependencies
-           var auth = pluginProvider.Get<AuthPlugin>();
-
-            if (UseAuthModule && auth != null)
-            {
-                auth.LoggedIn += OnUserLoggedIn;
-                auth.LoggedOut += OnUserLoggedOut;
-            }
+            var auth = pluginProvider.Get<AuthPlugin>();
+            auth.LoggedIn += OnUserLoggedIn;
+            auth.LoggedOut += OnUserLoggedOut;
 
             // Set handlers
             Server.SetHandler((ushort)OpCodes.PickUsername, HandlePickUsername);

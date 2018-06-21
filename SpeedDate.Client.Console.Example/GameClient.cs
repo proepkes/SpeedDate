@@ -1,10 +1,10 @@
 ﻿using System;
 using SpeedDate.ClientPlugins.Peer.Auth;
 using SpeedDate.ClientPlugins.Peer.Chat;
-using SpeedDate.ClientPlugins.Peer.Lobbies;
+using SpeedDate.ClientPlugins.Peer.Lobby;
 using SpeedDate.ClientPlugins.Peer.MatchMaker;
-using SpeedDate.ClientPlugins.Peer.Profiles;
-using SpeedDate.ClientPlugins.Peer.Rooms;
+using SpeedDate.ClientPlugins.Peer.Profile;
+using SpeedDate.ClientPlugins.Peer.Room;
 using SpeedDate.ClientPlugins.Peer.Security;
 using SpeedDate.ClientPlugins.Peer.SpawnRequest;
 using SpeedDate.Configuration;
@@ -13,7 +13,7 @@ namespace SpeedDate.Client.Console.Example
 {
     class GameClient
     {
-        private readonly SpeedDater _speedDater;
+        private readonly SpeedDateClient client;
 
         public event Action Connected;
 
@@ -28,8 +28,8 @@ namespace SpeedDate.Client.Console.Example
 
         public GameClient()
         {
-            _speedDater = new SpeedDater();
-            _speedDater.Started += () => Connected?.Invoke();
+            client = new SpeedDateClient();
+            client.Started += () => Connected?.Invoke();
         }
 
         /// <summary>
@@ -37,15 +37,15 @@ namespace SpeedDate.Client.Console.Example
         /// </summary>
         public void Start(IConfigProvider configProvider)
         {
-            _speedDater.Start(configProvider);
-            Auth = _speedDater.PluginProver.Get<AuthPlugin>();
-            Chat = _speedDater.PluginProver.Get<ChatPlugin>();
-            Lobby = _speedDater.PluginProver.Get<LobbyPlugin>();
-            Matchmaker = _speedDater.PluginProver.Get<MatchmakerPlugin>();
-            Profile = _speedDater.PluginProver.Get<ProfilePlugin>();
-            Room = _speedDater.PluginProver.Get<RoomPlugin>();
-            Security = _speedDater.PluginProver.Get<SecurityPlugin>();
-            Spawn = _speedDater.PluginProver.Get<SpawnRequestPlugin>();
+            client.Start(configProvider);
+            Auth = client.GetPlugin<AuthPlugin>();
+            Chat = client.GetPlugin<ChatPlugin>();
+            Lobby = client.GetPlugin<LobbyPlugin>();
+            Matchmaker = client.GetPlugin<MatchmakerPlugin>();
+            Profile = client.GetPlugin<ProfilePlugin>();
+            Room = client.GetPlugin<RoomPlugin>();
+            Security = client.GetPlugin<SecurityPlugin>();
+            Spawn = client.GetPlugin<SpawnRequestPlugin>();
         }
     }
 }

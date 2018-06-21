@@ -15,17 +15,11 @@ namespace SpeedDate.ServerPlugins.Spawner
 {
     internal class SpawnerPlugin : SpeedDateServerPlugin
     {
-        public delegate void SpawnedProcessRegistrationHandler(SpawnTask task, IPeer peer);
-
-        [Inject]
-        private readonly ILogger _logger;
-
-        [Inject]
-        private readonly SpawnerConfig _config;
-
-        private readonly Dictionary<int, RegisteredSpawner> _spawners = new Dictionary<int, RegisteredSpawner>();
+        [Inject] private readonly ILogger _logger;
+        [Inject] private readonly SpawnerConfig _config;
 
         private readonly Dictionary<int, SpawnTask> _spawnTasks = new Dictionary<int, SpawnTask>();
+        private readonly Dictionary<int, RegisteredSpawner> _spawners = new Dictionary<int, RegisteredSpawner>();
 
         private int _spawnerId;
         private int _spawnTaskId;
@@ -45,11 +39,6 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
         }
-
-        public event Action<RegisteredSpawner> SpawnerRegistered;
-        public event Action<RegisteredSpawner> SpawnerDestroyed;
-        public event SpawnedProcessRegistrationHandler SpawnedProcessRegistered;
-
 
         public virtual RegisteredSpawner CreateSpawner(IPeer peer, SpawnerOptions options)
         {
@@ -72,9 +61,6 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             // Add the spawner to a list of all spawners
             _spawners[spawner.SpawnerId] = spawner;
-
-            // Invoke the event
-            SpawnerRegistered?.Invoke(spawner);
 
             return spawner;
         }
@@ -103,8 +89,6 @@ namespace SpeedDate.ServerPlugins.Spawner
             _spawners.Remove(spawner.SpawnerId);
 
             _logger.Info($"Spawner disconnected. ID: {spawner.SpawnerId}");
-            // Invoke the event
-            SpawnerDestroyed?.Invoke(spawner);
         }
 
         public int GenerateSpawnerId()
@@ -210,16 +194,16 @@ namespace SpeedDate.ServerPlugins.Spawner
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(_config.QueueUpdateFrequency));
 
-                foreach (var spawner in _spawners.Values)
-                    try
-                    {
+                try
+                {
+                    foreach (var spawner in _spawners.Values)
                         spawner.UpdateQueue();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error(e);
-                        return;
-                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e);
+                    return;
+                }
             }
         }
 
@@ -369,8 +353,6 @@ namespace SpeedDate.ServerPlugins.Spawner
             }
 
             task.OnRegistered(message.Peer);
-
-            SpawnedProcessRegistered?.Invoke(task, message.Peer);
 
             message.Respond(task.Properties.ToBytes(), ResponseStatus.Success);
         }

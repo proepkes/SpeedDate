@@ -27,7 +27,7 @@ namespace SpeedDate.Configuration
             }
         }
         
-        public SpeedDateConfig Create(IEnumerable<IConfig> configInstances)
+        public SpeedDateConfig Configure(IEnumerable<IConfig> configInstances)
         {
             return _result;
         }

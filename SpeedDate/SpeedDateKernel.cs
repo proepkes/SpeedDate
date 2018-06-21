@@ -14,49 +14,33 @@ using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate
 {
-    public sealed class SpeedDater
+    public delegate void KernelStartedCallback(SpeedDateConfig config);
+    public sealed class SpeedDateKernel
     {
         private SpeedDateConfig _config;
-        private TinyIoCContainer _kernel;
-
-        public event Action Started;
-        public event Action Stopped;
-
-        public bool IsStarted { get; set; }
-
-        public IPluginProvider PluginProver
+        private TinyIoCContainer _container;
+        
+        public IPluginProvider PluginProvider
         {
             get;
             private set;
         }
 
-
-        public void Start(IConfigProvider configProvider)
+        public void Load(ISpeedDateStartable startable, IConfigProvider configProvider, KernelStartedCallback startedCallback)
         {
             var logger = LogManager.GetLogger("SpeedDate");
 
-            _kernel = CreateKernel();
+            _container = CreateContainer(startable);
+
+            _config = configProvider.Configure(_container.ResolveAll<IConfig>());
             
-            _config = configProvider.Create(_kernel.ResolveAll<IConfig>());
+            _container.BuildUp(startable);
 
-            var startable = _kernel.Resolve<ISpeedDateStartable>();
-            _kernel.BuildUp(startable);
-            startable.Started += () =>
-            {
-                IsStarted = true;
-                Started?.Invoke();
-            };
-            startable.Stopped += () =>
-            {
-                IsStarted = false;
-                Stopped?.Invoke();
-            };
+            PluginProvider = _container.Resolve<IPluginProvider>();
 
-            PluginProver = _kernel.Resolve<IPluginProvider>();
-
-            foreach (var plugin in _kernel.ResolveAll<IPlugin>())
+            foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
-                if (_config.Plugins.LoadAll || _config.Plugins.PluginsNamespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
+                if (_config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
                 {
                     //Inject configs, cannot use _kernel because the configProvider may have added additional IConfigs
                     var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
@@ -72,29 +56,28 @@ namespace SpeedDate
                     }
 
                     //Inject ILogger & other possible dependencies, Configs are already set above and will not be overwritten
-                    _kernel.BuildUp(plugin);
+                    _container.BuildUp(plugin);
 
-
-                    PluginProver.RegisterPlugin(plugin);
+                    PluginProvider.RegisterPlugin(plugin);
                 }
             }
 
-            foreach (var plugin in PluginProver.GetAll())
+            foreach (var plugin in PluginProvider.GetAll())
             {
-                plugin.Loaded(PluginProver);
+                plugin.Loaded(PluginProvider);
                 logger.Info($"Loaded {plugin.GetType().Name}");
             }
 
-            startable.Start(_config.Network);
+            startedCallback.Invoke(_config);
         }
 
         public void Stop()
         {
-            _kernel.TryResolve<ISpeedDateStartable>(out var startable);
-            startable.Stop();
+            AppUpdater.Instance.keepRunning = false;
+            AppTimer.Instance.keepRunning = false;
         }
 
-        private static TinyIoCContainer CreateKernel()
+        private static TinyIoCContainer CreateContainer(ISpeedDateStartable startable)
         {
             try
             {
@@ -103,6 +86,18 @@ namespace SpeedDate
                 TinyIoCContainer.Current.Register<IServerSocket, ServerSocket>();
                 TinyIoCContainer.Current.Register<IPluginProvider, PluginProvider>();
                 TinyIoCContainer.Current.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
+
+                switch (startable)
+                {
+                    case IServer _:
+                        TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
+                            (IServer)startable);
+                        break;
+                    case IClient _:
+                        TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
+                            (IClient)startable);
+                        break;
+                }
 
                 //Register configs & plugins
                 foreach (var dllFile in
@@ -116,26 +111,6 @@ namespace SpeedDate
                     {
                         var pluginConfig = (IConfig)Activator.CreateInstance(pluginConfigType);
                         TinyIoCContainer.Current.Register(pluginConfig, pluginConfigType.FullName);
-                    }
-
-                    foreach (var startableType in assembly.DefinedTypes.Where(info =>
-                        !info.IsAbstract && !info.IsInterface && typeof(ISpeedDateStartable).IsAssignableFrom(info)))
-                    {
-                        var startableInstance = (ISpeedDateStartable)Activator.CreateInstance(startableType);
-
-                        switch (startableInstance)
-                        {
-                            case IServer _:
-                                TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
-                                    (IServer) startableInstance);
-                                break;
-                            case IClient _:
-                                TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
-                                    (IClient) startableInstance);
-                                break;
-                        }
-                        
-                        TinyIoCContainer.Current.Register(startableInstance);
                     }
 
                     foreach (var pluginType in assembly.DefinedTypes.Where(info =>

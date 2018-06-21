@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 
 namespace SpeedDate.Network
@@ -12,6 +13,9 @@ namespace SpeedDate.Network
         private readonly List<Action> _mainThreadActions;
 
         private readonly object _mainThreadLock = new object();
+
+        public bool keepRunning = true;
+
         public static long CurrentTick { get; private set; }
 
         public static AppTimer Instance => _instance ?? (_instance = new AppTimer());
@@ -39,11 +43,8 @@ namespace SpeedDate.Network
 
         public static async void AfterSeconds(float time, Action callback)
         {
-            await Task.Run(async () =>
-            {
-                await Task.Delay(TimeSpan.FromSeconds(time));
-                callback.Invoke();
-            });
+            await Task.Delay(TimeSpan.FromSeconds(time));
+            callback.Invoke();
         }
 
         public static void ExecuteOnMainThread(Action action)
@@ -65,7 +66,7 @@ namespace SpeedDate.Network
 
             await Task.Run(async () =>
             {
-                while (true)
+                while (keepRunning)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
                     CurrentTick++;

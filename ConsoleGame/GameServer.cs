@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using SpeedDate;
+using SpeedDate.Client;
 using SpeedDate.ClientPlugins.GameServer;
 using SpeedDate.Configuration;
 
@@ -9,7 +10,7 @@ namespace ConsoleGame
 {
     class GameServer
     {
-        private readonly SpeedDater _speedDater;
+        private readonly SpeedDateClient client;
 
         public event Action ConnectedToMaster;
 
@@ -20,7 +21,7 @@ namespace ConsoleGame
 
         public GameServer()
         {
-            _speedDater = new SpeedDater();
+            client = new SpeedDateClient();
         }
 
         /// <summary>
@@ -28,17 +29,17 @@ namespace ConsoleGame
         /// </summary>
         public void Start(string configFile)
         {
-            _speedDater.Started += () => ConnectedToMaster?.Invoke();
-            _speedDater.Start(new FileConfigProvider($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}"));
-            Lobbies = _speedDater.PluginProver.Get<LobbiesPlugin>();
-            PeerInfo = _speedDater.PluginProver.Get<PeerInfoPlugin>();
-            Profiles = _speedDater.PluginProver.Get<ProfilesPlugin>();
-            Rooms = _speedDater.PluginProver.Get<RoomsPlugin>();
+            client.Started += () => ConnectedToMaster?.Invoke();
+            client.Start(new FileConfigProvider($@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{configFile}"));
+            Lobbies = client.GetPlugin<LobbiesPlugin>();
+            PeerInfo = client.GetPlugin<PeerInfoPlugin>();
+            Profiles = client.GetPlugin<ProfilesPlugin>();
+            Rooms = client.GetPlugin<RoomsPlugin>();
         }
 
         public void Stop()
         {
-            _speedDater.Stop();
+            client.Stop();
         }
     }
 }

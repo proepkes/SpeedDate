@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SpeedDate.Interfaces;
 
 namespace SpeedDate.Network
 {
@@ -16,6 +17,8 @@ namespace SpeedDate.Network
 
         private readonly List<IUpdatable> _runnables;
 
+        public bool keepRunning = true;
+
         public static AppUpdater Instance => _instance ?? (_instance = new AppUpdater());
 
         private AppUpdater()
@@ -30,7 +33,7 @@ namespace SpeedDate.Network
         {
             await Task.Run(async () =>
             {
-                while (true)
+                while (keepRunning)
                 {
                     try
                     {
@@ -61,10 +64,5 @@ namespace SpeedDate.Network
 
             _addList.Add(updatable);
         }
-    }
-
-    public interface IUpdatable
-    {
-        void Update();
     }
 }
