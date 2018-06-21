@@ -12,12 +12,11 @@ namespace SpeedDate.Client
     {
         private const float MinTimeToConnect = 0.5f;
         private const float MaxTimeToConnect = 4f;
+        private bool _isStarted;
 
         [Inject] private ILogger _logger;
         [Inject] private IClientSocket _connection;
 
-        private int _port;
-        private string _serverIp;
         private float _timeToConnect = 0.5f;
         private readonly SpeedDateKernel _kernel;
 
@@ -30,64 +29,68 @@ namespace SpeedDate.Client
         {
             _kernel = new SpeedDateKernel();
         }
-
         public void Start(IConfigProvider configProvider)
         {
+            _isStarted = true;
             _kernel.Load(this, configProvider, config =>
             {
                 ConnectAsync(config.Network.Address, config.Network.Port);
-            });   
+            });
         }
 
-        public void Stop()
-        {
-            _connection.Disconnect();
-            _kernel.Stop();
-        }
 
         private async void ConnectAsync(string serverIp, int port)
         {
-            _serverIp = serverIp;
-            _port = port;
+            _connection.Connected += Connected;
+            _connection.Disconnected += Disconnected;
 
-            await Task.Factory.StartNew(async () =>
+            while (!_connection.IsConnected && _isStarted)
             {
-                _connection.Connected += Connected;
-                _connection.Disconnected += Disconnected;
+                // If we got here, we're not connected 
+                _logger.Debug(_connection.IsConnecting
+                    ? $"Retrying to connect to server at: {serverIp}:{port}"
+                    : $"Connecting to server at: {serverIp}:{port}");
 
-                while (!_connection.IsConnected)
-                {
-                    // If we got here, we're not connected 
-                    if (_connection.IsConnecting)
-                        _logger.Debug("Retrying to connect to server at: " + _serverIp + ":" + _port);
-                    else
-                        _logger.Debug("Connecting to server at: " + _serverIp + ":" + _port);
+                _connection.Connect(serverIp, port);
 
-                    _connection.Connect(_serverIp, _port);
+                // Give a few seconds to try and connect
+                await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
 
-                    // Give a few seconds to try and connect
-                    await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
-
-                    // If we're still not connected
-                    if (!_connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
-                }
-            });
+                // If we're still not connected
+                if (!_connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
+            }
         }
+        
+        public void Stop()
+        {
+            if(IsConnected)
+                _connection.Disconnect();
+            else
+                Disconnected();
+        }
+        
         public void Dispose()
         {
-            _connection.Disconnect();
+            Stop();
         }
 
         private void Disconnected()
         {
             _timeToConnect = MinTimeToConnect;
+            
+            _isStarted = false;
+            _kernel.Stop();
+            
+            _connection.Connected -= Connected;
+            _connection.Disconnected -= Disconnected;
+            
             Stopped?.Invoke();
         }
 
         private void Connected()
         {
             _timeToConnect = MinTimeToConnect;
-            _logger.Info("Connected to: " + _serverIp + ":" + _port);
+            _logger.Info("Connected");
             Started?.Invoke();
         }
 

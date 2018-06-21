@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
+using SpeedDate.Logging;
 
 namespace SpeedDate.Network
 {
@@ -11,58 +12,90 @@ namespace SpeedDate.Network
     /// </summary>
     public class AppUpdater
     {
-        private static AppUpdater _instance;
-
         private readonly List<IUpdatable> _addList;
 
         private readonly List<IUpdatable> _runnables;
+        
+        public long CurrentTick { get; private set; }
 
-        public bool keepRunning = true;
+        public bool KeepRunning = true;
+        
+        public event Action<long> OnTick;
 
-        public static AppUpdater Instance => _instance ?? (_instance = new AppUpdater());
-
-        private AppUpdater()
+        public AppUpdater()
         {
             _runnables = new List<IUpdatable>();
             _addList = new List<IUpdatable>();
 
+
+            Task.Factory.StartNew(StartTicker, TaskCreationOptions.LongRunning);
+            
             Update();
         }
 
         private async void Update()
         {
-            await Task.Run(async () =>
+            while (KeepRunning)
             {
-                while (keepRunning)
+                try
                 {
-                    try
+                    lock (_addList)
                     {
                         if (_addList.Count > 0)
                         {
                             _runnables.AddRange(_addList);
                             _addList.Clear();
                         }
-
-                        foreach (var runnable in _runnables)
-                            runnable.Update();
-
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
                     }
 
-                    await Task.Delay(100);
+                    foreach (var runnable in _runnables)
+                        runnable.Update();
+
                 }
-            });
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+                await Task.Delay(100);
+            }
         }
 
         public void Add(IUpdatable updatable)
         {
-            if (_addList.Contains(updatable))
-                return;
+            lock (_addList)
+            {
+                if (_addList.Contains(updatable))
+                    return;
 
-            _addList.Add(updatable);
+                _addList.Add(updatable);
+            }
+        }
+        public void AddRange(IEnumerable<IUpdatable> updatables)
+        {
+            lock (_addList)
+            {
+                _addList.AddRange(updatables);
+            }
+        }
+        
+        private async void StartTicker()
+        {
+            CurrentTick = 0;
+            
+            while (KeepRunning)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                CurrentTick++;
+                try
+                {
+                    OnTick?.Invoke(CurrentTick);
+                }
+                catch (Exception e)
+                {
+                    Logs.Error(e);
+                }
+            }
         }
     }
 }

@@ -33,8 +33,7 @@ namespace SpeedDate.Server
 
         public void Dispose()
         {
-            _socket.Connected -= Connected;
-            _socket.Disconnected -= Disconnected;
+            Stop();
         }
 
         public void SetHandler(ushort opCode, IncommingMessageHandler handler)
@@ -72,10 +71,11 @@ namespace SpeedDate.Server
         {
             _socket.Stop();
             _kernel.Stop();
-            Stopped?.Invoke();
 
             _socket.Connected -= Connected;
             _socket.Disconnected -= Disconnected;
+            
+            Stopped?.Invoke();
         }
 
         private void Connected(IPeer peer)

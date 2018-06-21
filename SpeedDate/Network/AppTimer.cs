@@ -8,24 +8,14 @@ namespace SpeedDate.Network
 {
     public sealed class AppTimer : IUpdatable
     {
-        private static AppTimer _instance;
-
         private readonly List<Action> _mainThreadActions;
 
         private readonly object _mainThreadLock = new object();
 
-        public bool keepRunning = true;
 
-        public static long CurrentTick { get; private set; }
-
-        public static AppTimer Instance => _instance ?? (_instance = new AppTimer());
-
-        private AppTimer()
+        public AppTimer()
         {
             _mainThreadActions = new List<Action>();
-
-            Task.Factory.StartNew(StartTicker, TaskCreationOptions.LongRunning);
-            AppUpdater.Instance.Add(this);
         }
 
         public void Update()
@@ -39,7 +29,6 @@ namespace SpeedDate.Network
                 }
         }
 
-        public event Action<long> OnTick;
 
         public static async void AfterSeconds(float time, Action callback)
         {
@@ -47,9 +36,9 @@ namespace SpeedDate.Network
             callback.Invoke();
         }
 
-        public static void ExecuteOnMainThread(Action action)
+        public void ExecuteOnMainThread(Action action)
         {
-            Instance.OnMainThread(action);
+            OnMainThread(action);
         }
 
         private void OnMainThread(Action action)
@@ -60,26 +49,5 @@ namespace SpeedDate.Network
             }
         }
 
-        private async void StartTicker()
-        {
-            CurrentTick = 0;
-
-            await Task.Run(async () =>
-            {
-                while (keepRunning)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                    CurrentTick++;
-                    try
-                    {
-                        OnTick?.Invoke(CurrentTick);
-                    }
-                    catch (Exception e)
-                    {
-                        Logs.Error(e);
-                    }
-                }
-            });
-        }
     }
 }

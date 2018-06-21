@@ -4094,27 +4094,7 @@ namespace SpeedDate
 
         private void BuildUpInternal(object input, ResolveOptions resolveOptions)
         {
-            //Inject >>properties<<
-            var properties = from property in input.GetType().GetProperties()
-                             where (property.GetGetMethod() != null) && (property.GetSetMethod() != null) && !property.PropertyType.IsValueType() && Attribute.IsDefined(property, typeof(InjectAttribute))
-                             select property;
-
-            foreach (var property in properties)
-            {
-                if (property.GetValue(input, null) == null)
-                {
-                    try
-                    {
-                        property.SetValue(input, ResolveInternal(new TypeRegistration(property.PropertyType), NamedParameterOverloads.Default, resolveOptions, input.GetType()), null);
-                    }
-                    catch (TinyIoCResolutionException)
-                    {
-                        // Catch any resolution errors and ignore them
-                    }
-                }
-            }
-
-            //Inject >>fields<<
+            //Inject fields
             var fields = from field in input.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
                 where (!field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute)))
                 select field;
@@ -4127,6 +4107,7 @@ namespace SpeedDate
                     {
                         var value = ResolveInternal(new TypeRegistration(field.FieldType),
                             NamedParameterOverloads.Default, resolveOptions, input.GetType());
+                        BuildUp(value);
                         field.SetValue(input, value);
                     }
                     catch (TinyIoCResolutionException)

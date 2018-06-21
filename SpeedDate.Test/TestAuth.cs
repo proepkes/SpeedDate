@@ -17,8 +17,9 @@ namespace SpeedDate.Test
     [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
     public class TestAuth
     {
-        [Fact, Priority(100)]
-        public void TestLoginAsGuest()
+        [Theory, Priority(100)]
+        [InlineData(12346)]
+        public void TestLoginAsGuest(int port)
         {
             const string GUEST_PREFIX = "TestGuest-";
 
@@ -48,19 +49,14 @@ namespace SpeedDate.Test
             server.Started += () =>
             {
                 client.Start(new DefaultConfigProvider(
-                    new NetworkConfig(IPAddress.Loopback, 12345), //Connect to port 12345
+                    new NetworkConfig(IPAddress.Loopback, port), //Connect to port
                     new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
             };
             
             server.Start(new DefaultConfigProvider(
-                new NetworkConfig("0.0.0.0", 12345), //Listen in port 12345
+                new NetworkConfig("0.0.0.0", port), //Listen on port
                 new PluginsConfig("SpeedDate.ServerPlugins.*"), //Load server-plugins only
                 new IConfig[] {
-                    new CockroachDbConfig
-                    {
-                        CheckConnectionOnStartup = false,
-                        Port = 12346 //Set port to avoid exceptions
-                    }, 
                     new AuthConfig
                     {
                         GuestPrefix = GUEST_PREFIX, 

@@ -246,11 +246,11 @@ namespace SpeedDate.ClientPlugins.Spawner
                             var processId = process.Id;
 
                             // Notify server that we've successfully handled the request
-                            AppTimer.ExecuteOnMainThread(() =>
-                            {
+                            //AppTimer.ExecuteOnMainThread(() =>
+                            //{
                                 message.Respond(ResponseStatus.Success);
                                 controller.NotifyProcessStarted(packet.SpawnId, processId, startProcessInfo.Arguments);
-                            });
+                            //});
 
                             process.WaitForExit();
                         }
@@ -258,7 +258,10 @@ namespace SpeedDate.ClientPlugins.Spawner
                     catch (Exception e)
                     {
                         if (!processStarted)
-                            AppTimer.ExecuteOnMainThread(() => { message.Respond(ResponseStatus.Failed); });
+                            //AppTimer.ExecuteOnMainThread(() =>
+                            //{
+                                message.Respond(ResponseStatus.Failed);
+                            //});
 
                         _logger.Error("An exception was thrown while starting a process. Make sure that you have set a correct build path. " +
                                      "We've tried to start a process at: '" + path+"'. You can change it at 'SpawnerBehaviour' component");
@@ -272,14 +275,14 @@ namespace SpeedDate.ClientPlugins.Spawner
                             _processes.Remove(packet.SpawnId);
                         }
 
-                        AppTimer.ExecuteOnMainThread(() =>
-                        {
+                        //AppTimer.ExecuteOnMainThread(() =>
+                        //{
                             // Release the port number
                             _spawners.ReleasePort(port);
 
                             _logger.Debug("Notifying about killed process with spawn id: " + packet.SpawnerId);
                             controller.NotifyProcessKilled(packet.SpawnId);
-                        });
+                        //});
                     }
 
                 }).Start();

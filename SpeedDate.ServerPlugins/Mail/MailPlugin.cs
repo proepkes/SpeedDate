@@ -17,6 +17,7 @@ namespace SpeedDate.ServerPlugins.Mail
     {
         [Inject] private ILogger _logger;
         [Inject] private MailConfig config;
+        [Inject] private AppUpdater _updater;
         private readonly List<Exception> _sendMailExceptions = new List<Exception>();
         private SmtpClient _smtpClient;
 
@@ -24,7 +25,7 @@ namespace SpeedDate.ServerPlugins.Mail
         {
             base.Loaded(pluginProvider);
             SetupSmtpClient();
-            AppUpdater.Instance.Add(this);
+            _updater.Add(this);
         }
 
         public void Update()

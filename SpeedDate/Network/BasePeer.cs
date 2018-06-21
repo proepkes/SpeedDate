@@ -14,6 +14,8 @@ namespace SpeedDate.Network
     /// </summary>
     public abstract class BasePeer : IPeer
     {
+        private readonly AppUpdater _timer;
+
         /// <summary>
         ///     Default timeout, after which response callback is invoked with
         ///     timeout status.
@@ -36,14 +38,15 @@ namespace SpeedDate.Network
         /// </summary>
         public abstract long Id { get; }
 
-        protected BasePeer()
+        protected BasePeer(AppUpdater timer)
         {
+            _timer = timer;
             _data = new Dictionary<int, object>();
             _acks = new Dictionary<int, ResponseCallback>(30);
             _ackTimeoutQueue = new List<long[]>();
             _extensions = new Dictionary<Type, object>();
 
-            AppTimer.Instance.OnTick += HandleAckDisposalTick;
+            _timer.OnTick += HandleAckDisposalTick;
 
             _timeoutMessage = new IncommingMessage(OpCodes.Error, 0, "Time out".ToBytes(), DeliveryMethod.ReliableUnordered, this)
             {
@@ -211,7 +214,7 @@ namespace SpeedDate.Network
 
         public void Dispose()
         {
-            AppTimer.Instance.OnTick -= HandleAckDisposalTick;
+            _timer.OnTick -= HandleAckDisposalTick;
         }
 
         /// <summary>
@@ -325,7 +328,7 @@ namespace SpeedDate.Network
         private void StartAckTimeout(int ackId, int timeoutSecs)
         {
             // +1, because it might be about to tick in a few miliseconds
-            _ackTimeoutQueue.Add(new[] {ackId, AppTimer.CurrentTick + timeoutSecs + 1});
+            _ackTimeoutQueue.Add(new[] {ackId, _timer.CurrentTick + timeoutSecs + 1});
         }
 
         public virtual void HandleMessage(IIncommingMessage message)

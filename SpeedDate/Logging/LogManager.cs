@@ -112,19 +112,24 @@ namespace SpeedDate.Logging
             {
                 return null;
             }
-            if (!_loggers.TryGetValue(name, out var logger))
-            {
-                logger = CreateLogger(name);
-                _loggers.Add(name, logger);
-            }
 
-            if (!IsInitialized && poolUntilInitialized)
+            lock (_loggers)
             {
-                // Register to pre-initialization pooling
-                logger.OnLog += OnPooledLoggerLog;
-            }
+                if (!_loggers.TryGetValue(name, out var logger))
+                {
+                    logger = CreateLogger(name);
+                    _loggers.Add(name, logger);
+                }
 
-            return logger;
+                if (!IsInitialized && poolUntilInitialized)
+                {
+                    // Register to pre-initialization pooling
+                    logger.OnLog += OnPooledLoggerLog;
+                }
+
+                return logger;
+
+            }
         }
 
         private static void OnPooledLoggerLog(Logger logger, LogLevel level, object message)

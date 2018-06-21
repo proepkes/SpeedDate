@@ -25,7 +25,7 @@ namespace SpeedDate.Test
 
             var client = new SpeedDateClient();
             client.Start(new DefaultConfigProvider( //Start loads the plugins
-                new NetworkConfig(IPAddress.Loopback, 12345),
+                new NetworkConfig(IPAddress.Loopback, 1000),
                 new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
 
             client.GetPlugin<AuthPlugin>().ShouldNotBeNull();
@@ -38,6 +38,7 @@ namespace SpeedDate.Test
             client.GetPlugin<SpawnRequestPlugin>().ShouldNotBeNull();
 
             client.Stop();
+            client.Dispose();
         }
     }
 }

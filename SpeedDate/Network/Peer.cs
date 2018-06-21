@@ -13,7 +13,7 @@ namespace SpeedDate.Network
 
         public ConnectionState ConnectionState => _socket.ConnectionState;
 
-        public Peer(NetPeer socket)
+        public Peer(NetPeer socket, AppUpdater timer) : base(timer)
         {
             _socket = socket;
         }

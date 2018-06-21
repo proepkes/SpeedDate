@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
@@ -8,14 +10,17 @@ namespace SpeedDate.Network
 {
     public class ServerSocket : IServerSocket, IUpdatable
     {
+        [Inject] private readonly AppUpdater _updater;
         private readonly Dictionary<long, Peer> _connections = new Dictionary<long, Peer>(500);
         readonly EventBasedNetListener _listener = new EventBasedNetListener();
         private readonly NetManager _server;
 
         public ServerSocket()
         {
-            _server = new NetManager(_listener);
-            
+            _server = new NetManager(_listener)
+            {
+                ReuseAddress = true,
+            };
         }
         public event PeerActionHandler Connected;
         public event PeerActionHandler Disconnected;
@@ -24,7 +29,7 @@ namespace SpeedDate.Network
             _listener.ConnectionRequestEvent += request => request.AcceptIfKey("TundraNet");
             _listener.PeerConnectedEvent += peer =>
             {
-                var client = new Peer(peer);
+                var client = new Peer(peer, _updater);
                 _connections.Add(peer.ConnectId, client);
 
                 Connected?.Invoke(client);
@@ -44,7 +49,7 @@ namespace SpeedDate.Network
                 _connections.Remove(peer.ConnectId);
             };
 
-            AppUpdater.Instance.Add(this);
+            _updater.Add(this);
             return _server.Start(port);
         }
 

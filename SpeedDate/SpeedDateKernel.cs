@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,9 +29,9 @@ namespace SpeedDate
         public void Load(ISpeedDateStartable startable, IConfigProvider configProvider, KernelStartedCallback startedCallback)
         {
             var logger = LogManager.GetLogger("SpeedDate");
-
+            
             _container = CreateContainer(startable);
-
+            
             _config = configProvider.Configure(_container.ResolveAll<IConfig>());
             
             _container.BuildUp(startable);
@@ -42,7 +42,7 @@ namespace SpeedDate
             {
                 if (_config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
                 {
-                    //Inject configs, cannot use _kernel because the configProvider may have added additional IConfigs
+                    //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
                     var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
                         where !field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute))
                         select field;
@@ -73,29 +73,28 @@ namespace SpeedDate
 
         public void Stop()
         {
-            AppUpdater.Instance.keepRunning = false;
-            AppTimer.Instance.keepRunning = false;
+            _container.Resolve<AppUpdater>().KeepRunning = false;
         }
 
         private static TinyIoCContainer CreateContainer(ISpeedDateStartable startable)
         {
+            var ioc = new TinyIoCContainer();
             try
             {
                 //Register possible plugin-dependencies
-                TinyIoCContainer.Current.Register<IClientSocket, ClientSocket>();
-                TinyIoCContainer.Current.Register<IServerSocket, ServerSocket>();
-                TinyIoCContainer.Current.Register<IPluginProvider, PluginProvider>();
-                TinyIoCContainer.Current.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
+                ioc.Register(new AppUpdater());
+                ioc.Register<IClientSocket, ClientSocket>();
+                ioc.Register<IServerSocket, ServerSocket>();
+                ioc.Register<IPluginProvider, PluginProvider>();
+                ioc.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
 
                 switch (startable)
                 {
                     case IServer _:
-                        TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
-                            (IServer)startable);
+                        ioc.Register((container, overloads, requesttype) => (IServer)startable);
                         break;
                     case IClient _:
-                        TinyIoCContainer.Current.Register((container, overloads, requesttype) =>
-                            (IClient)startable);
+                        ioc.Register((container, overloads, requesttype) => (IClient)startable);
                         break;
                 }
 
@@ -110,14 +109,14 @@ namespace SpeedDate
                         !info.IsAbstract && !info.IsInterface && typeof(IConfig).IsAssignableFrom(info)))
                     {
                         var pluginConfig = (IConfig)Activator.CreateInstance(pluginConfigType);
-                        TinyIoCContainer.Current.Register(pluginConfig, pluginConfigType.FullName);
+                        ioc.Register(pluginConfig, pluginConfigType.FullName);
                     }
 
                     foreach (var pluginType in assembly.DefinedTypes.Where(info =>
                         !info.IsAbstract && !info.IsInterface && typeof(IPlugin).IsAssignableFrom(info)))
                     {
                         var plugin = (IPlugin)Activator.CreateInstance(pluginType);
-                        TinyIoCContainer.Current.Register(plugin, pluginType.FullName);
+                        ioc.Register(plugin, pluginType.FullName);
                     }
                 }
             }
@@ -127,7 +126,7 @@ namespace SpeedDate
                 throw;
             }
 
-            return TinyIoCContainer.Current;
+            return ioc;
         }
 
         private static string WildCardToRegular(string value)
