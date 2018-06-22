@@ -32,8 +32,11 @@ namespace SpeedDate.Network
 
         public static async void AfterSeconds(float time, Action callback)
         {
-            await Task.Delay(TimeSpan.FromSeconds(time));
-            callback.Invoke();
+            await Task.Factory.StartNew(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(time));
+                callback.Invoke();
+            });
         }
 
         public void ExecuteOnMainThread(Action action)
