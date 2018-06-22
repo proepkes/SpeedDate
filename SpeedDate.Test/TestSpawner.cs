@@ -9,11 +9,9 @@ using SpeedDate.Packets.Spawner;
 using SpeedDate.Server;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Priority;
 
 namespace SpeedDate.Test
 {
-    [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
     public class TestSpawner
     {
         private readonly ITestOutputHelper _output;
@@ -23,7 +21,7 @@ namespace SpeedDate.Test
             _output = output;
         }
 
-        [Theory, Priority(100), InlineData(13347)]
+        [Theory, InlineData(13500)]
         public void TestRegisterSpawner(int port)
         {
             var are = new AutoResetEvent(false);
@@ -65,7 +63,7 @@ namespace SpeedDate.Test
             ));
             
             
-            are.WaitOne(TimeSpan.FromSeconds(4)).ShouldBeTrue(); //Should be signaled
+            are.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue(); //Should be signaled
             
             server.Stop();
             server.Dispose();

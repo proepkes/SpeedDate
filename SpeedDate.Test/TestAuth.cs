@@ -10,15 +10,13 @@ using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Database.CockroachDb;
 using Xunit;
-using Xunit.Priority;
 
 namespace SpeedDate.Test
 {
-    [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
     public class TestAuth
     {
-        [Theory, Priority(100)]
-        [InlineData(12346)]
+        [Theory]
+        [InlineData(12000)]
         public void TestLoginAsGuest(int port)
         {
             const string GUEST_PREFIX = "TestGuest-";

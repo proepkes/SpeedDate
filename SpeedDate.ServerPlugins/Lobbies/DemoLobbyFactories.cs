@@ -10,7 +10,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
     /// This list contains a number of lobby factory methods,
     /// used for demonstration purposes
     /// </summary>
-    class DemoLobbyFactories
+    public class DemoLobbyFactories
     {
         private const string DefaultName = "Untitled Lobby";
 

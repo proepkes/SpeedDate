@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
-using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Utils.Conversion;
 using SpeedDate.Network.Utils.IO;
@@ -23,7 +21,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         private readonly HashSet<ObservableServerProfile> _modifiedProfiles;
 
-        private Task _sendUpdatesCoroutine;
+        private Task _updateTask;
 
         public ProfilesPlugin()
         {
@@ -73,10 +71,11 @@ namespace SpeedDate.ClientPlugins.GameServer
         {
             _modifiedProfiles.Add(profile);
 
-            if (_sendUpdatesCoroutine != null)
+            if (_updateTask != null)
                 return;
 
-            _sendUpdatesCoroutine = Task.Factory.StartNew(() => KeepSendingUpdates(), TaskCreationOptions.LongRunning);
+            _updateTask = KeepSendingUpdates();
+            
         }
 
         private void OnProfileDisposed(ObservableServerProfile profile)
@@ -86,42 +85,45 @@ namespace SpeedDate.ClientPlugins.GameServer
             _profiles.Remove(profile.Username);
         }
 
-        private async void KeepSendingUpdates()
+        private async Task KeepSendingUpdates()
         {
-            while (true)
+            await Task.Factory.StartNew(async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(ProfileUpdatesInterval));
-
-                if (_modifiedProfiles.Count == 0)
-                    continue;
-
-                using (var ms = new MemoryStream())
-                using (var writer = new EndianBinaryWriter(EndianBitConverter.Big, ms))
+                while (true)
                 {
-                    // Write profiles count
-                    writer.Write(_modifiedProfiles.Count);
+                    await Task.Delay(TimeSpan.FromSeconds(ProfileUpdatesInterval));
 
-                    foreach (var profile in _modifiedProfiles)
+                    if (_modifiedProfiles.Count == 0)
+                        continue;
+
+                    using (var ms = new MemoryStream())
+                    using (var writer = new EndianBinaryWriter(EndianBitConverter.Big, ms))
                     {
-                        // Write username
-                        writer.Write(profile.Username);
+                        // Write profiles count
+                        writer.Write(_modifiedProfiles.Count);
 
-                        var updates = profile.GetUpdates();
+                        foreach (var profile in _modifiedProfiles)
+                        {
+                            // Write username
+                            writer.Write(profile.Username);
 
-                        // Write updates length
-                        writer.Write(updates.Length);
+                            var updates = profile.GetUpdates();
 
-                        // Write updates
-                        writer.Write(updates);
+                            // Write updates length
+                            writer.Write(updates.Length);
 
-                        profile.ClearUpdates();
+                            // Write updates
+                            writer.Write(updates);
+
+                            profile.ClearUpdates();
+                        }
+
+                        Connection.SendMessage((ushort)OpCodes.UpdateServerProfile, ms.ToArray());
                     }
 
-                    Connection.SendMessage((ushort) OpCodes.UpdateServerProfile, ms.ToArray());
+                    _modifiedProfiles.Clear();
                 }
-
-                _modifiedProfiles.Clear();
-            }
+            }, TaskCreationOptions.LongRunning);
         }
     }
 }

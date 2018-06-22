@@ -27,38 +27,39 @@ namespace SpeedDate.Network
             _runnables = new List<IUpdatable>();
             _addList = new List<IUpdatable>();
 
-
-            Task.Factory.StartNew(StartTicker, TaskCreationOptions.LongRunning);
-            
+            StartTicker();
             Update();
         }
 
         private async void Update()
         {
-            while (KeepRunning)
+            await Task.Factory.StartNew(async () =>
             {
-                try
+                while (KeepRunning)
                 {
-                    lock (_addList)
+                    try
                     {
-                        if (_addList.Count > 0)
+                        lock (_addList)
                         {
-                            _runnables.AddRange(_addList);
-                            _addList.Clear();
+                            if (_addList.Count > 0)
+                            {
+                                _runnables.AddRange(_addList);
+                                _addList.Clear();
+                            }
                         }
+
+                        foreach (var runnable in _runnables)
+                            runnable.Update();
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
                     }
 
-                    foreach (var runnable in _runnables)
-                        runnable.Update();
-
+                    await Task.Delay(100);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-
-                await Task.Delay(100);
-            }
+            }, TaskCreationOptions.LongRunning);
         }
 
         public void Add(IUpdatable updatable)
@@ -82,20 +83,22 @@ namespace SpeedDate.Network
         private async void StartTicker()
         {
             CurrentTick = 0;
-            
-            while (KeepRunning)
+            await Task.Factory.StartNew(async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                CurrentTick++;
-                try
+                while (KeepRunning)
                 {
-                    OnTick?.Invoke(CurrentTick);
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    CurrentTick++;
+                    try
+                    {
+                        OnTick?.Invoke(CurrentTick);
+                    }
+                    catch (Exception e)
+                    {
+                        Logs.Error(e);
+                    }
                 }
-                catch (Exception e)
-                {
-                    Logs.Error(e);
-                }
-            }
+            }, TaskCreationOptions.LongRunning);
         }
     }
 }

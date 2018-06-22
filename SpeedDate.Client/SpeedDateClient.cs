@@ -43,22 +43,26 @@ namespace SpeedDate.Client
         {
             _connection.Connected += Connected;
             _connection.Disconnected += Disconnected;
-
-            while (!_connection.IsConnected && _isStarted)
+            
+            await Task.Factory.StartNew(async () =>
             {
-                // If we got here, we're not connected 
-                _logger.Debug(_connection.IsConnecting
-                    ? $"Retrying to connect to server at: {serverIp}:{port}"
-                    : $"Connecting to server at: {serverIp}:{port}");
+                while (!_connection.IsConnected && _isStarted)
+                {
+                    // If we got here, we're not connected 
+                    _logger.Debug(_connection.IsConnecting
+                        ? $"Retrying to connect to server at: {serverIp}:{port}"
+                        : $"Connecting to server at: {serverIp}:{port}");
 
-                _connection.Connect(serverIp, port);
+                    _connection.Connect(serverIp, port);
 
-                // Give a few seconds to try and connect
-                await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
+                    // Give a few seconds to try and connect
+                    await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
 
-                // If we're still not connected
-                if (!_connection.IsConnected) _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
-            }
+                    // If we're still not connected
+                    //                if (!_connection.IsConnected) 
+                    //                    _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
+                }
+            }, TaskCreationOptions.LongRunning);
         }
         
         public void Stop()

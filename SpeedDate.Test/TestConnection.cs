@@ -13,7 +13,7 @@ namespace SpeedDate.Test
     public class TestConnection
     {
         [Theory]
-        [InlineData(12345)]
+        [InlineData(12500)]
         public void TestConnectionToLoopback(int port)
         {
             var are = new AutoResetEvent(false);

@@ -5,6 +5,7 @@ using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.Server
 {
@@ -150,6 +151,11 @@ namespace SpeedDate.Server
                     Logs.Error(exception);
                 }
             }
+        }
+
+        public T GetPlugin<T>() where T : class, IPlugin
+        {
+            return _kernel.PluginProvider.Get<T>();
         }
     }
 }

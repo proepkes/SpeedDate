@@ -8,7 +8,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
     /// Lobby factory implementation, which simply invokes
     /// an anonymous method
     /// </summary>
-    class LobbyFactoryAnonymous : ILobbyFactory
+    public class LobbyFactoryAnonymous : ILobbyFactory
     {
         private LobbiesPlugin _plugin;
         private readonly LobbyCreationFactory _factory;
