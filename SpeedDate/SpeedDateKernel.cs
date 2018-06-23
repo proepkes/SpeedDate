@@ -38,28 +38,27 @@ namespace SpeedDate
 
             PluginProvider = _container.Resolve<IPluginProvider>();
 
-            foreach (var plugin in _container.ResolveAll<IPlugin>())
+            foreach (var plugin in _container.ResolveAll<IPlugin>()
+                .Where(p => _config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(p.GetType().Namespace, WildCardToRegular(ns.Trim())))))
             {
-                if (_config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns))))
+                logger.Debug($"Loading plugin: {plugin}");
+                //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
+                var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                    where !field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute))
+                    select field;
+
+                foreach (var field in fields)
                 {
-                    //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
-                    var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
-                        where !field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute))
-                        select field;
-
-                    foreach (var field in fields)
+                    if (field.GetValue(plugin) == null && _config.TryGetConfig(field.FieldType.FullName, out var config))
                     {
-                        if (field.GetValue(plugin) == null && _config.TryGetConfig(field.FieldType.FullName, out var config))
-                        {
-                            field.SetValue(plugin, config);
-                        }
+                        field.SetValue(plugin, config);
                     }
-
-                    //Inject ILogger & other possible dependencies, Configs are already set above and will not be overwritten
-                    _container.BuildUp(plugin);
-
-                    PluginProvider.RegisterPlugin(plugin);
                 }
+
+                //Inject ILogger & other possible dependencies, Configs are already set above and will not be overwritten
+                _container.BuildUp(plugin);
+
+                PluginProvider.RegisterPlugin(plugin);
             }
 
             foreach (var plugin in PluginProvider.GetAll())

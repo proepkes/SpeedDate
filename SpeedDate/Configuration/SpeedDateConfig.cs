@@ -31,9 +31,9 @@ namespace SpeedDate.Configuration
     public class PluginsConfig
     {
         public static readonly PluginsConfig LoadAllPlugins = new PluginsConfig();
-        public static readonly PluginsConfig DefaultPeerPlugins = new PluginsConfig("SpeedDate.ClientPlugins; SpeedDate.ClientPlugins.Peer*");
-        public static readonly PluginsConfig DefaultSpawnerPlugins = new PluginsConfig("SpeedDate.ClientPlugins; SpeedDate.ClientPlugins.Spawner*");
-        public static readonly PluginsConfig DefaultGameServerPlugins = new PluginsConfig("SpeedDate.ClientPlugins; SpeedDate.ClientPlugins.GameServer*");
+        public static readonly PluginsConfig DefaultPeerPlugins = new PluginsConfig("SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Peer*");
+        public static readonly PluginsConfig DefaultSpawnerPlugins = new PluginsConfig("SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.Spawner*");
+        public static readonly PluginsConfig DefaultGameServerPlugins = new PluginsConfig("SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.GameServer*");
 
         public static readonly PluginsConfig DefaultServerPlugins = new PluginsConfig("SpeedDate.ServerPlugins*");
 
