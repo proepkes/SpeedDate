@@ -1,23 +1,24 @@
 using System;
 using System.Net;
 using System.Threading;
+using NUnit.Framework;
 using Shouldly;
 using SpeedDate.Client;
 using SpeedDate.Configuration;
 using SpeedDate.Server;
-using SpeedDate.ServerPlugins.Database.CockroachDb;
-using Xunit;
+
 
 namespace SpeedDate.Test
 {
+    [TestFixture]
     public class TestConnection
     {
-        [Theory]
-        [InlineData(12500)]
-        public void TestConnectionToLoopback(int port)
+        [Test]
+        //Tests connect/disconnect with a separated server
+        public void TestConnectionToLoopback()
         {
             var are = new AutoResetEvent(false);
-
+            
             var server = new SpeedDateServer();
 
             var client = new SpeedDateClient();
@@ -25,14 +26,14 @@ namespace SpeedDate.Test
             server.Started += () =>
             {
                 client.Start(new DefaultConfigProvider(
-                    new NetworkConfig(IPAddress.Loopback, port), //Connect to port 
+                    new NetworkConfig(IPAddress.Loopback, SetUp.Port+1), //Connect to port 
                     new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
             };
 
             server.PeerConnected += peer => { are.Set(); };
 
             server.Start(new DefaultConfigProvider(
-                new NetworkConfig("0.0.0.0", port), //Listen in port
+                new NetworkConfig("0.0.0.0", SetUp.Port+1), //Listen in port
                 new PluginsConfig("SpeedDate.ServerPlugins.*") //Load server-plugins only
             ));
 

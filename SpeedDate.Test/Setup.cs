@@ -1,22 +1,25 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
+using NUnit.Framework;
+using Shouldly;
 using SpeedDate.Configuration;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
+using SpeedDate.ServerPlugins.Lobbies;
 
 namespace SpeedDate.Test
-{
-    public class ServerFixture: IDisposable
+{ 
+    [SetUpFixture]
+    public class SetUp
     {
         public const string GuestPrefix = "TestGuest-";
+        public const int Port = 12345;
         
-        public readonly int Port = 12345;
-        public readonly SpeedDateServer Server;
+        public SpeedDateServer Server;
         
-        public ServerFixture()
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
             Server = new SpeedDateServer();
-            
             Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new []
             {
                 new AuthConfig
@@ -25,9 +28,13 @@ namespace SpeedDate.Test
                     EnableGuestLogin = true
                 }
             }));
+            
+            Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
+            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3 vs 3", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
         }
         
-        public void Dispose()
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
         {
             Server.Stop();
             Server.Dispose();
