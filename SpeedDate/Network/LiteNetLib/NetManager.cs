@@ -250,8 +250,7 @@ namespace SpeedDate.Network.LiteNetLib
             if (errorCode != 0 && errorCode != 10065)
             {
                 //Send error
-                NetPeer fromPeer;
-                if (_peers.TryGetValue(remoteEndPoint, out fromPeer))
+                if (_peers.TryGetValue(remoteEndPoint, out var fromPeer))
                 {
                     DisconnectPeer(fromPeer, DisconnectReason.SocketSendError, errorCode, true, null, 0, 0);
                 }
@@ -495,8 +494,10 @@ namespace SpeedDate.Network.LiteNetLib
             }
             else
             {
+                var connId = _netEventListener.ValidateConnectionId(request.ConnectionId);
+                
                 //Accept
-                request.Peer.Accept(request.ConnectionId, request.ConnectionNumber);
+                request.Peer.Accept(connId, request.ConnectionNumber);
 
                 //Add event
                 var netEvent = CreateEvent(NetEventType.Connect);

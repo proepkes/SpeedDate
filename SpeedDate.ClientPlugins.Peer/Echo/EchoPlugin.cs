@@ -1,7 +1,22 @@
-﻿namespace SpeedDate.ClientPlugins.Peer.Echo
+﻿using System;
+using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
+
+namespace SpeedDate.ClientPlugins.Peer.Echo
 {
-    public class EchoPlugin
+    public class EchoPlugin : SpeedDateClientPlugin
     {
-        
+        public void Send(string message, Action<string> echoCallback, ErrorCallback error)
+        {
+            Connection.SendMessage((ushort)OpCodes.Echo, message, (status, response) => 
+            { 
+                if (status != ResponseStatus.Success)
+                {
+                    error.Invoke(response.AsString("Unknown error"));
+                }
+                
+                echoCallback.Invoke(response.AsString());
+            });
+        }
     }
 }

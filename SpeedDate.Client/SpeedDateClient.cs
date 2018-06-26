@@ -59,8 +59,8 @@ namespace SpeedDate.Client
                     await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
 
                     // If we're still not connected
-                    //                if (!_connection.IsConnected) 
-                    //                    _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
+                    if (!_connection.IsConnected) 
+                        _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
                 }
             }, TaskCreationOptions.LongRunning);
         }

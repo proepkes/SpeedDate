@@ -58,6 +58,16 @@ namespace SpeedDate.Network
         public event PeerActionHandler Disconnected;
 
 
+        public void SendMessage(OpCodes opCode)
+        {
+            SendMessage((ushort) opCode);
+        }
+
+        public void SendMessage(OpCodes opCode, ISerializablePacket packet, ResponseCallback responseCallback)
+        {
+            SendMessage((ushort) opCode, packet, responseCallback);
+        }
+
         public void SendMessage(ushort opCode)
         {
             SendMessage(MessageHelper.Create(opCode), DeliveryMethod.ReliableUnordered);
@@ -338,7 +348,7 @@ namespace SpeedDate.Network
 
         public void HandleDataReceived(byte[] buffer, int start)
         {
-            IIncommingMessage message = null;
+            IIncommingMessage message;
 
             try
             {

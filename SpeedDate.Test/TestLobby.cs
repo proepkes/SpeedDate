@@ -33,7 +33,7 @@ namespace SpeedDate.Test
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
                     info.Username.ShouldNotBeNullOrEmpty();
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3 vs 3", new Dictionary<string, string> {
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string> {
                     {
                         OptionKeys.LobbyName, LOBBY_NAME
                     }}, lobby =>
@@ -58,7 +58,7 @@ namespace SpeedDate.Test
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
                 new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
 
-            are.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
 
 
             var lobbyJoiner = new SpeedDateClient();
@@ -102,7 +102,7 @@ namespace SpeedDate.Test
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
                 new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
 
-            are.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
+            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
         }
     }
 }

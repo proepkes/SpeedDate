@@ -20,9 +20,12 @@ namespace SpeedDate.ServerPlugins.Authentication
     /// <summary>
     ///     Authentication module, which handles logging in and registration of accounts
     /// </summary>
-    internal class AuthPlugin : SpeedDateServerPlugin
+    public class AuthPlugin : SpeedDateServerPlugin
     {
         public delegate void AuthEventHandler(IUserExtension account);
+        
+        [Inject]
+        private readonly ILogger _logger;
 
         [Inject]
         private readonly AuthConfig _config;
@@ -604,6 +607,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                 extension.AesKeyEncrypted = encryptedAes;
                 extension.AesKey = aesKey;
 
+                _logger.Debug("Sending " + encryptedAes + " to " + message.Peer.Id);
                 message.Respond(encryptedAes, ResponseStatus.Success);
             }
         }

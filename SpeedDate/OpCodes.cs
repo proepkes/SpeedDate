@@ -93,5 +93,8 @@
         ServerProfileRequest,
         UpdateServerProfile,
         UpdateClientProfile,
+        
+        //Echo
+        Echo
     }
 }

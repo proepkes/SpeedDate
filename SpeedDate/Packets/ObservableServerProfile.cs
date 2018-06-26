@@ -9,7 +9,7 @@ namespace SpeedDate.Packets
     /// Client, game server and master servers will create a similar
     /// object.
     /// </summary>
-    public class ObservableServerProfile : ObservableProfile
+    public sealed class ObservableServerProfile : ObservableProfile
     {
         /// <summary>
         /// Username of the client, who's profile this is

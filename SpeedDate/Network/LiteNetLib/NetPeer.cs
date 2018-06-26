@@ -241,8 +241,8 @@ namespace SpeedDate.Network.LiteNetLib
             //check connection id
             if (packet.ConnectionId != _connectId)
             {
-                NetUtils.DebugWrite(ConsoleColor.Cyan, "[NC] Invalid connectId: {0}", _connectId);
-                return false;
+                _connectId = packet.ConnectionId;
+                NetUtils.DebugWrite(ConsoleColor.Cyan, "[NC] Server set new connectId from {0} to {1}", packet.ConnectionId, _connectId);
             }
             //check connect num
             ConnectionNum = packet.ConnectionNumber;

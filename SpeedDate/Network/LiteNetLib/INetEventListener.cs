@@ -50,6 +50,7 @@ namespace SpeedDate.Network.LiteNetLib
 
     public interface INetEventListener
     {
+        long ValidateConnectionId(long connectionId);
         /// <summary>
         /// New remote peer connected to host, or client connected to remote host
         /// </summary>
@@ -102,6 +103,7 @@ namespace SpeedDate.Network.LiteNetLib
 
     public class EventBasedNetListener : INetEventListener
     {
+        
         public delegate void OnPeerConnected(NetPeer peer);
         public delegate void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo);
         public delegate void OnNetworkError(IPEndPoint endPoint, int socketErrorCode);
@@ -118,6 +120,11 @@ namespace SpeedDate.Network.LiteNetLib
         public event OnNetworkReceiveUnconnected NetworkReceiveUnconnectedEvent;
         public event OnNetworkLatencyUpdate NetworkLatencyUpdateEvent;
         public event OnConnectionRequest ConnectionRequestEvent;
+
+        public virtual long ValidateConnectionId(long connectionId)
+        {
+            return connectionId;
+        }
 
         void INetEventListener.OnPeerConnected(NetPeer peer)
         {

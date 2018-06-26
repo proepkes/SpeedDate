@@ -4,7 +4,6 @@ namespace SpeedDate.Network.Interfaces
 {
     public interface IMsgDispatcher
     {
-
         void SendMessage(ushort opCode);
         void SendMessage(ushort opCode, ISerializablePacket packet);
         void SendMessage(ushort opCode, ISerializablePacket packet, DeliveryMethod method);

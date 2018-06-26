@@ -41,7 +41,7 @@ namespace SpeedDate.Test
                 new PluginsConfig("SpeedDate.ClientPlugins.Spawner*"))); //Load spawner-plugins only
             
             
-            are.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue(); //Should be signaled
+            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
     }
 }

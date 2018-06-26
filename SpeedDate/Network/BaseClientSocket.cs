@@ -7,6 +7,16 @@ namespace SpeedDate.Network
     {
         public IPeer Peer { get; protected set; }
 
+        public void SendMessage(OpCodes opCode)
+        {
+            SendMessage((ushort)opCode);
+        }
+
+        public void SendMessage(OpCodes opCode, ISerializablePacket packet, ResponseCallback responseCallback)
+        {
+            SendMessage((ushort)opCode, packet, responseCallback);
+        }
+
         public void SendMessage(ushort opCode)
         {
             var msg = MessageHelper.Create(opCode);

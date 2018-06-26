@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Security;
 using SpeedDate.Network;
-using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;
 using SpeedDate.Plugin.Interfaces;
 
@@ -143,7 +142,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 Connection.SendMessage((ushort) OpCodes.LogIn, encryptedData, (status, response) =>
                 {
                     _isLoggingIn = false;
-
+                    
                     if (status != ResponseStatus.Success)
                     {
                         errorCallback.Invoke(response.AsString("Unknown error"));
