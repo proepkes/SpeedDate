@@ -53,14 +53,11 @@ namespace SpeedDate.Test
         {
             var numberOfClients = 200;
             
-            var isClientLoggedIn = new bool[numberOfClients];
-            
             var doneEvent = new ManualResetEvent(false);
             
             for (var clientNumber = 0; clientNumber < numberOfClients; clientNumber++)
                 ThreadPool.QueueUserWorkItem(state =>
                     {
-                        Console.WriteLine($"Starting client {int.Parse(state.ToString())}");
                         var client = new SpeedDateClient();
                         client.Started += () =>
                         {
@@ -74,8 +71,6 @@ namespace SpeedDate.Test
                                     info.IsGuest.ShouldBeTrue();
                                     info.IsAdmin.ShouldBeFalse();
                                     info.Username.ShouldStartWith(SetUp.GuestPrefix);
-
-                                    isClientLoggedIn[(int) state] = true;
                                     
                                     if (Interlocked.Decrement(ref numberOfClients) == 0)
                                         doneEvent.Set();
