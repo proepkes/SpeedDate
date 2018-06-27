@@ -135,7 +135,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// <summary>
         /// Retrieves a list of channels, which user has joined
         /// </summary>
-        public void GetMyChannels(ChatChannelsCallback callback, ErrorCallback errorCallback)
+        public void GetJoinedChannels(ChatChannelsCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {

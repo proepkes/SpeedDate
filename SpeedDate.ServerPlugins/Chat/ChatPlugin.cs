@@ -132,9 +132,8 @@ namespace SpeedDate.ServerPlugins.Chat
         protected virtual ChatChannel GetOrCreateChannel(string channelName, bool ignoreForbidden)
         {
             var lowercaseName = channelName.ToLower();
-            Channels.TryGetValue(lowercaseName, out var channel);
 
-            if (channel == null)
+            if (!Channels.TryGetValue(lowercaseName, out var channel))
             {
                 if (channelName.Length < MinChannelNameLength)
                     return null;
@@ -143,11 +142,11 @@ namespace SpeedDate.ServerPlugins.Chat
                     return null;
 
                 // There's no such channel, but we might be able to create one
-                if (!ignoreForbidden) //&& ForbiddenWordsInChNames.Any(w => !string.IsNullOrEmpty(w) && channelName.Contains(w.ToLower())))
-                {
-                    // Channel contains a forbidden word
-                    return null;
-                }
+//                if (!ignoreForbidden && ForbiddenWordsInChNames.Any(w => !string.IsNullOrEmpty(w) && channelName.Contains(w.ToLower())))
+//                {
+//                    // Channel contains a forbidden word
+//                    return null;
+//                }
 
                 channel = new ChatChannel(channelName);
                 Channels.Add(lowercaseName, channel);

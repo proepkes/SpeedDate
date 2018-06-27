@@ -47,7 +47,39 @@ namespace SpeedDate.Test
 
             are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
-        
+
+        [Test]
+        public void TestLogOut()
+        {
+
+            var are = new AutoResetEvent(false);
+
+            var client = new SpeedDateClient();
+            client.Started += () =>
+            {
+                client.IsConnected.ShouldBeTrue();
+                client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    client.IsConnected.ShouldBeTrue();
+                    client.GetPlugin<AuthPlugin>().LogOut();
+
+                    client.GetPlugin<AuthPlugin>().IsLoggedIn.ShouldBeFalse();
+                    
+                    are.Set();
+                },
+                error =>
+                {
+                    Should.NotThrow(() => throw new Exception(error));
+                });
+            };
+
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+
+            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+        }
+
         [Test]
         public void TestMultipleGuests()
         {
