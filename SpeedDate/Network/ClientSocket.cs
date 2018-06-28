@@ -148,7 +148,8 @@ namespace SpeedDate.Network
 
         public void Disconnect()
         {
-            _client.Stop();
+            _peer.Disconnect("");
+            _peer.MessageReceived -= HandleMessage;
         }
 
         public void Update()

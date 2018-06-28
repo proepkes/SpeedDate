@@ -52,48 +52,5 @@ namespace SpeedDate.Test
 
             client.IsConnected.ShouldBeFalse("Client is no longer connected");
         }
-        
-        [Test]
-        public void TestMultiClientEcho()
-        {
-            var numberOfClients = 100;
-
-            
-            var doneEvent = new AutoResetEvent(false);
-            
-            for (var clientNumber = 0; clientNumber < numberOfClients; clientNumber++)
-            {
-                ThreadPool.QueueUserWorkItem(state =>
-                {
-                    var client = new SpeedDateClient();
-                    client.Started += () =>
-                    {
-                        client.IsConnected.ShouldBeTrue();
-                            
-                        client.GetPlugin<EchoPlugin>().Send("Hello from " + state, 
-                            echo =>
-                            {
-                                echo.ShouldBe("Hello from " + state);
-                                    
-                                if (Interlocked.Decrement(ref numberOfClients) == 0)
-                                    doneEvent.Set();
-                                    
-                            }, 
-                            error =>
-                            {
-                                Should.NotThrow(() => throw new Exception(error));
-                            });
-                    };
-
-                    client.Start(new DefaultConfigProvider(
-                        new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                        new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
-                        
-                }, clientNumber);
-            }
-
-
-            doneEvent.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
-        }
     }
 }

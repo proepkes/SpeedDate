@@ -29,20 +29,24 @@ namespace SpeedDate.Client
         {
             _kernel = new SpeedDateKernel();
         }
+
         public void Start(IConfigProvider configProvider)
         {
             _isStarted = true;
             _kernel.Load(this, configProvider, config =>
             {
+                _connection.Connected -= Connected;
+                _connection.Disconnected -= Disconnected;
+
+                _connection.Connected += Connected;
+                _connection.Disconnected += Disconnected;
+
                 ConnectAsync(config.Network.Address, config.Network.Port);
             });
         }
 
-
         private async void ConnectAsync(string serverIp, int port)
         {
-            _connection.Connected += Connected;
-            _connection.Disconnected += Disconnected;
             
             await Task.Factory.StartNew(async () =>
             {
@@ -84,9 +88,6 @@ namespace SpeedDate.Client
             
             _isStarted = false;
             _kernel.Stop();
-            
-            _connection.Connected -= Connected;
-            _connection.Disconnected -= Disconnected;
             
             Stopped?.Invoke();
         }
