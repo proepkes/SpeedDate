@@ -139,7 +139,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                     return;
                 }
 
-                callback.Invoke(response.Deserialize(new UsernameAndPeerIdPacket()));
+                callback.Invoke(response.Deserialize<UsernameAndPeerIdPacket>());
             });
         }
 

@@ -171,7 +171,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         private void HandleProvideRoomAccessCheck(IIncommingMessage message)
         {
-            var data = message.Deserialize(new RoomAccessProvideCheckPacket());
+            var data = message.Deserialize<RoomAccessProvideCheckPacket>();
 
             var roomController = _roomsPlugin.GetRoomController(data.RoomId);
 

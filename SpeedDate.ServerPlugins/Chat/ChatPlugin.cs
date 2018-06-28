@@ -434,7 +434,7 @@ namespace SpeedDate.ServerPlugins.Chat
                 return;
             }
 
-            var packet = message.Deserialize(new ChatMessagePacket());
+            var packet = message.Deserialize<ChatMessagePacket>();
 
             if (!OnChatMessageReceived(packet, chatUser, message))
             {

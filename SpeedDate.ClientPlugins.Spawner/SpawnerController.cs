@@ -103,7 +103,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         private void HandleSpawnRequest(IIncommingMessage message)
         {
-            var data = message.Deserialize(new SpawnRequestPacket());
+            var data = message.Deserialize<SpawnRequestPacket>();
 
             var controller = _spawners.GetController(data.SpawnerId);
 
@@ -120,7 +120,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         private void HandleKillSpawnedProcessRequest(IIncommingMessage message)
         {
-            var data = message.Deserialize(new KillSpawnedProcessPacket());
+            var data = message.Deserialize<KillSpawnedProcessPacket>();
 
             var controller = _spawners.GetController(data.SpawnerId);
 

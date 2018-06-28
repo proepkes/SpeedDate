@@ -223,7 +223,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         private void HandleMemberPropertyChanged(IIncommingMessage message)
         {
-            var data = message.Deserialize(new LobbyMemberPropChangePacket());
+            var data = message.Deserialize<LobbyMemberPropChangePacket>();
 
             if (Id != data.LobbyId)
                 return;
@@ -254,18 +254,16 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         private void HandleLobbyChatMessageMsg(IIncommingMessage message)
         {
-            var msg = message.Deserialize(new LobbyChatPacket());
+            var msg = message.Deserialize<LobbyChatPacket>();
 
-            if (Listener != null)
-                Listener.OnChatMessageReceived(msg);
+            Listener?.OnChatMessageReceived(msg);
         }
 
         private void HandleLobbyMemberLeftMsg(IIncommingMessage message)
         {
             var username = message.AsString();
 
-            LobbyMemberData member;
-            Members.TryGetValue(username, out member);
+            Members.TryGetValue(username, out var member);
 
             if (member == null)
                 return;
@@ -275,7 +273,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         private void HandleLobbyMemberJoinedMsg(IIncommingMessage message)
         {
-            var data = message.Deserialize(new LobbyMemberData());
+            var data = message.Deserialize<LobbyMemberData>();
             Members[data.Username] = data;
 
             Listener?.OnMemberJoined(data);
@@ -292,7 +290,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         private void HandleLobbyMemberReadyStatusChangeMsg(IIncommingMessage message)
         {
-            var data = message.Deserialize(new StringPairPacket());
+            var data = message.Deserialize<StringPairPacket>();
 
             Members.TryGetValue(data.A, out var member);
 
@@ -306,7 +304,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         private void HandlePlayerTeamChangeMsg(IIncommingMessage message)
         {
-            var data = message.Deserialize(new StringPairPacket());
+            var data = message.Deserialize<StringPairPacket>();
 
             Members.TryGetValue(data.A, out var member);
 
@@ -343,7 +341,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         private void HandleLobbyPropertyChanged(IIncommingMessage message)
         {
-            var data = message.Deserialize(new StringPairPacket());
+            var data = message.Deserialize<StringPairPacket>();
             Properties[data.A] = data.B;
 
             Listener?.OnLobbyPropertyChanged(data.A, data.B);

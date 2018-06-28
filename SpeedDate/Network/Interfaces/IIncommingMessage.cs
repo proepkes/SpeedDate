@@ -121,7 +121,7 @@ namespace SpeedDate.Network.Interfaces
         /// <typeparam name="T"></typeparam>
         /// <param name="packetToBeFilled"></param>
         /// <returns></returns>
-        T Deserialize<T>(T packetToBeFilled) where T : ISerializablePacket;
+        T Deserialize<T>() where T : ISerializablePacket, new();
 
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace SpeedDate.Network.Interfaces
         /// <typeparam name="T"></typeparam>
         /// <param name="packetCreator"></param>
         /// <returns></returns>
-        IEnumerable<T> DeserializeList<T>(Func<T> packetCreator) where T : ISerializablePacket;
+        IEnumerable<T> DeserializeList<T>() where T : ISerializablePacket, new();
 
     }
 }

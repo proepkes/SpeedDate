@@ -108,7 +108,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
                     return;
                 }
 
-                var data = response.Deserialize(new LobbyDataPacket());
+                var data = response.Deserialize<LobbyDataPacket>();
 
                 var key = data.LobbyId + ":" + Connection.PeerId;
 
@@ -282,7 +282,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
                     return;
                 }
 
-                var access = response.Deserialize(new RoomAccessPacket());
+                var access = response.Deserialize<RoomAccessPacket>();
 
                 _roomPlugin.TriggerAccessReceivedEvent(access);
 

@@ -253,7 +253,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
 
         private void HandleChatMessage(IIncommingMessage message)
         {
-            var packet = message.Deserialize(new ChatMessagePacket());
+            var packet = message.Deserialize<ChatMessagePacket>();
 
             MessageReceived?.Invoke(packet);
         }

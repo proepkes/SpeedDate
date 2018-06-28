@@ -53,7 +53,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         private void HandleStatusUpdate(IIncommingMessage message)
         {
-            var data = message.Deserialize(new SpawnStatusUpdatePacket());
+            var data = message.Deserialize<SpawnStatusUpdatePacket>();
 
             var controller = _spawnServer.GetRequestController(data.SpawnId);
 

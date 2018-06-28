@@ -180,8 +180,9 @@ namespace SpeedDate.Network
         /// <typeparam name="T"></typeparam>
         /// <param name="packetToBeFilled"></param>
         /// <returns></returns>
-        public T Deserialize<T>(T packetToBeFilled) where T : ISerializablePacket
+        public T Deserialize<T>() where T : ISerializablePacket, new()
         {
+            T packetToBeFilled = new T();
             return MessageHelper.Deserialize(_data, packetToBeFilled);
         }
 
@@ -191,9 +192,9 @@ namespace SpeedDate.Network
         /// <typeparam name="T"></typeparam>
         /// <param name="packetCreator"></param>
         /// <returns></returns>
-        public IEnumerable<T> DeserializeList<T>(Func<T> packetCreator) where T : ISerializablePacket
+        public IEnumerable<T> DeserializeList<T>() where T : ISerializablePacket, new()
         {
-            return MessageHelper.DeserializeList(_data, packetCreator);
+            return MessageHelper.DeserializeList<T>(_data);
         }
 
         public override string ToString()

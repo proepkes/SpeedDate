@@ -219,7 +219,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         protected virtual void HandleSetLobbyProperties(IIncommingMessage message)
         {
-            var data = message.Deserialize(new LobbyPropertiesSetPacket());
+            var data = message.Deserialize<LobbyPropertiesSetPacket>();
 
             Lobbies.TryGetValue(data.LobbyId, out var lobby);
 
@@ -302,7 +302,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         protected virtual void HandleJoinTeam(IIncommingMessage message)
         {
-            var data = message.Deserialize(new LobbyJoinTeamPacket());
+            var data = message.Deserialize<LobbyJoinTeamPacket>();
 
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
             var lobby = lobbiesExt.CurrentLobby;
@@ -368,7 +368,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         protected virtual void HandleGetLobbyMemberData(IIncommingMessage message)
         {
-            var data = message.Deserialize(new IntPairPacket());
+            var data = message.Deserialize<IntPairPacket>();
             var lobbyId = data.A;
             var peerId = data.B;
 

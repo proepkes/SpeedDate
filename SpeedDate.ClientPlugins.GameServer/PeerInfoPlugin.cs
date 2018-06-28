@@ -30,7 +30,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                     return;
                 }
 
-                var data = response.Deserialize(new PeerAccountInfoPacket());
+                var data = response.Deserialize<PeerAccountInfoPacket>();
 
                 callback.Invoke(data);
             });

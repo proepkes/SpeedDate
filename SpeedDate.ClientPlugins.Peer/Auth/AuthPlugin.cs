@@ -151,7 +151,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                     IsLoggedIn = true;
 
-                    AccountInfo = response.Deserialize(new AccountInfoPacket());
+                    AccountInfo = response.Deserialize<AccountInfoPacket>();
 
                     callback.Invoke(AccountInfo);
                 });

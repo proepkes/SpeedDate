@@ -145,7 +145,7 @@ namespace SpeedDate.ServerPlugins.Rooms
                     return;
                 }
 
-                var accessData = response.Deserialize(new RoomAccessPacket());
+                var accessData = response.Deserialize<RoomAccessPacket>();
 
                 var access = new RoomAccessData()
                 {

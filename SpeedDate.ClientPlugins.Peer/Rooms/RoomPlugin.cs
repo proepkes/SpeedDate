@@ -51,7 +51,7 @@ namespace SpeedDate.ClientPlugins.Peer.Rooms
                     return;
                 }
 
-                var access = response.Deserialize(new RoomAccessPacket());
+                var access = response.Deserialize<RoomAccessPacket>();
 
                 LastReceivedAccess = access;
 

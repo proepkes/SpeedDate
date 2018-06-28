@@ -34,7 +34,7 @@ namespace SpeedDate.ClientPlugins.Peer.MatchMaker
                     return;
                 }
 
-                var games = response.DeserializeList(() => new GameInfoPacket()).ToList();
+                var games = response.DeserializeList<GameInfoPacket>().ToList();
 
                 callback.Invoke(games);
             });

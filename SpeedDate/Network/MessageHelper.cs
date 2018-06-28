@@ -52,8 +52,8 @@ namespace SpeedDate.Network
         /// <param name="data"></param>
         /// <param name="packetCreator">Factory function</param>
         /// <returns></returns>
-        public static IEnumerable<T> DeserializeList<T>(byte[] data, Func<T> packetCreator)
-            where T : ISerializablePacket
+        public static IEnumerable<T> DeserializeList<T>(byte[] data)
+            where T : ISerializablePacket, new()
         {
             using (var ms = new MemoryStream(data))
             {
@@ -64,7 +64,7 @@ namespace SpeedDate.Network
 
                     for (var i = 0; i < count; i++)
                     {
-                        var packet = packetCreator();
+                        var packet = new T();
                         packet.FromBinaryReader(reader);
                         list.Add(packet);
                     }

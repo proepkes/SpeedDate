@@ -30,7 +30,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                     return;
                 }
 
-                var memberData = response.Deserialize(new LobbyMemberData());
+                var memberData = response.Deserialize<LobbyMemberData>();
                 callback.Invoke(memberData);
             });
         }
@@ -48,7 +48,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                     return;
                 }
 
-                var memberData = response.Deserialize(new LobbyDataPacket());
+                var memberData = response.Deserialize<LobbyDataPacket>();
                 callback.Invoke(memberData);
             });
         }

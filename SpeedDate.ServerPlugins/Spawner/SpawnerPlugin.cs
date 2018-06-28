@@ -211,7 +211,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         protected virtual void HandleClientsSpawnRequest(IIncommingMessage message)
         {
-            var data = message.Deserialize(new ClientsSpawnRequestPacket());
+            var data = message.Deserialize<ClientsSpawnRequestPacket>();
             var peer = message.Peer;
 
             if (!CanClientSpawn(peer, data))
@@ -317,7 +317,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                 return;
             }
 
-            var options = message.Deserialize(new SpawnerOptions());
+            var options = message.Deserialize<SpawnerOptions>();
 
             var spawner = CreateSpawner(message.Peer, options);
 
@@ -334,7 +334,7 @@ namespace SpeedDate.ServerPlugins.Spawner
         /// <param name="message"></param>
         protected virtual void HandleRegisterSpawnedProcess(IIncommingMessage message)
         {
-            var data = message.Deserialize(new RegisterSpawnedProcessPacket());
+            var data = message.Deserialize<RegisterSpawnedProcessPacket>();
 
             _spawnTasks.TryGetValue(data.SpawnId, out var task);
 
@@ -359,7 +359,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         protected virtual void HandleCompleteSpawnProcess(IIncommingMessage message)
         {
-            var data = message.Deserialize(new SpawnFinalizationPacket());
+            var data = message.Deserialize<SpawnFinalizationPacket>();
 
             _spawnTasks.TryGetValue(data.SpawnId, out var task);
 
@@ -411,7 +411,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         private void HandleSpawnedProcessesCount(IIncommingMessage message)
         {
-            var packet = message.Deserialize(new IntPairPacket());
+            var packet = message.Deserialize<IntPairPacket>();
 
             _spawners.TryGetValue(packet.A, out var spawner);
 

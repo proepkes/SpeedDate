@@ -197,7 +197,7 @@ namespace SpeedDate.ServerPlugins.Rooms
                 return;
             }
 
-            var options = message.Deserialize(new RoomOptions());
+            var options = message.Deserialize<RoomOptions>();
 
             var room = RegisterRoom(message.Peer, options);
 
@@ -232,7 +232,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         private void HandleValidateRoomAccess(IIncommingMessage message)
         {
-            var data = message.Deserialize(new RoomAccessValidatePacket());
+            var data = message.Deserialize<RoomAccessValidatePacket>();
 
             _rooms.TryGetValue(data.RoomId, out var room);
 
@@ -273,10 +273,9 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         protected virtual void HandleSaveRoomOptions(IIncommingMessage message)
         {
-            var data = message.Deserialize(new SaveRoomOptionsPacket());
+            var data = message.Deserialize<SaveRoomOptionsPacket>();
 
-            RegisteredRoom room;
-            _rooms.TryGetValue(data.RoomId, out room);
+            _rooms.TryGetValue(data.RoomId, out var room);
 
             if (room == null)
             {
@@ -298,7 +297,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         protected virtual void HandleGetRoomAccess(IIncommingMessage message)
         {
-            var data = message.Deserialize(new RoomAccessRequestPacket());
+            var data = message.Deserialize<RoomAccessRequestPacket>();
 
             RegisteredRoom room;
             _rooms.TryGetValue(data.RoomId, out room);
@@ -327,7 +326,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
         private void HandlePlayerLeftRoom(IIncommingMessage message)
         {
-            var data = message.Deserialize(new PlayerLeftRoomPacket());
+            var data = message.Deserialize<PlayerLeftRoomPacket>();
 
             _rooms.TryGetValue(data.RoomId, out var room);
 
