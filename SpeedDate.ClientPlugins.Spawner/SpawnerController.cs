@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,15 +12,15 @@ using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Spawner
 {
-    public partial class SpawnerController
+    public class SpawnerController
     {
         public delegate void SpawnRequestHandler(SpawnRequestPacket packet, IIncommingMessage message);
         public delegate void KillSpawnedProcessHandler(int spawnId);
 
         public readonly IClientSocket Connection;
 
-        public int SpawnerId { get; set; }
-        public SpawnerOptions Options { get; private set; }
+        public int SpawnerId { get; }
+        public SpawnerOptions Options { get; }
 
         private SpawnRequestHandler _spawnRequestHandler;
         private KillSpawnedProcessHandler _killRequestHandler;
@@ -32,8 +33,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         #region Default process spawn handling
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger(LogLevel.Warn);
-        private readonly object _processLock = new object();
-        private readonly Dictionary<int, Process> _processes = new Dictionary<int, Process>();
+        private readonly ConcurrentDictionary<int, Process> _processes = new ConcurrentDictionary<int, Process>();
 
         #endregion
 
@@ -46,8 +46,6 @@ namespace SpeedDate.ClientPlugins.Spawner
             Connection = connection;
             SpawnerId = spawnerId;
             Options = options;
-
-            //SpawnerSettings = SpeedDateConfig.Get<SpawnerConfig>();
 
             // Add handlers
             connection.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);
@@ -142,14 +140,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
             try
             {
-                Process process;
-
-                lock (_processLock)
-                {
-                    _processes.TryGetValue(spawnId, out process);
-                    _processes.Remove(spawnId);
-                }
-
+                _processes.TryRemove(spawnId, out var process);
                 process?.Kill();
             }
             catch (Exception e)
@@ -237,11 +228,8 @@ namespace SpeedDate.ClientPlugins.Spawner
                             _logger.Debug("Process started. Spawn Id: " + packet.SpawnId + ", pid: " + process.Id);
                             processStarted = true;
 
-                            lock (_processLock)
-                            {
                                 // Save the process
-                                _processes[packet.SpawnId] = process;
-                            }
+                            _processes[packet.SpawnId] = process;
 
                             var processId = process.Id;
 
@@ -269,11 +257,8 @@ namespace SpeedDate.ClientPlugins.Spawner
                     }
                     finally
                     {
-                        lock (_processLock)
-                        {
-                            // Remove the process
-                            _processes.Remove(packet.SpawnId);
-                        }
+                        // Remove the process
+                        _processes.TryRemove(packet.SpawnId, out _);
 
                         //AppTimer.ExecuteOnMainThread(() =>
                         //{
@@ -291,23 +276,6 @@ namespace SpeedDate.ClientPlugins.Spawner
             {
                 message.Respond(e.Message, ResponseStatus.Error);
                 Logs.Error(e);
-            }
-        }
-
-        public void KillProcessesSpawnedWithDefaultHandler()
-        {
-            var list = new List<Process>();
-            lock (_processLock)
-            {
-                foreach (var process in _processes.Values)
-                {
-                    list.Add(process);
-                }
-            }
-
-            foreach (var process in list)
-            {
-                process.Kill();
             }
         }
 

@@ -13,14 +13,14 @@ namespace SpeedDate.Test
     {
         public const string GuestPrefix = "TestGuest-";
         public const int Port = 12345;
-        
-        public SpeedDateServer Server;
+
+        private SpeedDateServer _server;
         
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            Server = new SpeedDateServer();
-            Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new []
+            _server = new SpeedDateServer();
+            _server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new []
             {
                 new AuthConfig
                 {
@@ -29,15 +29,15 @@ namespace SpeedDate.Test
                 }
             }));
             
-            Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
-            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
+            _server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
+            _server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", _server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
         }
         
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            Server.Stop();
-            Server.Dispose();
+            _server.Stop();
+            _server.Dispose();
         }
     }
 }

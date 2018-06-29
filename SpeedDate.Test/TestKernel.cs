@@ -23,7 +23,7 @@ namespace SpeedDate.Test
             var client = new SpeedDateClient();
             client.Start(new DefaultConfigProvider( //Start loads the plugins
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port),
-                new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             client.GetPlugin<AuthPlugin>().ShouldNotBeNull();
             client.GetPlugin<ChatPlugin>().ShouldNotBeNull();

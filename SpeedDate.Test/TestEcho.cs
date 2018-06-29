@@ -19,7 +19,7 @@ namespace SpeedDate.Test
         {
             const string message = "MyTestMessage12345";
 
-            var doneEvent = new AutoResetEvent(false);
+            var done = new AutoResetEvent(false);
 
             var client = new SpeedDateClient();
             client.Started += () =>
@@ -30,7 +30,7 @@ namespace SpeedDate.Test
                     echo =>
                     {
                         echo.ShouldBe(message);
-                        doneEvent.Set();
+                        done.Set();
                     },
                     error =>
                     {
@@ -42,7 +42,7 @@ namespace SpeedDate.Test
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
                 new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
 
-            doneEvent.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace SpeedDate.Test
             var numberOfClients = 100;
 
 
-            var doneEvent = new AutoResetEvent(false);
+            var done = new AutoResetEvent(false);
 
             for (var clientNumber = 0; clientNumber < numberOfClients; clientNumber++)
             {
@@ -68,7 +68,7 @@ namespace SpeedDate.Test
                                 echo.ShouldBe("Hello from " + state);
 
                                 if (Interlocked.Decrement(ref numberOfClients) == 0)
-                                    doneEvent.Set();
+                                    done.Set();
 
                             },
                             error =>
@@ -79,13 +79,13 @@ namespace SpeedDate.Test
 
                     client.Start(new DefaultConfigProvider(
                         new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                        new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+                        PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
                 }, clientNumber);
             }
 
 
-            doneEvent.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
     }
 }

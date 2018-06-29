@@ -7,7 +7,6 @@ using SpeedDate.Client;
 using SpeedDate.ClientPlugins.Spawner;
 using SpeedDate.Configuration;
 using SpeedDate.Packets.Spawner;
-using SpeedDate.Server;
 
 namespace SpeedDate.Test
 {
@@ -17,7 +16,7 @@ namespace SpeedDate.Test
         [Test]
         public void TestRegisterSpawner()
         {
-            var are = new AutoResetEvent(false);
+            var done = new AutoResetEvent(false);
 
             var client = new SpeedDateClient();
             client.Started += () =>
@@ -28,7 +27,7 @@ namespace SpeedDate.Test
                     {
                         spawner.SpawnerId.ShouldBeGreaterThanOrEqualTo(0);
 
-                        are.Set();
+                        done.Set();
                     },
                     error =>
                     {
@@ -38,10 +37,10 @@ namespace SpeedDate.Test
 
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                new PluginsConfig("SpeedDate.ClientPlugins.Spawner*"))); //Load spawner-plugins only
+                PluginsConfig.DefaultSpawnerPlugins)); //Load spawner-plugins only
             
             
-            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
     }
 }

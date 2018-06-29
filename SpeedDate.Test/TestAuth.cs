@@ -17,7 +17,7 @@ namespace SpeedDate.Test
         [Test]
         public void TestLoginAsGuest()
         {
-            var are = new AutoResetEvent(false);
+            var done = new AutoResetEvent(false);
 
             var client = new SpeedDateClient();
             client.Started += () =>
@@ -33,7 +33,7 @@ namespace SpeedDate.Test
                     info.IsAdmin.ShouldBeFalse();
                     info.Username.ShouldStartWith(SetUp.GuestPrefix);
 
-                    are.Set();
+                    done.Set();
                 }, 
                 error =>
                 {
@@ -43,16 +43,15 @@ namespace SpeedDate.Test
 
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
 
         [Test]
         public void TestLogOut()
         {
-
-            var are = new AutoResetEvent(false);
+            var done = new AutoResetEvent(false);
 
             var client = new SpeedDateClient();
             client.Started += () =>
@@ -65,7 +64,7 @@ namespace SpeedDate.Test
 
                     client.GetPlugin<AuthPlugin>().IsLoggedIn.ShouldBeFalse();
                     
-                    are.Set();
+                    done.Set();
                 },
                 error =>
                 {
@@ -75,9 +74,9 @@ namespace SpeedDate.Test
 
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            are.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
 
         [Test]
@@ -85,7 +84,7 @@ namespace SpeedDate.Test
         {
             var numberOfClients = 200;
             
-            var doneEvent = new ManualResetEvent(false);
+            var done = new ManualResetEvent(false);
             
             for (var clientNumber = 0; clientNumber < numberOfClients; clientNumber++)
                 ThreadPool.QueueUserWorkItem(state =>
@@ -104,8 +103,9 @@ namespace SpeedDate.Test
                                     info.IsAdmin.ShouldBeFalse();
                                     info.Username.ShouldStartWith(SetUp.GuestPrefix);
                                     
+                                    //Set done after all clients are logged in
                                     if (Interlocked.Decrement(ref numberOfClients) == 0)
-                                        doneEvent.Set();
+                                        done.Set();
                                 }, 
                                 error =>
                                 {
@@ -115,11 +115,11 @@ namespace SpeedDate.Test
 
                         client.Start(new DefaultConfigProvider(
                             new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                            new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+                            PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
                         
                     }, clientNumber);
             
-            doneEvent.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
     }
 }
