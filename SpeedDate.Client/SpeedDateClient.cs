@@ -35,9 +35,6 @@ namespace SpeedDate.Client
             _isStarted = true;
             _kernel.Load(this, configProvider, config =>
             {
-                _connection.Connected -= Connected;
-                _connection.Disconnected -= Disconnected;
-
                 _connection.Connected += Connected;
                 _connection.Disconnected += Disconnected;
 
@@ -47,7 +44,6 @@ namespace SpeedDate.Client
 
         private async void ConnectAsync(string serverIp, int port)
         {
-            
             await Task.Factory.StartNew(async () =>
             {
                 while (!_connection.IsConnected && _isStarted)
@@ -75,6 +71,9 @@ namespace SpeedDate.Client
                 _connection.Disconnect();
             else
                 Disconnected();
+
+            _connection.Connected -= Connected;
+            _connection.Disconnected -= Disconnected;
         }
         
         public void Dispose()
