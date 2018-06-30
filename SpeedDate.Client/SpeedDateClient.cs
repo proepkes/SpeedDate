@@ -23,7 +23,7 @@ namespace SpeedDate.Client
         public event Action Started;
         public event Action Stopped;
 
-        public bool IsConnected => _connection.IsConnected;
+        public bool IsConnected => _connection != null && _connection.IsConnected;
 
         public SpeedDateClient()
         {

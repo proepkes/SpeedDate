@@ -15,6 +15,13 @@ namespace SpeedDate.Test
     public class TestConnection
     {
         [Test]
+        public void TestIsConnected()
+        {
+            var client = new SpeedDateClient();
+            client.IsConnected.ShouldBeFalse();
+        }
+
+        [Test]
         public void TestConnectionToLoopback()
         {
             var done = new AutoResetEvent(false);
