@@ -180,8 +180,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             var lobbyId = message.AsInt();
 
-            ILobby lobby;
-            Lobbies.TryGetValue(lobbyId, out lobby);
+            Lobbies.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {

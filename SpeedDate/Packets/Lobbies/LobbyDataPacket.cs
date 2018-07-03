@@ -55,7 +55,7 @@ namespace SpeedDate.Packets.Lobbies
             writer.Write(MaxPlayers);
 
             // Write additional data
-            writer.Write(AdditionalData == null ? 0 : AdditionalData.Length);
+            writer.Write(AdditionalData?.Length ?? 0);
             if (AdditionalData != null) writer.Write(AdditionalData);
 
             // Write player properties

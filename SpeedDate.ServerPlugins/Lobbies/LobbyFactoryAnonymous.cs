@@ -10,7 +10,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
     /// </summary>
     public class LobbyFactoryAnonymous : ILobbyFactory
     {
-        private LobbiesPlugin _plugin;
+        private readonly LobbiesPlugin _plugin;
         private readonly LobbyCreationFactory _factory;
 
         public delegate ILobby LobbyCreationFactory(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator);

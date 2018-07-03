@@ -79,10 +79,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         public Packets.Lobbies.LobbyState State
         {
-            get
-            {
-                return _state;
-            }
+            get => _state;
             protected set
             {
                 if (_state == value)
@@ -95,7 +92,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         public string StatusText
         {
-            get { return _statusText; }
+            get => _statusText;
             protected set
             {
                 if (_statusText == value)
@@ -107,7 +104,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         protected LobbyMember GameMaster
         {
-            get { return _gameMaster; }
+            get => _gameMaster;
             set
             {
                 if (!Config.EnableGameMasters)
@@ -198,8 +195,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             OnPlayerAdded(member);
 
-            if (PlayerAdded != null)
-                PlayerAdded.Invoke(member);
+            PlayerAdded?.Invoke(member);
 
 
             return true;
@@ -716,7 +712,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             {
                 SendChatMessage(
                     member,
-                    string.Format("Not enough players. Need {0} more ", (MinPlayers - Members.Count)),
+                    $"Not enough players. Need {MinPlayers - Members.Count} more ",
                     true);
                 return false;
             }
@@ -725,7 +721,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             if (lackingTeam != null)
             {
-                var msg = string.Format("Team {0} does not have enough players", lackingTeam.Name);
+                var msg = $"Team {lackingTeam.Name} does not have enough players";
                 SendChatMessage(member, msg, true);
                 return false;
             }
@@ -808,7 +804,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             if (!Config.KeepAliveWithZeroPlayers && Members.Count == 0)
             {
                 Destroy();
-                Logger.Log(LogLevel.Info, string.Format("Lobby \"{0}\" destroyed due to last player leaving.", Name));
+                Logger.Log(LogLevel.Info, $"Lobby \"{Name}\" destroyed due to last player leaving.");
             }
 
             // Notify others about the user who left

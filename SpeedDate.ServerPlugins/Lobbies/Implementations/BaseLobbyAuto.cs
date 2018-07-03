@@ -7,8 +7,8 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 {
     class BaseLobbyAuto : BaseLobby
     {
-        public float WaitSecondsAfterMinPlayersReached = 10;
-        public float WaitSecondsAfterFullTeams = 5;
+        public const float WaitSecondsAfterMinPlayersReached = 10;
+        public const float WaitSecondsAfterFullTeams = 5;
 
         public BaseLobbyAuto(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config) : base(lobbyId, teams, plugin, config)
         {
@@ -21,7 +21,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         {
             await Task.Run(async () =>
             {
-                float timeToWait = WaitSecondsAfterMinPlayersReached;
+                var timeToWait = WaitSecondsAfterMinPlayersReached;
 
                 var initialState = State;
 
@@ -47,7 +47,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                     if (lackingTeam != null)
                     {
                         timeToWait = WaitSecondsAfterMinPlayersReached;
-                        StatusText = string.Format("Not enough players in team '{0}'", lackingTeam.Name);
+                        StatusText = $"Not enough players in team '{lackingTeam.Name}'";
                         continue;
                     }
 

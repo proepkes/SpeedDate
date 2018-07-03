@@ -31,6 +31,7 @@ namespace SpeedDate.Test
             
             _server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
             _server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", _server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
+            _server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", _server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
         }
         
         [OneTimeTearDown]

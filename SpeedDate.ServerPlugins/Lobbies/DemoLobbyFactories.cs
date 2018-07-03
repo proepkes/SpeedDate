@@ -184,12 +184,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var teamA = new LobbyTeam("Team Blue")
             {
                 MaxPlayers = 3,
-                MinPlayers = 1
+                MinPlayers = 2
             };
             var teamB = new LobbyTeam("Team Red")
             {
                 MaxPlayers = 3,
-                MinPlayers = 1
+                MinPlayers = 2
             };
 
             // Set their colors

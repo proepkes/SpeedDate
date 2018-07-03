@@ -36,7 +36,7 @@ namespace SpeedDate.Packets.Lobbies
             writer.Write(Label);
             writer.Write(PropertyKey);
 
-            writer.Write(Options != null ? Options.Count : 0);
+            writer.Write(Options?.Count ?? 0);
 
             if (Options != null)
             {
