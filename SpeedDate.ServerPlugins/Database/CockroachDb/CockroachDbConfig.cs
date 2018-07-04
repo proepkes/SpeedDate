@@ -4,8 +4,7 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
 {
     public class CockroachDbConfig : IConfig
     {
-        public bool CheckConnectionOnStartup { get; set; }
-
+        public bool CheckConnectionOnStartup { get; set; } = false;
         public string Host { get; set; } = "localhost";
         public int Port { get; set; } = 26257;
         public string Username { get; set; } = "root";
