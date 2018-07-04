@@ -14,7 +14,7 @@ namespace SpeedDate.Test
     public class TestSpawner
     {
         [Test]
-        public void TestRegisterSpawner()
+        public void RegisterSpawner_ShouldGenerateSpawnerId()
         {
             var done = new AutoResetEvent(false);
 
@@ -26,7 +26,6 @@ namespace SpeedDate.Test
                     spawner =>
                     {
                         spawner.SpawnerId.ShouldBeGreaterThanOrEqualTo(0);
-
                         done.Set();
                     },
                     error =>
@@ -38,7 +37,6 @@ namespace SpeedDate.Test
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
                 PluginsConfig.DefaultSpawnerPlugins)); //Load spawner-plugins only
-            
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }

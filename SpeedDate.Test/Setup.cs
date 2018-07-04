@@ -14,13 +14,13 @@ namespace SpeedDate.Test
         public const string GuestPrefix = "TestGuest-";
         public const int Port = 12345;
 
-        private SpeedDateServer _server;
+        public static SpeedDateServer Server;
         
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _server = new SpeedDateServer();
-            _server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new []
+            Server = new SpeedDateServer();
+            Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new []
             {
                 new AuthConfig
                 {
@@ -29,16 +29,16 @@ namespace SpeedDate.Test
                 }
             }));
             
-            _server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
-            _server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", _server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
-            _server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", _server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
+            Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
+            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
+            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
         }
         
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            _server.Stop();
-            _server.Dispose();
+            Server.Stop();
+            Server.Dispose();
         }
     }
 }

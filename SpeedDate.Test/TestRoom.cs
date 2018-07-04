@@ -15,7 +15,7 @@ namespace SpeedDate.Test
     public class TestRoom
     {
         [Test]
-        public void TestRegisterRoom()
+        public void RegisterRoom_ShouldApplyOptions()
         {
             var done = new AutoResetEvent(false);
 
@@ -70,7 +70,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void TestMakeRoomPublic()
+        public void MakeRoomPublic_ShouldMakePublic()
         {
             var done = new AutoResetEvent(false);
 
@@ -90,9 +90,11 @@ namespace SpeedDate.Test
                     {
                         info.Options.IsPublic.ShouldBe(false);
 
-                        //info.MakePublic();
-
-                        done.Set();
+                        info.MakePublic(() =>
+                        {
+                            info.Options.IsPublic.ShouldBe(true);
+                            done.Set();
+                        });
                     },
                     error =>
                     {

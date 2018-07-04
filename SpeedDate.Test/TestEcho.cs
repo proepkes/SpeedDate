@@ -15,7 +15,7 @@ namespace SpeedDate.Test
     public class TestEcho
     {
         [Test]
-        public void TestSingleEcho()
+        public void Echo_ShouldBeEchoed()
         {
             const string message = "MyTestMessage12345";
 
@@ -46,7 +46,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void TestMultiClientEcho()
+        public void EchoFromMultipleClients_ShouldBeEchoed()
         {
             var numberOfClients = 100;
 

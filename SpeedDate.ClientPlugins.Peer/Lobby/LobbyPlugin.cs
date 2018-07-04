@@ -21,22 +21,11 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         public event Action<JoinedLobby> LobbyJoined;
 
         /// <summary>
-        /// Key is in format 'lobbyId:connectionPeerId' - this is to allow
-        /// mocking multiple clients on the same client and same lobby
-        /// </summary>
-        private readonly Dictionary<string, JoinedLobby> _joinedLobbies;
-
-        /// <summary>
         /// Instance of a lobby that was joined the last
         /// </summary>
         public JoinedLobby LastJoinedLobby;
 
         private RoomPlugin _roomPlugin;
-
-        public LobbyPlugin()
-        {
-            _joinedLobbies = new Dictionary<string, JoinedLobby>();
-        }
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
@@ -110,21 +99,9 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
                 var data = response.Deserialize<LobbyDataPacket>();
 
-                var key = data.LobbyId + ":" + Connection.PeerId;
-
-                if (_joinedLobbies.ContainsKey(key))
-                {
-                    // If there's already a lobby
-                    callback.Invoke(_joinedLobbies[key]);
-                    return;
-                }
-
                 var joinedLobby = new JoinedLobby(this, data, Connection);
 
                 LastJoinedLobby = joinedLobby;
-
-                // Save the lobby
-                _joinedLobbies[key] = joinedLobby;
 
                 callback.Invoke(joinedLobby);
 
@@ -135,21 +112,21 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// <summary>
         /// Sends a request to leave a lobby
         /// </summary>
-        public void LeaveLobby(int lobbyId, Action callback)
+        public void LeaveLobby(int lobbyId, Action callback, ErrorCallback errorCallback)
         {
             Connection.SendMessage((ushort)OpCodes.LeaveLobby, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
-                    Logs.Error(response.AsString("Something went wrong when trying to leave a lobby"));
-
-                callback.Invoke();
+                    errorCallback.Invoke(response.AsString("Something went wrong when trying to leave a lobby"));
+                else
+                    callback.Invoke();
             });
         }
 
         /// <summary>
         /// Sets a ready status of current player
         /// </summary>
-        public void SetReadyStatus(bool isReady, SuccessCallback callback, ErrorCallback errorCallback, IClientSocket Connection)
+        public void SetReadyStatus(bool isReady, SuccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Connection.IsConnected)
             {
@@ -175,7 +152,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         public void SetLobbyProperties(int lobbyId, Dictionary<string, string> properties,
             SuccessCallback callback, ErrorCallback errorCallback)
         {
-            var packet = new LobbyPropertiesSetPacket()
+            var packet = new LobbyPropertiesSetPacket
             {
                 LobbyId = lobbyId,
                 Properties = properties

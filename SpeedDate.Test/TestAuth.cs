@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using NUnit.Framework;
@@ -15,7 +17,7 @@ namespace SpeedDate.Test
     public class TestAuth
     {
         [Test]
-        public void TestLoginAsGuest()
+        public void LoginAsGuest_ShouldGenerateGuestUsername()
         {
             var done = new AutoResetEvent(false);
 
@@ -49,7 +51,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void TestLogOut()
+        public void LogOut_ShouldLogOut()
         {
             var done = new AutoResetEvent(false);
 
@@ -61,7 +63,6 @@ namespace SpeedDate.Test
                 {
                     client.IsConnected.ShouldBeTrue();
                     client.GetPlugin<AuthPlugin>().LogOut();
-
                     client.GetPlugin<AuthPlugin>().IsLoggedIn.ShouldBeFalse();
                     
                     done.Set();
@@ -80,10 +81,12 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void TestMultipleGuests()
+        public void SimulatenouseLogins_ShouldGenerateDistinctUsernames()
         {
             var numberOfClients = 200;
-            
+            IProducerConsumerCollection<string> generatedUsernames = new ConcurrentBag<string>();
+
+
             var done = new ManualResetEvent(false);
             
             for (var clientNumber = 0; clientNumber < numberOfClients; clientNumber++)
@@ -102,7 +105,9 @@ namespace SpeedDate.Test
                                     info.IsGuest.ShouldBeTrue();
                                     info.IsAdmin.ShouldBeFalse();
                                     info.Username.ShouldStartWith(SetUp.GuestPrefix);
-                                    
+
+                                    generatedUsernames.TryAdd(info.Username).ShouldBeTrue();
+
                                     //Set done after all clients are logged in
                                     if (Interlocked.Decrement(ref numberOfClients) == 0)
                                         done.Set();

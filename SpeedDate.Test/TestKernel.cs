@@ -18,7 +18,7 @@ namespace SpeedDate.Test
     public class TestKernel
     {
         [Test]
-        public void TestGetPeerPlugins()
+        public void GetPlugin_ShouldResolvePeerPlugins()
         {
             var client = new SpeedDateClient();
             client.Start(new DefaultConfigProvider( //Start loads the plugins

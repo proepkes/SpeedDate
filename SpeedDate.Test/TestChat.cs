@@ -15,7 +15,7 @@ namespace SpeedDate.Test
     public class TestChat
     {
         [Test]
-        public void TestGetEmptyChannels()
+        public void GetJoinedChannels_ShouldBeEmpty()
         {
             var done = new AutoResetEvent(false);
 
@@ -25,7 +25,6 @@ namespace SpeedDate.Test
                 client.IsConnected.ShouldBeTrue();
                 client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                     {
-                        client.IsConnected.ShouldBeTrue();
                         client.GetPlugin<ChatPlugin>().GetJoinedChannels(channels =>
                         {
                             channels.ShouldNotBeNull();
@@ -47,7 +46,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void TestJoinSingleChannel()
+        public void GetJoinedChannels_ShouldContainJoinedChannel()
         {
             const string channelName = "General";
             
@@ -59,10 +58,8 @@ namespace SpeedDate.Test
                 client.IsConnected.ShouldBeTrue();
                 client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                     {
-                        client.IsConnected.ShouldBeTrue();
                         client.GetPlugin<ChatPlugin>().JoinChannel(channelName, () =>
                         {
-                            client.IsConnected.ShouldBeTrue();
                             client.GetPlugin<ChatPlugin>().GetJoinedChannels(channels =>
                             {
                                 channels.ShouldNotBeNull();
@@ -83,7 +80,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void TestSendChannelMessage()
+        public void SendChannelMessage_ShouldBeReceived()
         {
             const string channelName = "MyChannel";
             const string message = "MyTest123";
@@ -105,20 +102,11 @@ namespace SpeedDate.Test
                     done.Set();
                 };
 
-                masterClient.IsConnected.ShouldBeTrue();
                 masterClient.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    masterClient.IsConnected.ShouldBeTrue();
                     masterClient.GetPlugin<ChatPlugin>().JoinChannel(channelName, () =>
                     {
-                        masterClient.IsConnected.ShouldBeTrue();
-                        masterClient.GetPlugin<ChatPlugin>().GetJoinedChannels(channels =>
-                        {
-                            channels.ShouldNotBeNull();
-                            channels.Count.ShouldBe(1);
-                            channels.ShouldContain(channelName);
-                            done.Set();
-                        }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                        done.Set();
                     }, error => { Should.NotThrow(() => throw new Exception(error)); });
                 }, error => { Should.NotThrow(() => throw new Exception(error)); });
             };
@@ -133,22 +121,12 @@ namespace SpeedDate.Test
             var slaveClient = new SpeedDateClient();
             slaveClient.Started += () =>
             {
-                slaveClient.IsConnected.ShouldBeTrue();
                 slaveClient.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    slaveClient.IsConnected.ShouldBeTrue();
                     usernameSlaveClient = info.Username;
-
                     slaveClient.GetPlugin<ChatPlugin>().JoinChannel(channelName, () =>
                     {
-                        slaveClient.IsConnected.ShouldBeTrue();
-                        slaveClient.GetPlugin<ChatPlugin>().GetJoinedChannels(channels =>
-                        {
-                            channels.ShouldNotBeNull();
-                            channels.Count.ShouldBe(1);
-                            channels.ShouldContain(channelName);
-                            done.Set();
-                        }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                        done.Set();
                     }, error => { Should.NotThrow(() => throw new Exception(error)); });
                 }, error => { Should.NotThrow(() => throw new Exception(error)); });
             };
@@ -159,15 +137,45 @@ namespace SpeedDate.Test
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside slaveClient.Started
 
+            usernameSlaveClient.ShouldNotBeNullOrEmpty();
+
             slaveClient.GetPlugin<ChatPlugin>().SendChannelMessage(channelName, message, () => { }, error => { Should.NotThrow(() => throw new Exception(error)); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside masterClient.MessageReceived
         }
 
         [Test]
-        public void TestSendPrivateMessage()
+        public void SendPrivateMessage_ShouldBeNotLoggedInError()
         {
             const string channelName = "MyChannel";
+            const string message = "MyTest123";
+            
+            var done = new AutoResetEvent(false);
+
+
+            //Join Channel with slave-client
+            var slaveClient = new SpeedDateClient();
+            slaveClient.Started += () =>
+            {
+                slaveClient.GetPlugin<ChatPlugin>().SendPrivateMessage(channelName, message, () => { },
+                    error =>
+                    {
+                        error.ShouldNotBeNullOrEmpty("SendPrivateMessage without logging in");
+                        done.Set();
+                    });
+            };
+
+            slaveClient.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside slaveClient.SendPrivateMessage
+        }
+    
+
+        [Test]
+        public void SendPrivateMessage_ShouldBeReceived()
+        {
             const string message = "MyTest123";
 
             var usernameMasterClient = string.Empty;
@@ -179,7 +187,6 @@ namespace SpeedDate.Test
             var masterClient = new SpeedDateClient();
             masterClient.Started += () =>
             {
-                masterClient.IsConnected.ShouldBeTrue();
                 masterClient.GetPlugin<ChatPlugin>().MessageReceived += packet =>
                 {
                     packet.Type.ShouldBe(ChatMessagePacket.PrivateMessage);
@@ -191,9 +198,7 @@ namespace SpeedDate.Test
 
                 masterClient.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    masterClient.IsConnected.ShouldBeTrue();
                     usernameMasterClient = info.Username;
-
                     done.Set();
                 }, error => { Should.NotThrow(() => throw new Exception(error)); });
             };
@@ -210,33 +215,26 @@ namespace SpeedDate.Test
             var slaveClient = new SpeedDateClient();
             slaveClient.Started += () =>
             {
-                slaveClient.IsConnected.ShouldBeTrue();
-                slaveClient.GetPlugin<ChatPlugin>().SendPrivateMessage(channelName, message, () => { }, 
-                    error =>
+                slaveClient.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    error.ShouldNotBeNullOrEmpty("SendMessage without logging in");
-                    done.Set();
-                });
+                    usernameSlaveClient = info.Username;
+
+                    slaveClient.IsConnected.ShouldBeTrue();
+                    slaveClient.GetPlugin<ChatPlugin>().SendPrivateMessage(usernameMasterClient, message, () =>
+                    {
+
+                    }, error =>
+                    {
+                        Should.NotThrow(() => throw new Exception(error));
+                    });
+                }, error => { Should.NotThrow(() => throw new Exception(error)); });
             };
 
             slaveClient.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside slaveClient.SendPrivateMessage
-
-            slaveClient.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
-            {
-                usernameSlaveClient = info.Username;
-
-                slaveClient.IsConnected.ShouldBeTrue();
-                slaveClient.GetPlugin<ChatPlugin>().SendPrivateMessage(usernameMasterClient, message, () => { }, error =>
-                {
-                    Should.NotThrow(() => throw new Exception(error));
-                });
-            }, error => { Should.NotThrow(() => throw new Exception(error)); });
-
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside masterClient.MessageReceived
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside MessageReceived
         }
     }
 }

@@ -18,9 +18,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         public delegate void PlayerPropertyChangedHandler(LobbyMemberData member, string propertyKey,
             string propertyValue);
-
-        private readonly IClientSocket _connection;
-
+        
         private readonly LobbyPlugin _lobbyServer;
 
         public LobbyDataPacket Data { get; }
@@ -42,7 +40,6 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         public JoinedLobby(LobbyPlugin owner, LobbyDataPacket data, IClientSocket connection)
         {
             Data = data;
-            _connection = connection;
             connection.SetHandler((ushort) OpCodes.LobbyMemberPropertyChanged, HandleMemberPropertyChanged);
             connection.SetHandler((ushort) OpCodes.LeftLobby, HandleLeftLobbyMsg);
             connection.SetHandler((ushort) OpCodes.LobbyChatMessage, HandleLobbyChatMessageMsg);
@@ -67,16 +64,16 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void Leave()
         {
-            _lobbyServer.LeaveLobby(Id, () => { });
+            _lobbyServer.LeaveLobby(Id, () => { }, error => { });
         }
 
         /// <summary>
         ///     Leaves this lobby
         /// </summary>
         /// <param name="callback"></param>
-        public void Leave(Action callback)
+        public void Leave(Action callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.LeaveLobby(Id, callback);
+            _lobbyServer.LeaveLobby(Id, callback, errorCallback);
         }
 
         /// <summary>
@@ -151,7 +148,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// <param name="isReady"></param>
         public void SetReadyStatus(bool isReady)
         {
-            _lobbyServer.SetReadyStatus(isReady, () => { }, reason => {}, _connection);
+            _lobbyServer.SetReadyStatus(isReady, () => { }, reason => {});
         }
 
         /// <summary>
@@ -159,7 +156,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void SetReadyStatus(bool isReady, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _lobbyServer.SetReadyStatus(isReady, callback, errorCallback, _connection);
+            _lobbyServer.SetReadyStatus(isReady, callback, errorCallback);
         }
 
         /// <summary>
