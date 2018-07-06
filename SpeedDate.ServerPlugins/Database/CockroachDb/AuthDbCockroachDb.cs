@@ -272,8 +272,7 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
                 account = new SqlAccountData()
                 {
                     Username = reader["username"] as string,
-					//AccountId = reader.GetInt32("account_id"),
-					AccountId = Int32.Parse(reader["account_id"].ToString()),
+					AccountId = long.Parse(reader["account_id"].ToString()),
 					Email = reader["email"] as string,
                     Password = reader["password"] as string,
                     IsAdmin = reader["is_admin"] as bool? ?? false,
@@ -310,7 +309,7 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
 
         public class SqlAccountData : IAccountData
         {
-            public int AccountId { get; set; }
+            public long AccountId { get; set; }
             public string Username { get; set; }
             public string Password { get; set; }
             public string Email { get; set; }

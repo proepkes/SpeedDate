@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using System;
+using Npgsql;
 using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
@@ -36,12 +37,21 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
                     ? CommandLineArgs.DbConnectionString
                     : connStringBuilder.ConnectionString;
 
-                if (_config.CheckConnectionOnStartup)
+                try
                 {
-                    using (var con = new NpgsqlConnection(connectionString))
+                    if (_config.CheckConnectionOnStartup)
                     {
-                        con.Open();
+                        using (var con = new NpgsqlConnection(connectionString))
+                        {
+                            con.Open();
+                        }
                     }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
                 }
 
                 AuthDatabase = new AuthDbCockroachDb(connectionString);

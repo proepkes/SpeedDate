@@ -49,7 +49,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void LogOut_ShouldLogOut()
+        public void LogOut()
         {
             var done = new AutoResetEvent(false);
 
@@ -174,6 +174,35 @@ namespace SpeedDate.Test
                 });
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+        }
+        
+        [Test]
+        public void Login()
+        {
+            var done = new AutoResetEvent(false);
+
+            var client = new SpeedDateClient();
+            client.Started += () =>
+            {
+                done.Set();
+            };
+
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(5)).ShouldBeTrue(); //Should be signaled
+
+            client.GetPlugin<AuthPlugin>().LogIn("asdf", "asdfasdf", info =>
+                {
+                    done.Set();
+                },
+                error =>
+                {
+                    Should.NotThrow(() => throw new Exception(error));
+                });
+            
+            done.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
         }
     }
 }

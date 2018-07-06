@@ -287,19 +287,9 @@ namespace SpeedDate
 
         #endregion
 
-        ///// <summary>
-        ///// Retrieves current public IP
-        ///// </summary>
-        ///// <param name="callback"></param>
-        //public void GetPublicIp(Action<string> callback)
-        //{
-        //    BTimer.Instance.StartCoroutine(GetPublicIPCoroutine(callback));
-        //}
-
-        //private IEnumerator GetPublicIPCoroutine(Action<string> callback)
+        //private void GetPublicIP(Action<string> callback)
         //{
         //    var req = new WWW("http://checkip.dyndns.org");
-        //    yield return req;
         //    var ip = req.text;
         //    ip = ip.Substring(ip.IndexOf(":") + 1);
         //    ip = ip.Substring(0, ip.IndexOf("<"));
