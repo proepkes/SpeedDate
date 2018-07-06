@@ -538,6 +538,15 @@ namespace SpeedDate.ServerPlugins.Authentication
                     message.Respond("Invalid Credentials".ToBytes(), ResponseStatus.Unauthorized);
                     return;
                 }
+                
+                var otherSession = GetLoggedInUser(accountData.Username);
+                if (otherSession != null)
+                {
+                    otherSession.Peer.Disconnect("Other user logged in");
+                    message.Respond("This account is already logged in".ToBytes(),
+                        ResponseStatus.Unauthorized);
+                    return;
+                }
             }
 
             if (accountData == null)

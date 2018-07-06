@@ -41,11 +41,6 @@ namespace SpeedDate.ClientPlugins.Peer.Security
             });
         }
 
-        public void ClearData()
-        {
-            _encryptionData = null;
-        }
-
         /// <summary>
         ///     Should be called on client. Generates RSA public key,
         ///     sends it to master, which returns encrypted AES key. After decrypting AES key,

@@ -25,8 +25,6 @@ namespace SpeedDate.Server
 
         public event Action Started;
         public event Action Stopped;
-        public event PeerActionHandler PeerConnected;
-        public event PeerActionHandler PeerDisconnected;
 
 
         public SpeedDateServer()
@@ -52,8 +50,6 @@ namespace SpeedDate.Server
                 extension.PermissionLevel = 0;
 
                 _logger.Info($"Client {peer.ConnectId} connected.");
-
-                PeerConnected?.Invoke(peer);
             };
             
             _listener.NetworkErrorEvent += (point, code) =>
@@ -73,8 +69,7 @@ namespace SpeedDate.Server
                 // Remove listener to messages
                 peer.MessageReceived -= OnMessageReceived;
 
-                // Invoke the event
-                PeerDisconnected?.Invoke(peer);
+                peer.NotifyDisconnected();
             };
 
             _manager = new NetManager(_listener)

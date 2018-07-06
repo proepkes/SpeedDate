@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
@@ -41,23 +42,25 @@ namespace SpeedDate.Network
                 {
                     try
                     {
-                        lock (_addList)
+                        lock (_removeList) lock (_addList)
                         {
+                            //Remove entries that are added or removed at the same time
+                            _removeList.RemoveAll(updatable => _addList.Contains(updatable));
+                            _addList.RemoveAll(updatable => _removeList.Contains(updatable));
+                            
                             if (_addList.Count > 0)
                             {
                                 _runnables.AddRange(_addList);
                                 _addList.Clear();
                             }
-                        }
-
-                        lock (_removeList)
-                        {
+                            
                             if (_removeList.Count > 0)
                             {
                                 _runnables.RemoveAll(updatable => _removeList.Contains(updatable));
                                 _removeList.Clear();
                             }
                         }
+                        
 
                         foreach (var runnable in _runnables)
                             runnable.Update();

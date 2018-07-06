@@ -14,23 +14,30 @@ namespace SpeedDate.Client
     {
         private readonly Dictionary<ushort, IPacketHandler> _handlers;
         private readonly SpeedDateKernel _kernel;
-        private readonly NetManager _manager;
         private readonly SpeedDateNetListener _listener;
 
         [Inject] private ILogger _logger;
         private NetPeer _netPeer;
+        private NetManager _manager;
 
         private float _timeToConnect = 0.5f;
         public SpeedDateConfig Config { get; private set; }
+
+        public event Action Started;
+        public event Action Stopped;
 
         public SpeedDateClient()
         {
             _handlers = new Dictionary<ushort, IPacketHandler>();
             _kernel = new SpeedDateKernel();
             _listener = new SpeedDateNetListener();
+            
+            _listener.NetworkErrorEvent += (point, code) =>
+            {
+                Logs.Error($"NetworkError: ({code}): {point}");
+            };
             _listener.PeerConnectedEvent += peer =>
             {
-                _netPeer = peer;
                 _netPeer.MessageReceived += HandleMessage;
 
                 _logger.Info("Connected");
@@ -42,9 +49,10 @@ namespace SpeedDate.Client
             };
             _listener.PeerDisconnectedEvent += (peer, info) =>
             {
-                _kernel.Stop();
                 _manager.Stop();
 
+                AppUpdater.Instance.Remove(this);
+                
                 _logger.Info("Disconnected");
                 Stopped?.Invoke();
             };
@@ -57,9 +65,17 @@ namespace SpeedDate.Client
 
         public void Reconnect()
         {
-            _manager.Stop();
-            _manager.Start();
-            _manager.Connect(Config.Network.Address, Config.Network.Port, "TundraNet");
+            void StartAfterStop()
+            {
+                Stopped -= StartAfterStop;
+                
+                AppUpdater.Instance.Add(this);
+                _manager.Start();
+                _netPeer = _manager.Connect(Config.Network.Address, Config.Network.Port, "TundraNet");
+            }
+
+            Stopped += StartAfterStop;
+            Stop();
         }
 
         public void SetHandler(ushort opCode, IncommingMessageHandler handler)
@@ -157,9 +173,6 @@ namespace SpeedDate.Client
             Stop();
         }
 
-        public event Action Started;
-        public event Action Stopped;
-
         public void Start(IConfigProvider configProvider)
         {
             AppUpdater.Instance.Add(this);
@@ -168,17 +181,15 @@ namespace SpeedDate.Client
                 Config = config;
 
                 _manager.Start();
-                _manager.Connect(config.Network.Address, config.Network.Port, "TundraNet");
+                _netPeer = _manager.Connect(config.Network.Address, config.Network.Port, "TundraNet");
             });
         }
 
         public void Stop()
         {
-            _manager.Stop();
-            AppUpdater.Instance.Remove(this);
+            _manager.DisconnectAll();
         }
-
-
+        
         public T GetPlugin<T>() where T : class, IPlugin
         {
             return _kernel.PluginProvider.Get<T>();

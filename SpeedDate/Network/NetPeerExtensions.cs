@@ -11,7 +11,7 @@ namespace SpeedDate.Network.LiteNetLib
     {
         private int _nextAckId = 1;
 
-        public const int DefaultTimeout = 10;
+        public const int DefaultTimeout = 60;
 
         public event PeerActionHandler Disconnected;
         public event Action<IIncommingMessage> MessageReceived;
@@ -207,6 +207,11 @@ namespace SpeedDate.Network.LiteNetLib
         {
             SendMessage(message, method);
         }
+        
+        public void NotifyDisconnected()
+        {
+            Disconnected?.Invoke(this);
+        }
 
         private void RegisterAck(IMessage message, ResponseCallback responseCallback,
             int timeoutSecs)
@@ -277,6 +282,5 @@ namespace SpeedDate.Network.LiteNetLib
 
             ackCallback(responseCode, _timeoutMessage);
         }
-
     }
 }

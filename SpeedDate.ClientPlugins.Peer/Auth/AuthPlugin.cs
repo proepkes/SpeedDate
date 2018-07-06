@@ -85,7 +85,6 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
             IsLoggedIn = false;
             AccountInfo = null;
-            _securityPlugin.ClearData();
 
             if (Client != null && Client.IsConnected)
                 Client.Reconnect();

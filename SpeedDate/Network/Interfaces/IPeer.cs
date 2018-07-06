@@ -15,15 +15,11 @@ namespace SpeedDate.Network.Interfaces
         long ConnectId { get; }
 
         ConnectionState ConnectionState { get; }
+        
         /// <summary>
         ///     Invoked when peer disconnects
         /// </summary>
         event PeerActionHandler Disconnected;
-
-        /// <summary>
-        ///     Invoked when peer receives a message
-        /// </summary>
-        event Action<IIncommingMessage> MessageReceived;
         
         /// <summary>
         ///     Force disconnect

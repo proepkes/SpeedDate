@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using SpeedDate.Client;
@@ -86,7 +87,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void SimultaneousLogins_ShouldGenerateDistinctUsernames()
+        public void SimultaneousGuestLogins_ShouldGenerateDistinctUsernames()
         {
             var numberOfClients = 200;
             IProducerConsumerCollection<string> generatedUsernames = new ConcurrentBag<string>();
@@ -132,7 +133,7 @@ namespace SpeedDate.Test
         }
         
         [Test]
-        public void LoginLogOutLogIn_ShouldCreateNewAesKey()
+        public void ReLogInAsGuest_ShouldCreateNewAesKey()
         {
             var done = new AutoResetEvent(false);
 
@@ -176,7 +177,7 @@ namespace SpeedDate.Test
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
         }
         
-        [Test]
+        [Test, Order(2)]
         public void Login()
         {
             var done = new AutoResetEvent(false);
@@ -202,7 +203,59 @@ namespace SpeedDate.Test
                     Should.NotThrow(() => throw new Exception(error));
                 });
             
-            done.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            
+            client.GetPlugin<AuthPlugin>().LogOut();
+            
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+        }
+        
+        [Test, Order(1)]
+        public void ReLogin()
+        {
+            var done = new AutoResetEvent(false);
+
+            var client = new SpeedDateClient();
+            client.Started += () =>
+            {
+                done.Set();
+            };
+
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+
+            client.GetPlugin<AuthPlugin>().LogIn("asdf", "asdfasdf", info =>
+                {
+                    done.Set();
+                },
+                error =>
+                {
+                    Should.NotThrow(() => throw new Exception(error));
+                });
+            
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            
+            client.GetPlugin<AuthPlugin>().LogOut();
+            
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            
+            client.GetPlugin<AuthPlugin>().LogIn("asdf", "asdfasdf", info =>
+                {
+                    done.Set();
+                },
+                error =>
+                {
+                    Should.NotThrow(() => throw new Exception(error));
+                });
+            
+            done.WaitOne(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+            
+            client.GetPlugin<AuthPlugin>().LogOut();
+            
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
         }
     }
 }
