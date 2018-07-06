@@ -4,16 +4,16 @@ using SpeedDate.Network.LiteNetLib.Utils;
 
 namespace SpeedDate.Network
 {
-    class Peer : BasePeer
+    class NetPeerAdapter : BasePeer
     {
         public override long Id => _socket.ConnectId;
         public override bool IsConnected => _socket.ConnectionState == ConnectionState.Connected;
 
-        private readonly NetPeer _socket;
+        internal readonly NetPeer _socket;
 
         public ConnectionState ConnectionState => _socket.ConnectionState;
 
-        public Peer(NetPeer socket, AppUpdater timer) : base(timer)
+        public NetPeerAdapter(NetPeer socket, AppUpdater timer) : base(timer)
         {
             _socket = socket;
         }
