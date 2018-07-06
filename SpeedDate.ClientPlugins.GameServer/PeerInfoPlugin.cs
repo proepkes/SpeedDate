@@ -16,13 +16,13 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void GetPeerAccountInfo(int peerId, PeerAccountInfoCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.GetPeerAccountInfo, peerId, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.GetPeerAccountInfo, peerId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

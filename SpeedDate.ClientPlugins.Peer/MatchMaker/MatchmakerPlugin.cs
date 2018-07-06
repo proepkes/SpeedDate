@@ -20,13 +20,13 @@ namespace SpeedDate.ClientPlugins.Peer.MatchMaker
         /// </summary>
         public void FindGames(Dictionary<string, string> filter, FindGamesCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort) OpCodes.FindGames, filter.ToBytes(), (status, response) =>
+            Client.SendMessage((ushort) OpCodes.FindGames, filter.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

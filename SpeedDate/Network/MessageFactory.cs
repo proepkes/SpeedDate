@@ -25,7 +25,7 @@ namespace SpeedDate.Network
         /// <param name="start"></param>
         /// <param name="peer"></param>
         /// <returns></returns>
-        public IIncommingMessage FromBytes(byte[] buffer, int start, IPeer peer)
+        public IIncommingMessage FromBytes(byte[] buffer, int start, NetPeer peer)
         {
             try
             {

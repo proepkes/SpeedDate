@@ -8,7 +8,7 @@ namespace SpeedDate.ClientPlugins.Peer.Echo
     {
         public void Send(string message, Action<string> echoCallback, ErrorCallback error)
         {
-            Connection.SendMessage((ushort)OpCodes.Echo, message, (status, response) => 
+            Client.SendMessage((ushort)OpCodes.Echo, message, (status, response) => 
             { 
                 if (status != ResponseStatus.Success)
                 {

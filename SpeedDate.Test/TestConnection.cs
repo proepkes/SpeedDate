@@ -22,11 +22,11 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void StopServer_ShouldStopClient()
+        public void StopServer_ShouldAlsoStopClient()
         {
             var done = new AutoResetEvent(false);
 
-            //We will stop the server later, so we create a separate one so other tests will not be affected
+            //A new server is created so other tests are not affected
             var server = new SpeedDateServer();
 
             var client = new SpeedDateClient();
@@ -47,17 +47,41 @@ namespace SpeedDate.Test
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
 
-            client.IsConnected.ShouldBeTrue("Client is connected");
+            client.IsConnected.ShouldBeTrue();
             client.Stopped += () => done.Set();
-
-            done.Reset();
 
             server.Stop();
             server.Dispose();
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            done.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
 
-            client.IsConnected.ShouldBeFalse("Client is no longer connected");
+            client.IsConnected.ShouldBeFalse();
+        }
+
+        [Test]
+        public void Reconnect_ShouldReconnect()
+        {
+            var done = new AutoResetEvent(false);
+            
+            var client = new SpeedDateClient();
+
+            client.Started += () =>
+            {
+                done.Set();
+            };
+            
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port 
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+
+            done.WaitOne(TimeSpan.FromSeconds(30));
+            
+            client.Reconnect(); 
+            
+            done.WaitOne(TimeSpan.FromSeconds(3));
+            
+            client.IsConnected.ShouldBeTrue();
         }
     }
 }

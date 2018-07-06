@@ -216,7 +216,7 @@ namespace SpeedDate.ServerPlugins.Profiles
             // Remove value from debounced updates
             debouncedClientUpdates.Remove(profile.Username);
 
-            if (profile.ClientPeer == null || !profile.ClientPeer.IsConnected)
+            if (profile.ClientPeer == null || profile.ClientPeer.ConnectionState != ConnectionState.Connected)
             {
                 // If client is not connected, and we don't need to send him profile updates
                 profile.ClearUpdates();

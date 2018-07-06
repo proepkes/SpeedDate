@@ -22,7 +22,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 B = peerId
             };
 
-            Connection.SendMessage((ushort)OpCodes.GetLobbyMemberData, packet, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.GetLobbyMemberData, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -40,7 +40,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void GetLobbyInfo(int lobbyId, LobbyInfoCallback callback, ErrorCallback errorCallback)
         {
-            Connection.SendMessage((ushort)OpCodes.GetLobbyInfo, lobbyId, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.GetLobbyInfo, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

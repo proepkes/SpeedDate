@@ -3,6 +3,7 @@ using System.Linq;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ServerPlugins.Spawner
@@ -53,7 +54,7 @@ namespace SpeedDate.ServerPlugins.Spawner
         public void UpdateQueue()
         {
             // Ignore if there's no connection with the peer
-            if (!Peer.IsConnected)
+            if (Peer.ConnectionState != ConnectionState.Connected)
                 return;
 
             // Ignore if nothing's in the queue

@@ -49,13 +49,13 @@ namespace SpeedDate.ClientPlugins.Spawner
         public void RegisterSpawner(SpawnerOptions options, RegisterSpawnerCallback callback, ErrorCallback errorCallback)
         {
             _logger.Info("Registering Spawner...");
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort) OpCodes.RegisterSpawner, options, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.RegisterSpawner, options, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -65,7 +65,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
                 var spawnerId = response.AsInt();
 
-                var controller = new SpawnerController(this, spawnerId, Connection, options);
+                var controller = new SpawnerController(this, spawnerId, Client, options);
 
                 // Save reference
                 _locallyCreatedSpawners[spawnerId] = controller;
@@ -87,7 +87,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                 A = spawnerId,
                 B = count
             };
-            Connection.SendMessage((ushort)OpCodes.UpdateSpawnerProcessesCount, packet);
+            Client.SendMessage((ushort)OpCodes.UpdateSpawnerProcessesCount, packet);
         }
 
         public SpawnerController GetController(int spawnerId)
@@ -127,10 +127,10 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// <param name="cmdArgs"></param>
         public void NotifyProcessStarted(int spawnId, int processId, string cmdArgs)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
                 return;
 
-            Connection.SendMessage((ushort)OpCodes.ProcessStarted, new SpawnedProcessStartedPacket
+            Client.SendMessage((ushort)OpCodes.ProcessStarted, new SpawnedProcessStartedPacket
             {
                 CmdArgs = cmdArgs,
                 ProcessId = processId,
@@ -140,10 +140,10 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         public void NotifyProcessKilled(int spawnId)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
                 return;
 
-            Connection.SendMessage((ushort)OpCodes.ProcessKilled, spawnId);
+            Client.SendMessage((ushort)OpCodes.ProcessKilled, spawnId);
         }
     }
 }

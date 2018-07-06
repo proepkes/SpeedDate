@@ -1,6 +1,6 @@
 ﻿using SpeedDate.Network.Interfaces;
 
-namespace SpeedDate.Server
+namespace SpeedDate.Network
 {
     public delegate void PeerActionHandler(IPeer peer);
 }

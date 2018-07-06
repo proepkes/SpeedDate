@@ -181,7 +181,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             }
 
             Members[member.Username] = member;
-            MembersByPeerId[playerExt.Peer.Id] = member;
+            MembersByPeerId[playerExt.Peer.ConnectId] = member;
 
             // Set this lobby as player's current lobby
             playerExt.CurrentLobby = this;
@@ -212,7 +212,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 return;
 
             Members.Remove(username);
-            MembersByPeerId.Remove(playerExt.Peer.Id);
+            MembersByPeerId.Remove(playerExt.Peer.ConnectId);
 
             if (playerExt.CurrentLobby == this)
                 playerExt.CurrentLobby = null;
@@ -244,7 +244,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             if (Config.EnableGameMasters)
             {
-                MembersByPeerId.TryGetValue(setter.Peer.Id, out var member);
+                MembersByPeerId.TryGetValue(setter.Peer.ConnectId, out var member);
 
                 if (GameMaster != member)
                     return false;
@@ -270,7 +270,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         public LobbyMember GetMember(LobbyUserExtension playerExt)
         {
-            MembersByPeerId.TryGetValue(playerExt.Peer.Id, out var member);
+            MembersByPeerId.TryGetValue(playerExt.Peer.ConnectId, out var member);
 
             return member;
         }

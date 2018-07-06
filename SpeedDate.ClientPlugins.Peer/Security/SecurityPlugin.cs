@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
+using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 
@@ -19,20 +20,20 @@ namespace SpeedDate.ClientPlugins.Peer.Security
 
         private const int RsaKeySize = 512;
 
-        private readonly Dictionary<IClientSocket, EncryptionData> _encryptionData;
+        private readonly Dictionary<IClient, EncryptionData> _encryptionData;
 
         public int CurrentPermissionLevel { get; private set; }
 
         public SecurityPlugin()
         {
-            _encryptionData = new Dictionary<IClientSocket, EncryptionData>();
+            _encryptionData = new Dictionary<IClient, EncryptionData>();
         }
 
         public event Action PermissionsLevelChanged;
 
         public void RequestPermissionLevel(string key, PermissionLevelCallback callback, ErrorCallback errorCallback)
         {
-            Connection.SendMessage((ushort) OpCodes.RequestPermissionLevel, key, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.RequestPermissionLevel, key, (status, response) =>
             {
                 if (status != ResponseStatus.Success) 
                     errorCallback.Invoke(response.AsString("Unknown error"));
@@ -52,13 +53,13 @@ namespace SpeedDate.ClientPlugins.Peer.Security
         /// </summary>
         public void GetAesKey(Action<string> callback)
         {
-            _encryptionData.TryGetValue(Connection, out var data);
+            _encryptionData.TryGetValue(Client, out var data);
 
             if (data == null)
             {
                 data = new EncryptionData();
-                _encryptionData[Connection] = data;
-                Connection.Disconnected += OnEncryptableConnectionDisconnected;
+                _encryptionData[Client] = data;
+                ((ISpeedDateStartable) Client).Stopped += OnEncryptableConnectionDisconnected;
 
                 data.ClientsCsp = new RSACryptoServiceProvider(RsaKeySize);
 
@@ -79,7 +80,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
             xs.Serialize(sw, data.ClientsPublicKey);
 
             // Send the request
-            Connection.SendMessage((ushort) OpCodes.AesKeyRequest, sw.ToString(), (status, response) =>
+            Client.SendMessage((ushort) OpCodes.AesKeyRequest, sw.ToString(), (status, response) =>
             {
                 if (data.ClientAesKey != null)
                 {
@@ -112,7 +113,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
                 _encryptionData.Remove(connection);
 
                 // Unsubscribe from event
-                connection.Disconnected -= OnEncryptableConnectionDisconnected;
+                ((ISpeedDateStartable)Client).Stopped -= OnEncryptableConnectionDisconnected;
             }
         }
 

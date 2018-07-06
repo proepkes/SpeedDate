@@ -40,7 +40,7 @@ namespace SpeedDate.Network.LiteNetLib
     /// <summary>
     /// Network peer. Main purpose is sending messages to specific peer.
     /// </summary>
-    public sealed class NetPeer
+    public  sealed partial class NetPeer
     {
         //Ping and RTT
         private int _ping;
@@ -197,6 +197,7 @@ namespace SpeedDate.Network.LiteNetLib
             _unreliableChannel = new SimpleChannel(this);
             _reliableSequencedChannel = new SequencedChannel(this, true);
             _holdedFragments = new Dictionary<ushort, IncomingFragments>();
+            InitializeAckDisposal();
         }
 
         //"Connect to" constructor

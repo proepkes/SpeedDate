@@ -81,9 +81,7 @@ namespace SpeedDate
             try
             {
                 //Register possible plugin-dependencies
-                ioc.Register(new AppUpdater());
-                ioc.Register<IClientSocket, ClientSocket>();
-                ioc.Register<IServerSocket, ServerSocket>();
+                ioc.Register(AppUpdater.Instance);
                 ioc.Register<IPluginProvider, PluginProvider>();
                 ioc.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
 

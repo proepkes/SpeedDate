@@ -28,7 +28,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// </summary>
         public void RequestSpawn(Dictionary<string, string> options, string region, ClientSpawnRequestCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
@@ -40,7 +40,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 Region = region
             };
 
-            Connection.SendMessage((ushort) OpCodes.ClientsSpawnRequest, packet, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.ClientsSpawnRequest, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -51,7 +51,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 // Spawn id
                 var spawnId = response.AsInt();
 
-                var controller = new SpawnRequestController(this, spawnId, Connection, options);
+                var controller = new SpawnRequestController(this, spawnId, Client, options);
 
                 _localSpawnRequests[controller.SpawnId] = controller;
 
@@ -79,13 +79,13 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// </summary>
         public void AbortSpawn(int spawnId, AbortSpawnHandler callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.AbortSpawnRequest, spawnId, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.AbortSpawnRequest, spawnId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -101,15 +101,15 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// Retrieves data, which was given to master server by a spawned process,
         /// which was finalized
         /// </summary>
-        public void GetFinalizationData(int spawnId, FinalizationDataHandler callback, ErrorCallback errorCallback, IClientSocket connection)
+        public void GetFinalizationData(int spawnId, FinalizationDataHandler callback, ErrorCallback errorCallback, IClient client)
         {
-            if (!connection.IsConnected)
+            if (!client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            connection.SendMessage((ushort)OpCodes.GetSpawnFinalizationData, spawnId, (status, response) =>
+            client.SendMessage((ushort)OpCodes.GetSpawnFinalizationData, spawnId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

@@ -1,36 +1,111 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.Server
 {
-    public sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable
+    public sealed class SpeedDateServer : IServer, ISpeedDateStartable, IDisposable, IUpdatable
     {
         private const string InternalServerErrorMessage = "Internal Server Error";
 
         private readonly SpeedDateKernel _kernel;
-        private readonly Dictionary<long, IPeer> _connectedPeers;
         private readonly Dictionary<ushort, IPacketHandler> _handlers;
 
         [Inject] private ILogger _logger;
-        [Inject] private IServerSocket _socket;
+
+        private readonly NetManager _manager;
+        private SpeedDateNetListener _listener;
 
         public event Action Started;
         public event Action Stopped;
         public event PeerActionHandler PeerConnected;
         public event PeerActionHandler PeerDisconnected;
 
+
         public SpeedDateServer()
         {
             _kernel = new SpeedDateKernel();
-            _connectedPeers = new Dictionary<long, IPeer>();
             _handlers = new Dictionary<ushort, IPacketHandler>();
+
+            _listener = new SpeedDateNetListener();
+            _listener.ConnectionRequestEvent += request =>
+            {
+                request.AcceptIfKey("TundraNet");
+            };
+            
+            _listener.PeerConnectedEvent += peer =>
+            {
+                // Listen to messages
+                peer.MessageReceived += OnMessageReceived;
+
+                // Create the security extension
+                var extension = peer.AddExtension(new PeerSecurityExtension());
+
+                // Set default permission level
+                extension.PermissionLevel = 0;
+
+                _logger.Info($"Client {peer.ConnectId} connected.");
+
+                PeerConnected?.Invoke(peer);
+            };
+            
+            _listener.NetworkErrorEvent += (point, code) =>
+            {
+                Logs.Error($"NetworkError: ({code}): {point}");
+            };
+            
+            _listener.NetworkReceiveEvent += (peer, reader, method) =>
+            {
+                peer.HandleDataReceived(reader.Data);
+            };
+            
+            _listener.PeerDisconnectedEvent += (peer, info) =>
+            {
+                _logger.Info($"Client {peer.ConnectId} disconnected.");
+
+                // Remove listener to messages
+                peer.MessageReceived -= OnMessageReceived;
+
+                // Invoke the event
+                PeerDisconnected?.Invoke(peer);
+            };
+
+            _manager = new NetManager(_listener)
+            {
+                ReuseAddress = true
+            };
         }
+
+        public void Start(IConfigProvider configProvider)
+        {
+            _kernel.Load(this, configProvider, config =>
+            {
+                AppUpdater.Instance.Add(this);
+                if (_manager.Start(config.Network.Port))
+                {
+                    _logger.Info($"Listening on: {config.Network.Port}");
+                    Started?.Invoke();
+                }
+            });
+        }
+
+        public void Stop()
+        {
+            _manager.Stop();
+            _kernel.Stop();
+
+            AppUpdater.Instance.Remove(this);
+            
+            Stopped?.Invoke();
+        }
+
 
         public void Dispose()
         {
@@ -49,69 +124,9 @@ namespace SpeedDate.Server
 
         public IPeer GetPeer(long peerId)
         {
-            _connectedPeers.TryGetValue(peerId, out var peer);
-            return peer;
+            return _manager.ConnectedPeerList.FirstOrDefault(netPeer => netPeer.ConnectId.Equals(peerId));
         }
-
-        public void Start(IConfigProvider configProvider)
-        {
-            _kernel.Load(this, configProvider, config =>
-            {
-                _socket.Connected += Connected;
-                _socket.Disconnected += Disconnected;
-
-                if (_socket.Listen(config.Network.Port))
-                {
-                    _logger.Info($"Listening on: {config.Network.Port}");
-                    Started?.Invoke();
-                }
-            });
-        }
-
-        public void Stop()
-        {
-            _socket.Stop();
-            _kernel.Stop();
-
-            _socket.Connected -= Connected;
-            _socket.Disconnected -= Disconnected;
-            
-            Stopped?.Invoke();
-        }
-
-        private void Connected(IPeer peer)
-        {
-            // Listen to messages
-            peer.MessageReceived += OnMessageReceived;
-
-            // Save the peer
-            _connectedPeers[peer.Id] = peer;
-
-            // Create the security extension
-            var extension = peer.AddExtension(new PeerSecurityExtension());
-
-            // Set default permission level
-            extension.PermissionLevel = 0;
-
-            _logger.Info($"Client {peer.Id} connected.");
-            // Invoke the event
-            PeerConnected?.Invoke(peer);
-        }
-
-        private void Disconnected(IPeer peer)
-        {
-            _logger.Info($"Client {peer.Id} disconnected.");
-
-            // Remove listener to messages
-            peer.MessageReceived -= OnMessageReceived;
-
-            // Remove the peer
-            _connectedPeers.Remove(peer.Id);
-
-            // Invoke the event
-            PeerDisconnected?.Invoke(peer);
-        }
-
+        
         private void OnMessageReceived(IIncommingMessage message)
         {
             try
@@ -156,6 +171,11 @@ namespace SpeedDate.Server
         public T GetPlugin<T>() where T : class, IPlugin
         {
             return _kernel.PluginProvider.Get<T>();
+        }
+
+        public void Update()
+        {
+            _manager?.PollEvents();
         }
     }
 }

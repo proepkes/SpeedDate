@@ -247,12 +247,11 @@ namespace SpeedDate.ServerPlugins.Spawner
             task.StatusChanged += status =>
             {
                 // Send status update
-                var msg = MessageHelper.Create((ushort) OpCodes.SpawnRequestStatusChange, new SpawnStatusUpdatePacket
+                message.Peer.SendMessage((ushort)OpCodes.SpawnRequestStatusChange, new SpawnStatusUpdatePacket
                 {
                     SpawnId = task.SpawnId,
                     Status = status
                 });
-                message.Peer.SendMessage(msg);
             };
 
             message.Respond(task.SpawnId, ResponseStatus.Success);

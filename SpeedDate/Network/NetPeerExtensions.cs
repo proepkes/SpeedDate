@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Network.LiteNetLib.Utils;
-using SpeedDate.Server;
 
 namespace SpeedDate.Network.LiteNetLib
 {

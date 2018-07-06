@@ -9,7 +9,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 {
     public class SpawnRequestController
     {
-        private readonly IClientSocket _connection;
+        private readonly IClient _client;
         public int SpawnId { get; set; }
 
         public event Action<SpawnStatus> StatusChanged;
@@ -24,16 +24,16 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         private readonly SpawnRequestPlugin _spawnServer;
 
-        public SpawnRequestController(SpawnRequestPlugin owner, int spawnId, IClientSocket connection, Dictionary<string, string> spawnOptions)
+        public SpawnRequestController(SpawnRequestPlugin owner, int spawnId, IClient client, Dictionary<string, string> spawnOptions)
         {
             _spawnServer = owner;
 
-            _connection = connection;
+            _client = client;
             SpawnId = spawnId;
             SpawnOptions = spawnOptions;
 
             // Set handlers
-            connection.SetHandler((ushort) OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);
+            client.SetHandler((ushort) OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);
         }
 
         public void Abort()
@@ -48,7 +48,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         public void GetFinalizationData(SpawnRequestPlugin.FinalizationDataHandler handler, ErrorCallback errorCallback)
         {
-            _spawnServer.GetFinalizationData(SpawnId, handler, errorCallback,  _connection);
+            _spawnServer.GetFinalizationData(SpawnId, handler, errorCallback,  _client);
         }
 
         private void HandleStatusUpdate(IIncommingMessage message)

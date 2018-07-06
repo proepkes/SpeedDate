@@ -27,7 +27,7 @@ namespace SpeedDate.ClientPlugins.Peer.Room
         public void GetAccess(int roomId, RoomAccessCallback callback, string password,
             Dictionary<string, string> properties, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
@@ -40,7 +40,7 @@ namespace SpeedDate.ClientPlugins.Peer.Room
                 Password = password
             };
 
-            Connection.SendMessage((ushort) OpCodes.GetRoomAccess, packet, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.GetRoomAccess, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

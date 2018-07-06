@@ -39,6 +39,7 @@
 
         // Auth
         LogIn,
+        LogOut,
         RegisterAccount,
         PasswordResetCodeRequest,
         RequestEmailConfirmCode,

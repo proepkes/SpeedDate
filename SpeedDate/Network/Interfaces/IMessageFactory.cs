@@ -1,4 +1,6 @@
-﻿namespace SpeedDate.Network.Interfaces
+﻿using SpeedDate.Network.LiteNetLib;
+
+namespace SpeedDate.Network.Interfaces
 {
     /// <summary>
     ///     Represents basic functionality of message factory
@@ -26,6 +28,6 @@
         /// <param name="buffer"></param>
         /// <param name="peer"></param>
         /// <returns></returns>
-        IIncommingMessage FromBytes(byte[] buffer, int start, IPeer peer);
+        IIncommingMessage FromBytes(byte[] buffer, int start, NetPeer peer);
     }
 }

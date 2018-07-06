@@ -15,7 +15,7 @@ namespace SpeedDate.ClientPlugins.GameServer
     /// </summary>
     public class RoomController
     {
-        public readonly IClientSocket Connection;
+        public readonly IClient Client;
 
         public int RoomId { get; private set; }
         public RoomOptions Options { get; private set; }
@@ -26,16 +26,16 @@ namespace SpeedDate.ClientPlugins.GameServer
 
         private readonly RoomsPlugin _roomsPlugin;
 
-        public RoomController(RoomsPlugin owner, int roomId, IClientSocket connection, RoomOptions options)
+        public RoomController(RoomsPlugin owner, int roomId, IClient client, RoomOptions options)
         {
             _roomsPlugin = owner;
 
-            Connection = connection;
+            Client = client;
             RoomId = roomId;
             Options = options;
 
             // Add handlers
-            connection.SetHandler((ushort) OpCodes.ProvideRoomAccessCheck, HandleProvideRoomAccessCheck);
+            client.SetHandler((ushort) OpCodes.ProvideRoomAccessCheck, HandleProvideRoomAccessCheck);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void Destroy(SuccessCallback callback, ErrorCallback errorCallback)
         {
-            _roomsPlugin.DestroyRoom(RoomId, callback, errorCallback, Connection);
+            _roomsPlugin.DestroyRoom(RoomId, callback, errorCallback, Client);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 callback.Invoke();
 
-            }, errorCallback.Invoke, Connection);
+            }, errorCallback.Invoke, Client);
         }
 
         /// <summary>

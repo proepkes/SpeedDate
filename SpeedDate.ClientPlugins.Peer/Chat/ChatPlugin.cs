@@ -33,9 +33,9 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         public override void Loaded(IPluginProvider pluginProvider)
         {
             base.Loaded(pluginProvider);
-            Connection.SetHandler((ushort)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
-            Connection.SetHandler((ushort)OpCodes.UserLeftChannel, HandleUserLeftChannel);
-            Connection.SetHandler((ushort)OpCodes.ChatMessage, HandleChatMessage);
+            Client.SetHandler((ushort)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
+            Client.SetHandler((ushort)OpCodes.UserLeftChannel, HandleUserLeftChannel);
+            Client.SetHandler((ushort)OpCodes.ChatMessage, HandleChatMessage);
         }
 
         /// <summary>
@@ -43,13 +43,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void PickUsername(string username, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.PickUsername, username, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.PickUsername, username, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -66,13 +66,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void JoinChannel(string channel, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort) OpCodes.JoinChannel, channel, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.JoinChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -90,13 +90,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void LeaveChannel(string channel, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.LeaveChannel, channel, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.LeaveChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -114,13 +114,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void SetDefaultChannel(string channel, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.SetDefaultChannel, channel, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.SetDefaultChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -137,13 +137,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void GetJoinedChannels(ChatChannelsCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.GetCurrentChannels, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.GetCurrentChannels, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -162,13 +162,13 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void GetUsersInChannel(string channel, ChatUsersCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.GetUsersInChannel, channel, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.GetUsersInChannel, channel, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -237,7 +237,7 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         /// </summary>
         public void SendMessage(ChatMessagePacket packet, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            Connection.SendMessage((ushort)OpCodes.ChatMessage, packet, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.ChatMessage, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

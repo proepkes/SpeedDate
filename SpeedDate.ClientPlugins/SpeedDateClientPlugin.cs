@@ -11,7 +11,7 @@ namespace SpeedDate.ClientPlugins
     public abstract class SpeedDateClientPlugin : IPlugin
     {
         [Inject]
-        protected readonly IClientSocket Connection;
+        protected readonly IClient Client;
 
         public virtual void Loaded(IPluginProvider pluginProvider)
         {

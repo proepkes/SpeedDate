@@ -6,36 +6,38 @@ using SpeedDate.Logging;
 
 namespace SpeedDate.Network
 {
-    /// <summary>
-    ///     This is an object which gets spawned into game once.
-    ///     It's main purpose is to call update methods
-    /// </summary>
     public class AppUpdater
     {
+
+        private static readonly Lazy<AppUpdater> LazyInstance = new Lazy<AppUpdater>(() => new AppUpdater());
+
         private readonly List<IUpdatable> _addList;
+        private readonly List<IUpdatable> _removeList;
 
         private readonly List<IUpdatable> _runnables;
-        
-        public long CurrentTick { get; private set; }
 
         public bool KeepRunning = true;
-        
-        public event Action<long> OnTick;
+        public static AppUpdater Instance => LazyInstance.Value;
 
-        public AppUpdater()
+        private AppUpdater()
         {
             _runnables = new List<IUpdatable>();
             _addList = new List<IUpdatable>();
+            _removeList = new List<IUpdatable>();
 
             StartTicker();
-            Update();
+            StartUpdating();
         }
+        
+        public long CurrentTick { get; private set; }
 
-        private async void Update()
+        public event Action<long> OnTick;
+
+        private async void StartUpdating()
         {
             await Task.Factory.StartNew(async () =>
             {
-                while (KeepRunning)
+                while (KeepRunning || _runnables.Count > 0)
                 {
                     try
                     {
@@ -48,9 +50,17 @@ namespace SpeedDate.Network
                             }
                         }
 
+                        lock (_removeList)
+                        {
+                            if (_removeList.Count > 0)
+                            {
+                                _runnables.RemoveAll(updatable => _removeList.Contains(updatable));
+                                _removeList.Clear();
+                            }
+                        }
+
                         foreach (var runnable in _runnables)
                             runnable.Update();
-
                     }
                     catch (Exception e)
                     {
@@ -72,20 +82,24 @@ namespace SpeedDate.Network
                 _addList.Add(updatable);
             }
         }
-        public void AddRange(IEnumerable<IUpdatable> updatables)
+
+        public void Remove(IUpdatable updatable)
         {
-            lock (_addList)
+            lock (_removeList)
             {
-                _addList.AddRange(updatables);
+                if (_removeList.Contains(updatable))
+                    return;
+
+                _removeList.Add(updatable);
             }
         }
-        
+
         private async void StartTicker()
         {
             CurrentTick = 0;
             await Task.Factory.StartNew(async () =>
             {
-                while (KeepRunning)
+                while (KeepRunning|| _runnables.Count > 0)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
                     CurrentTick++;

@@ -4,6 +4,7 @@ using System.Linq;
 using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Packets.Rooms;
 using SpeedDate.ServerPlugins.Authentication;
 
@@ -79,14 +80,14 @@ namespace SpeedDate.ServerPlugins.Rooms
         public void GetAccess(IPeer peer, Dictionary<string, string> properties, GetAccessCallback callback, ErrorCallback errorCallback)
         {
             // If request is already pending
-            if (_requestsInProgress.Contains(peer.Id))
+            if (_requestsInProgress.Contains(peer.ConnectId))
             {
                 errorCallback.Invoke("You've already requested an access to this room");
                 return;
             }
 
             // If player is already in the game
-            if (_players.ContainsKey(peer.Id))
+            if (_players.ContainsKey(peer.ConnectId))
             {
                 errorCallback.Invoke("You are already in this room");
                 return;
@@ -120,7 +121,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
             var packet = new RoomAccessProvideCheckPacket()
             {
-                PeerId = peer.Id,
+                PeerId = peer.ConnectId,
                 RoomId =  RoomId
             };
 
@@ -132,12 +133,12 @@ namespace SpeedDate.ServerPlugins.Rooms
             }
 
             // Add to pending list
-            _requestsInProgress.Add(peer.Id);
+            _requestsInProgress.Add(peer.ConnectId);
 
             Peer.SendMessage((ushort) OpCodes.ProvideRoomAccessCheck, packet, (status, response) =>
             {
                 // Remove from pending list
-                _requestsInProgress.Remove(peer.Id);
+                _requestsInProgress.Remove(peer.ConnectId);
 
                 if (status != ResponseStatus.Success)
                 {
@@ -181,11 +182,11 @@ namespace SpeedDate.ServerPlugins.Rooms
             _unconfirmedAccesses.Remove(token);
 
             // If player is no longer connected
-            if (!data.Peer.IsConnected)
+            if (data.Peer.ConnectionState != ConnectionState.Connected)
                 return false;
 
             // Set access as used
-            _accessesInUse.Add(data.Peer.Id, data.Access);
+            _accessesInUse.Add(data.Peer.ConnectId, data.Access);
 
             peer = data.Peer;
 

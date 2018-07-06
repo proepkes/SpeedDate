@@ -57,6 +57,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             // Set handlers
             Server.SetHandler((ushort)OpCodes.LogIn, HandleLogIn);
+            Server.SetHandler((ushort)OpCodes.LogOut, HandleLogOut);
             Server.SetHandler((ushort)OpCodes.RegisterAccount, HandleRegister);
             Server.SetHandler((ushort)OpCodes.PasswordResetCodeRequest, HandlePasswordResetRequest);
             Server.SetHandler((ushort)OpCodes.RequestEmailConfirmCode, HandleRequestEmailConfirmCode);
@@ -68,6 +69,18 @@ namespace SpeedDate.ServerPlugins.Authentication
             // AesKey handler
             Server.SetHandler((ushort)OpCodes.AesKeyRequest, HandleAesKeyRequest);
             Server.SetHandler((ushort)OpCodes.RequestPermissionLevel, HandlePermissionLevelRequest);
+        }
+
+        private void HandleLogOut(IIncommingMessage message)
+        {
+            var extension = message.Peer.GetExtension<IUserExtension>();
+            if (extension == null)
+            {
+                message.Respond("Not logged in", ResponseStatus.Failed);
+                return;
+            }
+
+            message.Respond(ResponseStatus.Success);
         }
 
         public string GenerateGuestUsername()
@@ -607,7 +620,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                 extension.AesKeyEncrypted = encryptedAes;
                 extension.AesKey = aesKey;
 
-                _logger.Debug("Sending " + encryptedAes + " to " + message.Peer.Id);
+                _logger.Debug("Sending " + encryptedAes + " to " + message.Peer.ConnectId);
                 message.Respond(encryptedAes, ResponseStatus.Success);
             }
         }

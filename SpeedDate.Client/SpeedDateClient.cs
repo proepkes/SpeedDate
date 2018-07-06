@@ -1,106 +1,232 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
+using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.Client
 {
-    public sealed class SpeedDateClient : IClient, ISpeedDateStartable, IDisposable
+    public sealed class SpeedDateClient : IClient, ISpeedDateStartable, IDisposable, IUpdatable
     {
-        private const float MinTimeToConnect = 0.5f;
-        private const float MaxTimeToConnect = 4f;
-        private bool _isStarted;
+        private readonly Dictionary<ushort, IPacketHandler> _handlers;
+        private readonly SpeedDateKernel _kernel;
+        private readonly NetManager _manager;
+        private readonly SpeedDateNetListener _listener;
 
         [Inject] private ILogger _logger;
-        [Inject] private IClientSocket _connection;
+        private NetPeer _netPeer;
 
         private float _timeToConnect = 0.5f;
-        private readonly SpeedDateKernel _kernel;
-
-        public event Action Started;
-        public event Action Stopped;
-
-        public bool IsConnected => _connection != null && _connection.IsConnected;
+        public SpeedDateConfig Config { get; private set; }
 
         public SpeedDateClient()
         {
+            _handlers = new Dictionary<ushort, IPacketHandler>();
             _kernel = new SpeedDateKernel();
-        }
-
-        public void Start(IConfigProvider configProvider)
-        {
-            _isStarted = true;
-            _kernel.Load(this, configProvider, config =>
+            _listener = new SpeedDateNetListener();
+            _listener.PeerConnectedEvent += peer =>
             {
-                _connection.Connected += Connected;
-                _connection.Disconnected += Disconnected;
+                _netPeer = peer;
+                _netPeer.MessageReceived += HandleMessage;
 
-                ConnectAsync(config.Network.Address, config.Network.Port);
-            });
-        }
-
-        private async void ConnectAsync(string serverIp, int port)
-        {
-            await Task.Factory.StartNew(async () =>
+                _logger.Info("Connected");
+                Started?.Invoke();
+            };
+            _listener.NetworkReceiveEvent += (peer, reader, method) =>
             {
-                while (!_connection.IsConnected && _isStarted)
-                {
-                    // If we got here, we're not connected 
-                    _logger.Debug(_connection.IsConnecting
-                        ? $"Retrying to connect to server at: {serverIp}:{port}"
-                        : $"Connecting to server at: {serverIp}:{port}");
+                _netPeer.HandleDataReceived(reader.Data);
+            };
+            _listener.PeerDisconnectedEvent += (peer, info) =>
+            {
+                _kernel.Stop();
+                _manager.Stop();
 
-                    _connection.Connect(serverIp, port);
+                _logger.Info("Disconnected");
+                Stopped?.Invoke();
+            };
 
-                    // Give a few seconds to try and connect
-                    await Task.Delay(TimeSpan.FromSeconds(_timeToConnect));
-
-                    // If we're still not connected
-                    if (!_connection.IsConnected) 
-                        _timeToConnect = Math.Min(_timeToConnect * 2, MaxTimeToConnect);
-                }
-            }, TaskCreationOptions.LongRunning);
+            _manager = new NetManager(_listener);
         }
-        
-        public void Stop()
+
+
+        public bool IsConnected => _netPeer != null && _netPeer.ConnectionState == ConnectionState.Connected;
+
+        public void Reconnect()
         {
-            if(IsConnected)
-                _connection.Disconnect();
-            else
-                Disconnected();
-
-            _connection.Connected -= Connected;
-            _connection.Disconnected -= Disconnected;
+            _manager.Stop();
+            _manager.Start();
+            _manager.Connect(Config.Network.Address, Config.Network.Port, "TundraNet");
         }
-        
+
+        public void SetHandler(ushort opCode, IncommingMessageHandler handler)
+        {
+            SetHandler(new PacketHandler(opCode, handler));
+        }
+
+        public void SetHandler(OpCodes opCode, IncommingMessageHandler handler)
+        {
+            SetHandler(new PacketHandler((ushort) opCode, handler));
+        }
+
+        public void SendMessage(ushort opCode)
+        {
+            _netPeer.SendMessage(opCode);
+        }
+
+        public void SendMessage(ushort opCode, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(opCode, responseCallback);
+        }
+
+        public void SendMessage(ushort opCode, ISerializablePacket packet)
+        {
+            _netPeer.SendMessage(opCode, packet);
+        }
+
+        public void SendMessage(ushort opCode, ISerializablePacket packet, DeliveryMethod method)
+        {
+            _netPeer.SendMessage(opCode, packet, method);
+        }
+
+        public void SendMessage(ushort opCode, ISerializablePacket packet, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(opCode, packet, responseCallback);
+        }
+
+        public void SendMessage(ushort opCode, byte[] data)
+        {
+            _netPeer.SendMessage(opCode, data);
+        }
+
+        public void SendMessage(ushort opCode, byte[] data, DeliveryMethod method)
+        {
+            _netPeer.SendMessage(opCode, data, method);
+        }
+
+        public void SendMessage(ushort opCode, byte[] data, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(opCode, data, responseCallback);
+        }
+
+        public void SendMessage(ushort opCode, string data)
+        {
+            _netPeer.SendMessage(opCode, data);
+        }
+
+        public void SendMessage(ushort opCode, string data, DeliveryMethod method)
+        {
+            _netPeer.SendMessage(opCode, data, method);
+        }
+
+        public void SendMessage(ushort opCode, string data, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(opCode, data, responseCallback);
+        }
+
+        public void SendMessage(ushort opCode, int data)
+        {
+            _netPeer.SendMessage(opCode, data);
+        }
+
+        public void SendMessage(ushort opCode, int data, DeliveryMethod method)
+        {
+            _netPeer.SendMessage(opCode, data, method);
+        }
+
+        public void SendMessage(ushort opCode, int data, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(opCode, data, responseCallback);
+        }
+
+        public void SendMessage(IMessage message, DeliveryMethod method)
+        {
+            ((IMsgDispatcher) _netPeer).SendMessage(message, method);
+        }
+
+        public void SendMessage(IMessage message, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(message, responseCallback);
+        }
+
         public void Dispose()
         {
             Stop();
         }
 
-        private void Disconnected()
+        public event Action Started;
+        public event Action Stopped;
+
+        public void Start(IConfigProvider configProvider)
         {
-            _timeToConnect = MinTimeToConnect;
-            
-            _isStarted = false;
-            _kernel.Stop();
-            
-            Stopped?.Invoke();
+            AppUpdater.Instance.Add(this);
+            _kernel.Load(this, configProvider, config =>
+            {
+                Config = config;
+
+                _manager.Start();
+                _manager.Connect(config.Network.Address, config.Network.Port, "TundraNet");
+            });
         }
 
-        private void Connected()
+        public void Stop()
         {
-            _timeToConnect = MinTimeToConnect;
-            _logger.Info("Connected");
-            Started?.Invoke();
+            _manager.Stop();
+            AppUpdater.Instance.Remove(this);
         }
+
 
         public T GetPlugin<T>() where T : class, IPlugin
         {
             return _kernel.PluginProvider.Get<T>();
+        }
+
+        private void HandleMessage(IIncommingMessage message)
+        {
+            try
+            {
+                _handlers.TryGetValue(message.OpCode, out var handler);
+
+                if (handler != null)
+                {
+                    handler.Handle(message);
+                }
+                else if (message.IsExpectingResponse)
+                {
+                    Logs.Error("Connection is missing a handler. OpCode: " + message.OpCode);
+                    message.Respond(ResponseStatus.Error);
+                }
+            }
+            catch (Exception e)
+            {
+                Logs.Error("Failed to handle a message. OpCode: " + message.OpCode);
+                Logs.Error(e);
+
+                if (!message.IsExpectingResponse)
+                    return;
+
+                try
+                {
+                    message.Respond(ResponseStatus.Error);
+                }
+                catch (Exception exception)
+                {
+                    Logs.Error(exception);
+                }
+            }
+        }
+
+        public void SetHandler(IPacketHandler handler)
+        {
+            _handlers[handler.OpCode] = handler;
+        }
+
+        public void Update()
+        {
+            _manager?.PollEvents();
         }
     }
 }

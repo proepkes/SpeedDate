@@ -50,20 +50,25 @@ namespace SpeedDate.Configuration
         public string Address { get; set; }
         public int Port { get; set; }
 
+        public string Key { get; set; }
+
         public override string ToString()
         {
             return $"{Address}:{Port}";
         }
 
-        public NetworkConfig(string address = default(string) , int port = default(int))
+        public NetworkConfig(string address = default(string), int port = default(int), string key = "TundraNet")
         {
             Address = address;
             Port = port;
+            Key = key;
         }
-        public NetworkConfig(IPAddress address, int port = default(int))
+
+        public NetworkConfig(IPAddress address, int port = default(int), string key = "TundraNet")
         {
             Address = address.ToString();
             Port = port;
+            Key = key;
         }
     }
 }

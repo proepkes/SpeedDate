@@ -17,7 +17,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         public delegate void SpawnRequestHandler(SpawnRequestPacket packet, IIncommingMessage message);
         public delegate void KillSpawnedProcessHandler(int spawnId);
 
-        public readonly IClientSocket Connection;
+        public readonly IClient Client;
 
         public int SpawnerId { get; }
         public SpawnerOptions Options { get; }
@@ -39,17 +39,17 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         private readonly SpawnerPlugin _spawners;
 
-        public SpawnerController(SpawnerPlugin owner, int spawnerId, IClientSocket connection, SpawnerOptions options)
+        public SpawnerController(SpawnerPlugin owner, int spawnerId, IClient client, SpawnerOptions options)
         {
             _spawners = owner;
 
-            Connection = connection;
+            Client = client;
             SpawnerId = spawnerId;
             Options = options;
 
             // Add handlers
-            connection.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);
-            connection.SetHandler((ushort) OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
+            client.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);
+            client.SetHandler((ushort) OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
         }
 
         public void SetSpawnRequestHandler(SpawnRequestHandler handler)
@@ -202,8 +202,8 @@ namespace SpeedDate.ClientPlugins.Spawner
                     (spawnInBatchmode ? "-batchmode -nographics " : "") +
                     (controller.SpawnerSettings.AddWebGlFlag ? CommandLineArgs.Names.WebGl+" " : "") +
                     sceneNameArgument +
-                            $"{CommandLineArgs.Names.MasterIp} {controller.Connection.ConnectionIp} " +
-                            $"{CommandLineArgs.Names.MasterPort} {controller.Connection.ConnectionPort} " +
+                            $"{CommandLineArgs.Names.MasterIp} {controller.Client.Config.Network.Address} " +
+                            $"{CommandLineArgs.Names.MasterPort} {controller.Client.Config.Network.Port} " +
                             $"{CommandLineArgs.Names.SpawnId} {packet.SpawnId} " +
                             $"{CommandLineArgs.Names.AssignedPort} {port} " +
                             $"{CommandLineArgs.Names.MachineIp} {machineIp} " +

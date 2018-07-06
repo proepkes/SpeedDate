@@ -35,13 +35,13 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void FillProfileValues(ObservableServerProfile profile, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort) OpCodes.ServerProfileRequest, profile.Username, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.ServerProfileRequest, profile.Username, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -118,7 +118,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                             profile.ClearUpdates();
                         }
 
-                        Connection.SendMessage((ushort)OpCodes.UpdateServerProfile, ms.ToArray());
+                        Client.SendMessage((ushort)OpCodes.UpdateServerProfile, ms.ToArray());
                     }
 
                     _modifiedProfiles.Clear();

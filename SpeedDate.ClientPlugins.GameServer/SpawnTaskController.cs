@@ -8,17 +8,17 @@ namespace SpeedDate.ClientPlugins.GameServer
 {
     public class SpawnTaskController
     {
-        private readonly IClientSocket _connection;
+        private readonly IClient _client;
         public int SpawnId { get; private set; }
         public Dictionary<string, string> Properties { get; private set; }
 
         private readonly RoomsPlugin _spawnerClient;
 
-        public SpawnTaskController(RoomsPlugin owner, int spawnId, Dictionary<string, string> properties, IClientSocket connection)
+        public SpawnTaskController(RoomsPlugin owner, int spawnId, Dictionary<string, string> properties, IClient client)
         {
             _spawnerClient = owner;
 
-            _connection = connection;
+            _client = client;
             SpawnId = spawnId;
             Properties = properties;
         }

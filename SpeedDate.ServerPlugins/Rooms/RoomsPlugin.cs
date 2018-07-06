@@ -257,7 +257,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
             var packet = new UsernameAndPeerIdPacket()
             {
-                PeerId =  playerPeer.Id
+                PeerId =  playerPeer.ConnectId
             };
 
             // Add username if available

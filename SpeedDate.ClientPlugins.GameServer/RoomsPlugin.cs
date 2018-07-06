@@ -43,13 +43,13 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void RegisterRoom(RoomOptions options, RoomCreationCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort) OpCodes.RegisterRoom, options, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.RegisterRoom, options, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -60,7 +60,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 var roomId = response.AsInt();
 
-                var controller = new RoomController(this, roomId, Connection, options);
+                var controller = new RoomController(this, roomId, Client, options);
 
                 // Save the reference
                 _localCreatedRooms[roomId] = controller;
@@ -77,21 +77,21 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void DestroyRoom(int roomId, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            DestroyRoom(roomId, callback, errorCallback, Connection);
+            DestroyRoom(roomId, callback, errorCallback, Client);
         }
 
         /// <summary>
         /// Sends a request to destroy a room of a given room id
         /// </summary>
-        public void DestroyRoom(int roomId, SuccessCallback successCallback, ErrorCallback errorCallback, IClientSocket connection)
+        public void DestroyRoom(int roomId, SuccessCallback successCallback, ErrorCallback errorCallback, IClient client)
         {
-            if (!connection.IsConnected)
+            if (!client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            connection.SendMessage((ushort)OpCodes.DestroyRoom, roomId, (status, response) =>
+            client.SendMessage((ushort)OpCodes.DestroyRoom, roomId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -119,7 +119,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <param name="errorCallback"></param>
         public void ValidateAccess(int roomId, string token, RoomAccessValidateCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
@@ -131,7 +131,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 Token = token
             };
 
-            Connection.SendMessage((ushort)OpCodes.ValidateRoomAccess, packet, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.ValidateRoomAccess, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -151,15 +151,15 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <param name="successCallback"></param>
         public void SaveOptions(int roomId, RoomOptions options, SuccessCallback successCallback, ErrorCallback errorCallback)
         {
-            SaveOptions(roomId, options, successCallback, errorCallback, Connection);
+            SaveOptions(roomId, options, successCallback, errorCallback, Client);
         }
 
         /// <summary>
         /// Updates the options of the registered room
         /// </summary>
-        public void SaveOptions(int roomId, RoomOptions options, SuccessCallback successCallback, ErrorCallback errorCallback, IClientSocket connection)
+        public void SaveOptions(int roomId, RoomOptions options, SuccessCallback successCallback, ErrorCallback errorCallback, IClient client)
         {
-            if (!connection.IsConnected)
+            if (!client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
@@ -171,7 +171,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 RoomId =  roomId
             };
 
-            connection.SendMessage((ushort) OpCodes.SaveRoomOptions, changePacket, (status, response) =>
+            client.SendMessage((ushort) OpCodes.SaveRoomOptions, changePacket, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -191,7 +191,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// <param name="callback"></param>
         public void NotifyPlayerLeft(int roomId, int peerId, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("NotConnected");
                 return;
@@ -203,7 +203,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 RoomId = roomId
             };
 
-            Connection.SendMessage((ushort) OpCodes.PlayerLeftRoom, packet, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.PlayerLeftRoom, packet, (status, response) =>
             {
                 if (status == ResponseStatus.Success)
                 {
@@ -245,7 +245,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void RegisterSpawnedProcess(int spawnId, string spawnCode, RegisterSpawnedProcessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
@@ -257,7 +257,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 SpawnId = spawnId
             };
 
-            Connection.SendMessage((ushort)OpCodes.RegisterSpawnedProcess, packet, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.RegisterSpawnedProcess, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -267,7 +267,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 var properties = new Dictionary<string, string>().FromBytes(response.AsBytes());
 
-                var process = new SpawnTaskController(this, spawnId, properties, Connection);
+                var process = new SpawnTaskController(this, spawnId, properties, Client);
 
                 callback.Invoke(process);
             });
@@ -279,7 +279,7 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public void FinalizeSpawnedProcess(int spawnId, CompleteSpawnedProcessCallback callback, ErrorCallback errorCallback, Dictionary<string, string> finalizationData = null)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
@@ -291,7 +291,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 FinalizationData = finalizationData ?? new Dictionary<string, string>()
             };
 
-            Connection.SendMessage((ushort)OpCodes.CompleteSpawnProcess, packet, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.CompleteSpawnProcess, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

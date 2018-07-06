@@ -1066,15 +1066,6 @@ namespace SpeedDate.Network.LiteNetLib
             return count;
         }
 
-        /// <summary>
-        /// Get copy of current connected peers (slow! use GetPeersNonAlloc for best performance)
-        /// </summary>
-        /// <returns>Array with connected peers</returns>
-        [Obsolete("Use GetPeers(ConnectionState peerState)")]
-        public NetPeer[] GetPeers()
-        {
-            return GetPeers(ConnectionState.Connected | ConnectionState.InProgress);
-        } 
 
         /// <summary>
         /// Get copy of current connected peers (slow! use GetPeersNonAlloc for best performance)

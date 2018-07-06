@@ -55,7 +55,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         public void CreateLobby(string factory, Dictionary<string, string> properties, 
             CreateLobbyCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");   
                 return;
@@ -63,7 +63,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
             properties[OptionKeys.LobbyFactoryId] = factory;
 
-            Connection.SendMessage((ushort) OpCodes.CreateLobby, properties.ToBytes(), (status, response) =>
+            Client.SendMessage((ushort) OpCodes.CreateLobby, properties.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -82,14 +82,14 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void JoinLobby(int lobbyId, JoinLobbyCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
             // Send the message
-            Connection.SendMessage((ushort) OpCodes.JoinLobby, lobbyId, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.JoinLobby, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -99,7 +99,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
                 var data = response.Deserialize<LobbyDataPacket>();
 
-                var joinedLobby = new JoinedLobby(this, data, Connection);
+                var joinedLobby = new JoinedLobby(this, data, Client);
 
                 LastJoinedLobby = joinedLobby;
 
@@ -114,7 +114,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void LeaveLobby(int lobbyId, Action callback, ErrorCallback errorCallback)
         {
-            Connection.SendMessage((ushort)OpCodes.LeaveLobby, lobbyId, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.LeaveLobby, lobbyId, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                     errorCallback.Invoke(response.AsString("Something went wrong when trying to leave a lobby"));
@@ -128,13 +128,13 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void SetReadyStatus(bool isReady, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort) OpCodes.LobbySetReady, isReady ? 1 : 0, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.LobbySetReady, isReady ? 1 : 0, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -158,7 +158,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
                 Properties = properties
             };
 
-            Connection.SendMessage((ushort) OpCodes.SetLobbyProperties, packet, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.SetLobbyProperties, packet, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -177,7 +177,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         public void SetMyProperties(Dictionary<string, string> properties,
             SuccessCallback callback, ErrorCallback errorCallback)
         {
-            Connection.SendMessage((ushort)OpCodes.SetMyLobbyProperties, properties.ToBytes(),
+            Client.SendMessage((ushort)OpCodes.SetMyLobbyProperties, properties.ToBytes(),
                 (status, response) =>
                 {
                     if (status != ResponseStatus.Success)
@@ -201,7 +201,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
                 TeamName = teamName
             };
 
-            Connection.SendMessage((ushort)OpCodes.JoinLobbyTeam, packet,
+            Client.SendMessage((ushort)OpCodes.JoinLobbyTeam, packet,
                 (status, response) =>
                 {
                     if (status != ResponseStatus.Success)
@@ -220,7 +220,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void SendChatMessage(string message)
         {
-            Connection.SendMessage((ushort) OpCodes.LobbySendChatMessage, message);
+            Client.SendMessage((ushort) OpCodes.LobbySendChatMessage, message);
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void StartGame(SuccessCallback callback, ErrorCallback errorCallback)
         {
-            Connection.SendMessage((ushort) OpCodes.LobbyStartGame, (status, response) =>
+            Client.SendMessage((ushort) OpCodes.LobbyStartGame, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -245,13 +245,13 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.GetLobbyRoomAccess, properties.ToBytes(), (status, response) =>
+            Client.SendMessage((ushort)OpCodes.GetLobbyRoomAccess, properties.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

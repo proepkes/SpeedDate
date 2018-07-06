@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using SpeedDate.Network.Interfaces;
+using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Network.Utils.Conversion;
 using SpeedDate.Network.Utils.IO;
 
@@ -130,7 +131,7 @@ namespace SpeedDate.Network
         /// <param name="buffer"></param>
         /// <param name="peer"></param>
         /// <returns></returns>
-        public static IIncommingMessage FromBytes(byte[] buffer, int start, IPeer peer)
+        public static IIncommingMessage FromBytes(byte[] buffer, int start, NetPeer peer)
         {
             return _factory.FromBytes(buffer, start, peer);
         }

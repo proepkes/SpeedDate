@@ -1,6 +1,12 @@
-﻿namespace SpeedDate.Network.Interfaces
+﻿using System;
+using SpeedDate.Configuration;
+
+namespace SpeedDate.Network.Interfaces
 {
-    public interface IClient
+    public interface IClient : IMessageHandlerProvider, IMsgDispatcher
     {
+        bool IsConnected { get; }
+        SpeedDateConfig Config { get; }
+        void Reconnect();
     }
 }

@@ -30,7 +30,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void Register(Dictionary<string, string> data, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
@@ -60,7 +60,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                 var encryptedData = Util.EncryptAES(data.ToBytes(), aesKey);
 
-                Connection.SendMessage((ushort)OpCodes.RegisterAccount, encryptedData, (status, response) =>
+                Client.SendMessage((ushort)OpCodes.RegisterAccount, encryptedData, (status, response) =>
                 {
 
                     if (status != ResponseStatus.Success)
@@ -86,8 +86,8 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
             IsLoggedIn = false;
             AccountInfo = null;
 
-            if (Connection != null && Connection.IsConnected)
-                Connection.Reconnect();
+            if (Client != null && Client.IsConnected)
+                Client.Reconnect();
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void LogIn(Dictionary<string, string> data, LoginCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
@@ -139,7 +139,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 
                 var encryptedData = Util.EncryptAES(data.ToBytes(), aesKey);
 
-                Connection.SendMessage((ushort) OpCodes.LogIn, encryptedData, (status, response) =>
+                Client.SendMessage((ushort) OpCodes.LogIn, encryptedData, (status, response) =>
                 {
                     _isLoggingIn = false;
                     
@@ -164,7 +164,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void ConfirmEmail(string code, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
@@ -176,7 +176,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.ConfirmEmail, code, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.ConfirmEmail, code, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -193,7 +193,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void RequestEmailConfirmationCode(SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
@@ -205,7 +205,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.RequestEmailConfirmCode, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.RequestEmailConfirmCode, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -222,13 +222,13 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void RequestPasswordReset(string email, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
             }
 
-            Connection.SendMessage((ushort)OpCodes.PasswordResetCodeRequest, email, (status, response) =>
+            Client.SendMessage((ushort)OpCodes.PasswordResetCodeRequest, email, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
@@ -246,7 +246,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         /// </summary>
         public void ChangePassword(PasswordChangeData data, SuccessCallback callback, ErrorCallback errorCallback)
         {
-            if (!Connection.IsConnected)
+            if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected to server");
                 return;
@@ -259,7 +259,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
                 {"password", data.NewPassword }
             };
 
-            Connection.SendMessage((ushort)OpCodes.PasswordChange, dictionary.ToBytes(), (status, response) =>
+            Client.SendMessage((ushort)OpCodes.PasswordChange, dictionary.ToBytes(), (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {
