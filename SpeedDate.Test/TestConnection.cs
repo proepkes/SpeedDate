@@ -75,11 +75,11 @@ namespace SpeedDate.Test
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
 
-            done.WaitOne(TimeSpan.FromSeconds(30));
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
             
             client.Reconnect(); 
             
-            done.WaitOne(TimeSpan.FromSeconds(3));
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
             
             client.IsConnected.ShouldBeTrue();
         }

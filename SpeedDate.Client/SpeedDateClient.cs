@@ -219,14 +219,14 @@ namespace SpeedDate.Client
             }
         }
 
-        public void SetHandler(IPacketHandler handler)
-        {
-            _handlers[handler.OpCode] = handler;
-        }
-
         public void Update()
         {
             _manager?.PollEvents();
+        }
+
+        private void SetHandler(IPacketHandler handler)
+        {
+            _handlers[handler.OpCode] = handler;
         }
     }
 }

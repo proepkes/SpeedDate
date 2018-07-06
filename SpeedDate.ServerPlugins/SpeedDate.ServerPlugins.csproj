@@ -16,6 +16,18 @@
     <ProjectReference Include="..\SpeedDate.Server\SpeedDate.Server.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <_OutputPathItem Remove="bin\Debug\netstandard2.0\" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppConfigFileDestination Remove="bin\Debug\netstandard2.0\SpeedDate.ServerPlugins.dll.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <_DebugSymbolsOutputPath Remove="bin\Debug\netstandard2.0\SpeedDate.ServerPlugins.pdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <_ApplicationManifestFinal Remove="bin\Debug\netstandard2.0\Native.SpeedDate.ServerPlugins.manifest" />
+  </ItemGroup>
   <!--<Target Name="PublishModule" AfterTargets="Publish" Inputs="@(ModuleFiles)" Outputs="@(ModuleFiles->'%(DestinationPath)')">
     <Copy SourceFiles="@(ModuleFiles)" DestinationFiles="@(ModuleFiles->'%(DestinationPath)')" />
   </Target>-->

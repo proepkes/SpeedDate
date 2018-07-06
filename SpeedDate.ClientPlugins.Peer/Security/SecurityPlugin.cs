@@ -20,14 +20,9 @@ namespace SpeedDate.ClientPlugins.Peer.Security
 
         private const int RsaKeySize = 512;
 
-        private readonly Dictionary<IClient, EncryptionData> _encryptionData;
+        private EncryptionData _encryptionData;
 
         public int CurrentPermissionLevel { get; private set; }
-
-        public SecurityPlugin()
-        {
-            _encryptionData = new Dictionary<IClient, EncryptionData>();
-        }
 
         public event Action PermissionsLevelChanged;
 
@@ -46,6 +41,11 @@ namespace SpeedDate.ClientPlugins.Peer.Security
             });
         }
 
+        public void ClearData()
+        {
+            _encryptionData = null;
+        }
+
         /// <summary>
         ///     Should be called on client. Generates RSA public key,
         ///     sends it to master, which returns encrypted AES key. After decrypting AES key,
@@ -53,39 +53,36 @@ namespace SpeedDate.ClientPlugins.Peer.Security
         /// </summary>
         public void GetAesKey(Action<string> callback)
         {
-            _encryptionData.TryGetValue(Client, out var data);
-
-            if (data == null)
+            if (_encryptionData == null)
             {
-                data = new EncryptionData();
-                _encryptionData[Client] = data;
+                _encryptionData = new EncryptionData();
                 ((ISpeedDateStartable) Client).Stopped += OnEncryptableConnectionDisconnected;
 
-                data.ClientsCsp = new RSACryptoServiceProvider(RsaKeySize);
+                _encryptionData.ClientsCsp = new RSACryptoServiceProvider(RsaKeySize);
 
                 // Generate keys
-                data.ClientsPublicKey = data.ClientsCsp.ExportParameters(false);
+                _encryptionData.ClientsPublicKey = _encryptionData.ClientsCsp.ExportParameters(false);
             }
 
-            if (data.ClientAesKey != null)
+            if (_encryptionData.ClientAesKey != null)
             {
                 // We already have an aes generated for this connection
-                callback.Invoke(data.ClientAesKey);
+                callback.Invoke(_encryptionData.ClientAesKey);
                 return;
             }
 
             // Serialize public key
             var sw = new StringWriter();
             var xs = new XmlSerializer(typeof(RSAParameters));
-            xs.Serialize(sw, data.ClientsPublicKey);
+            xs.Serialize(sw, _encryptionData.ClientsPublicKey);
 
             // Send the request
             Client.SendMessage((ushort) OpCodes.AesKeyRequest, sw.ToString(), (status, response) =>
             {
-                if (data.ClientAesKey != null)
+                if (_encryptionData.ClientAesKey != null)
                 {
                     // Aes is already decrypted.
-                    callback.Invoke(data.ClientAesKey);
+                    callback.Invoke(_encryptionData.ClientAesKey);
                     return;
                 }
 
@@ -96,25 +93,19 @@ namespace SpeedDate.ClientPlugins.Peer.Security
                     return;
                 }
 
-                var decrypted = data.ClientsCsp.Decrypt(response.AsBytes(), false);
-                data.ClientAesKey = Encoding.Unicode.GetString(decrypted);
+                var decrypted = _encryptionData.ClientsCsp.Decrypt(response.AsBytes(), false);
+                _encryptionData.ClientAesKey = Encoding.Unicode.GetString(decrypted);
 
-                callback.Invoke(data.ClientAesKey);
+                callback.Invoke(_encryptionData.ClientAesKey);
             });
         }
 
         private void OnEncryptableConnectionDisconnected()
         {
-            var disconnected = _encryptionData.Keys.Where(c => !c.IsConnected).ToList();
-
-            foreach (var connection in disconnected)
-            {
-                // Remove encryption data
-                _encryptionData.Remove(connection);
-
-                // Unsubscribe from event
-                ((ISpeedDateStartable)Client).Stopped -= OnEncryptableConnectionDisconnected;
-            }
+            _encryptionData = null;
+            
+            // Unsubscribe from event
+            ((ISpeedDateStartable)Client).Stopped -= OnEncryptableConnectionDisconnected;
         }
 
         private class EncryptionData

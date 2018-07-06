@@ -79,6 +79,7 @@ namespace SpeedDate.Test
             client.GetPlugin<AuthPlugin>().LogOut();
             client.GetPlugin<AuthPlugin>().IsLoggedIn.ShouldBeFalse();
 
+            //LogOut will raise "Started"-event
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
             
             client.IsConnected.ShouldBeTrue();
@@ -128,6 +129,51 @@ namespace SpeedDate.Test
                     }, clientNumber);
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+        }
+        
+        [Test]
+        public void LoginLogOutLogIn_ShouldCreateNewAesKey()
+        {
+            var done = new AutoResetEvent(false);
+
+            var client = new SpeedDateClient();
+            client.Started += () =>
+            {
+                done.Set();
+            };
+
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+
+            client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    done.Set();
+                },
+                error =>
+                {
+                    Should.NotThrow(() => throw new Exception(error));
+                });
+            
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            
+            client.GetPlugin<AuthPlugin>().LogOut();
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            
+            client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    done.Set();
+                },
+                error =>
+                {
+                    //If the server wouldn't generate a new AES-Key for this client, the server would respond with "Insecure request"
+                    Should.NotThrow(() => throw new Exception(error));
+                });
+            
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
         }
     }
 }
