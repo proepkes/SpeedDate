@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Npgsql;
+using SpeedDate.Logging;
+using SpeedDate.Packets;
 using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Database.CockroachDb
 {
-    public class AuthDbCockroachDb : IAuthDatabase
+    public class AuthDbCockroachDb : IDbAccess
     {
         private readonly string _connectionString;
 
@@ -92,14 +94,14 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
                 con.Open();
 
                 cmd.Connection = con;
-				//cmd.CommandText = "INSERT INTO password_reset_codes (email, code) " +
-				//				  "VALUES(@email, @code) " +
-				//				  "ON DUPLICATE KEY UPDATE code = @code";
-				cmd.CommandText = "INSERT INTO password_reset_codes (email, code) " +
-								  "VALUES(@email, @code) " +
-								  "ON CONFLICT (email) DO UPDATE SET code = @code";
+                //cmd.CommandText = "INSERT INTO password_reset_codes (email, code) " +
+                //				  "VALUES(@email, @code) " +
+                //				  "ON DUPLICATE KEY UPDATE code = @code";
+                cmd.CommandText = "INSERT INTO password_reset_codes (email, code) " +
+                                  "VALUES(@email, @code) " +
+                                  "ON CONFLICT (email) DO UPDATE SET code = @code";
 
-				cmd.Parameters.AddWithValue("@email", account.Email);
+                cmd.Parameters.AddWithValue("@email", account.Email);
                 cmd.Parameters.AddWithValue("@code", code);
                 cmd.ExecuteNonQuery();
             }
@@ -142,14 +144,14 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
                 con.Open();
 
                 cmd.Connection = con;
-				//cmd.CommandText = "INSERT INTO email_confirmation_codes (email, code) " +
-				//				  "VALUES(@email, @code) " +
-				//				  "ON DUPLICATE KEY UPDATE code = @code";
-				cmd.CommandText = "INSERT INTO email_confirmation_codes (email, code) " +
-								  "VALUES(@email, @code) " +
-								  "ON CONFLICT (email) DO UPDATE SET code = @code";
+                //cmd.CommandText = "INSERT INTO email_confirmation_codes (email, code) " +
+                //				  "VALUES(@email, @code) " +
+                //				  "ON DUPLICATE KEY UPDATE code = @code";
+                cmd.CommandText = "INSERT INTO email_confirmation_codes (email, code) " +
+                                  "VALUES(@email, @code) " +
+                                  "ON CONFLICT (email) DO UPDATE SET code = @code";
 
-				cmd.Parameters.AddWithValue("@email", email);
+                cmd.Parameters.AddWithValue("@email", email);
                 cmd.Parameters.AddWithValue("@code", code);
                 cmd.ExecuteNonQuery();
             }
@@ -220,17 +222,18 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
 
                 cmd.Connection = con;
 
-				cmd.CommandText = "INSERT INTO accounts (username, password, email, is_admin, is_guest, is_email_confirmed) " +
+                cmd.CommandText =
+                    "INSERT INTO accounts (username, password, email, is_admin, is_guest, is_email_confirmed) " +
                     "VALUES (@username, @password, @email, @is_admin, @is_guest, @is_email_confirmed) RETURNING account_id";
 
-				cmd.Parameters.AddWithValue("@username", account.Username);
+                cmd.Parameters.AddWithValue("@username", account.Username);
                 cmd.Parameters.AddWithValue("@password", account.Password);
                 cmd.Parameters.AddWithValue("@email", account.Email);
                 cmd.Parameters.AddWithValue("@is_admin", account.IsAdmin);
                 cmd.Parameters.AddWithValue("@is_guest", account.IsGuest);
                 cmd.Parameters.AddWithValue("@is_email_confirmed", account.IsEmailConfirmed);
 
-				Debug.WriteLine("InsertNewAccount - Query:\n" + cmd.CommandText);
+                Debug.WriteLine("InsertNewAccount - Query:\n" + cmd.CommandText);
 
                 var id = cmd.ExecuteScalar() as int?;
                 if (id.HasValue)
@@ -238,7 +241,7 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
                     account.AccountId = id.Value;
                 }
             }
-		}
+        }
 
         public void InsertToken(IAccountData acc, string token)
         {
@@ -272,8 +275,8 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
                 account = new SqlAccountData()
                 {
                     Username = reader["username"] as string,
-					AccountId = long.Parse(reader["account_id"].ToString()),
-					Email = reader["email"] as string,
+                    AccountId = long.Parse(reader["account_id"].ToString()),
+                    Email = reader["email"] as string,
                     Password = reader["password"] as string,
                     IsAdmin = reader["is_admin"] as bool? ?? false,
                     IsGuest = reader["is_guest"] as bool? ?? false,
@@ -304,7 +307,96 @@ namespace SpeedDate.ServerPlugins.Database.CockroachDb
 
                 account.Properties[key] = value;
             }
+
             return account;
+        }
+
+        public void RestoreProfile(ObservableServerProfile profile)
+        {
+            using (var con = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand())
+            {
+                con.Open();
+
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT profile_values.* " +
+                                  "FROM profile_values " +
+                                  "INNER JOIN accounts " +
+                                  "ON accounts.account_id = profile_values.account_id " +
+                                  "WHERE username = @username;";
+                cmd.Parameters.AddWithValue("@username", profile.Username);
+
+                var reader = cmd.ExecuteReader();
+
+                // There's no such data
+                if (!reader.HasRows)
+                    return;
+
+                var data = new Dictionary<short, string>();
+
+                while (reader.Read())
+                {
+                    //var key = reader.GetInt16("value_key");
+                    var key = short.Parse(reader["value_key"].ToString());
+
+                    var value = reader["value_value"] as string ?? "";
+                    data.Add(key, value);
+                }
+
+                profile.FromStrings(data);
+            }
+        }
+
+        public void UpdateProfile(ObservableServerProfile profile)
+        {
+            if (!profile.ShouldBeSavedToDatabase)
+                return;
+
+            using (var con = new NpgsqlConnection(_connectionString))
+            using (var cmd = new NpgsqlCommand())
+            {
+                con.Open();
+
+                cmd.Connection = con;
+                cmd.CommandText = "SELECT account_id FROM accounts " +
+                                  "WHERE username = @username";
+                cmd.Parameters.AddWithValue("@username", profile.Username);
+
+                var reader = cmd.ExecuteReader();
+
+                if (!reader.HasRows)
+                {
+                    Logs.Error("Tried to save a profile of a user who has no account: " + profile.Username);
+                    return;
+                }
+
+                reader.Read();
+
+                //var accountId = reader.GetInt32("account_id");
+                var accountId = int.Parse(reader["account_id"].ToString());
+
+                reader.Close();
+                cmd.Parameters.Clear();
+
+                cmd.Connection = con;
+
+                foreach (var unsavedProp in profile.UnsavedProperties)
+                {
+                    cmd.CommandText = "INSERT INTO profile_values (account_id, value_key, value_value) " +
+                                      "VALUES (@account_id, @value_key, @value_value)" +
+                                      "ON CONFLICT (account_id, value_key) DO UPDATE SET value_value = @value_value";
+
+                    cmd.Parameters.AddWithValue("@account_id", accountId);
+                    cmd.Parameters.AddWithValue("@value_key", unsavedProp.Key);
+                    cmd.Parameters.AddWithValue("@value_value", unsavedProp.SerializeToString());
+
+                    cmd.ExecuteNonQuery();
+
+                    cmd.Parameters.Clear();
+                }
+            }
+
+            profile.UnsavedProperties.Clear();
         }
 
         public class SqlAccountData : IAccountData
