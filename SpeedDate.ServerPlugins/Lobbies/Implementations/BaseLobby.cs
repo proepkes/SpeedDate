@@ -398,13 +398,13 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         /// <summary>
         /// Extracts username of the peer.
-        /// By default, uses user extension <see cref="IUserExtension"/>
+        /// By default, uses user extension <see cref="UserExtension"/>
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
         protected virtual string TryGetUsername(IPeer peer)
         {
-            var userExt = peer.GetExtension<IUserExtension>();
+            var userExt = peer.GetExtension<UserExtension>();
 
             return userExt?.Username;
         }

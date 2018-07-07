@@ -1,6 +1,7 @@
 ﻿using SpeedDate.Interfaces;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;
+using SpeedDate.ServerPlugins.Database.Entities;
 
 namespace SpeedDate.ServerPlugins.Authentication
 {
@@ -8,10 +9,10 @@ namespace SpeedDate.ServerPlugins.Authentication
     /// Instance of this class will be added to 
     /// extensions of a peer who has logged in 
     /// </summary>
-    public class UserExtension : IUserExtension
+    public class UserExtension
     {
-        public IPeer Peer { get; private set; }
-        public string Username { get { return AccountData.Username; } }
+        public IPeer Peer { get; }
+        public string Username => AccountData.Username;
 
         public UserExtension(IPeer peer)
         {
@@ -20,7 +21,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         public AccountInfoPacket CreateInfoPacket()
         {
-            return new AccountInfoPacket()
+            return new AccountInfoPacket
             {
                 Username = AccountData.Username,
                 IsAdmin = AccountData.IsAdmin,
@@ -29,11 +30,11 @@ namespace SpeedDate.ServerPlugins.Authentication
             };
         }
 
-        public void Load(IAccountData accountData)
+        public void Load(AccountData accountData)
         {
             AccountData = accountData;
         }
 
-        public IAccountData AccountData { get; set; }
+        public AccountData AccountData { get; set; }
     }
 }

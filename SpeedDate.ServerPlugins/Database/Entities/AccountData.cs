@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using SpeedDate.ServerPlugins.Authentication;
 
-namespace SpeedDate.ServerPlugins.Database.CockroachDb
+namespace SpeedDate.ServerPlugins.Database.Entities
 {
     public class AccountData
     {

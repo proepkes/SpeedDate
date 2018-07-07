@@ -7,10 +7,10 @@ namespace SpeedDate.Test
     public class TestUtil
     {
         [Test]
-        public void ValidatePassword()
+        public void ShouldValidatePassword()
         {
             const string password = "asdfasdf";
-
+            
             var hash = Util.CreateHash(password);
             
             Util.ValidatePassword(password, hash).ShouldBeTrue();

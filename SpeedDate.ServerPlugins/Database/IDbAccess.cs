@@ -1,29 +1,31 @@
-﻿using SpeedDate.Packets;
-using SpeedDate.ServerPlugins.Authentication;
+﻿using System;
+using SpeedDate.Packets;
+using SpeedDate.ServerPlugins.Database.Entities;
 
 namespace SpeedDate.ServerPlugins.Database
 {
     public interface IDbAccess
     {
-        /// <summary>
-        ///     Should create an empty object with account data.
-        /// </summary>
-        /// <returns></returns>
-        IAccountData CreateAccountObject();
+        string BuildConnectionString(DatabaseConfig config);
+        void SetConnectionString(string connectionString);
 
-        IAccountData GetAccount(string username);
-        IAccountData GetAccountByToken(string token);
-        IAccountData GetAccountByEmail(string email);
+        bool TryConnection(out Exception e);
+        
+        AccountData CreateAccountObject();
 
-        void SavePasswordResetCode(IAccountData account, string code);
-        IPasswordResetData GetPasswordResetData(string email);
+        AccountData GetAccount(string username);
+        AccountData GetAccountByToken(string token);
+        AccountData GetAccountByEmail(string email);
+
+        void SavePasswordResetCode(AccountData account, string code);
+        PasswordResetData GetPasswordResetData(string email);
 
         void SaveEmailConfirmationCode(string email, string code);
         string GetEmailConfirmationCode(string email);
 
-        void UpdateAccount(IAccountData account);
-        void InsertNewAccount(IAccountData account);
-        void InsertToken(IAccountData account, string token);
+        void UpdateAccount(AccountData account);
+        void InsertNewAccount(AccountData account);
+        void InsertToken(AccountData account, string token);
         
         /// <summary>
         /// Should restore all values of the given profile, 

@@ -1,7 +1,6 @@
 ﻿namespace SpeedDate.Plugin.Interfaces
 {
-    public interface IPluginResource
+    public interface IPluginResource<T>
     {
-        
     }
 }

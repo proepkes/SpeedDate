@@ -28,10 +28,10 @@ namespace SpeedDate.Network
 
         public long ValidateConnectionId(long connectionId)
         {
-            var newConnectionId = LongRandom(0, long.MaxValue, _rnd);;
+            var newConnectionId = CreateRandomConnectionId(0, long.MaxValue, _rnd);;
             lock (_connectionIds)
             {
-                while (_connectionIds.Contains(newConnectionId)) newConnectionId = LongRandom(0, long.MaxValue, _rnd);
+                while (_connectionIds.Contains(newConnectionId)) newConnectionId = CreateRandomConnectionId(0, long.MaxValue, _rnd);
 
                 _connectionIds.Add(newConnectionId);
             }
@@ -90,7 +90,7 @@ namespace SpeedDate.Network
         public event OnConnectionRequest ConnectionRequestEvent;
 
 
-        private long LongRandom(long min, long max, Random rand)
+        private long CreateRandomConnectionId(long min, long max, Random rand)
         {
             var buf = new byte[8];
             rand.NextBytes(buf);

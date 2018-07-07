@@ -25,12 +25,12 @@
     EnableClientSpawnRequests="true"
     CreateSpawnerPermissionLevel="0" />
 
-  <CockroachDbConfig
+  <DatabaseConfig
     CheckConnectionOnStartup="false"
     Host="localhost" 
     Port="26257" 
     Username="root" 
     Password="" 
-    Database="msf" />
+    Database="speeddate" />
 
 </configuration>

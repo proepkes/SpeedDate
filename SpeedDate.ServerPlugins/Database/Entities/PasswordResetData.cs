@@ -1,4 +1,4 @@
-﻿namespace SpeedDate.ServerPlugins.Database.CockroachDb
+﻿namespace SpeedDate.ServerPlugins.Database.Entities
 {
     public class PasswordResetData
     {

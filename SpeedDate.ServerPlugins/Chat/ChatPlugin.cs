@@ -85,7 +85,7 @@ namespace SpeedDate.ServerPlugins.Chat
             return new ChatUserExtension(peer, username);
         }
 
-        protected virtual void OnUserLoggedIn(IUserExtension account)
+        protected virtual void OnUserLoggedIn(UserExtension account)
         {
             var chatUser = CreateChatUser(account.Peer, account.Username);
 
@@ -95,7 +95,7 @@ namespace SpeedDate.ServerPlugins.Chat
             account.Peer.AddExtension(chatUser);
         }
 
-        protected virtual void OnUserLoggedOut(IUserExtension account)
+        protected virtual void OnUserLoggedOut(UserExtension account)
         {
             var chatExt = account.Peer.GetExtension<ChatUserExtension>();
 

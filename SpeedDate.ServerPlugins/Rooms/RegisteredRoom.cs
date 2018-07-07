@@ -126,7 +126,7 @@ namespace SpeedDate.ServerPlugins.Rooms
             };
 
             // Add the username if available
-            var userExt = peer.GetExtension<IUserExtension>();
+            var userExt = peer.GetExtension<UserExtension>();
             if (userExt != null && !string.IsNullOrEmpty(userExt.Username))
             {
                 packet.Username = userExt.Username;

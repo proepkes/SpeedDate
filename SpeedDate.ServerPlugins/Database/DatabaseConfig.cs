@@ -1,8 +1,8 @@
 ﻿using SpeedDate.Configuration;
 
-namespace SpeedDate.ServerPlugins.Database.CockroachDb
+namespace SpeedDate.ServerPlugins.Database
 {
-    public class CockroachDbConfig : IConfig
+    public class DatabaseConfig : IConfig
     {
         public bool CheckConnectionOnStartup { get; set; } = false;
         public string Host { get; set; } = "localhost";

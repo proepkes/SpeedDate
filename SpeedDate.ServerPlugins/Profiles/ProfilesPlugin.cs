@@ -14,7 +14,7 @@ using SpeedDate.Packets;
 using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
-using SpeedDate.ServerPlugins.Database.CockroachDb;
+using SpeedDate.ServerPlugins.Database;
 
 namespace SpeedDate.ServerPlugins.Profiles
 {
@@ -50,7 +50,7 @@ namespace SpeedDate.ServerPlugins.Profiles
         private readonly Dictionary<string, ObservableServerProfile> profiles = new Dictionary<string, ObservableServerProfile>();
 
         private AuthPlugin _auth;
-        private CockroachDbPlugin database;
+        private DatabasePlugin database;
 
         private readonly HashSet<string> _debouncedSaves = new HashSet<string>();
         private readonly HashSet<string> debouncedClientUpdates = new HashSet<string>();
@@ -71,7 +71,7 @@ namespace SpeedDate.ServerPlugins.Profiles
             _auth = pluginProvider.Get<AuthPlugin>();
             _auth.LoggedIn += OnLoggedIn;
 
-            database = pluginProvider.Get<CockroachDbPlugin>();
+            database = pluginProvider.Get<DatabasePlugin>();
 
             Server.SetHandler((ushort)OpCodes.ClientProfileRequest, HandleClientProfileRequest);
 
@@ -86,7 +86,7 @@ namespace SpeedDate.ServerPlugins.Profiles
         /// </summary>
         /// <param name="session"></param>
         /// <param name="accountData"></param>
-        private void OnLoggedIn(IUserExtension user)
+        private void OnLoggedIn(UserExtension user)
         {
             user.Peer.Disconnected += OnPeerPlayerDisconnected;
 
@@ -108,7 +108,7 @@ namespace SpeedDate.ServerPlugins.Profiles
 
             // Restore profile data from database (only if not a guest)
             if (!user.AccountData.IsGuest)
-                database.ProfilesDatabase.RestoreProfile(profile);
+                database.RestoreProfile(profile);
 
             // Save profile property
             user.Peer.AddExtension(new ProfileExtension(profile, user.Peer));
@@ -194,7 +194,7 @@ namespace SpeedDate.ServerPlugins.Profiles
             // Remove value from debounced updates
             _debouncedSaves.Remove(profile.Username);
 
-            database.ProfilesDatabase.UpdateProfile(profile);
+            database.UpdateProfile(profile);
 
             profile.UnsavedProperties.Clear();
         }

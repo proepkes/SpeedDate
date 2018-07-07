@@ -5,6 +5,7 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SpeedDate.Database.CockroachDb\SpeedDate.Database.CockroachDb.csproj" />
     <ProjectReference Include="..\SpeedDate.ServerPlugins\SpeedDate.ServerPlugins.csproj" />
     <ProjectReference Include="..\SpeedDate.Server\SpeedDate.Server.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />

@@ -4110,7 +4110,7 @@ namespace SpeedDate
                         BuildUp(value);
                         field.SetValue(input, value);
                     }
-                    catch (TinyIoCResolutionException)
+                    catch (TinyIoCResolutionException e)
                     {
                         // Catch any resolution errors and ignore them
                     }

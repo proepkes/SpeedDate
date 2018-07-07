@@ -17,6 +17,7 @@
     <ProjectReference Include="..\SpeedDate.ClientPlugins.Spawner\SpeedDate.ClientPlugins.Spawner.csproj" />
     <ProjectReference Include="..\SpeedDate.ClientPlugins\SpeedDate.ClientPlugins.csproj" />
     <ProjectReference Include="..\SpeedDate.Client\SpeedDate.Client.csproj" />
+    <ProjectReference Include="..\SpeedDate.Database.CockroachDb\SpeedDate.Database.CockroachDb.csproj" />
     <ProjectReference Include="..\SpeedDate.ServerPlugins\SpeedDate.ServerPlugins.csproj" />
     <ProjectReference Include="..\SpeedDate.Server\SpeedDate.Server.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />

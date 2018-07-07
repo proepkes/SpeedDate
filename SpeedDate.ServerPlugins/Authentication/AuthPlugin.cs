@@ -12,7 +12,8 @@ using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;
 using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
-using SpeedDate.ServerPlugins.Database.CockroachDb;
+using SpeedDate.ServerPlugins.Database;
+using SpeedDate.ServerPlugins.Database.Entities;
 using SpeedDate.ServerPlugins.Mail;
 
 namespace SpeedDate.ServerPlugins.Authentication
@@ -22,19 +23,15 @@ namespace SpeedDate.ServerPlugins.Authentication
     /// </summary>
     public class AuthPlugin : SpeedDateServerPlugin
     {
-        public delegate void AuthEventHandler(IUserExtension account);
+        public delegate void AuthEventHandler(UserExtension account);
         
-        [Inject]
-        private readonly ILogger _logger;
+        [Inject] private readonly ILogger _logger;
+        [Inject] private readonly AuthConfig _config;
 
-        [Inject]
-        private readonly AuthConfig _config;
-
-        private readonly Dictionary<string, IUserExtension> _loggedInUsers = new Dictionary<string, IUserExtension>();
-
-        private CockroachDbPlugin _database;
+        private readonly Dictionary<string, UserExtension> _loggedInUsers = new Dictionary<string, UserExtension>();
 
         private MailPlugin _mailer;
+        private DatabasePlugin _database;
 
         private int _nextGuestId;
 
@@ -52,8 +49,8 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         public override void Loaded(IPluginProvider pluginProvider)
         {
-            _database = pluginProvider.Get<CockroachDbPlugin>();
             _mailer = pluginProvider.Get<MailPlugin>();
+            _database = pluginProvider.Get<DatabasePlugin>();
 
             // Set handlers
             Server.SetHandler((ushort)OpCodes.LogIn, HandleLogIn);
@@ -73,7 +70,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         private void HandleLogOut(IIncommingMessage message)
         {
-            var extension = message.Peer.GetExtension<IUserExtension>();
+            var extension = message.Peer.GetExtension<UserExtension>();
             if (extension == null)
             {
                 message.Respond("Not logged in", ResponseStatus.Failed);
@@ -88,12 +85,12 @@ namespace SpeedDate.ServerPlugins.Authentication
             return _config.GuestPrefix + _nextGuestId++;
         }
 
-        public virtual IUserExtension CreateUserExtension(IPeer peer)
+        public virtual UserExtension CreateUserExtension(IPeer peer)
         {
             return new UserExtension(peer);
         }
 
-        protected void FinalizeLogin(IUserExtension extension)
+        protected void FinalizeLogin(UserExtension extension)
         {
             extension.Peer.Disconnected += OnUserDisconnect;
 
@@ -106,7 +103,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         private void OnUserDisconnect(IPeer peer)
         {
-            var extension = peer.GetExtension<IUserExtension>();
+            var extension = peer.GetExtension<UserExtension>();
 
             if (extension == null)
                 return;
@@ -118,7 +115,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             LoggedOut?.Invoke(extension);
         }
 
-        public IUserExtension GetLoggedInUser(string username)
+        public UserExtension GetLoggedInUser(string username)
         {
             _loggedInUsers.TryGetValue(username.ToLower(), out var extension);
             return extension;
@@ -164,9 +161,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                 return;
             }
 
-            var db = _database.AuthDatabase;
-
-            var resetData = db.GetPasswordResetData(data["email"]);
+            var resetData = _database.GetPasswordResetData(data["email"]);
 
             if (resetData?.Code == null || resetData.Code != data["code"])
             {
@@ -174,13 +169,13 @@ namespace SpeedDate.ServerPlugins.Authentication
                 return;
             }
 
-            var account = db.GetAccountByEmail(data["email"]);
+            var account = _database.GetAccountByEmail(data["email"]);
 
             // Delete (overwrite) code used
-            db.SavePasswordResetCode(account, null);
+            _database.SavePasswordResetCode(account, null);
 
             account.Password = Util.CreateHash(data["password"]);
-            db.UpdateAccount(account);
+            _database.UpdateAccount(account);
 
             message.Respond(ResponseStatus.Success);
         }
@@ -202,7 +197,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         {
             var code = message.AsString();
 
-            var extension = message.Peer.GetExtension<IUserExtension>();
+            var extension = message.Peer.GetExtension<UserExtension>();
 
             if (extension?.AccountData == null)
             {
@@ -224,10 +219,8 @@ namespace SpeedDate.ServerPlugins.Authentication
                     ResponseStatus.Success);
                 return;
             }
-
-            var db = _database.AuthDatabase;
-
-            var requiredCode = db.GetEmailConfirmationCode(extension.AccountData.Email);
+            
+            var requiredCode = _database.GetEmailConfirmationCode(extension.AccountData.Email);
 
             if (requiredCode != code)
             {
@@ -239,7 +232,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             extension.AccountData.IsEmailConfirmed = true;
 
             // Update account
-            db.UpdateAccount(extension.AccountData);
+            _database.UpdateAccount(extension.AccountData);
 
             // Respond with success
             message.Respond(ResponseStatus.Success);
@@ -252,9 +245,8 @@ namespace SpeedDate.ServerPlugins.Authentication
         protected virtual void HandlePasswordResetRequest(IIncommingMessage message)
         {
             var email = message.AsString();
-            var db = _database.AuthDatabase;
 
-            var account = db.GetAccountByEmail(email);
+            var account = _database.GetAccountByEmail(email);
 
             if (account == null)
             {
@@ -264,7 +256,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             var code = Util.CreateRandomString(4);
 
-            db.SavePasswordResetCode(account, code);
+            _database.SavePasswordResetCode(account, code);
 
             if (!_mailer.SendMail(account.Email, "Password Reset Code", string.Format(_config.PasswordResetEmailBody, code)))
             {
@@ -277,7 +269,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
         protected virtual void HandleRequestEmailConfirmCode(IIncommingMessage message)
         {
-            var extension = message.Peer.GetExtension<IUserExtension>();
+            var extension = message.Peer.GetExtension<UserExtension>();
 
             if (extension?.AccountData == null)
             {
@@ -292,12 +284,10 @@ namespace SpeedDate.ServerPlugins.Authentication
             }
 
             var code = Util.CreateRandomString(6);
-
-            var db = _database.AuthDatabase;
-
+            
             // Save the new code
             Debug.WriteLine("SHOULD BE HERE");
-            db.SaveEmailConfirmationCode(extension.AccountData.Email, code);
+            _database.SaveEmailConfirmationCode(extension.AccountData.Email, code);
 
             if (!_mailer.SendMail(extension.AccountData.Email, "E-mail confirmation",
                 string.Format(_config.ConfirmEmailBody, code)))
@@ -343,7 +333,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             var usernameLower = username.ToLower();
 
-            var extension = message.Peer.GetExtension<IUserExtension>();
+            var extension = message.Peer.GetExtension<UserExtension>();
 
             if (extension != null && !extension.AccountData.IsGuest)
             {
@@ -388,10 +378,8 @@ namespace SpeedDate.ServerPlugins.Authentication
                 message.Respond("Invalid Email".ToBytes(), ResponseStatus.Error);
                 return;
             }
-
-            var db = _database.AuthDatabase;
-
-            var account = db.CreateAccountObject();
+            
+            var account = _database.CreateAccountObject();
 
             account.Username = username;
             account.Email = email;
@@ -399,7 +387,7 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             try
             {
-                db.InsertNewAccount(account);
+                _database.InsertNewAccount(account);
 
                 message.Respond(ResponseStatus.Success);
             }
@@ -432,7 +420,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                 return;
             }
 
-            var account = peer.GetExtension<IUserExtension>();
+            var account = peer.GetExtension<UserExtension>();
 
             if (account == null)
             {
@@ -458,7 +446,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         /// <param name="message"></param>
         protected virtual void HandleLogIn(IIncommingMessage message)
         {
-            if (message.Peer.HasExtension<IUserExtension>())
+            if (message.Peer.HasExtension<UserExtension>())
             {
                 message.Respond("Already logged in", ResponseStatus.Unauthorized);
                 return;
@@ -477,17 +465,15 @@ namespace SpeedDate.ServerPlugins.Authentication
 
             var decrypted = Util.DecryptAES(encryptedData, aesKey);
             var data = new Dictionary<string, string>().FromBytes(decrypted);
-
-            var db = _database.AuthDatabase;
-
-            IAccountData accountData = null;
+            
+            AccountData accountData = null;
 
             // ---------------------------------------------
             // Guest Authentication
             if (data.ContainsKey("guest") && _config.EnableGuestLogin)
             {
                 var guestUsername = GenerateGuestUsername();
-                accountData = db.CreateAccountObject();
+                accountData = _database.CreateAccountObject();
 
                 accountData.Username = guestUsername;
                 accountData.IsGuest = true;
@@ -498,7 +484,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             // Token Authentication
             if (data.ContainsKey("token") && accountData == null)
             {
-                accountData = db.GetAccountByToken(data["token"]);
+                accountData = _database.GetAccountByToken(data["token"]);
                 if (accountData == null)
                 {
                     message.Respond("Invalid Credentials".ToBytes(), ResponseStatus.Unauthorized);
@@ -523,7 +509,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                 var username = data["username"];
                 var password = data["password"];
 
-                accountData = db.GetAccount(username);
+                accountData = _database.GetAccount(username);
 
                 if (accountData == null)
                 {

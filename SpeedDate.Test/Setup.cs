@@ -4,7 +4,7 @@ using Shouldly;
 using SpeedDate.Configuration;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
-using SpeedDate.ServerPlugins.Database.CockroachDb;
+using SpeedDate.ServerPlugins.Database;
 using SpeedDate.ServerPlugins.Lobbies;
 
 namespace SpeedDate.Test
@@ -23,9 +23,8 @@ namespace SpeedDate.Test
             Server = new SpeedDateServer();
             Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new IConfig[]
             {
-                new CockroachDbConfig
+                new DatabaseConfig
                 {
-                  //Change this to true for database-tests
                   CheckConnectionOnStartup  = false
                 },
                 new AuthConfig

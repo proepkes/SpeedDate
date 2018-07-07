@@ -115,6 +115,16 @@ namespace SpeedDate
                         var plugin = (IPlugin)Activator.CreateInstance(pluginType);
                         ioc.Register(plugin, pluginType.FullName);
                     }
+                    
+                    foreach (var pluginResourceType in assembly.DefinedTypes.Where(info =>
+                        !info.IsAbstract && !info.IsInterface))
+                    {
+                        if (IsAssignableToGenericType(pluginResourceType, typeof(IPluginResource<>), out var genericTypeArgument))
+                        {
+                            var pluginResource = Activator.CreateInstance(pluginResourceType);
+                            ioc.Register(genericTypeArgument, pluginResource);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -129,6 +139,31 @@ namespace SpeedDate
         private static string WildCardToRegular(string value)
         {
             return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
+        }
+        
+        private static bool IsAssignableToGenericType(Type givenType, Type genericType, out Type genericTypeArgument)
+        {
+            genericTypeArgument = null;
+            
+            var interfaceTypes = givenType.GetInterfaces();
+
+            foreach (var it in interfaceTypes)
+            {
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
+                {
+                    genericTypeArgument = it.GenericTypeArguments.First();
+                    return true;
+                }
+            }
+
+            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
+            {
+                genericTypeArgument = givenType.GenericTypeArguments.First();
+                return true;
+            }
+
+            var baseType = givenType.BaseType;
+            return baseType != null && IsAssignableToGenericType(baseType, genericType, out genericTypeArgument);
         }
     }
 }
