@@ -7,9 +7,8 @@ namespace SpeedDate.ServerPlugins.Echo
 {
     public class EchoPlugin : SpeedDateServerPlugin
     {
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
-            base.Loaded(pluginProvider);
             Server.SetHandler(OpCodes.Echo, HandleEcho);
         }
 

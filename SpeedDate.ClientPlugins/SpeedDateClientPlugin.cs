@@ -10,10 +10,9 @@ namespace SpeedDate.ClientPlugins
 {
     public abstract class SpeedDateClientPlugin : IPlugin
     {
-        [Inject]
-        protected readonly IClient Client;
+        [Inject] protected readonly IClient Client;
 
-        public virtual void Loaded(IPluginProvider pluginProvider)
+        public virtual void Loaded()
         {
             
         }

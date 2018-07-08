@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -16,10 +16,12 @@ namespace SpeedDate.ServerPlugins.Matchmaker
     {
         private readonly HashSet<IGamesProvider> _gameProviders = new HashSet<IGamesProvider>();
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        [Inject] private RoomsPlugin _roomsPlugin;
+        [Inject] private LobbiesPlugin _lobbiesPlugin;
+        public override void Loaded()
         {
-            AddProvider(pluginProvider.Get<RoomsPlugin>());
-            AddProvider(pluginProvider.Get<LobbiesPlugin>());
+            AddProvider(_roomsPlugin);
+            AddProvider(_lobbiesPlugin);
 
             // Add handlers
             Server.SetHandler((ushort)OpCodes.FindGames, HandleFindGames);

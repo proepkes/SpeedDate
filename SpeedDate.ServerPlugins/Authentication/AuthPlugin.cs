@@ -27,12 +27,12 @@ namespace SpeedDate.ServerPlugins.Authentication
         
         [Inject] private readonly ILogger _logger;
         [Inject] private readonly AuthConfig _config;
+        
+        [Inject] private MailPlugin _mailer;
+        [Inject] public DatabasePlugin _database;
 
         private readonly Dictionary<string, UserExtension> _loggedInUsers = new Dictionary<string, UserExtension>();
-
-        private MailPlugin _mailer;
-        private DatabasePlugin _database;
-
+        
         private int _nextGuestId;
 
         private readonly List<PermissionEntry> _permissions = new List<PermissionEntry>();
@@ -47,11 +47,8 @@ namespace SpeedDate.ServerPlugins.Authentication
         /// </summary>
         public event AuthEventHandler LoggedOut;
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
-            _mailer = pluginProvider.Get<MailPlugin>();
-            _database = pluginProvider.Get<DatabasePlugin>();
-
             // Set handlers
             Server.SetHandler((ushort)OpCodes.LogIn, HandleLogIn);
             Server.SetHandler((ushort)OpCodes.LogOut, HandleLogOut);
@@ -90,7 +87,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             return new UserExtension(peer);
         }
 
-        protected void FinalizeLogin(UserExtension extension)
+        private void FinalizeLogin(UserExtension extension)
         {
             extension.Peer.Disconnected += OnUserDisconnect;
 

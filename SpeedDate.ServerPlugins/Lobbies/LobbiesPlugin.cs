@@ -18,8 +18,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     public class LobbiesPlugin : SpeedDateServerPlugin, IGamesProvider
     {
-        [Inject] 
-        private readonly ILogger _logger;
+        [Inject] private readonly ILogger _logger;
+        [Inject] internal readonly RoomsPlugin RoomsPlugin;
+        [Inject] internal readonly SpawnerPlugin SpawnerPlugin;
         
         public int CreateLobbiesPermissionLevel = 0;
 
@@ -32,15 +33,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         private int _nextLobbyId;
 
-        internal SpawnerPlugin SpawnerPlugin;
-        internal RoomsPlugin RoomsPlugin;
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
-            // Get dependencies
-            SpawnerPlugin = pluginProvider.Get<SpawnerPlugin>();
-            RoomsPlugin = pluginProvider.Get<RoomsPlugin>();
-
             Server.SetHandler((ushort)OpCodes.CreateLobby, HandleCreateLobby);
             Server.SetHandler((ushort)OpCodes.JoinLobby, HandleJoinLobby);
             Server.SetHandler((ushort)OpCodes.LeaveLobby, HandleLeaveLobby);

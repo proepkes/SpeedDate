@@ -6,6 +6,6 @@ namespace SpeedDate.Plugin.Interfaces
         /// <summary>
         /// Gets called when all Plugins have been initialized
         /// </summary>
-        void Loaded(IPluginProvider pluginProvider);
+        void Loaded();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,12 +20,6 @@ namespace SpeedDate
     {
         private SpeedDateConfig _config;
         private TinyIoCContainer _container;
-        
-        public IPluginProvider PluginProvider
-        {
-            get;
-            private set;
-        }
 
         public void Load(ISpeedDateStartable startable, IConfigProvider configProvider, KernelStartedCallback startedCallback)
         {
@@ -35,35 +30,42 @@ namespace SpeedDate
             _config = configProvider.Configure(_container.ResolveAll<IConfig>());
             
             _container.BuildUp(startable);
-
-            PluginProvider = _container.Resolve<IPluginProvider>();
-
-            foreach (var plugin in _container.ResolveAll<IPlugin>()
-                .Where(p => _config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(p.GetType().Namespace, WildCardToRegular(ns.Trim())))))
+            
+            //Filter plugins for namespace & inject configuration into valid plugins
+            foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
-                logger.Debug($"Loading plugin: {plugin}");
-                //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
-                var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
-                    where !field.FieldType.IsValueType() && Attribute.IsDefined(field, typeof(InjectAttribute))
-                    select field;
-
-                foreach (var field in fields)
+                if(_config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns.Trim()))))
                 {
-                    if (field.GetValue(plugin) == null && _config.TryGetConfig(field.FieldType.FullName, out var config))
+                    logger.Debug($"Loading plugin: {plugin}");
+                    //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
+                    var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                        where Attribute.IsDefined(field, typeof(InjectAttribute))
+                        select field;
+
+                    foreach (var field in fields)
                     {
-                        field.SetValue(plugin, config);
+                        if (field.GetValue(plugin) == null && _config.TryGetConfig(field.FieldType.FullName, out var config))
+                        {
+                            field.SetValue(plugin, config);
+                        }
                     }
                 }
-
-                //Inject ILogger & other possible dependencies, Configs are already set above and will not be overwritten
-                _container.BuildUp(plugin);
-
-                PluginProvider.RegisterPlugin(plugin);
+                else
+                {
+                    _container.Unregister(typeof(IPlugin), plugin.GetType().FullName);
+                }
             }
-
-            foreach (var plugin in PluginProvider.GetAll())
+           
+            //Inject additional dependencies e.g. ILogger 
+            foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
-                plugin.Loaded(PluginProvider);
+                _container.BuildUp(plugin);
+            }
+            
+            //Finally notify ever plugin that loading finished
+            foreach (var plugin in _container.ResolveAll<IPlugin>())
+            {
+                plugin.Loaded();
                 logger.Info($"Loaded {plugin.GetType().Name}");
             }
 
@@ -72,7 +74,7 @@ namespace SpeedDate
 
         public void Stop()
         {
-            _container.Resolve<AppUpdater>().KeepRunning = false;
+            AppUpdater.Instance.KeepRunning = false;
         }
 
         private static TinyIoCContainer CreateContainer(ISpeedDateStartable startable)
@@ -82,7 +84,6 @@ namespace SpeedDate
             {
                 //Register possible plugin-dependencies
                 ioc.Register(AppUpdater.Instance);
-                ioc.Register<IPluginProvider, PluginProvider>();
                 ioc.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
 
                 switch (startable)
@@ -112,8 +113,9 @@ namespace SpeedDate
                     foreach (var pluginType in assembly.DefinedTypes.Where(info =>
                         !info.IsAbstract && !info.IsInterface && typeof(IPlugin).IsAssignableFrom(info)))
                     {
-                        var plugin = (IPlugin)Activator.CreateInstance(pluginType);
-                        ioc.Register(plugin, pluginType.FullName);
+                        var plugin = Activator.CreateInstance(pluginType);
+                        ioc.Register(plugin as IPlugin, pluginType.FullName);
+                        ioc.Register(pluginType, (a, b, c) => plugin);
                     }
                     
                     foreach (var pluginResourceType in assembly.DefinedTypes.Where(info =>
@@ -164,6 +166,11 @@ namespace SpeedDate
 
             var baseType = givenType.BaseType;
             return baseType != null && IsAssignableToGenericType(baseType, genericType, out genericTypeArgument);
+        }
+
+        public T GetPlugin<T>() where T : class, IPlugin
+        {
+            return _container.ResolveAll<IPlugin>().FirstOrDefault(plugin => plugin is T) as T;
         }
     }
 }

@@ -18,24 +18,43 @@ namespace SpeedDate.Test
     public class TestKernel
     {
         [Test]
+        public void GetPlugin_ShouldReturnSameObject()
+        {
+            using (var client = new SpeedDateClient())
+            {
+                client.Start(new DefaultConfigProvider( //Start loads the plugins
+                    new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                    PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+                var a = client.GetPlugin<AuthPlugin>();
+                var b = client.GetPlugin<AuthPlugin>();
+            
+                a.ShouldBe(b);
+            
+                client.Stop();
+            }
+        }
+        
+        [Test]
         public void GetPlugin_ShouldResolvePeerPlugins()
         {
-            var client = new SpeedDateClient();
-            client.Start(new DefaultConfigProvider( //Start loads the plugins
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
-                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+            using (var client = new SpeedDateClient())
+            {
+                client.Start(new DefaultConfigProvider( //Start loads the plugins
+                    new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                    PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            client.GetPlugin<AuthPlugin>().ShouldNotBeNull();
-            client.GetPlugin<ChatPlugin>().ShouldNotBeNull();
-            client.GetPlugin<LobbyPlugin>().ShouldNotBeNull();
-            client.GetPlugin<MatchmakerPlugin>().ShouldNotBeNull();
-            client.GetPlugin<ProfilePlugin>().ShouldNotBeNull();
-            client.GetPlugin<RoomPlugin>().ShouldNotBeNull();
-            client.GetPlugin<SecurityPlugin>().ShouldNotBeNull();
-            client.GetPlugin<SpawnRequestPlugin>().ShouldNotBeNull();
+                client.GetPlugin<AuthPlugin>().ShouldNotBeNull();
+                client.GetPlugin<ChatPlugin>().ShouldNotBeNull();
+                client.GetPlugin<LobbyPlugin>().ShouldNotBeNull();
+                client.GetPlugin<MatchmakerPlugin>().ShouldNotBeNull();
+                client.GetPlugin<ProfilePlugin>().ShouldNotBeNull();
+                client.GetPlugin<RoomPlugin>().ShouldNotBeNull();
+                client.GetPlugin<SecurityPlugin>().ShouldNotBeNull();
+                client.GetPlugin<SpawnRequestPlugin>().ShouldNotBeNull();
 
-            client.Stop();
-            client.Dispose();
+                client.Stop();
+            }
         }
     }
 }

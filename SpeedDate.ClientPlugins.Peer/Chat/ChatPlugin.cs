@@ -30,9 +30,8 @@ namespace SpeedDate.ClientPlugins.Peer.Chat
         public event ChatMessageHandler MessageReceived;
 
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
-            base.Loaded(pluginProvider);
             Client.SetHandler((ushort)OpCodes.UserJoinedChannel, HandleUserJoinedChannel);
             Client.SetHandler((ushort)OpCodes.UserLeftChannel, HandleUserLeftChannel);
             Client.SetHandler((ushort)OpCodes.ChatMessage, HandleChatMessage);

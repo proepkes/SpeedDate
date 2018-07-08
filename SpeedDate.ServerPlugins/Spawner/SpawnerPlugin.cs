@@ -24,7 +24,7 @@ namespace SpeedDate.ServerPlugins.Spawner
         private int _spawnerId;
         private int _spawnTaskId;
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
             // Add handlers
             Server.SetHandler(OpCodes.RegisterSpawner, HandleRegisterSpawner);

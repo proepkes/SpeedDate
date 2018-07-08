@@ -24,8 +24,6 @@ namespace SpeedDate.Test
             var client = new SpeedDateClient();
             client.Started += () =>
             {
-                client.IsConnected.ShouldBeTrue();
-
                 client.GetPlugin<EchoPlugin>().Send(message,
                     echo =>
                     {
@@ -40,7 +38,7 @@ namespace SpeedDate.Test
 
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                new PluginsConfig("SpeedDate.ClientPlugins.Peer*"))); //Load peer-plugins only
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }
@@ -50,26 +48,22 @@ namespace SpeedDate.Test
         {
             var numberOfClients = 100;
 
-
             var done = new AutoResetEvent(false);
 
             for (var clientNumber = 0; clientNumber < numberOfClients; clientNumber++)
             {
-                ThreadPool.QueueUserWorkItem(state =>
+                ThreadPool.QueueUserWorkItem(index =>
                 {
                     var client = new SpeedDateClient();
                     client.Started += () =>
                     {
-                        client.IsConnected.ShouldBeTrue();
-
-                        client.GetPlugin<EchoPlugin>().Send("Hello from " + state,
+                        client.GetPlugin<EchoPlugin>().Send("Hello from " + index,
                             echo =>
                             {
-                                echo.ShouldBe("Hello from " + state);
+                                echo.ShouldBe("Hello from " + index);
 
                                 if (Interlocked.Decrement(ref numberOfClients) == 0)
                                     done.Set();
-
                             },
                             error =>
                             {
@@ -83,7 +77,6 @@ namespace SpeedDate.Test
 
                 }, clientNumber);
             }
-
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
         }

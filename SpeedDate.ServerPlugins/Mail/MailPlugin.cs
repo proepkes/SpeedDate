@@ -15,15 +15,14 @@ namespace SpeedDate.ServerPlugins.Mail
     {
         [Inject] private ILogger _logger;
         [Inject] private MailConfig config;
-        [Inject] private AppUpdater _updater;
         [Inject] private ISmtpClient _smtpClient;
 
         private readonly IProducerConsumerCollection<Exception> _sendMailExceptions = new ConcurrentBag<Exception>();
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
             SetupSmtpClient();
-            _updater.Add(this);
+            AppUpdater.Instance.Add(this);
         }
 
         public void SetSmtpClient(ISmtpClient smtpClient)
@@ -40,7 +39,6 @@ namespace SpeedDate.ServerPlugins.Mail
                 while (_sendMailExceptions.TryTake(out var e))
                 {
                     _logger.Error(e);
-
                 }
             }
         }

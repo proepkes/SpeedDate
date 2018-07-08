@@ -23,26 +23,14 @@ namespace SpeedDate.ServerPlugins.Chat
         public int MinChannelNameLength = 2;
         public int MaxChannelNameLength = 25;
         
-        [Inject] 
-        private ILogger logger;
+        [Inject] private ILogger logger;
+        [Inject] private AuthPlugin auth;
 
-        public readonly Dictionary<string, ChatUserExtension> ChatUsers;
-        public readonly Dictionary<string, ChatChannel> Channels;
+        public readonly Dictionary<string, ChatUserExtension> ChatUsers = new Dictionary<string, ChatUserExtension>();
+        public readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
 
-
-
-        public ChatPlugin()
+        public override void Loaded()
         {
-            ChatUsers = new Dictionary<string, ChatUserExtension>();
-            Channels = new Dictionary<string, ChatChannel>();
-            
-            
-        }
-
-        public override void Loaded(IPluginProvider pluginProvider)
-        {
-            //Setup auth dependencies
-            var auth = pluginProvider.Get<AuthPlugin>();
             auth.LoggedIn += OnUserLoggedIn;
             auth.LoggedOut += OnUserLoggedOut;
 

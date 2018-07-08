@@ -13,7 +13,14 @@ namespace SpeedDate.ServerPlugins.Database
         [Inject] private ILogger _logger;
         [Inject] private DatabaseConfig _config;
 
-        public void Loaded(IPluginProvider pluginProvider)
+
+        public DatabasePlugin()
+        {
+            
+        }
+        
+        
+        public void Loaded()
         {
             try
             {

@@ -28,7 +28,7 @@ namespace SpeedDate.ServerPlugins.Rooms
         public event Action<RegisteredRoom> RoomRegistered; 
         public event Action<RegisteredRoom> RoomDestroyed;
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
             // Add handlers
             Server.SetHandler((ushort)OpCodes.RegisterRoom, HandleRegisterRoom);

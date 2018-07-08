@@ -165,7 +165,7 @@ namespace SpeedDate.Server
 
         public T GetPlugin<T>() where T : class, IPlugin
         {
-            return _kernel.PluginProvider.Get<T>();
+            return _kernel.GetPlugin<T>();
         }
 
         public void Update()

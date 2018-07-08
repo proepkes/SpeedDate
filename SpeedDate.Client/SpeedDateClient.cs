@@ -192,7 +192,7 @@ namespace SpeedDate.Client
         
         public T GetPlugin<T>() where T : class, IPlugin
         {
-            return _kernel.PluginProvider.Get<T>();
+            return _kernel.GetPlugin<T>();
         }
 
         private void HandleMessage(IIncommingMessage message)

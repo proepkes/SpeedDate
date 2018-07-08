@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
+using SpeedDate.Configuration;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -49,13 +49,12 @@ namespace SpeedDate.ServerPlugins.Profiles
 
         private readonly Dictionary<string, ObservableServerProfile> profiles = new Dictionary<string, ObservableServerProfile>();
 
-        private AuthPlugin _auth;
-        private DatabasePlugin database;
+        [Inject] private ILogger _logger;
+        [Inject] private AuthPlugin _auth;
+        [Inject] private DatabasePlugin database;
 
         private readonly HashSet<string> _debouncedSaves = new HashSet<string>();
         private readonly HashSet<string> debouncedClientUpdates = new HashSet<string>();
-
-        protected readonly Logger Logger = LogManager.GetLogger(typeof(ProfilesPlugin).Name);
 
         public bool IgnoreProfileMissmatchError = false;
 
@@ -66,13 +65,9 @@ namespace SpeedDate.ServerPlugins.Profiles
         /// </summary>
         public ProfileFactory ProfileFactory { get; set; }
 
-        public override void Loaded(IPluginProvider pluginProvider)
+        public override void Loaded()
         {
-            _auth = pluginProvider.Get<AuthPlugin>();
             _auth.LoggedIn += OnLoggedIn;
-
-            database = pluginProvider.Get<DatabasePlugin>();
-
             Server.SetHandler((ushort)OpCodes.ClientProfileRequest, HandleClientProfileRequest);
 
             // Games dependency setup
@@ -346,7 +341,7 @@ namespace SpeedDate.ServerPlugins.Profiles
 
             if (!IgnoreProfileMissmatchError && clientPropCount != profileExt.Profile.PropertyCount)
             {
-                Logger.Error($"Client requested a profile with {clientPropCount} properties, but server " +
+                _logger.Error($"Client requested a profile with {clientPropCount} properties, but server " +
                              $"constructed a profile with {profileExt.Profile.PropertyCount}. Make sure that you've changed the " +
                              "profile factory on the ProfilesModule");
             }

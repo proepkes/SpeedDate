@@ -8,7 +8,7 @@ namespace SpeedDate.Server
     {
         [Inject] protected readonly IServer Server;
 
-        public virtual void Loaded(IPluginProvider pluginProvider)
+        public virtual void Loaded()
         {
         }
     }

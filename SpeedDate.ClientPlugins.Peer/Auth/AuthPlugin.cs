@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Security;
+using SpeedDate.Configuration;
 using SpeedDate.Network;
 using SpeedDate.Packets.Authentication;
 using SpeedDate.Plugin.Interfaces;
@@ -9,7 +10,7 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
 {
     public class AuthPlugin : SpeedDateClientPlugin
     {
-        private SecurityPlugin _securityPlugin;
+        [Inject] private SecurityPlugin _securityPlugin;
 
         public delegate void LoginCallback(AccountInfoPacket accountInfo);
 
@@ -18,12 +19,6 @@ namespace SpeedDate.ClientPlugins.Peer.Auth
         public bool IsLoggedIn { get; protected set; }
 
         public AccountInfoPacket AccountInfo;
-        
-        public override void Loaded(IPluginProvider pluginProvider)
-        {
-            base.Loaded(pluginProvider);
-            _securityPlugin = pluginProvider.Get<SecurityPlugin>();
-        }
 
         /// <summary>
         /// Sends a registration request to given connection

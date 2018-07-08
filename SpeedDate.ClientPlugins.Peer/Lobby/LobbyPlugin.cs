@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Room;
+using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -25,14 +26,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// </summary>
         public JoinedLobby LastJoinedLobby;
 
-        private RoomPlugin _roomPlugin;
-
-        public override void Loaded(IPluginProvider pluginProvider)
-        {
-            base.Loaded(pluginProvider);
-
-            _roomPlugin = pluginProvider.Get<RoomPlugin>();
-        }
+        [Inject] private RoomPlugin _roomPlugin;
 
         /// <summary>
         /// Sends a request to create a lobby and joins it
