@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,7 +8,6 @@ using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
-using SpeedDate.Plugin;
 using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate
@@ -103,27 +100,24 @@ namespace SpeedDate
                     var assembly = Assembly.LoadFrom(dllFile);
                     
                     //Register Configurations
-                    foreach (var pluginConfigType in assembly.DefinedTypes.Where(info =>
-                        !info.IsAbstract && !info.IsInterface && typeof(IConfig).IsAssignableFrom(info)))
+                    foreach (var typeInfo in assembly.DefinedTypes.Where(type => !type.IsAbstract && !type.IsInterface))
                     {
-                        var pluginConfig = (IConfig)Activator.CreateInstance(pluginConfigType);
-                        ioc.Register(pluginConfig, pluginConfigType.FullName);
-                    }
-
-                    foreach (var pluginType in assembly.DefinedTypes.Where(info =>
-                        !info.IsAbstract && !info.IsInterface && typeof(IPlugin).IsAssignableFrom(info)))
-                    {
-                        var plugin = Activator.CreateInstance(pluginType);
-                        ioc.Register(plugin as IPlugin, pluginType.FullName);
-                        ioc.Register(pluginType, (a, b, c) => plugin);
-                    }
-                    
-                    foreach (var pluginResourceType in assembly.DefinedTypes.Where(info =>
-                        !info.IsAbstract && !info.IsInterface))
-                    {
-                        if (IsAssignableToGenericType(pluginResourceType, typeof(IPluginResource<>), out var genericTypeArgument))
+                        if (typeof(IConfig).IsAssignableFrom(typeInfo))
                         {
-                            var pluginResource = Activator.CreateInstance(pluginResourceType);
+                            var pluginConfig = (IConfig) Activator.CreateInstance(typeInfo);
+                            ioc.Register(pluginConfig, typeInfo.FullName);
+                        }
+
+                        if (typeof(IPlugin).IsAssignableFrom(typeInfo))
+                        {
+                            var plugin = Activator.CreateInstance(typeInfo);
+                            ioc.Register(plugin as IPlugin, typeInfo.FullName);
+                            ioc.Register(typeInfo, (container, param, requestType) => plugin);
+                        }
+
+                        if (IsAssignableToGenericType(typeInfo, typeof(IPluginResource<>), out var genericTypeArgument))
+                        {
+                            var pluginResource = Activator.CreateInstance(typeInfo);
                             ioc.Register(genericTypeArgument, pluginResource);
                         }
                     }
