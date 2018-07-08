@@ -98,8 +98,6 @@ namespace SpeedDate
                     Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "*.dll"))
                 {
                     var assembly = Assembly.LoadFrom(dllFile);
-                    
-                    //Register Configurations
                     foreach (var typeInfo in assembly.DefinedTypes.Where(type => !type.IsAbstract && !type.IsInterface))
                     {
                         if (typeof(IConfig).IsAssignableFrom(typeInfo))
