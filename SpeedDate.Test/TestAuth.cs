@@ -1,48 +1,18 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Threading;
-using Moq;
 using NUnit.Framework;
 using Shouldly;
 using SpeedDate.Client;
 using SpeedDate.ClientPlugins.Peer.Auth;
 using SpeedDate.Configuration;
-using SpeedDate.ServerPlugins.Database;
-using SpeedDate.ServerPlugins.Database.Entities;
 
 namespace SpeedDate.Test
 {
     [TestFixture]
     public class TestAuth
     {
-        private const string TestAccountPassword = "testPassword";
-        private readonly AccountData _testAccount = new AccountData
-        {
-            AccountId = 1,
-            Email = "test@account.com",
-            IsAdmin = false,
-            IsEmailConfirmed = true,
-            IsGuest = false,
-            Password = Util.CreateHash(TestAccountPassword),
-            Properties = new Dictionary<string, string>(),
-            Token = "testToken",
-            Username = "TestUser"
-        };
-        
-        [SetUp]
-        public void Setup()
-        {
-            var databaseMock = new Mock<IDbAccess>();
-            databaseMock.Setup(access => access.CreateAccountObject()).Returns(new AccountData());
-            databaseMock.Setup(access => access.GetAccount(_testAccount.Username)).Returns(_testAccount);
-            databaseMock.Setup(access => access.GetAccountByEmail(_testAccount.Email)).Returns(_testAccount);
-            databaseMock.Setup(access => access.GetAccountByToken(_testAccount.Token)).Returns(_testAccount);
-            
-            SetUp.Server.GetPlugin<DatabasePlugin>().SetDbAccess(databaseMock.Object);
-        }
-
         [Test]
         public void LoginAsGuest_ShouldGenerateGuestUsername()
         {
@@ -161,7 +131,7 @@ namespace SpeedDate.Test
         }
         
         [Test]
-        public void ReLogInAsGuest_ShouldCreateNewAesKey()
+        public void ShouldReLogInAsGuest()
         {
             var done = new AutoResetEvent(false);
 
@@ -222,7 +192,7 @@ namespace SpeedDate.Test
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
 
-            client.GetPlugin<AuthPlugin>().LogIn(_testAccount.Username, TestAccountPassword, info =>
+            client.GetPlugin<AuthPlugin>().LogIn(SetUp.TestAccount.Username, SetUp.TestAccountPassword, info =>
                 {
                     done.Set();
                 },
@@ -255,7 +225,7 @@ namespace SpeedDate.Test
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled by Started
 
-            client.GetPlugin<AuthPlugin>().LogIn(_testAccount.Username, TestAccountPassword, info =>
+            client.GetPlugin<AuthPlugin>().LogIn(SetUp.TestAccount.Username, SetUp.TestAccountPassword, info =>
                 {
                     done.Set();
                 },
@@ -270,7 +240,7 @@ namespace SpeedDate.Test
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
             
-            client.GetPlugin<AuthPlugin>().LogIn(_testAccount.Username, TestAccountPassword, info =>
+            client.GetPlugin<AuthPlugin>().LogIn(SetUp.TestAccount.Username, SetUp.TestAccountPassword, info =>
                 {
                     done.Set();
                 },

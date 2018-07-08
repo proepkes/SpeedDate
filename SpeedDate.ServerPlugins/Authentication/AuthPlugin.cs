@@ -257,12 +257,8 @@ namespace SpeedDate.ServerPlugins.Authentication
             var code = Util.CreateRandomString(4);
 
             _database.SavePasswordResetCode(account, code);
-
-            if (!_mailer.SendMail(account.Email, "Password Reset Code", string.Format(_config.PasswordResetEmailBody, code)))
-            {
-                message.Respond("Couldn't send an activation code to your e-mail");
-                return;
-            }
+            
+            _mailer.SendMail(account.Email, "Password Reset Code", string.Format(_config.PasswordResetEmailBody, code));
 
             message.Respond(ResponseStatus.Success);
         }
@@ -286,15 +282,10 @@ namespace SpeedDate.ServerPlugins.Authentication
             var code = Util.CreateRandomString(6);
             
             // Save the new code
-            Debug.WriteLine("SHOULD BE HERE");
             _database.SaveEmailConfirmationCode(extension.AccountData.Email, code);
 
-            if (!_mailer.SendMail(extension.AccountData.Email, "E-mail confirmation",
-                string.Format(_config.ConfirmEmailBody, code)))
-            {
-                message.Respond("Couldn't send a confirmation code to your e-mail. Please contact support");
-                return;
-            }
+            _mailer.SendMail(extension.AccountData.Email, "E-mail confirmation",
+                string.Format(_config.ConfirmEmailBody, code));
 
             // Respond with success
             message.Respond(ResponseStatus.Success);

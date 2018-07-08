@@ -3488,8 +3488,7 @@ namespace SpeedDate
 
         private bool IsIgnoredAssembly(Assembly assembly)
         {
-            // TODO - find a better way to remove "system" assemblies from the auto registration
-            var ignoreChecks = new List<Func<Assembly, bool>>()
+            var ignoreChecks = new List<Func<Assembly, bool>>
             {
                 asm => asm.FullName.StartsWith("Microsoft.", StringComparison.Ordinal),
                 asm => asm.FullName.StartsWith("System.", StringComparison.Ordinal),
@@ -3512,7 +3511,6 @@ namespace SpeedDate
 
         private bool IsIgnoredType(Type type, Func<Type, bool> registrationPredicate)
         {
-            // TODO - find a better way to remove "system" types from the auto registration
             var ignoreChecks = new List<Func<Type, bool>>()
             {
                 t => t.FullName.StartsWith("System.", StringComparison.Ordinal),

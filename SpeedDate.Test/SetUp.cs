@@ -34,12 +34,23 @@ namespace SpeedDate.Test
         };
 
         public static SpeedDateServer Server;
-        public static Mock<ISmtpClient> SmtpClientMock;
-        public static Mock<IDbAccess> DatabaseMock;
+        public static Mock<ISmtpClient> SmtpClientMock = new Mock<ISmtpClient>();
+        public static Mock<IDbAccess> DatabaseMock = new Mock<IDbAccess>();
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            DatabaseMock.Setup(db => db.CreateAccountObject()).Returns(new AccountData());
+            
+            DatabaseMock.Setup(db => db.GetAccount(TestAccount.Username)).Returns(TestAccount);
+            DatabaseMock.Setup(db => db.GetAccount(It.IsNotIn(TestAccount.Username))).Returns(() => null);
+            
+            DatabaseMock.Setup(db => db.GetAccountByEmail(TestAccount.Email)).Returns(TestAccount);
+            DatabaseMock.Setup(db => db.GetAccountByEmail(It.IsNotIn(TestAccount.Email))).Returns(() => null);
+            
+            DatabaseMock.Setup(db => db.GetAccountByToken(TestAccount.Token)).Returns(TestAccount);
+            DatabaseMock.Setup(db => db.GetAccountByToken(It.IsNotIn(TestAccount.Token))).Returns(() => null);
+            
             Server = new SpeedDateServer();
             Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new IConfig[]
             {
@@ -57,15 +68,7 @@ namespace SpeedDate.Test
             Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
             Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
             Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
-
-            SmtpClientMock = new Mock<ISmtpClient>();
             Server.GetPlugin<MailPlugin>().SetSmtpClient(SmtpClientMock.Object);
-
-            DatabaseMock = new Mock<IDbAccess>();
-            DatabaseMock.Setup(access => access.CreateAccountObject()).Returns(new AccountData());
-            DatabaseMock.Setup(access => access.GetAccount(TestAccount.Username)).Returns(TestAccount);
-            DatabaseMock.Setup(access => access.GetAccountByEmail(TestAccount.Email)).Returns(TestAccount);
-            DatabaseMock.Setup(access => access.GetAccountByToken(TestAccount.Token)).Returns(TestAccount);
             Server.GetPlugin<DatabasePlugin>().SetDbAccess(DatabaseMock.Object);
         }
         

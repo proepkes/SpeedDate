@@ -59,7 +59,6 @@
         UserLeftChannel,
         SetDefaultChannel,
 
-        // TODO cleanup
         // Lobbies
         JoinLobby,
         LeaveLobby,

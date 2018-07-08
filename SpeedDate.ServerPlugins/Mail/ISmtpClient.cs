@@ -12,6 +12,8 @@ namespace SpeedDate.ServerPlugins.Mail
 
         ICredentialsByHost Credentials { get; set; }
         bool EnableSsl { get; set; }
+        string Host { get; set; }
+        int Port { get; set; }
 
         void SendAsync(MailMessage mailMessage, string userToken);
     }
@@ -22,12 +24,12 @@ namespace SpeedDate.ServerPlugins.Mail
 
         public event Action<object, AsyncCompletedEventArgs> SendCompleted;
 
-        public DotNetSmtpClient(string configSmtpHost, int configSmtpPort)
+        public DotNetSmtpClient()
         {
-            _smtpClient = new SmtpClient(configSmtpHost, configSmtpPort);
+            _smtpClient = new SmtpClient();
             _smtpClient.SendCompleted += OnSendCompleted;
         }
-
+        
         public ICredentialsByHost Credentials
         {
             get => _smtpClient.Credentials;
@@ -38,6 +40,18 @@ namespace SpeedDate.ServerPlugins.Mail
         {
             get => _smtpClient.EnableSsl;
             set => _smtpClient.EnableSsl = value;
+        }
+
+        public string Host
+        {
+            get => _smtpClient.Host;
+            set => _smtpClient.Host = value;
+        }
+
+        public int Port
+        {
+            get => _smtpClient.Port;
+            set => _smtpClient.Port = value;
         }
 
         public void SendAsync(MailMessage mailMessage, string userToken)

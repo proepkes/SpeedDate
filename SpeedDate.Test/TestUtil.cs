@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Shouldly;
 
 namespace SpeedDate.Test
@@ -13,6 +14,7 @@ namespace SpeedDate.Test
             
             var hash = Util.CreateHash(password);
             
+            Util.ValidatePassword(password, string.Empty).ShouldBeFalse();
             Util.ValidatePassword(password, hash).ShouldBeTrue();
         }
     }

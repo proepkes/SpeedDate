@@ -65,6 +65,11 @@ namespace SpeedDate
         /// <returns>True if the password is correct. False otherwise.</returns>
         public static bool ValidatePassword(string password, string correctHash)
         {
+            if (correctHash.Equals(string.Empty))
+            {
+                return false;
+            }
+            
             // Extract the parameters from the hash
             char[] delimiter = {':'};
             var split = correctHash.Split(delimiter);
