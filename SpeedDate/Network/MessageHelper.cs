@@ -119,7 +119,15 @@ namespace SpeedDate.Network
             Converter.CopyBytes(value, bytes, 0);
             return _factory.Create(opCode, bytes);
         }
-        
+
+        public static IMessage Create(ushort opCode, bool value)
+        {
+            var bytes = new byte[1];
+            Converter.CopyBytes(value, bytes, 0);
+            return _factory.Create(opCode, bytes);
+        }
+
+
         public static IMessage Create(ushort opCode, ISerializablePacket packet)
         {
             return Create(opCode, packet.ToBytes());

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
-using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Network.LiteNetLib.Utils;
 
 namespace SpeedDate.Network.LiteNetLib
@@ -108,7 +107,6 @@ namespace SpeedDate.Network.LiteNetLib
         }
 
 
-
         private void SendMessage(IMessage message, DeliveryMethod deliveryMethod)
         {
             Send(message.ToBytes(), deliveryMethod);
@@ -203,7 +201,22 @@ namespace SpeedDate.Network.LiteNetLib
             SendMessage(MessageHelper.Create(opCode, data), responseCallback, DefaultTimeout, DeliveryMethod.ReliableUnordered);
         }
 
-        void IMsgDispatcher.SendMessage(IMessage message, DeliveryMethod method)
+        public void SendMessage(ushort opCode, bool data)
+        {
+            SendMessage(MessageHelper.Create(opCode, data), DeliveryMethod.ReliableUnordered);
+        }
+
+        public void SendMessage(ushort opCode, bool data, DeliveryMethod method)
+        {
+            SendMessage(MessageHelper.Create(opCode, data), method);
+        }
+
+        public void SendMessage(ushort opCode, bool data, ResponseCallback responseCallback)
+        {
+            SendMessage(MessageHelper.Create(opCode, data), responseCallback, DefaultTimeout, DeliveryMethod.ReliableUnordered);
+        }
+
+        void IMsgDispatcher.SendMessage(IMessage message,  DeliveryMethod method)
         {
             SendMessage(message, method);
         }

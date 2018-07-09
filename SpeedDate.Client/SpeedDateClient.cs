@@ -158,6 +158,21 @@ namespace SpeedDate.Client
             _netPeer.SendMessage(opCode, data, responseCallback);
         }
 
+        public void SendMessage(ushort opCode, bool data)
+        {
+            _netPeer.SendMessage(opCode, data);
+        }
+
+        public void SendMessage(ushort opCode, bool data, DeliveryMethod method)
+        {
+            _netPeer.SendMessage(opCode, data, method);
+        }
+
+        public void SendMessage(ushort opCode, bool data, ResponseCallback responseCallback)
+        {
+            _netPeer.SendMessage(opCode, data, responseCallback);
+        }
+
         public void SendMessage(IMessage message, DeliveryMethod method)
         {
             ((IMsgDispatcher) _netPeer).SendMessage(message, method);

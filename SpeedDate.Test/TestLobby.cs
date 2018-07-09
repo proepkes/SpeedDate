@@ -21,9 +21,44 @@ namespace SpeedDate.Test
     public class TestLobby
     {
         [Test]
+        public void CreateSinglePlayerLobby()
+        {
+            const string LOBBY_NAME = "SinglePlayerLobby";
+            var done = new AutoResetEvent(false);
+
+            var lobbyCreator = new SpeedDateClient();
+            lobbyCreator.Started += () =>
+            {
+                lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("SinglePlayer", new Dictionary<string, string>
+                    {
+                        {
+                            OptionKeys.LobbyName, LOBBY_NAME
+                        }
+                    }, lobby =>
+                    {
+                        lobby.Data.GameMaster.ShouldBe(info.Username);
+                        lobby.Members.ShouldContainKey(info.Username);
+
+                        lobby.LobbyName.ShouldBe(LOBBY_NAME);
+                        lobby.State.ShouldBe(LobbyState.Preparations);
+                        lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
+                        done.Set();
+                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+            };
+
+            lobbyCreator.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+        }
+
+        [Test]
         public void CreateAndJoinLobby_ShouldBeCreated()
         {
-            var lobbyId = -1;
             const string LOBBY_NAME = "TestCreateAndJoinLobby";
 
             var done = new AutoResetEvent(false);
@@ -46,8 +81,6 @@ namespace SpeedDate.Test
                         lobby.LobbyName.ShouldBe(LOBBY_NAME);
                         lobby.State.ShouldBe(LobbyState.Preparations);
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
-
-                        lobbyId = lobby.Id;
 
                         done.Set();
                     }, error => { Should.NotThrow(() => throw new Exception(error)); });
