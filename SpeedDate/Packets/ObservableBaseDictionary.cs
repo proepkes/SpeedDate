@@ -10,33 +10,30 @@ namespace SpeedDate.Packets
     {
         private const int SetOperation = 0;
         private const int RemoveOperation = 1;
-
-        private Dictionary<TKey, TValue> _values;
-
         private readonly Queue<UpdateEntry> _updates;
 
         public ObservableBaseDictionary(short key, Dictionary<TKey, TValue> defaultValues = null) : base(key)
         {
             _updates = new Queue<UpdateEntry>();
 
-            _values = defaultValues == null ? new Dictionary<TKey, TValue>() :
+            UnderlyingDictionary = defaultValues == null ? new Dictionary<TKey, TValue>() :
                 defaultValues.ToDictionary(k => k.Key, k => k.Value);
         }
 
         /// <summary>
         /// Returns an immutable list of values
         /// </summary>
-        public IEnumerable<TValue> Values => _values.Values;
+        public IEnumerable<TValue> Values => UnderlyingDictionary.Values;
 
         /// <summary>
         /// Returns an immutable list of key-value pairs
         /// </summary>
-        public IEnumerable<KeyValuePair<TKey, TValue>> Pairs => _values.ToList();
+        public IEnumerable<KeyValuePair<TKey, TValue>> Pairs => UnderlyingDictionary.ToList();
 
         /// <summary>
         /// Returns a mutable dictionary
         /// </summary>
-        public Dictionary<TKey, TValue> UnderlyingDictionary => _values;
+        public Dictionary<TKey, TValue> UnderlyingDictionary { get; }
 
         public void SetValue(TKey key, TValue value)
         {
@@ -46,13 +43,13 @@ namespace SpeedDate.Packets
                 return;
             }
 
-            if (_values.ContainsKey(key))
+            if (UnderlyingDictionary.ContainsKey(key))
             {
-                _values[key] = value;
+                UnderlyingDictionary[key] = value;
             }
             else
             {
-                _values.Add(key, value);
+                UnderlyingDictionary.Add(key, value);
             }
 
             MarkDirty();
@@ -66,7 +63,7 @@ namespace SpeedDate.Packets
 
         public void Remove(TKey key)
         {
-            _values.Remove(key);
+            UnderlyingDictionary.Remove(key);
 
             MarkDirty();
             _updates.Enqueue(new UpdateEntry()
@@ -78,7 +75,7 @@ namespace SpeedDate.Packets
 
         public TValue GetValue(TKey key)
         {
-            _values.TryGetValue(key, out var result);
+            UnderlyingDictionary.TryGetValue(key, out var result);
             return result;
         }
 
@@ -97,9 +94,9 @@ namespace SpeedDate.Packets
             {
                 using (var writer = new EndianBinaryWriter(EndianBitConverter.Big, ms))
                 {
-                    writer.Write(_values.Count);
+                    writer.Write(UnderlyingDictionary.Count);
 
-                    foreach (var item in _values)
+                    foreach (var item in UnderlyingDictionary)
                     {
                         WriteKey(item.Key, writer);
                         WriteValue(item.Value, writer);
@@ -123,13 +120,13 @@ namespace SpeedDate.Packets
                     {
                         var key = ReadKey(reader);
                         var value = ReadValue(reader);
-                        if (_values.ContainsKey(key))
+                        if (UnderlyingDictionary.ContainsKey(key))
                         {
-                            _values[key] = value;
+                            UnderlyingDictionary[key] = value;
                         }
                         else
                         {
-                            _values.Add(key, value);
+                            UnderlyingDictionary.Add(key, value);
                         }
                     }
                 }
@@ -175,18 +172,18 @@ namespace SpeedDate.Packets
                         if (operation == RemoveOperation)
                         {
                             
-                            _values.Remove(key);
+                            UnderlyingDictionary.Remove(key);
                             continue;
                         }
 
                         var value = ReadValue(reader);
-                        if (_values.ContainsKey(key))
+                        if (UnderlyingDictionary.ContainsKey(key))
                         {
-                            _values[key] = value;
+                            UnderlyingDictionary[key] = value;
                         }
                         else
                         {
-                            _values.Add(key, value);
+                            UnderlyingDictionary.Add(key, value);
                         }
                     }
                 }
