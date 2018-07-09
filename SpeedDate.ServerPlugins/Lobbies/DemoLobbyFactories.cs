@@ -19,12 +19,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby SinglePlayer(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
+        public static ILobby SingleTeam(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var team = new LobbyTeam("Team Blue")
             {
-                MaxPlayers = 1,
+                MaxPlayers = 8,
                 MinPlayers = 1
             };
 

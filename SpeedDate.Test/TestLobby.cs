@@ -21,9 +21,9 @@ namespace SpeedDate.Test
     public class TestLobby
     {
         [Test]
-        public void CreateSinglePlayerLobby()
+        public void CreateDeathmatchLobby()
         {
-            const string LOBBY_NAME = "SinglePlayerLobby";
+            const string LOBBY_NAME = "CreateDeathmatchLobby";
             var done = new AutoResetEvent(false);
 
             var lobbyCreator = new SpeedDateClient();
@@ -31,7 +31,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("SinglePlayer", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("Deathmatch", new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, LOBBY_NAME
