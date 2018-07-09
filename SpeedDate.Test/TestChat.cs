@@ -55,7 +55,6 @@ namespace SpeedDate.Test
             var client = new SpeedDateClient();
             client.Started += () =>
             {
-                client.IsConnected.ShouldBeTrue();
                 client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                     {
                         client.GetPlugin<ChatPlugin>().JoinChannel(channelName, () =>
@@ -152,7 +151,6 @@ namespace SpeedDate.Test
             
             var done = new AutoResetEvent(false);
 
-
             //Join Channel with slave-client
             var slaveClient = new SpeedDateClient();
             slaveClient.Started += () =>
@@ -171,7 +169,6 @@ namespace SpeedDate.Test
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside slaveClient.SendPrivateMessage
         }
-    
 
         [Test]
         public void SendPrivateMessage_ShouldBeReceived()

@@ -66,6 +66,7 @@ namespace SpeedDate.Test
             }));
             
             Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
+            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("SinglePlayer", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.SinglePlayer));
             Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
             Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
             Server.GetPlugin<MailPlugin>().SetSmtpClient(SmtpClientMock.Object);
