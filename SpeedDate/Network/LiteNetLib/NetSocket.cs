@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace SpeedDate.Network.LiteNetLib
@@ -23,11 +24,8 @@ namespace SpeedDate.Network.LiteNetLib
 
         public short Ttl
         {
-            get { return _udpSocketv4.Ttl; }
-            set
-            {
-                _udpSocketv4.Ttl = value;
-            }
+            get => _udpSocketv4.Ttl;
+            set => _udpSocketv4.Ttl = value;
         }
 
         static NetSocket()
@@ -90,15 +88,19 @@ namespace SpeedDate.Network.LiteNetLib
 
         public bool Bind(IPAddress addressIPv4, IPAddress addressIPv6, int port, bool reuseAddress)
         {
-            _udpSocketv4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            _udpSocketv4.Blocking = false;
-            _udpSocketv4.ReceiveBufferSize = NetConstants.SocketBufferSize;
-            _udpSocketv4.SendBufferSize = NetConstants.SocketBufferSize;
-            _udpSocketv4.Ttl = NetConstants.SocketTTL;
+            _udpSocketv4 =
+                new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+                {
+                    Blocking = false,
+                    ReceiveBufferSize = NetConstants.SocketBufferSize,
+                    SendBufferSize = NetConstants.SocketBufferSize,
+                    Ttl = NetConstants.SocketTTL
+                };
             if(reuseAddress)
                 _udpSocketv4.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 #if !NETCORE
-            _udpSocketv4.DontFragment = true;
+            if(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                _udpSocketv4.DontFragment = true;
 #endif
             try
             {
@@ -115,9 +117,11 @@ namespace SpeedDate.Network.LiteNetLib
             }
             LocalPort = ((IPEndPoint) _udpSocketv4.LocalEndPoint).Port;
             _running = true;
-            _threadv4 = new Thread(ReceiveLogic);
-            _threadv4.Name = "SocketThreadv4(" + LocalPort + ")";
-            _threadv4.IsBackground = true;
+            _threadv4 = new Thread(ReceiveLogic)
+            {
+                Name = "SocketThreadv4(" + LocalPort + ")",
+                IsBackground = true
+            };
             _threadv4.Start(_udpSocketv4);
 
             //Check IPv6 support
@@ -149,9 +153,11 @@ namespace SpeedDate.Network.LiteNetLib
                     // Unity3d throws exception - ignored
                 }
 
-                _threadv6 = new Thread(ReceiveLogic);
-                _threadv6.Name = "SocketThreadv6(" + LocalPort + ")";
-                _threadv6.IsBackground = true;
+                _threadv6 = new Thread(ReceiveLogic)
+                {
+                    Name = "SocketThreadv6(" + LocalPort + ")",
+                    IsBackground = true
+                };
                 _threadv6.Start(_udpSocketv6);
             }
 
@@ -218,10 +224,9 @@ namespace SpeedDate.Network.LiteNetLib
                     socket = _udpSocketv6;
                 }
 
-                int result;
                 if (!socket.Poll(SocketSendPollTime, SelectMode.SelectWrite))
                     return -1;
-                result = socket.SendTo(data, offset, size, SocketFlags.None, remoteEndPoint);
+                var result = socket.SendTo(data, offset, size, SocketFlags.None, remoteEndPoint);
 
                 NetUtils.DebugWrite(ConsoleColor.Blue, "[S]Send packet to {0}, result: {1}", remoteEndPoint, result);
                 return result;

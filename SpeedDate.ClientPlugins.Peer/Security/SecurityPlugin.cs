@@ -18,7 +18,7 @@ namespace SpeedDate.ClientPlugins.Peer.Security
     {
         public delegate void PermissionLevelCallback(int? permissionLevel);
 
-        private const int RsaKeySize = 512;
+        private const int RsaKeySize = 1024;
 
         private EncryptionData _encryptionData;
 
