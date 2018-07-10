@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Moq;
 using NUnit.Framework;
@@ -23,7 +24,7 @@ namespace SpeedDate.Test
         [Test]
         public void CreateDeathmatchLobby()
         {
-            const string LOBBY_NAME = "CreateDeathmatchLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
             var done = new AutoResetEvent(false);
 
             var lobbyCreator = new SpeedDateClient();
@@ -34,14 +35,14 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("Deathmatch", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
                         lobby.Data.GameMaster.ShouldBe(info.Username);
                         lobby.Members.ShouldContainKey(info.Username);
 
-                        lobby.LobbyName.ShouldBe(LOBBY_NAME);
+                        lobby.LobbyName.ShouldBe(lobbyName);
                         lobby.State.ShouldBe(LobbyState.Preparations);
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
                         done.Set();
@@ -57,9 +58,43 @@ namespace SpeedDate.Test
         }
 
         [Test]
+        public void ShouldNotGetLobbyRoomAccessWithoutJoiningLobbyFirst()
+        {
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var done = new AutoResetEvent(false);
+
+            var lobbyCreator = new SpeedDateClient();
+            lobbyCreator.Started += () =>
+            {
+                lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    lobbyCreator.GetPlugin<LobbyPlugin>().GetLobbyRoomAccess(new Dictionary<string, string>
+                    {
+                        {
+                            OptionKeys.LobbyName, lobbyName
+                        }
+                    }, lobby =>
+                    {
+                        Should.NotThrow(() => throw new Exception("Got Lobby access without joining a lobby"));
+                    }, error =>
+                    {
+                        error.ShouldNotBeNullOrEmpty();
+                        done.Set();
+                    });
+                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+            };
+
+            lobbyCreator.Start(new DefaultConfigProvider(
+                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+        }
+
+        [Test]
         public void CreateAndJoinLobby_ShouldBeCreated()
         {
-            const string LOBBY_NAME = "TestCreateAndJoinLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var done = new AutoResetEvent(false);
 
@@ -71,14 +106,14 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
                         lobby.Data.GameMaster.ShouldBe(info.Username);
                         lobby.Members.ShouldContainKey(info.Username);
 
-                        lobby.LobbyName.ShouldBe(LOBBY_NAME);
+                        lobby.LobbyName.ShouldBe(lobbyName);
                         lobby.State.ShouldBe(LobbyState.Preparations);
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
 
@@ -98,7 +133,7 @@ namespace SpeedDate.Test
         public void CreateAndJoinAutoLobby_ShouldBeCreated()
         {
             var lobbyId = -1;
-            const string LOBBY_NAME = "TestCreateAndJoinAutoLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var done = new AutoResetEvent(false);
 
@@ -110,14 +145,14 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
                         lobby.Data.GameMaster.ShouldBeEmpty();
                         lobby.Members.ShouldContainKey(info.Username);
 
-                        lobby.LobbyName.ShouldBe(LOBBY_NAME);
+                        lobby.LobbyName.ShouldBe(lobbyName);
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
                         lobby.State.ShouldBe(LobbyState.Preparations);
 
@@ -138,7 +173,7 @@ namespace SpeedDate.Test
         [Test]
         public void JoinLobby_ShouldIncreaseMembersCount()
         {
-            const string LOBBY_NAME = "JoinLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
             var lobbyId = -1;
 
             var done = new AutoResetEvent(false);
@@ -151,7 +186,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -193,7 +228,7 @@ namespace SpeedDate.Test
         [Test]
         public void JoinLobby_ShouldNotifyListener()
         {
-            const string LOBBY_NAME = "JoinLobbyListener";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
             var lobbyId = -1;
             var joinerUsername = string.Empty;
 
@@ -207,7 +242,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -259,7 +294,7 @@ namespace SpeedDate.Test
         {
             var lobbyId = -1;
             var joinerUsername = string.Empty;
-            const string LOBBY_NAME = "JoinLobbyListener";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var done = new AutoResetEvent(false);
 
@@ -271,7 +306,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -325,7 +360,7 @@ namespace SpeedDate.Test
         [Test]
         public void FindGames_ShouldContainLobby()
         {
-            const string LOBBY_NAME = "TestFindGamesContainsLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
             var lobbyId = -1;
 
             var done = new AutoResetEvent(false);
@@ -338,7 +373,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -365,7 +400,7 @@ namespace SpeedDate.Test
 
                         var lobby = games.First(packet => packet.Id.Equals(lobbyId));
                         lobby.Type.ShouldBe(GameInfoType.Lobby);
-                        lobby.Name.ShouldBe(LOBBY_NAME);
+                        lobby.Name.ShouldBe(lobbyName);
                         lobby.OnlinePlayers.ShouldBe(1);
 
                         done.Set();
@@ -385,7 +420,7 @@ namespace SpeedDate.Test
         public void AutoLobbyFindGames_ShouldContainLobby()
         {
             var lobbyId = -1;
-            const string LOBBY_NAME = "AutoLobbyFindGames";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var done = new AutoResetEvent(false);
 
@@ -397,7 +432,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -424,7 +459,7 @@ namespace SpeedDate.Test
 
                         var gameInfo = games.First(packet => packet.Id.Equals(lobbyId));
                         gameInfo.Type.ShouldBe(GameInfoType.Lobby);
-                        gameInfo.Name.ShouldBe(LOBBY_NAME);
+                        gameInfo.Name.ShouldBe(lobbyName);
                         gameInfo.OnlinePlayers.ShouldBe(1);
                         done.Set();
 
@@ -443,7 +478,7 @@ namespace SpeedDate.Test
         public void JoinTeam_CreatorShouldBeInSameTeam()
         {
             var lobbyId = -1;
-            const string LOBBY_NAME = "TestJoinCreatorTeam";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var joinerTeam = string.Empty;
             var creatorTeam = string.Empty;
@@ -459,7 +494,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -540,7 +575,7 @@ namespace SpeedDate.Test
         public void RejoinLobby_CreatorShouldBeInDifferentTeam()
         {
             var lobbyId = -1;
-            const string LOBBY_NAME = "TestRejoinLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var joinerTeam = string.Empty;
             var creatorTeam = string.Empty;
@@ -556,7 +591,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {
@@ -638,7 +673,7 @@ namespace SpeedDate.Test
         public void JoinTeamThenRejoinLobby_CreatorShouldBeInDifferentTeam()
         {
             var lobbyId = -1;
-            const string LOBBY_NAME = "JoinCreatorTeamThenRejoinLobby";
+            var lobbyName = TestContext.CurrentContext.Test.Name;;
 
             var joinerTeam = string.Empty;
             var creatorTeam = string.Empty;
@@ -654,7 +689,7 @@ namespace SpeedDate.Test
                     lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
                     {
                         {
-                            OptionKeys.LobbyName, LOBBY_NAME
+                            OptionKeys.LobbyName, lobbyName
                         }
                     }, lobby =>
                     {

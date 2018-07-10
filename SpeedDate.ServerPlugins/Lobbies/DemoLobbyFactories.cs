@@ -13,55 +13,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
     public class DemoLobbyFactories
     {
         private const string DefaultName = "Untitled Lobby";
-        /// <summary>
-        /// Creates a game lobby for a single player
-        /// </summary>
-        /// <param name="plugin"></param>
-        /// <param name="properties"></param>
-        /// <returns></returns>
-        public static ILobby SingleTeam(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
-        {
-            // Create the teams
-            var team = new LobbyTeam("Team Blue")
-            {
-                MaxPlayers = 8,
-                MinPlayers = 1
-            };
-
-            // Set their colors
-            team.SetProperty("color", "0000FF");
-
-            var config = new LobbyConfig();
-
-            // Create the lobby
-            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
-                new[] { team }, plugin, config)
-            {
-                Name = ExtractLobbyName(properties)
-            };
-
-            // Override properties with what user provided
-            lobby.SetLobbyProperties(properties);
-
-            // Add control for the game speed
-            lobby.AddControl(new LobbyPropertyData()
-            {
-                Label = "Game Speed",
-                Options = new List<string> { "1x", "2x", "3x" },
-                PropertyKey = "speed"
-            }, "2x"); // Default option
-
-            // Add control to enable/disable gravity
-            lobby.AddControl(new LobbyPropertyData
-            {
-                Label = "Gravity",
-                Options = new List<string> { "On", "Off" },
-                PropertyKey = "gravity",
-            });
-
-            return lobby;
-        }
-
+       
         /// <summary>
         /// Creates a game lobby for 1 vs 1 game
         /// </summary>

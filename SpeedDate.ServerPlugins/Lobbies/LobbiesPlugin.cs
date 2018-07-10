@@ -357,6 +357,11 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
             var lobby = lobbiesExt.CurrentLobby;
 
+            if (lobby == null)
+            {
+                message.Respond("Invalid request", ResponseStatus.Failed);
+                return;
+            }
             lobby.HandleGameAccessRequest(message);
         }
 

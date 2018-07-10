@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
@@ -15,11 +16,11 @@ namespace SpeedDate.Network.LiteNetLib
         public event PeerActionHandler Disconnected;
         public event Action<IIncommingMessage> MessageReceived;
 
-        private readonly Dictionary<int, object> _data = new Dictionary<int, object>(30);
+        private readonly Dictionary<int, object> _data = new Dictionary<int, object>();
         private readonly Dictionary<Type, object> _extensions = new Dictionary<Type, object>();
 
-        private readonly List<long[]> _ackTimeoutQueue = new List<long[]>(100);
-        private readonly Dictionary<int, ResponseCallback> _acks = new Dictionary<int, ResponseCallback>(30);
+        private readonly List<long[]> _ackTimeoutQueue = new List<long[]>();
+        private readonly Dictionary<int, ResponseCallback> _acks = new Dictionary<int, ResponseCallback>();
 
         private IIncommingMessage _timeoutMessage;
 
@@ -37,7 +38,10 @@ namespace SpeedDate.Network.LiteNetLib
 
         public T AddExtension<T>(T extension)
         {
-            _extensions[typeof(T)] = extension;
+            lock (_extensions)
+            {
+                _extensions[typeof(T)] = extension;
+            }
             return extension;
         }
 
@@ -87,17 +91,23 @@ namespace SpeedDate.Network.LiteNetLib
 
         public void SetProperty(int id, object data)
         {
-            if (_data.ContainsKey(id))
-                _data[id] = data;
-            else
-                _data.Add(id, data);
+            lock (_data)
+            {
+                if (_data.ContainsKey(id))
+                    _data[id] = data;
+                else
+                    _data.Add(id, data);
+            }
         }
 
         public object GetProperty(int id)
         {
-            _data.TryGetValue(id, out var value);
+            lock (_data)
+            {
+                _data.TryGetValue(id, out var value);
+                return value;
+            }
 
-            return value;
         }
 
         public object GetProperty(int id, object defaultValue)

@@ -234,9 +234,14 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
             });
         }
 
-        /// <summary>
-        /// Sends a request to get access to room, which is assigned to this lobby
-        /// </summary>
+        ///-------------------------------------------------------------------------------------------------
+        /// <summary>   Sends a request to get access to room, which is assigned to this lobby. </summary>
+        ///
+        /// <param name="properties">       The properties. </param>
+        /// <param name="callback">         The callback. </param>
+        /// <param name="errorCallback">    The error callback. </param>
+        ///-------------------------------------------------------------------------------------------------
+
         public void GetLobbyRoomAccess(Dictionary<string, string> properties, RoomAccessCallback callback, ErrorCallback errorCallback)
         {
             if (!Client.IsConnected)
