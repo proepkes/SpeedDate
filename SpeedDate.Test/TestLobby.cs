@@ -24,7 +24,7 @@ namespace SpeedDate.Test
         [Test]
         public void CreateDeathmatchLobby()
         {
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
             var done = new AutoResetEvent(false);
 
             var lobbyCreator = new SpeedDateClient();
@@ -46,8 +46,8 @@ namespace SpeedDate.Test
                         lobby.State.ShouldBe(LobbyState.Preparations);
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -60,7 +60,7 @@ namespace SpeedDate.Test
         [Test]
         public void ShouldNotGetLobbyRoomAccessWithoutJoiningLobbyFirst()
         {
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
             var done = new AutoResetEvent(false);
 
             var lobbyCreator = new SpeedDateClient();
@@ -75,13 +75,13 @@ namespace SpeedDate.Test
                         }
                     }, lobby =>
                     {
-                        Should.NotThrow(() => throw new Exception("Got Lobby access without joining a lobby"));
+                        throw new Exception("Got Lobby access without joining a lobby");
                     }, error =>
                     {
                         error.ShouldNotBeNullOrEmpty();
                         done.Set();
                     });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -94,7 +94,7 @@ namespace SpeedDate.Test
         [Test]
         public void CreateAndJoinLobby_ShouldBeCreated()
         {
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var done = new AutoResetEvent(false);
 
@@ -118,8 +118,8 @@ namespace SpeedDate.Test
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -133,7 +133,7 @@ namespace SpeedDate.Test
         public void CreateAndJoinAutoLobby_ShouldBeCreated()
         {
             var lobbyId = -1;
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var done = new AutoResetEvent(false);
 
@@ -159,8 +159,8 @@ namespace SpeedDate.Test
                         lobbyId = lobby.Id;
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -173,7 +173,7 @@ namespace SpeedDate.Test
         [Test]
         public void JoinLobby_ShouldIncreaseMembersCount()
         {
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
             var lobbyId = -1;
 
             var done = new AutoResetEvent(false);
@@ -192,8 +192,8 @@ namespace SpeedDate.Test
                     {
                         lobbyId = lobby.Id;
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -214,8 +214,8 @@ namespace SpeedDate.Test
                         joinedLobby.Members.ShouldContainKey(info.Username);
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -228,7 +228,7 @@ namespace SpeedDate.Test
         [Test]
         public void JoinLobby_ShouldNotifyListener()
         {
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
             var lobbyId = -1;
             var joinerUsername = string.Empty;
 
@@ -259,8 +259,8 @@ namespace SpeedDate.Test
                         lobby.SetListener(listener.Object);
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -278,8 +278,8 @@ namespace SpeedDate.Test
                     lobbyJoiner.GetPlugin<LobbyPlugin>().JoinLobby(lobbyId, joinedLobby =>
                     {
                         //Listener will signal done
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -294,7 +294,7 @@ namespace SpeedDate.Test
         {
             var lobbyId = -1;
             var joinerUsername = string.Empty;
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var done = new AutoResetEvent(false);
 
@@ -323,8 +323,8 @@ namespace SpeedDate.Test
                         lobby.SetListener(listener.Object);
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -344,9 +344,9 @@ namespace SpeedDate.Test
                         lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () =>
                         {
                             //Listener will signal done
-                        }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                        }, error => { throw new Exception(error); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -360,7 +360,7 @@ namespace SpeedDate.Test
         [Test]
         public void FindGames_ShouldContainLobby()
         {
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
             var lobbyId = -1;
 
             var done = new AutoResetEvent(false);
@@ -379,8 +379,8 @@ namespace SpeedDate.Test
                     {
                         lobbyId = lobby.Id;
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -405,8 +405,8 @@ namespace SpeedDate.Test
 
                         done.Set();
 
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -420,7 +420,7 @@ namespace SpeedDate.Test
         public void AutoLobbyFindGames_ShouldContainLobby()
         {
             var lobbyId = -1;
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var done = new AutoResetEvent(false);
 
@@ -438,8 +438,8 @@ namespace SpeedDate.Test
                     {
                         lobbyId = lobby.Id;
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -463,8 +463,8 @@ namespace SpeedDate.Test
                         gameInfo.OnlinePlayers.ShouldBe(1);
                         done.Set();
 
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -478,7 +478,7 @@ namespace SpeedDate.Test
         public void JoinTeam_CreatorShouldBeInSameTeam()
         {
             var lobbyId = -1;
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var joinerTeam = string.Empty;
             var creatorTeam = string.Empty;
@@ -504,8 +504,8 @@ namespace SpeedDate.Test
                         lobbyId = lobby.Id;
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -538,8 +538,8 @@ namespace SpeedDate.Test
                             });
                         joinedLobby.SetListener(joinedLobbyListenerMock.Object);
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -558,7 +558,7 @@ namespace SpeedDate.Test
 
             //Let joiner switch to the creator's team
             lobbyJoiner.GetPlugin<LobbyPlugin>().JoinTeam(lobbyId, creatorTeam, () => { },
-                error => { Should.NotThrow(() => throw new Exception(error)); });
+                error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for OnMemberTeamChanged
 
@@ -575,7 +575,7 @@ namespace SpeedDate.Test
         public void RejoinLobby_CreatorShouldBeInDifferentTeam()
         {
             var lobbyId = -1;
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var joinerTeam = string.Empty;
             var creatorTeam = string.Empty;
@@ -602,8 +602,8 @@ namespace SpeedDate.Test
                         creatorTeam.ShouldNotBeNullOrEmpty();
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -638,8 +638,8 @@ namespace SpeedDate.Test
 
                         joinedLobby.SetListener(joinedLobbyListenerMock.Object);
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -649,7 +649,7 @@ namespace SpeedDate.Test
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
 
             lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () => done.Set(),
-                error => { Should.NotThrow(() => throw new Exception(error)); });
+                error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, LeaveLobby
 
@@ -662,7 +662,7 @@ namespace SpeedDate.Test
                 joinerTeam.ShouldNotBeNullOrEmpty();
 
                 done.Set();
-            }, error => { Should.NotThrow(() => throw new Exception(error)); });
+            }, error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, JoinLobby
 
@@ -673,7 +673,7 @@ namespace SpeedDate.Test
         public void JoinTeamThenRejoinLobby_CreatorShouldBeInDifferentTeam()
         {
             var lobbyId = -1;
-            var lobbyName = TestContext.CurrentContext.Test.Name;;
+            var lobbyName = TestContext.CurrentContext.Test.Name;
 
             var joinerTeam = string.Empty;
             var creatorTeam = string.Empty;
@@ -700,8 +700,8 @@ namespace SpeedDate.Test
                         lobbyId = lobby.Id;
 
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -736,8 +736,8 @@ namespace SpeedDate.Test
 
                         joinedLobby.SetListener(joinedLobbyListenerMock.Object);
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -747,11 +747,11 @@ namespace SpeedDate.Test
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
 
             //Let joiner switch to the creator's team
-            lobbyJoiner.GetPlugin<LobbyPlugin>().JoinTeam(lobbyId, creatorTeam, () => { }, error => { Should.NotThrow(() => throw new Exception(error)); });
+            lobbyJoiner.GetPlugin<LobbyPlugin>().JoinTeam(lobbyId, creatorTeam, () => { }, error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for OnMemberTeamChanged
 
-            lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () => done.Set(), error => { Should.NotThrow(() => throw new Exception(error)); });
+            lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () => done.Set(), error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, LeaveLobby
 
@@ -764,7 +764,7 @@ namespace SpeedDate.Test
                 joinerTeam.ShouldNotBeNullOrEmpty();
 
                 done.Set();
-            }, error => { Should.NotThrow(() => throw new Exception(error)); });
+            }, error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, JoinLobby
 

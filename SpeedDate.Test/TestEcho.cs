@@ -32,7 +32,7 @@ namespace SpeedDate.Test
                     },
                     error =>
                     {
-                        Should.NotThrow(() => throw new Exception(error));
+                        throw new Exception(error);
                     });
             };
 
@@ -67,7 +67,7 @@ namespace SpeedDate.Test
                             },
                             error =>
                             {
-                                Should.NotThrow(() => throw new Exception(error));
+                                throw new Exception(error);
                             });
                     };
 

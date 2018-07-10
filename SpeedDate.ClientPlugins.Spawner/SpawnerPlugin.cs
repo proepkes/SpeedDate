@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpeedDate.Configuration;
-using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
-using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
-using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.ClientPlugins.Spawner
 {
@@ -15,8 +12,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
     public class SpawnerPlugin : SpeedDateClientPlugin
     {
-        [Inject]
-        private ILogger _logger;
+        [Inject] private ILogger _logger;
         
         private readonly Dictionary<int, SpawnerController> _locallyCreatedSpawners;
 
@@ -31,7 +27,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         public bool IsSpawnedProccess { get; }
 
         /// <summary>
-        /// Invoked on "spawner server", when it successfully registers to master server
+        /// Invoked on "spawner client", when it successfully registers to master server
         /// </summary>
         public event Action<SpawnerController> SpawnerRegistered;
         

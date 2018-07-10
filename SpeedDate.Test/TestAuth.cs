@@ -36,7 +36,7 @@ namespace SpeedDate.Test
                 }, 
                 error =>
                 {
-                    Should.NotThrow(() => throw new Exception(error));
+                    throw new Exception(error);
                 });
             };
 
@@ -70,7 +70,7 @@ namespace SpeedDate.Test
             },
             error =>
             {
-                Should.NotThrow(() => throw new Exception(error));
+                throw new Exception(error);
             });
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
@@ -117,7 +117,7 @@ namespace SpeedDate.Test
                                 }, 
                                 error =>
                                 {
-                                    Should.NotThrow(() => throw new Exception(error));
+                                    throw new Exception(error);
                                 });
                         };
 
@@ -153,7 +153,7 @@ namespace SpeedDate.Test
                 },
                 error =>
                 {
-                    Should.NotThrow(() => throw new Exception(error));
+                    throw new Exception(error);
                 });
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
@@ -169,7 +169,7 @@ namespace SpeedDate.Test
                 error =>
                 {
                     //If the server wouldn't generate a new AES-Key for this client, the server would respond with "Insecure request"
-                    Should.NotThrow(() => throw new Exception(error));
+                    throw new Exception(error);
                 });
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
@@ -198,7 +198,7 @@ namespace SpeedDate.Test
                 },
                 error =>
                 {
-                    Should.NotThrow(() => throw new Exception(error));
+                    throw new Exception(error);
                 });
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
@@ -231,7 +231,7 @@ namespace SpeedDate.Test
                 },
                 error =>
                 {
-                    Should.NotThrow(() => throw new Exception(error));
+                    throw new Exception(error);
                 });
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled by Login
@@ -246,7 +246,7 @@ namespace SpeedDate.Test
                 },
                 error =>
                 {
-                    Should.NotThrow(() => throw new Exception(error));
+                    throw new Exception(error);
                 });
             
             done.WaitOne(TimeSpan.FromSeconds(5)).ShouldBeTrue();

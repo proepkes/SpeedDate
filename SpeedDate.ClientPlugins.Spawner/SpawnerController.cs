@@ -15,7 +15,7 @@ namespace SpeedDate.ClientPlugins.Spawner
     public class SpawnerController
     {
         public delegate void SpawnRequestHandler(SpawnRequestPacket packet, IIncommingMessage message);
-        public delegate void KillSpawnedProcessHandler(int spawnId);
+        public delegate bool KillSpawnedProcessHandler(int spawnId);
 
         public readonly IClient Client;
 
@@ -47,6 +47,9 @@ namespace SpeedDate.ClientPlugins.Spawner
             SpawnerId = spawnerId;
             Options = options;
 
+            _killRequestHandler = DefaultKillRequestHandler;
+            _spawnRequestHandler = DefaultSpawnRequestHandler;
+            
             // Add handlers
             client.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);
             client.SetHandler((ushort) OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
@@ -79,24 +82,12 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         private void HandleSpawnRequest(SpawnRequestPacket packet, IIncommingMessage message)
         {
-            if (_spawnRequestHandler == null)
-            {
-                DefaultSpawnRequestHandler(packet, message);
-                return;
-            }
-
             _spawnRequestHandler.Invoke(packet, message);
         }
 
-        private void HandleKillSpawnedProcessRequest(int spawnId)
+        private bool HandleKillSpawnedProcessRequest(int spawnId)
         {
-            if (_killRequestHandler == null)
-            {
-                DefaultKillRequestHandler(spawnId);
-                return;
-            }
-
-            _killRequestHandler.Invoke(spawnId);
+            return _killRequestHandler.Invoke(spawnId);
         }
 
         private void HandleSpawnRequest(IIncommingMessage message)
@@ -129,12 +120,12 @@ namespace SpeedDate.ClientPlugins.Spawner
                 return;
             }
 
-            controller.HandleKillSpawnedProcessRequest(data.SpawnId);
+            message.Respond(controller.HandleKillSpawnedProcessRequest(data.SpawnId) ? ResponseStatus.Success : ResponseStatus.Failed);
         }
 
         #region Default handlers
 
-        public void DefaultKillRequestHandler(int spawnId)
+        public bool DefaultKillRequestHandler(int spawnId)
         {
             _logger.Debug("Default kill request handler started handling a request to kill a process");
 
@@ -147,7 +138,9 @@ namespace SpeedDate.ClientPlugins.Spawner
             {
                 _logger.Error("Got error while killing a spawned process");
                 _logger.Error(e);
+                return false;
             }
+            return true;
         }
 
         public void DefaultSpawnRequestHandler(SpawnRequestPacket packet, IIncommingMessage message)
@@ -194,6 +187,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             var spawnInBatchmode = controller.SpawnerSettings.SpawnInBatchmode
                                    && !CommandLineArgs.DontSpawnInBatchmode;
 
+            
             var startProcessInfo = new ProcessStartInfo(path)
             {
                 CreateNoWindow = true,

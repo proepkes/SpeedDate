@@ -30,11 +30,11 @@ namespace SpeedDate.Test
                             channels.ShouldNotBeNull();
                             channels.ShouldBeEmpty();
                             done.Set();
-                        }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                        }, error => { throw new Exception(error); });
                     },
                     error =>
                     {
-                        Should.NotThrow(() => throw new Exception(error));
+                        throw new Exception(error);
                     });
             };
 
@@ -66,9 +66,9 @@ namespace SpeedDate.Test
                                 channels.ShouldContain(channelName);
                                 
                                 done.Set();
-                            }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                        }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                            }, error => { throw new Exception(error); });
+                        }, error => { throw new Exception(error); });
+                    }, error => { throw new Exception(error); });
             };
 
             client.Start(new DefaultConfigProvider(
@@ -106,8 +106,8 @@ namespace SpeedDate.Test
                     masterClient.GetPlugin<ChatPlugin>().JoinChannel(channelName, () =>
                     {
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             masterClient.Start(new DefaultConfigProvider(
@@ -126,8 +126,8 @@ namespace SpeedDate.Test
                     slaveClient.GetPlugin<ChatPlugin>().JoinChannel(channelName, () =>
                     {
                         done.Set();
-                    }, error => { Should.NotThrow(() => throw new Exception(error)); });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                    }, error => { throw new Exception(error); });
+                }, error => { throw new Exception(error); });
             };
 
             slaveClient.Start(new DefaultConfigProvider(
@@ -138,7 +138,7 @@ namespace SpeedDate.Test
 
             usernameSlaveClient.ShouldNotBeNullOrEmpty();
 
-            slaveClient.GetPlugin<ChatPlugin>().SendChannelMessage(channelName, message, () => { }, error => { Should.NotThrow(() => throw new Exception(error)); });
+            slaveClient.GetPlugin<ChatPlugin>().SendChannelMessage(channelName, message, () => { }, error => { throw new Exception(error); });
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside masterClient.MessageReceived
         }
@@ -197,7 +197,7 @@ namespace SpeedDate.Test
                 {
                     usernameMasterClient = info.Username;
                     done.Set();
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                }, error => { throw new Exception(error); });
             };
 
             masterClient.Start(new DefaultConfigProvider(
@@ -222,9 +222,9 @@ namespace SpeedDate.Test
 
                     }, error =>
                     {
-                        Should.NotThrow(() => throw new Exception(error));
+                        throw new Exception(error);
                     });
-                }, error => { Should.NotThrow(() => throw new Exception(error)); });
+                }, error => { throw new Exception(error); });
             };
 
             slaveClient.Start(new DefaultConfigProvider(

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using SpeedDate;
 using SpeedDate.Client;
 using SpeedDate.ClientPlugins.GameServer;
 using SpeedDate.Configuration;

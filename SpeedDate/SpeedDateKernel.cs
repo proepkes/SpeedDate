@@ -59,7 +59,7 @@ namespace SpeedDate
                 _container.BuildUp(plugin);
             }
             
-            //Finally notify ever plugin that loading finished
+            //Finally notify every plugin that loading has finished
             foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
                 plugin.Loaded();
@@ -80,7 +80,6 @@ namespace SpeedDate
             try
             {
                 //Register possible plugin-dependencies
-                ioc.Register(AppUpdater.Instance);
                 ioc.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
 
                 switch (startable)

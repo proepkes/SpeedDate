@@ -12,13 +12,6 @@ namespace SpeedDate.ServerPlugins.Database
         [Inject] private IDbAccess DbAccess;
         [Inject] private ILogger _logger;
         [Inject] private DatabaseConfig _config;
-
-
-        public DatabasePlugin()
-        {
-            
-        }
-        
         
         public void Loaded()
         {
