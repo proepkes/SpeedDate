@@ -24,10 +24,10 @@ namespace SpeedDate.Test
             var spawner = new SpeedDateClient();
             spawner.Started += () =>
             {
-                spawner.GetPlugin<SpawnerPlugin>().RegisterSpawner(new SpawnerOptions {Region = "EU"},
-                    controller =>
+                spawner.GetPlugin<SpawnerPlugin>().Register(new SpawnerOptions {Region = "EU"},
+                    spawnerId =>
                     {
-                        controller.SpawnerId.ShouldBeGreaterThanOrEqualTo(0);
+                        spawnerId.ShouldBeGreaterThanOrEqualTo(0);
                         done.Set();
                     },
                     error => { throw new Exception(error); });
@@ -51,10 +51,10 @@ namespace SpeedDate.Test
             var spawner = new SpeedDateClient();
             spawner.Started += () =>
             {
-                spawner.GetPlugin<SpawnerPlugin>().RegisterSpawner(new SpawnerOptions {Region = spawnerRegionName},
-                    controller =>
+                spawner.GetPlugin<SpawnerPlugin>().Register(new SpawnerOptions {Region = spawnerRegionName},
+                    spawnerId =>
                     {
-                        controller.SpawnerId.ShouldBeGreaterThanOrEqualTo(0);
+                        spawnerId.ShouldBeGreaterThanOrEqualTo(0);
                         done.Set();
                     },
                     error =>
@@ -65,14 +65,9 @@ namespace SpeedDate.Test
 
             spawner.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                PluginsConfig.DefaultSpawnerPlugins, new IConfig[]{new SpawnerConfig
-                {
-                    MachineIp = "127.0.0.1"
-                }})); //Load spawner-plugins only
+                PluginsConfig.DefaultSpawnerPlugins)); //Load spawner-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Spawner is registered
-
-            var expectedSpawnerStatus = SpawnStatus.Aborting;
             
             var client = new SpeedDateClient();
             client.Started += () =>
@@ -82,21 +77,11 @@ namespace SpeedDate.Test
                     {
                         controller.ShouldNotBeNull();
                         controller.Status.ShouldBe(SpawnStatus.None);
-                        controller.StatusChanged += status => 
+                        controller.StatusChanged += status =>
                         {
-                            Debug.WriteLine("Status changed to: " + status);
-                            if (status == expectedSpawnerStatus)
+                            if (status == SpawnStatus.Killed)
                             {
-                                //First Status: Aborting
-                                if (status == SpawnStatus.Aborting)
-                                {
-                                    expectedSpawnerStatus = SpawnStatus.Aborted;
-                                }
-                                else
-                                {
-                                    //LastStatus: Aborted
-                                    done.Set();
-                                }
+                                done.Set();
                             }
                         }; 
                     }, error => 
@@ -110,7 +95,6 @@ namespace SpeedDate.Test
                 PluginsConfig.DefaultPeerPlugins)); //Load spawner-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
-            done.WaitOne(TimeSpan.FromSeconds(5)); //Should be signaled
         }
     }
 }

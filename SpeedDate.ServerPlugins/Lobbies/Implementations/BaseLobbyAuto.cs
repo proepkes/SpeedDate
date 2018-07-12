@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SpeedDate.Packets.Lobbies;
 
 namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 {
@@ -25,7 +26,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
                 var initialState = State;
 
-                while (State == Packets.Lobbies.LobbyState.Preparations || State == initialState)
+                while (State == LobbyState.Preparations || State == initialState)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
 

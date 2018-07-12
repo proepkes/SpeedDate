@@ -8,16 +8,16 @@ using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.LiteNetLib;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
+using SpeedDate.Packets.Spawner;
 using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Rooms;
 using SpeedDate.ServerPlugins.Spawner;
-using SpawnStatus = SpeedDate.Packets.Spawner.SpawnStatus;
 
 namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 {
     class BaseLobby : ILobby
     {
-        private Packets.Lobbies.LobbyState _state;
+        private LobbyState _state;
         private string _statusText = "";
         private LobbyMember _gameMaster;
 
@@ -78,7 +78,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         public string GameIp { get; protected set; }
         public int GamePort { get; protected set; }
 
-        public Packets.Lobbies.LobbyState State
+        public LobbyState State
         {
             get => _state;
             protected set
@@ -156,7 +156,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 return false;
             }
 
-            if (!Config.AllowJoiningWhenGameIsLive && State != Packets.Lobbies.LobbyState.Preparations)
+            if (!Config.AllowJoiningWhenGameIsLive && State != LobbyState.Preparations)
             {
                 callback.Invoke("Game is already in progress");
                 return false;
@@ -454,7 +454,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 return false;
             }
 
-            State = Packets.Lobbies.LobbyState.StartingGameServer;
+            State = LobbyState.StartingGameServer;
 
             SetGameSpawnTask(task);
 
@@ -513,16 +513,16 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             var isStarting = status > SpawnStatus.None && status < SpawnStatus.Finalized;
 
             // If the game is currently starting
-            if (isStarting && State != Packets.Lobbies.LobbyState.StartingGameServer)
+            if (isStarting && State != LobbyState.StartingGameServer)
             {
-                State = Packets.Lobbies.LobbyState.StartingGameServer;
+                State = LobbyState.StartingGameServer;
                 return;
             }
 
             // If game is running
             if (status == SpawnStatus.Finalized)
             {
-                State = Packets.Lobbies.LobbyState.GameInProgress;
+                State = LobbyState.GameInProgress;
                 OnGameServerFinalized();
             }
 
@@ -530,14 +530,14 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             if (status < SpawnStatus.None)
             {
                 // If game was open before
-                if (State == Packets.Lobbies.LobbyState.StartingGameServer)
+                if (State == LobbyState.StartingGameServer)
                 {
-                    State = Config.PlayAgainEnabled ? Packets.Lobbies.LobbyState.Preparations : Packets.Lobbies.LobbyState.FailedToStart;
+                    State = Config.PlayAgainEnabled ? LobbyState.Preparations : LobbyState.FailedToStart;
                     BroadcastChatMessage("Failed to start a game server", true);
                 }
                 else
                 {
-                    State = Config.PlayAgainEnabled ? Packets.Lobbies.LobbyState.Preparations : Packets.Lobbies.LobbyState.GameOver;
+                    State = Config.PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
                 }
             }
         }
@@ -580,7 +580,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             GameSpawnTask = null;
 
-            State = Config.PlayAgainEnabled ? Packets.Lobbies.LobbyState.Preparations : Packets.Lobbies.LobbyState.GameOver;
+            State = Config.PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
         }
 
         public Dictionary<string, string> GetPublicProperties(IPeer peer)
@@ -690,7 +690,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 return false;
             }
 
-            if (State != Packets.Lobbies.LobbyState.Preparations)
+            if (State != LobbyState.Preparations)
             {
                 SendChatMessage(member, "Invalid lobby state", true);
                 return false;
@@ -811,23 +811,23 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             Broadcast(MessageHelper.Create((ushort)OpCodes.LobbyMemberLeft, member.Username));
         }
 
-        protected virtual void OnLobbyStateChange(Packets.Lobbies.LobbyState state)
+        protected virtual void OnLobbyStateChange(LobbyState state)
         {
             switch (state)
             {
-                case Packets.Lobbies.LobbyState.FailedToStart:
+                case LobbyState.FailedToStart:
                     StatusText = "Failed to start server";
                     break;
-                case Packets.Lobbies.LobbyState.Preparations:
+                case LobbyState.Preparations:
                     StatusText = "Failed to start server";
                     break;
-                case Packets.Lobbies.LobbyState.StartingGameServer:
+                case LobbyState.StartingGameServer:
                     StatusText = "Starting game server";
                     break;
-                case Packets.Lobbies.LobbyState.GameInProgress:
+                case LobbyState.GameInProgress:
                     StatusText = "Game in progress";
                     break;
-                case Packets.Lobbies.LobbyState.GameOver:
+                case LobbyState.GameOver:
                     StatusText = "Game is over";
                     break;
                 default:

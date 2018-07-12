@@ -18,9 +18,9 @@ namespace SpeedDate.ServerPlugins.Spawner
         public string CustomArgs { get; private set; }
 
         public int SpawnId { get; private set; }
-        public event Action<Packets.Spawner.SpawnStatus> StatusChanged;
+        public event Action<SpawnStatus> StatusChanged;
 
-        private Packets.Spawner.SpawnStatus _status;
+        private SpawnStatus _status;
 
         public string UniqueCode { get; private set; }
 
@@ -41,13 +41,13 @@ namespace SpeedDate.ServerPlugins.Spawner
             WhenDoneCallbacks = new List<Action<SpawnTask>>();
         }
 
-        public bool IsAborted { get { return _status < Packets.Spawner.SpawnStatus.None; } }
+        public bool IsAborted { get { return _status < SpawnStatus.None; } }
 
         public bool IsDoneStartingProcess { get { return IsAborted || IsProcessStarted; } }
 
-        public bool IsProcessStarted { get { return Status >= Packets.Spawner.SpawnStatus.WaitingForProcess; } }
+        public bool IsProcessStarted { get { return Status >= SpawnStatus.WaitingForProcess; } }
 
-        public Packets.Spawner.SpawnStatus Status
+        public SpawnStatus Status
         {
             get { return _status; }
             set
@@ -57,7 +57,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                 if (StatusChanged != null)
                     StatusChanged.Invoke(_status);
 
-                if (_status >= Packets.Spawner.SpawnStatus.Finalized || _status < Packets.Spawner.SpawnStatus.None)
+                if (_status >= SpawnStatus.Finalized || _status < SpawnStatus.None)
                     NotifyDoneListeners();
             }
         }
@@ -77,33 +77,33 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         public void OnProcessStarted()
         {
-            if (!IsAborted && Status < Packets.Spawner.SpawnStatus.WaitingForProcess)
+            if (!IsAborted && Status < SpawnStatus.WaitingForProcess)
             {
-                Status = Packets.Spawner.SpawnStatus.WaitingForProcess;
+                Status = SpawnStatus.WaitingForProcess;
             }
         }
 
         public void OnProcessKilled()
         {
-            Status = Packets.Spawner.SpawnStatus.Killed;
+            Status = SpawnStatus.Killed;
         }
 
         public void OnRegistered(IPeer peerWhoRegistered)
         {
             RegisteredPeer = peerWhoRegistered;
 
-            if (!IsAborted && Status < Packets.Spawner.SpawnStatus.ProcessRegistered)
+            if (!IsAborted && Status < SpawnStatus.ProcessRegistered)
             {
-                Status = Packets.Spawner.SpawnStatus.ProcessRegistered;
+                Status = SpawnStatus.ProcessRegistered;
             }
         }
 
         public void OnFinalized(SpawnFinalizationPacket finalizationPacket)
         {
             FinalizationPacket = finalizationPacket;
-            if (!IsAborted && Status < Packets.Spawner.SpawnStatus.Finalized)
+            if (!IsAborted && Status < SpawnStatus.Finalized)
             {
-                Status = Packets.Spawner.SpawnStatus.Finalized;
+                Status = SpawnStatus.Finalized;
             }
         }
 
@@ -135,23 +135,21 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         public void Abort()
         {
-            if (Status >= Packets.Spawner.SpawnStatus.Finalized)
+            if (Status >= SpawnStatus.Finalized)
                 return;
 
-            Status = Packets.Spawner.SpawnStatus.Aborting;
-
-            KillSpawnedProcess();
-        }
-
-        public void KillSpawnedProcess()
-        {
+            
             Spawner.SendKillRequest(SpawnId, killed =>
             {
-                Status = Packets.Spawner.SpawnStatus.Aborted;
+                Status = SpawnStatus.Killed;
 
                 if (!killed)
                     Logs.Warn("Spawned Process might not have been killed");
             });
+        }
+
+        public void KillSpawnedProcess()
+        {
         }
         
     }

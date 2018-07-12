@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using Moq;
 using NUnit.Framework;
@@ -14,7 +13,6 @@ using SpeedDate.ClientPlugins.Peer.MatchMaker;
 using SpeedDate.Configuration;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.Packets.Matchmaking;
-using LobbyState = SpeedDate.Packets.Lobbies.LobbyState;
 
 namespace SpeedDate.Test
 {

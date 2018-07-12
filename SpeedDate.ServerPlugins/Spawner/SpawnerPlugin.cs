@@ -265,13 +265,13 @@ namespace SpeedDate.ServerPlugins.Spawner
                 return;
             }
 
-            if (prevRequest.Status >= Packets.Spawner.SpawnStatus.Finalized)
+            if (prevRequest.Status >= SpawnStatus.Finalized)
             {
                 message.Respond("You can't abort a completed request", ResponseStatus.Failed);
                 return;
             }
 
-            if (prevRequest.Status <= Packets.Spawner.SpawnStatus.None)
+            if (prevRequest.Status <= SpawnStatus.None)
             {
                 message.Respond("Already aborting", ResponseStatus.Success);
                 return;

@@ -11,7 +11,7 @@ namespace SpeedDate.Client.Spawner.Console
             System.Console.WriteLine("------STARTING SPAWNER------");
             var spawner = new Spawner();
             
-            spawner.Connected += () => spawner.SpawnApi.RegisterSpawner(new SpawnerOptions { Region = "EU" },
+            spawner.Connected += () => spawner.SpawnApi.Register(new SpawnerOptions { Region = "EU" },
                 controller =>
                 {
                     System.Console.WriteLine("Registered spawner");

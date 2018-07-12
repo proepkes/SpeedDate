@@ -38,7 +38,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             {
                 Options = options,
                 Region = region
-            };
+            };        
 
             Client.SendMessage((ushort) OpCodes.ClientsSpawnRequest, packet, (status, response) =>
             {

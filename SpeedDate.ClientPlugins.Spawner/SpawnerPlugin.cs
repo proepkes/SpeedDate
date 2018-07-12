@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -9,37 +13,32 @@ using SpeedDate.Packets.Spawner;
 
 namespace SpeedDate.ClientPlugins.Spawner
 {
-    public delegate void RegisterSpawnerCallback(SpawnerController spawner);
+    public delegate void RegisterSpawnerCallback(int spawnerId);
+    public delegate void SpawnRequestHandler(IIncommingMessage message);
+    public delegate bool KillSpawnedProcessHandler(int spawnId);
 
     public class SpawnerPlugin : SpeedDateClientPlugin
     {
         [Inject] private ILogger _logger;
-        [Inject] public SpawnerConfig Config;
-
-        
-        private readonly Dictionary<int, SpawnerController> _locallyCreatedSpawners;
+        [Inject] private SpawnerConfig _config;
 
         public const int PortsStartFrom = 10000;
 
         private readonly Queue<int> _freePorts;
         private int _lastPortTaken = -1;
 
-        /// <summary>
-        /// If true, this process is considered to be spawned by the spawner
-        /// </summary>
-        public bool IsSpawnedProccess { get; }
+        private SpawnRequestHandler _spawnRequestHandler;
+        private KillSpawnedProcessHandler _killRequestHandler;
+        private readonly ConcurrentDictionary<int, Process> _processes = new ConcurrentDictionary<int, Process>();
 
-        /// <summary>
-        /// Invoked on "spawner client", when it successfully registers to master server
-        /// </summary>
-        public event Action<SpawnerController> SpawnerRegistered;
-        
+        public int SpawnerId { get; private set; }
+
         public SpawnerPlugin() 
         {
-            _locallyCreatedSpawners = new Dictionary<int, SpawnerController>();
             _freePorts = new Queue<int>();
 
-            IsSpawnedProccess = CommandLineArgs.IsProvided(CommandLineArgs.Names.SpawnCode);
+            _killRequestHandler = DefaultKillRequestHandler;
+            _spawnRequestHandler = DefaultSpawnRequestHandler;
         }
 
         public override void Loaded()
@@ -51,15 +50,15 @@ namespace SpeedDate.ClientPlugins.Spawner
         /// <summary>
         /// Sends a request to master server, to register an existing spawner with given options
         /// </summary>
-        public void RegisterSpawner(SpawnerOptions options, RegisterSpawnerCallback callback, ErrorCallback errorCallback)
+        public void Register(SpawnerOptions options, RegisterSpawnerCallback callback, ErrorCallback errorCallback)
         {
-            _logger.Info("Registering Spawner...");
             if (!Client.IsConnected)
             {
                 errorCallback.Invoke("Not connected");
                 return;
             }
 
+            _logger.Info("Registering Spawner...");
             Client.SendMessage((ushort) OpCodes.RegisterSpawner, options, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
@@ -68,22 +67,14 @@ namespace SpeedDate.ClientPlugins.Spawner
                     return;
                 }
 
-                var spawnerId = response.AsInt();
+                SpawnerId = response.AsInt();
 
-                var controller = new SpawnerController(this, spawnerId, Client);
-
-                // Save reference
-                _locallyCreatedSpawners[spawnerId] = controller;
-
-                callback.Invoke(controller);
-                
-                // Invoke the event
-                SpawnerRegistered?.Invoke(controller);
+                callback.Invoke(SpawnerId);
             });
         }
 
         /// <summary>
-        /// Notifies master server, how many processes are running on a specified spawner
+        /// Notifies master server, how many processes are running on this spawner
         /// </summary>
         public void UpdateProcessesCount(int spawnerId, int count)
         {
@@ -95,19 +86,17 @@ namespace SpeedDate.ClientPlugins.Spawner
             Client.SendMessage((ushort)OpCodes.UpdateSpawnerProcessesCount, packet);
         }
 
-        public SpawnerController GetController(int spawnerId)
+        public void SetSpawnRequestHandler(SpawnRequestHandler handler)
         {
-            _locallyCreatedSpawners.TryGetValue(spawnerId, out var controller);
-
-            return controller;
+            _spawnRequestHandler = handler;
         }
 
-        public IEnumerable<SpawnerController> GetLocallyCreatedSpawners()
+        public void SetKillRequestHandler(KillSpawnedProcessHandler handler)
         {
-            return _locallyCreatedSpawners.Values;
+            _killRequestHandler = handler;
         }
 
-        public int GetAvailablePort()
+        private int GetAvailablePort()
         {
             // Return a port from a list of available ports
             if (_freePorts.Count > 0)
@@ -119,18 +108,12 @@ namespace SpeedDate.ClientPlugins.Spawner
             return _lastPortTaken++;
         }
 
-        public void ReleasePort(int port)
+        private void ReleasePort(int port)
         {
             _freePorts.Enqueue(port);
         }
-
-        /// <summary>
-        /// Should be called by a spawned process, as soon as it is started
-        /// </summary>
-        /// <param name="spawnId"></param>
-        /// <param name="processId"></param>
-        /// <param name="cmdArgs"></param>
-        public void NotifyProcessStarted(int spawnId, int processId, string cmdArgs)
+        
+        private void NotifyProcessStarted(int spawnId, int processId, string cmdArgs)
         {
             if (!Client.IsConnected)
                 return;
@@ -143,7 +126,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             });
         }
 
-        public void NotifyProcessKilled(int spawnId)
+        private void NotifyProcessKilled(int spawnId)
         {
             if (!Client.IsConnected)
                 return;
@@ -151,39 +134,168 @@ namespace SpeedDate.ClientPlugins.Spawner
             Client.SendMessage((ushort)OpCodes.ProcessKilled, spawnId);
         }
 
-
-
+        private bool HandleKillSpawnedProcessRequest(int spawnId)
+        {
+            return _killRequestHandler.Invoke(spawnId);
+        }
+        
         private void HandleSpawnRequest(IIncommingMessage message)
         {
-            var data = message.Deserialize<SpawnRequestPacket>();
-
-            var controller = GetController(data.SpawnerId);
-
-            if (controller == null)
-            {
-                if (message.IsExpectingResponse)
-                    message.Respond("Couldn't find a spawn controller", ResponseStatus.NotHandled);
-                return;
-            }
-
             // Pass the request to handler
-            controller.HandleSpawnRequest(data, message);
+            _spawnRequestHandler.Invoke(message);
         }
 
         private void HandleKillSpawnedProcessRequest(IIncommingMessage message)
         {
             var data = message.Deserialize<KillSpawnedProcessPacket>();
 
-            var controller = GetController(data.SpawnerId);
+            message.Respond(HandleKillSpawnedProcessRequest(data.SpawnId) ? ResponseStatus.Success : ResponseStatus.Failed);
+        }
 
-            if (controller == null)
+        private bool DefaultKillRequestHandler(int spawnId)
+        {
+            _logger.Debug("Default kill request handler started handling a request to kill a process");
+
+            try
             {
-                if (message.IsExpectingResponse)
-                    message.Respond("Couldn't find a spawn controller", ResponseStatus.NotHandled);
+                _processes.TryRemove(spawnId, out var process);
+                process?.Kill();
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Got error while killing a spawned process");
+                _logger.Error(e);
+                return false;
+            }
+            return true;
+        }
+
+        private void DefaultSpawnRequestHandler(IIncommingMessage message)
+        {
+            var packet = message.Deserialize<SpawnRequestPacket>();
+            if (packet == null)
+            {
+                message.Respond(ResponseStatus.Error);
                 return;
             }
+            _logger.Debug("Default spawn handler started handling a request to spawn process");
 
-            message.Respond(controller.HandleKillSpawnedProcessRequest(data.SpawnId) ? ResponseStatus.Success : ResponseStatus.Failed);
+            var port = GetAvailablePort();
+
+            // Machine Ip
+            var machineIp = _config.MachineIp;
+
+            // Path to executable
+            var path = _config.ExecutablePath;
+            if (string.IsNullOrEmpty(path))
+            {
+                path = File.Exists(Environment.GetCommandLineArgs()[0])
+                    ? Environment.GetCommandLineArgs()[0]
+                    : Process.GetCurrentProcess().MainModule.FileName;
+            }
+
+            // In case a path is provided with the request
+            if (packet.Properties.ContainsKey(OptionKeys.ExecutablePath))
+                path = packet.Properties[OptionKeys.ExecutablePath];
+
+            // Get the scene name
+            var sceneNameArgument = packet.Properties.ContainsKey(OptionKeys.SceneName)
+                ? $"{CommandLineArgs.Names.LoadScene} {packet.Properties[OptionKeys.SceneName]} "
+                : "";
+
+            if (!string.IsNullOrEmpty(packet.OverrideExePath))
+            {
+                path = packet.OverrideExePath;
+            }
+
+            // If spawn in batchmode was set and `DontSpawnInBatchmode` arg is not provided
+            var spawnInBatchmode = _config.SpawnInBatchmode
+                                   && !CommandLineArgs.DontSpawnInBatchmode;
+
+
+            var startProcessInfo = new ProcessStartInfo(path)
+            {
+                CreateNoWindow = true,
+                UseShellExecute = true,
+                Arguments = " " +
+                    (spawnInBatchmode ? "-batchmode -nographics " : "") +
+                    (_config.AddWebGlFlag ? CommandLineArgs.Names.WebGl + " " : "") +
+                    sceneNameArgument +
+                            $"{CommandLineArgs.Names.MasterIp} {Client.Config.Network.Address} " +
+                            $"{CommandLineArgs.Names.MasterPort} {Client.Config.Network.Port} " +
+                            $"{CommandLineArgs.Names.SpawnId} {packet.SpawnId} " +
+                            $"{CommandLineArgs.Names.AssignedPort} {port} " +
+                            $"{CommandLineArgs.Names.MachineIp} {machineIp} " +
+                            $"{CommandLineArgs.Names.SpawnCode} \"{packet.SpawnCode}\" " +
+                    packet.CustomArgs
+            };
+
+            _logger.Debug("Starting process with args: " + startProcessInfo.Arguments);
+
+            var processStarted = false;
+
+            try
+            {
+                new Thread(() =>
+                {
+                    try
+                    {
+                        _logger.Debug("New thread started");
+
+                        using (var process = Process.Start(startProcessInfo))
+                        {
+                            _logger.Debug("Process started. Spawn Id: " + packet.SpawnId + ", pid: " + process.Id);
+
+                            // Save the process
+                            _processes[packet.SpawnId] = process;
+
+                            var processId = process.Id;
+
+                            // Notify server that we've successfully handled the request
+                            //AppTimer.ExecuteOnMainThread(() =>
+                            //{
+                            message.Respond(ResponseStatus.Success);
+                            NotifyProcessStarted(packet.SpawnId, processId, startProcessInfo.Arguments);
+                            //});
+
+                            processStarted = true;
+                            process.WaitForExit();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (!processStarted)
+                            //AppTimer.ExecuteOnMainThread(() =>
+                            //{
+                            message.Respond(ResponseStatus.Failed);
+                        //});
+
+                        _logger.Error("An exception was thrown while starting a process. Make sure that you have set a correct build path. " +
+                                     "We've tried to start a process at: '" + path + "'. You can change it at 'SpawnerBehaviour' component");
+                        _logger.Error(e);
+                    }
+                    finally
+                    {
+                        // Remove the process
+                        _processes.TryRemove(packet.SpawnId, out _);
+
+                        //AppTimer.ExecuteOnMainThread(() =>
+                        //{
+                        // Release the port number
+                        ReleasePort(port);
+
+                        _logger.Debug("Notifying about killed process with spawn id: " + packet.SpawnerId);
+                        NotifyProcessKilled(packet.SpawnId);
+                        //});
+                    }
+
+                }).Start();
+            }
+            catch (Exception e)
+            {
+                message.Respond(e.Message, ResponseStatus.Error);
+                Logs.Error(e);
+            }
         }
     }
 }

@@ -2,9 +2,7 @@
 {
     public enum SpawnStatus
     {
-        Killed = -3,
-        Aborted = -2,
-        Aborting = -1,
+        Killed = -1,
 
         None,
         InQueue,
