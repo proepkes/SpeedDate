@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using NullGuard;
 using SpeedDate.Network.LiteNetLib.Utils;
 
 namespace SpeedDate.Network.LiteNetLib
@@ -1093,12 +1094,7 @@ namespace SpeedDate.Network.LiteNetLib
             }
         }
 
-        public void DisconnectAll()
-        {
-            DisconnectAll(null, 0, 0);
-        }
-
-        public void DisconnectAll(byte[] data, int start, int count)
+        public void DisconnectAll([AllowNull] byte[] data = null, int start = 0, int count = 0)
         {
             //Send disconnect packets
             for (var netPeer = _peers.HeadPeer; netPeer != null; netPeer = netPeer.NextPeer)

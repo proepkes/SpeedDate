@@ -15,7 +15,7 @@ namespace SpeedDate.ServerPlugins.Database.Entities
 
         public bool IsEmailConfirmed { get; set; }
 
-        public Dictionary<string, string> Properties { get; set; }
+        public Dictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
 
         public event Action<AccountData> OnChange;
 

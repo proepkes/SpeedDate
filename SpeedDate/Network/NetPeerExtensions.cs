@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using NullGuard;
 using SpeedDate.Logging;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Network.LiteNetLib.Utils;
@@ -45,6 +47,7 @@ namespace SpeedDate.Network.LiteNetLib
             return extension;
         }
 
+        [return: AllowNull]
         public T GetExtension<T>()
         {
             _extensions.TryGetValue(typeof(T), out var extension);
@@ -100,6 +103,7 @@ namespace SpeedDate.Network.LiteNetLib
             }
         }
 
+        [return: AllowNull]
         public object GetProperty(int id)
         {
             lock (_data)
@@ -120,11 +124,6 @@ namespace SpeedDate.Network.LiteNetLib
         private void SendMessage(IMessage message, DeliveryMethod deliveryMethod)
         {
             Send(message.ToBytes(), deliveryMethod);
-        }
-
-        public void SendMessage(IMessage message, ResponseCallback responseCallback)
-        {
-            SendMessage(message.OpCode, message.ToBytes(), responseCallback);
         }
 
         private void SendMessage(IMessage message, ResponseCallback responseCallback,

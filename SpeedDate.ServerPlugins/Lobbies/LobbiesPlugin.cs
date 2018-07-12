@@ -183,9 +183,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 return;
             }
 
-            if (!lobby.AddPlayer(user, out var error))
+            if (!lobby.AddPlayer(user, error => message.Respond(error ?? "Failed to add player to lobby", ResponseStatus.Failed)))
             {
-                message.Respond(error ?? "Failed to add player to lobby", ResponseStatus.Failed);
                 return;
             }
 

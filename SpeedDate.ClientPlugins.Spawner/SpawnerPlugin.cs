@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
+using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
 
@@ -13,6 +14,8 @@ namespace SpeedDate.ClientPlugins.Spawner
     public class SpawnerPlugin : SpeedDateClientPlugin
     {
         [Inject] private ILogger _logger;
+        [Inject] public SpawnerConfig Config;
+
         
         private readonly Dictionary<int, SpawnerController> _locallyCreatedSpawners;
 
@@ -39,6 +42,12 @@ namespace SpeedDate.ClientPlugins.Spawner
             IsSpawnedProccess = CommandLineArgs.IsProvided(CommandLineArgs.Names.SpawnCode);
         }
 
+        public override void Loaded()
+        {
+            Client.SetHandler((ushort)OpCodes.SpawnRequest, HandleSpawnRequest);
+            Client.SetHandler((ushort)OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
+        }
+
         /// <summary>
         /// Sends a request to master server, to register an existing spawner with given options
         /// </summary>
@@ -61,7 +70,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
                 var spawnerId = response.AsInt();
 
-                var controller = new SpawnerController(this, spawnerId, Client, options);
+                var controller = new SpawnerController(this, spawnerId, Client);
 
                 // Save reference
                 _locallyCreatedSpawners[spawnerId] = controller;
@@ -140,6 +149,41 @@ namespace SpeedDate.ClientPlugins.Spawner
                 return;
 
             Client.SendMessage((ushort)OpCodes.ProcessKilled, spawnId);
+        }
+
+
+
+        private void HandleSpawnRequest(IIncommingMessage message)
+        {
+            var data = message.Deserialize<SpawnRequestPacket>();
+
+            var controller = GetController(data.SpawnerId);
+
+            if (controller == null)
+            {
+                if (message.IsExpectingResponse)
+                    message.Respond("Couldn't find a spawn controller", ResponseStatus.NotHandled);
+                return;
+            }
+
+            // Pass the request to handler
+            controller.HandleSpawnRequest(data, message);
+        }
+
+        private void HandleKillSpawnedProcessRequest(IIncommingMessage message)
+        {
+            var data = message.Deserialize<KillSpawnedProcessPacket>();
+
+            var controller = GetController(data.SpawnerId);
+
+            if (controller == null)
+            {
+                if (message.IsExpectingResponse)
+                    message.Respond("Couldn't find a spawn controller", ResponseStatus.NotHandled);
+                return;
+            }
+
+            message.Respond(controller.HandleKillSpawnedProcessRequest(data.SpawnId) ? ResponseStatus.Success : ResponseStatus.Failed);
         }
     }
 }

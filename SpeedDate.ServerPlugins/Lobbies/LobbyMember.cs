@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NullGuard;
 using SpeedDate.Packets.Lobbies;
 
 namespace SpeedDate.ServerPlugins.Lobbies
@@ -29,6 +30,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <summary>
         /// A lobby team, to which this member belongs
         /// </summary>
+        [AllowNull]
         public virtual LobbyTeam Team { get; set; }
 
         /// <summary>

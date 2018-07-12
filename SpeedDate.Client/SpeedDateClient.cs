@@ -178,11 +178,6 @@ namespace SpeedDate.Client
             ((IMsgDispatcher) _netPeer).SendMessage(message, method);
         }
 
-        public void SendMessage(IMessage message, ResponseCallback responseCallback)
-        {
-            _netPeer.SendMessage(message, responseCallback);
-        }
-
         public void Dispose()
         {
             Stop();
@@ -228,8 +223,11 @@ namespace SpeedDate.Client
             }
             catch (Exception e)
             {
-                Logs.Error("Failed to handle a message. OpCode: " + message.OpCode);
-                Logs.Error(e);
+                if (Enum.TryParse(message.OpCode.ToString(), out OpCodes opcode))
+                {
+                    Logs.Error($"Failed to handle {opcode}: {e}");
+                }
+                Logs.Error($"Failed to handle{message.OpCode}: {e}");
 
                 if (!message.IsExpectingResponse)
                     return;

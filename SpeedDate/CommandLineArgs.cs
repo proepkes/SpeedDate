@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using NullGuard;
 
 namespace SpeedDate
 {
@@ -109,12 +110,8 @@ namespace SpeedDate
 
         #region Helper methods
 
-        /// <summary>
-        ///     Extracts a value for command line arguments provided
-        /// </summary>
-        /// <param name="argName"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
+        
+        [return: AllowNull]
         public static string ExtractValue(string argName, string defaultValue = null)
         {
             if (!Args.Contains(argName))

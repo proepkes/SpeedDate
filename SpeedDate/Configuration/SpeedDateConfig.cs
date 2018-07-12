@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
+using NullGuard;
 
 namespace SpeedDate.Configuration
 {
@@ -21,7 +22,8 @@ namespace SpeedDate.Configuration
             _pluginConfigs.Add(config);
         }
 
-        public bool TryGetConfig(string typeName, out IConfig result)
+        
+        public bool TryGetConfig(string typeName, [AllowNull] out IConfig result)
         {
             result = _pluginConfigs.FirstOrDefault(config => config.GetType().FullName.Equals(typeName));
             return result != null;
@@ -47,7 +49,8 @@ namespace SpeedDate.Configuration
 
     public class NetworkConfig
     {
-        public string Address { get; set; }
+        [AllowNull]
+        public string Address { get; set; } = String.Empty;
         public int Port { get; set; }
 
         public string Key { get; set; }

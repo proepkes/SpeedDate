@@ -1,4 +1,5 @@
-﻿using SpeedDate.Interfaces;
+﻿using NullGuard;
+using SpeedDate.Interfaces;
 using SpeedDate.Network.Interfaces;
 
 namespace SpeedDate.ServerPlugins.Lobbies
@@ -10,6 +11,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <summary>
         /// Lobby, to which current peer belongs
         /// </summary>
+        [AllowNull]
         public ILobby CurrentLobby { get; set; }
 
         public LobbyUserExtension(IPeer peer)

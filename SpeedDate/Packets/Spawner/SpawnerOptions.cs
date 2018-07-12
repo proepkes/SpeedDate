@@ -8,11 +8,6 @@ namespace SpeedDate.Packets.Spawner
     public class SpawnerOptions : SerializablePacket
     {
         /// <summary>
-        /// Public IP address of the machine, on which the spawner is running
-        /// </summary>
-        public string MachineIp = "xxx.xxx.xxx.xxx";
-
-        /// <summary>
         /// Max number of processes that this spawner can handle. If 0 - unlimited
         /// </summary>
         public int MaxProcesses = 0;
@@ -20,7 +15,7 @@ namespace SpeedDate.Packets.Spawner
         /// <summary>
         /// Spawner properties
         /// </summary>
-        public Dictionary<string, string> Properties;
+        public Dictionary<string, string> Properties = new Dictionary<string, string>();
 
         /// <summary>
         /// Region, to which the spawner belongs
@@ -29,7 +24,6 @@ namespace SpeedDate.Packets.Spawner
 
         public override void ToBinaryWriter(EndianBinaryWriter writer)
         {
-            writer.Write(MachineIp);
             writer.Write(MaxProcesses);
             writer.Write(Properties);
             writer.Write(Region);
@@ -37,7 +31,6 @@ namespace SpeedDate.Packets.Spawner
 
         public override void FromBinaryReader(EndianBinaryReader reader)
         {
-            MachineIp = reader.ReadString();
             MaxProcesses = reader.ReadInt32();
             Properties = reader.ReadDictionary();
             Region = reader.ReadString();
@@ -52,7 +45,7 @@ namespace SpeedDate.Packets.Spawner
 
             properties = "[" + properties + "]";
 
-            return $"PublicIp: {MachineIp}, MaxProcesses: {MaxProcesses}, Region: {Region}, Properties: {properties}";
+            return $"MaxProcesses: {MaxProcesses}, Region: {Region}, Properties: {properties}";
         }
     }
 }

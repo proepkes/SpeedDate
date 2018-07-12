@@ -4,6 +4,9 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="NullGuard.Fody" Version="1.8.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
   </ItemGroup>
 </Project>

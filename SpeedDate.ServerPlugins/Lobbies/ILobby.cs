@@ -19,7 +19,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         Dictionary<string, string> GetPublicProperties(IPeer peer);
 
         event Action<ILobby> Destroyed;
-        bool AddPlayer(LobbyUserExtension playerExt, out string error);
+        bool AddPlayer(LobbyUserExtension playerExt, ErrorCallback callback);
         void RemovePlayer(LobbyUserExtension playerExt);
 
         bool SetProperty(LobbyUserExtension setter, string key, string value);

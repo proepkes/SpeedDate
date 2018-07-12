@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
+using NullGuard;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -112,10 +113,11 @@ namespace SpeedDate.ServerPlugins.Authentication
             LoggedOut?.Invoke(extension);
         }
 
-        public UserExtension GetLoggedInUser(string username)
+        public bool TryGetLoggedInUser(string username, [AllowNull] out UserExtension value)
         {
-            _loggedInUsers.TryGetValue(username.ToLower(), out var extension);
-            return extension;
+            var result = _loggedInUsers.TryGetValue(username.ToLower(), out var extension);
+            value = extension;
+            return result;
         }
 
         protected virtual bool IsUsernameValid(string username)
@@ -479,8 +481,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                     return;
                 }
 
-                var otherSession = GetLoggedInUser(accountData.Username);
-                if (otherSession != null)
+                if (TryGetLoggedInUser(accountData.Username, out var otherSession))
                 {
                     otherSession.Peer.Disconnect("Other user logged in");
                     message.Respond("This account is already logged in".ToBytes(),
@@ -513,8 +514,7 @@ namespace SpeedDate.ServerPlugins.Authentication
                     return;
                 }
                 
-                var otherSession = GetLoggedInUser(accountData.Username);
-                if (otherSession != null)
+                if (TryGetLoggedInUser(accountData.Username, out var otherSession))
                 {
                     otherSession.Peer.Disconnect("Other user logged in");
                     message.Respond("This account is already logged in".ToBytes(),

@@ -97,6 +97,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+using NullGuard;
 using SpeedDate.Configuration;
 
 #endif
@@ -150,7 +151,7 @@ namespace SpeedDate
             }
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [AllowNull] out TValue value)
         {
             _padlock.EnterReadLock();
             try

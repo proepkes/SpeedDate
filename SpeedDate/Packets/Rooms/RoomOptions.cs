@@ -57,7 +57,7 @@ namespace SpeedDate.Packets.Rooms
         /// <summary>
         /// Extra properties that you might want to send to master server
         /// </summary>
-        public Dictionary<string, string> Properties;
+        public Dictionary<string, string> Properties = new Dictionary<string, string>();
 
         public override void ToBinaryWriter(EndianBinaryWriter writer)
         {

@@ -193,7 +193,7 @@ namespace SpeedDate.Network.LiteNetLib
             long connectionId = BitConverter.ToInt64(packet.RawData, 5);
 
             // Read data and create request
-            var reader = new NetDataReader(null, 0, 0);
+            var reader = new NetDataReader();
             if (packet.Size > 13)
                 reader.SetSource(packet.RawData, 13, packet.Size);
 

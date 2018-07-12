@@ -86,7 +86,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                 SpawnCode = task.UniqueCode
             };
 
-            Peer.SendMessage(MessageHelper.Create((ushort)OpCodes.SpawnRequest, data), (status, response) =>
+            Peer.SendMessage((ushort)OpCodes.SpawnRequest, data, (status, response) =>
             {
                 if (status != ResponseStatus.Success)
                 {

@@ -20,15 +20,9 @@ namespace SpeedDate.ClientPlugins.Spawner
         public readonly IClient Client;
 
         public int SpawnerId { get; }
-        public SpawnerOptions Options { get; }
 
         private SpawnRequestHandler _spawnRequestHandler;
         private KillSpawnedProcessHandler _killRequestHandler;
-        
-        /// <summary>
-        /// Settings, which are used by the default spawn handler
-        /// </summary>
-        public SpawnerConfig SpawnerSettings { get; private set; }
 
         #region Default process spawn handling
 
@@ -37,22 +31,17 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         #endregion
 
-        private readonly SpawnerPlugin _spawners;
+        private readonly SpawnerPlugin _owner;
 
-        public SpawnerController(SpawnerPlugin owner, int spawnerId, IClient client, SpawnerOptions options)
+        public SpawnerController(SpawnerPlugin owner, int spawnerId, IClient client)
         {
-            _spawners = owner;
+            _owner = owner;
 
             Client = client;
             SpawnerId = spawnerId;
-            Options = options;
 
             _killRequestHandler = DefaultKillRequestHandler;
             _spawnRequestHandler = DefaultSpawnRequestHandler;
-            
-            // Add handlers
-            client.SetHandler((ushort) OpCodes.SpawnRequest, HandleSpawnRequest);
-            client.SetHandler((ushort) OpCodes.KillSpawnedProcess, HandleKillSpawnedProcessRequest);
         }
 
         public void SetSpawnRequestHandler(SpawnRequestHandler handler)
@@ -67,60 +56,27 @@ namespace SpeedDate.ClientPlugins.Spawner
 
         public void NotifyProcessStarted(int spawnId, int processId, string cmdArgs)
         {
-            _spawners.NotifyProcessStarted(spawnId, processId, cmdArgs);
+            _owner.NotifyProcessStarted(spawnId, processId, cmdArgs);
         }
 
         public void NotifyProcessKilled(int spawnId)
         {
-            _spawners.NotifyProcessKilled(spawnId);
+            _owner.NotifyProcessKilled(spawnId);
         }
 
         public void UpdateProcessesCount(int count)
         {
-            _spawners.UpdateProcessesCount(SpawnerId, count);
+            _owner.UpdateProcessesCount(SpawnerId, count);
         }
 
-        private void HandleSpawnRequest(SpawnRequestPacket packet, IIncommingMessage message)
+        public void HandleSpawnRequest(SpawnRequestPacket packet, IIncommingMessage message)
         {
             _spawnRequestHandler.Invoke(packet, message);
         }
 
-        private bool HandleKillSpawnedProcessRequest(int spawnId)
+        public bool HandleKillSpawnedProcessRequest(int spawnId)
         {
             return _killRequestHandler.Invoke(spawnId);
-        }
-
-        private void HandleSpawnRequest(IIncommingMessage message)
-        {
-            var data = message.Deserialize<SpawnRequestPacket>();
-
-            var controller = _spawners.GetController(data.SpawnerId);
-
-            if (controller == null)
-            {
-                if (message.IsExpectingResponse) 
-                    message.Respond("Couldn't find a spawn controller", ResponseStatus.NotHandled);
-                return;
-            }
-
-            // Pass the request to handler
-            controller.HandleSpawnRequest(data, message);
-        }
-
-        private void HandleKillSpawnedProcessRequest(IIncommingMessage message)
-        {
-            var data = message.Deserialize<KillSpawnedProcessPacket>();
-
-            var controller = _spawners.GetController(data.SpawnerId);
-
-            if (controller == null)
-            {
-                if (message.IsExpectingResponse)
-                    message.Respond("Couldn't find a spawn controller", ResponseStatus.NotHandled);
-                return;
-            }
-
-            message.Respond(controller.HandleKillSpawnedProcessRequest(data.SpawnId) ? ResponseStatus.Success : ResponseStatus.Failed);
         }
 
         #region Default handlers
@@ -147,7 +103,7 @@ namespace SpeedDate.ClientPlugins.Spawner
         {
             _logger.Debug("Default spawn handler started handling a request to spawn process");
 
-            var controller = _spawners.GetController(packet.SpawnerId);
+            var controller = _owner.GetController(packet.SpawnerId);
 
             if (controller == null)
             {
@@ -155,13 +111,13 @@ namespace SpeedDate.ClientPlugins.Spawner
                 return;
             }
 
-            var port = _spawners.GetAvailablePort();
+            var port = _owner.GetAvailablePort();
             
             // Machine Ip
-            var machineIp = controller.SpawnerSettings.MachineIp; 
+            var machineIp = _owner.Config.MachineIp; 
 
             // Path to executable
-            var path = controller.SpawnerSettings.ExecutablePath;
+            var path = _owner.Config.ExecutablePath;
             if (string.IsNullOrEmpty(path))
             {
                 path = File.Exists(Environment.GetCommandLineArgs()[0]) 
@@ -184,7 +140,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             }
 
             // If spawn in batchmode was set and `DontSpawnInBatchmode` arg is not provided
-            var spawnInBatchmode = controller.SpawnerSettings.SpawnInBatchmode
+            var spawnInBatchmode = _owner.Config.SpawnInBatchmode
                                    && !CommandLineArgs.DontSpawnInBatchmode;
 
             
@@ -194,10 +150,10 @@ namespace SpeedDate.ClientPlugins.Spawner
                 UseShellExecute = true,
                 Arguments = " " +
                     (spawnInBatchmode ? "-batchmode -nographics " : "") +
-                    (controller.SpawnerSettings.AddWebGlFlag ? CommandLineArgs.Names.WebGl+" " : "") +
+                    (_owner.Config.AddWebGlFlag ? CommandLineArgs.Names.WebGl+" " : "") +
                     sceneNameArgument +
-                            $"{CommandLineArgs.Names.MasterIp} {controller.Client.Config.Network.Address} " +
-                            $"{CommandLineArgs.Names.MasterPort} {controller.Client.Config.Network.Port} " +
+                            $"{CommandLineArgs.Names.MasterIp} {Client.Config.Network.Address} " +
+                            $"{CommandLineArgs.Names.MasterPort} {Client.Config.Network.Port} " +
                             $"{CommandLineArgs.Names.SpawnId} {packet.SpawnId} " +
                             $"{CommandLineArgs.Names.AssignedPort} {port} " +
                             $"{CommandLineArgs.Names.MachineIp} {machineIp} " +
@@ -257,7 +213,7 @@ namespace SpeedDate.ClientPlugins.Spawner
                         //AppTimer.ExecuteOnMainThread(() =>
                         //{
                             // Release the port number
-                            _spawners.ReleasePort(port);
+                            _owner.ReleasePort(port);
 
                             _logger.Debug("Notifying about killed process with spawn id: " + packet.SpawnerId);
                             controller.NotifyProcessKilled(packet.SpawnId);

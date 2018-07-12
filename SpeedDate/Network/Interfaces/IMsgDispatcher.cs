@@ -25,7 +25,5 @@ namespace SpeedDate.Network.Interfaces
         void SendMessage(ushort opCode, bool data, ResponseCallback responseCallback);
 
         void SendMessage(IMessage message, DeliveryMethod method);
-        void SendMessage(IMessage message, ResponseCallback responseCallback);
-
     }
 }

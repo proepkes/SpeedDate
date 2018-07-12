@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using NullGuard;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -73,6 +73,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         public int MaxPlayers { get; protected set; }
         public int MinPlayers { get; protected set; }
 
+        [AllowNull]
         public string Type { get; set; }
         public string GameIp { get; protected set; }
         public int GamePort { get; protected set; }
@@ -101,7 +102,8 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 OnStatusTextChange(value);
             }
         }
-
+        
+        [AllowNull]
         protected LobbyMember GameMaster
         {
             get => _gameMaster;
@@ -114,13 +116,11 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             }
         }
 
-        public bool AddPlayer(LobbyUserExtension playerExt, out string error)
+        public bool AddPlayer(LobbyUserExtension playerExt, ErrorCallback callback)
         {
-            error = null;
-
             if (playerExt.CurrentLobby != null)
             {
-                error = "You're already in a lobby";
+                callback.Invoke("You're already in a lobby");
                 return false;
             }
 
@@ -128,37 +128,37 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             if (username == null)
             {
-                error = "Invalid username";
+                callback.Invoke("Invalid username");
                 return false;
             }
 
             if (Members.ContainsKey(username))
             {
-                error = "Already in the lobby";
+                callback.Invoke("Already in the lobby");
                 return false;
             }
 
             if (IsDestroyed)
             {
-                error = "Lobby is destroyed";
+                callback.Invoke("Lobby is destroyed");
                 return false;
             }
 
             if (!IsPlayerAllowed(username, playerExt))
             {
-                error = "You're not allowed";
+                callback.Invoke("You're not allowed");
                 return false;
             }
 
             if (Members.Values.Count >= MaxPlayers)
             {
-                error = "Lobby is full";
+                callback.Invoke("Lobby is full");
                 return false;
             }
 
             if (!Config.AllowJoiningWhenGameIsLive && State != Packets.Lobbies.LobbyState.Preparations)
             {
-                error =  "Game is already in progress";
+                callback.Invoke("Game is already in progress");
                 return false;
             }
 
@@ -170,13 +170,13 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             if (team == null)
             {
-                error = "Invalid lobby team";
+                callback.Invoke("Invalid lobby team");
                 return false;
             }
 
             if (!team.AddMember(member))
             {
-                error = "Not allowed to join a team";
+                callback.Invoke("Not allowed to join a team");
                 return false;
             }
 

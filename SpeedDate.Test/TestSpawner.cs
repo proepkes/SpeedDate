@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using NUnit.Framework;
@@ -56,12 +57,18 @@ namespace SpeedDate.Test
                         controller.SpawnerId.ShouldBeGreaterThanOrEqualTo(0);
                         done.Set();
                     },
-                    error => { throw new Exception(error); });
+                    error =>
+                    {
+                        throw new Exception(error);
+                    });
             };
 
             spawner.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                PluginsConfig.DefaultSpawnerPlugins)); //Load spawner-plugins only
+                PluginsConfig.DefaultSpawnerPlugins, new IConfig[]{new SpawnerConfig
+                {
+                    MachineIp = "127.0.0.1"
+                }})); //Load spawner-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Spawner is registered
 
@@ -77,6 +84,7 @@ namespace SpeedDate.Test
                         controller.Status.ShouldBe(SpawnStatus.None);
                         controller.StatusChanged += status => 
                         {
+                            Debug.WriteLine("Status changed to: " + status);
                             if (status == expectedSpawnerStatus)
                             {
                                 //First Status: Aborting
@@ -102,6 +110,7 @@ namespace SpeedDate.Test
                 PluginsConfig.DefaultPeerPlugins)); //Load spawner-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(5)); //Should be signaled
         }
     }
 }
