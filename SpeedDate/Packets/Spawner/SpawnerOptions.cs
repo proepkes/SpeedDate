@@ -13,11 +13,6 @@ namespace SpeedDate.Packets.Spawner
         public int MaxProcesses = 0;
 
         /// <summary>
-        /// Spawner properties
-        /// </summary>
-        public Dictionary<string, string> Properties = new Dictionary<string, string>();
-
-        /// <summary>
         /// Region, to which the spawner belongs
         /// </summary>
         public string Region = "International";
@@ -25,27 +20,18 @@ namespace SpeedDate.Packets.Spawner
         public override void ToBinaryWriter(EndianBinaryWriter writer)
         {
             writer.Write(MaxProcesses);
-            writer.Write(Properties);
             writer.Write(Region);
         }
 
         public override void FromBinaryReader(EndianBinaryReader reader)
         {
             MaxProcesses = reader.ReadInt32();
-            Properties = reader.ReadDictionary();
             Region = reader.ReadString();
         }
 
         public override string ToString()
         {
-            var properties = "none";
-
-            if (Properties != null && Properties.Count > 0)
-                properties = string.Join("; ", Properties.Select(p => p.Key + " : " + p.Value).ToArray());
-
-            properties = "[" + properties + "]";
-
-            return $"MaxProcesses: {MaxProcesses}, Region: {Region}, Properties: {properties}";
+            return $"MaxProcesses: {MaxProcesses}, Region: {Region}";
         }
     }
 }

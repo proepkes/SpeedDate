@@ -20,7 +20,7 @@ namespace SpeedDate.Test
     public class TestLobby
     {
         [Test]
-        public void CreateDeathmatchLobby()
+        public void ShouldCreateDeathmatchLobby()
         {
             var lobbyName = TestContext.CurrentContext.Test.Name;
             var done = new AutoResetEvent(false);

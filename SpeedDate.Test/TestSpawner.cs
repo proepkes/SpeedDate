@@ -24,7 +24,7 @@ namespace SpeedDate.Test
             var spawner = new SpeedDateClient();
             spawner.Started += () =>
             {
-                spawner.GetPlugin<SpawnerPlugin>().Register(new SpawnerOptions {Region = "EU"},
+                spawner.GetPlugin<SpawnerPlugin>().Register(
                     spawnerId =>
                     {
                         spawnerId.ShouldBeGreaterThanOrEqualTo(0);
@@ -51,7 +51,7 @@ namespace SpeedDate.Test
             var spawner = new SpeedDateClient();
             spawner.Started += () =>
             {
-                spawner.GetPlugin<SpawnerPlugin>().Register(new SpawnerOptions {Region = spawnerRegionName},
+                spawner.GetPlugin<SpawnerPlugin>().Register(
                     spawnerId =>
                     {
                         spawnerId.ShouldBeGreaterThanOrEqualTo(0);
@@ -65,7 +65,10 @@ namespace SpeedDate.Test
 
             spawner.Start(new DefaultConfigProvider(
                 new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
-                PluginsConfig.DefaultSpawnerPlugins)); //Load spawner-plugins only
+                PluginsConfig.DefaultSpawnerPlugins, new IConfig[]{ new SpawnerConfig
+                {
+                    Region = spawnerRegionName
+                }})); //Load spawner-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Spawner is registered
             

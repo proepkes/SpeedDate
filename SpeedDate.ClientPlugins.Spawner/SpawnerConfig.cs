@@ -9,5 +9,7 @@ namespace SpeedDate.ClientPlugins.Spawner
             public bool SpawnInBatchmode {get; set; }
             public string ExecutablePath {get; set; } = string.Empty;
             public bool AddWebGlFlag { get; set; }
+            public int MaxProcesses { get; set; }
+            public string Region { get; set; } = "International";
         }
 }
