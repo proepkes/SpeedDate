@@ -277,7 +277,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                 return;
             }
 
-            prevRequest.Abort();
+            prevRequest.Kill();
         }
 
         protected virtual void HandleGetCompletionData(IIncommingMessage message)

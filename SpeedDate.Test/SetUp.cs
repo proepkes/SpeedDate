@@ -12,7 +12,7 @@ using SpeedDate.ServerPlugins.Lobbies;
 using SpeedDate.ServerPlugins.Mail;
 
 namespace SpeedDate.Test
-{ 
+{
     [SetUpFixture]
     public class SetUp
     {

@@ -13,20 +13,20 @@ namespace SpeedDate.ServerPlugins.Spawner
     /// </summary>
     public class SpawnTask
     {
-        public RegisteredSpawner Spawner { get; private set; }
-        public Dictionary<string, string> Properties { get; private set; }
-        public string CustomArgs { get; private set; }
+        public RegisteredSpawner Spawner { get; }
+        public Dictionary<string, string> Properties { get; }
+        public string CustomArgs { get; }
 
-        public int SpawnId { get; private set; }
+        public int SpawnId { get; }
         public event Action<SpawnStatus> StatusChanged;
 
         private SpawnStatus _status;
 
-        public string UniqueCode { get; private set; }
+        public string UniqueCode { get; }
 
         public SpawnFinalizationPacket FinalizationPacket { get; private set; }
 
-        protected List<Action<SpawnTask>> WhenDoneCallbacks;
+        private readonly List<Action<SpawnTask>> _whenDoneCallbacks;
 
         public SpawnTask(int spawnId, RegisteredSpawner spawner, 
             Dictionary<string, string> properties, string customArgs) {
@@ -38,24 +38,23 @@ namespace SpeedDate.ServerPlugins.Spawner
             CustomArgs = customArgs;
 
             UniqueCode = Util.CreateRandomString(6);
-            WhenDoneCallbacks = new List<Action<SpawnTask>>();
+            _whenDoneCallbacks = new List<Action<SpawnTask>>();
         }
 
-        public bool IsAborted { get { return _status < SpawnStatus.None; } }
+        public bool IsAborted => _status < SpawnStatus.None;
 
-        public bool IsDoneStartingProcess { get { return IsAborted || IsProcessStarted; } }
+        public bool IsDoneStartingProcess => IsAborted || IsProcessStarted;
 
-        public bool IsProcessStarted { get { return Status >= SpawnStatus.WaitingForProcess; } }
+        public bool IsProcessStarted => Status >= SpawnStatus.WaitingForProcess;
 
         public SpawnStatus Status
         {
-            get { return _status; }
-            set
+            get => _status;
+            private set
             {
                 _status = value;
 
-                if (StatusChanged != null)
-                    StatusChanged.Invoke(_status);
+                StatusChanged?.Invoke(_status);
 
                 if (_status >= SpawnStatus.Finalized || _status < SpawnStatus.None)
                     NotifyDoneListeners();
@@ -109,17 +108,17 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         public override string ToString()
         {
-            return string.Format("[SpawnTask: id - {0}]", SpawnId);
+            return $"[SpawnTask: id - {SpawnId}]";
         }
 
         protected void NotifyDoneListeners()
         {
-            foreach (var callback in WhenDoneCallbacks)
+            foreach (var callback in _whenDoneCallbacks)
             {
                 callback.Invoke(this);
             }
 
-            WhenDoneCallbacks.Clear();
+            _whenDoneCallbacks.Clear();
         }
 
         /// <summary>
@@ -129,11 +128,11 @@ namespace SpeedDate.ServerPlugins.Spawner
         /// <param name="callback"></param>
         public SpawnTask WhenDone(Action<SpawnTask> callback)
         {
-            WhenDoneCallbacks.Add(callback);
+            _whenDoneCallbacks.Add(callback);
             return this;
         }
 
-        public void Abort()
+        public void Kill()
         {
             if (Status >= SpawnStatus.Finalized)
                 return;
@@ -146,10 +145,6 @@ namespace SpeedDate.ServerPlugins.Spawner
                 if (!killed)
                     Logs.Warn("Spawned Process might not have been killed");
             });
-        }
-
-        public void KillSpawnedProcess()
-        {
         }
         
     }

@@ -90,7 +90,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             {
                 if (status != ResponseStatus.Success)
                 {
-                    task.Abort();
+                    task.Kill();
                     Logs.Error("Spawn request was not handled. Status: " + status + " | " + response.AsString("Unknown Error"));
                 }
             });

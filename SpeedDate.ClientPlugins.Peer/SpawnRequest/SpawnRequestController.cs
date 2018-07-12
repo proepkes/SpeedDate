@@ -10,27 +10,20 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
     public class SpawnRequestController
     {
         private readonly IClient _client;
-        public int SpawnId { get; set; }
+        public int SpawnId { get; }
 
         public event Action<SpawnStatus> StatusChanged;
 
         public SpawnStatus Status { get; private set; }
 
-        /// <summary>
-        /// A dictionary of options that user provided when requesting a 
-        /// process to be spawned
-        /// </summary>
-        public Dictionary<string, string> SpawnOptions;
-
         private readonly SpawnRequestPlugin _spawnServer;
 
-        public SpawnRequestController(SpawnRequestPlugin owner, int spawnId, IClient client, Dictionary<string, string> spawnOptions)
+        public SpawnRequestController(SpawnRequestPlugin owner, int spawnId, IClient client)
         {
             _spawnServer = owner;
 
             _client = client;
             SpawnId = spawnId;
-            SpawnOptions = spawnOptions;
 
             // Set handlers
             client.SetHandler((ushort) OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);

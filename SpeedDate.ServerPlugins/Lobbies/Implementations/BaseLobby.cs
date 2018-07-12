@@ -477,7 +477,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             if (GameSpawnTask != null)
             {
                 GameSpawnTask.StatusChanged -= OnSpawnServerStatusChanged;
-                GameSpawnTask.KillSpawnedProcess();
+                GameSpawnTask.Kill();
             }
 
             Destroyed?.Invoke(this);
@@ -500,7 +500,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
             {
                 // Unsubscribe from previous game
                 GameSpawnTask.StatusChanged -= OnSpawnServerStatusChanged;
-                GameSpawnTask.Abort();
+                GameSpawnTask.Kill();
             }
 
             GameSpawnTask = task;

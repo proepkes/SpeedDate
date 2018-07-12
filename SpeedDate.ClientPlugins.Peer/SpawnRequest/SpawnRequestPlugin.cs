@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-
-using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -34,7 +32,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 return;
             }
 
-            var packet = new ClientsSpawnRequestPacket()
+            var packet = new ClientsSpawnRequestPacket
             {
                 Options = options,
                 Region = region
@@ -51,7 +49,7 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
                 // Spawn id
                 var spawnId = response.AsInt();
 
-                var controller = new SpawnRequestController(this, spawnId, Client, options);
+                var controller = new SpawnRequestController(this, spawnId, Client);
 
                 _localSpawnRequests[controller.SpawnId] = controller;
 
