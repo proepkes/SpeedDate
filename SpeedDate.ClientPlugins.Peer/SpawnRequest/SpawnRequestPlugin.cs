@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NullGuard;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -8,19 +9,19 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 {
     public delegate void ClientSpawnRequestCallback(SpawnRequestController controller);
 
-    public class SpawnRequestPlugin : SpeedDateClientPlugin
+    public sealed  class SpawnRequestPlugin : SpeedDateClientPlugin
     {
         public delegate void AbortSpawnHandler();
 
         public delegate void FinalizationDataHandler(Dictionary<string, string> data);
 
-        private readonly Dictionary<int, SpawnRequestController> _localSpawnRequests;
+        private readonly Dictionary<int, SpawnRequestController> _localSpawnRequests = new Dictionary<int, SpawnRequestController>();
 
-        public SpawnRequestPlugin()
+        public override void Loaded()
         {
-            _localSpawnRequests = new Dictionary<int, SpawnRequestController>();
+            Client.SetHandler((ushort)OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);
         }
-        
+
         /// <summary>
         /// Sends a request to master server, to spawn a process in a given region, and with given options
         /// </summary>
@@ -124,11 +125,24 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// </summary>
         /// <param name="spawnId"></param>
         /// <returns></returns>
+        [return: AllowNull]
         public SpawnRequestController GetRequestController(int spawnId)
         {
             _localSpawnRequests.TryGetValue(spawnId, out var controller);
 
             return controller;
+        }
+
+        private void HandleStatusUpdate(IIncommingMessage message)
+        {
+            var data = message.Deserialize<SpawnStatusUpdatePacket>();
+
+            var controller = GetRequestController(data.SpawnId);
+
+            if (controller == null)
+                return;
+
+            controller.Status = data.Status;
         }
     }
 }
