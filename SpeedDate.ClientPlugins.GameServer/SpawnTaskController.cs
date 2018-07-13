@@ -2,23 +2,20 @@
 using System.Collections.Generic;
 using SpeedDate.Interfaces;
 using SpeedDate.Logging;
-using SpeedDate.Network.Interfaces;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
     public class SpawnTaskController
     {
-        private readonly IClient _client;
         public int SpawnId { get; private set; }
         public Dictionary<string, string> Properties { get; private set; }
 
         private readonly RoomsPlugin _spawnerClient;
 
-        public SpawnTaskController(RoomsPlugin owner, int spawnId, Dictionary<string, string> properties, IClient client)
+        public SpawnTaskController(RoomsPlugin owner, int spawnId, Dictionary<string, string> properties)
         {
             _spawnerClient = owner;
 
-            _client = client;
             SpawnId = spawnId;
             Properties = properties;
         }
