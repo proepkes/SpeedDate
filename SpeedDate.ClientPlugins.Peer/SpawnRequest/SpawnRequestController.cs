@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using SpeedDate.Interfaces;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Spawner;
@@ -14,7 +13,20 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
 
         public event Action<SpawnStatus> StatusChanged;
 
-        public SpawnStatus Status { get; private set; }
+        private SpawnStatus status;
+
+        public SpawnStatus Status
+        {
+            get => status;
+            set
+            {
+                if (status != value)
+                {
+                    status = value;
+                    StatusChanged?.Invoke(Status);
+                }
+            }
+        }
 
         private readonly SpawnRequestPlugin _spawnServer;
 
@@ -25,8 +37,6 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
             _client = client;
             SpawnId = spawnId;
 
-            // Set handlers
-            client.SetHandler((ushort) OpCodes.SpawnRequestStatusChange, HandleStatusUpdate);
         }
 
         public void Abort()
@@ -42,20 +52,6 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         public void GetFinalizationData(SpawnRequestPlugin.FinalizationDataHandler handler, ErrorCallback errorCallback)
         {
             _spawnServer.GetFinalizationData(SpawnId, handler, errorCallback,  _client);
-        }
-
-        private void HandleStatusUpdate(IIncommingMessage message)
-        {
-            var data = message.Deserialize<SpawnStatusUpdatePacket>();
-
-            var controller = _spawnServer.GetRequestController(data.SpawnId);
-
-            if (controller == null)
-                return;
-
-            controller.Status = data.Status;
-
-            controller.StatusChanged?.Invoke(data.Status);
         }
     }
 }
