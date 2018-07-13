@@ -334,7 +334,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                 return;
             }
 
-            if (task.Handler != message.Peer)
+            if (task.RegisteredPeer != message.Peer)
             {
                 message.Respond("Unauthorized", ResponseStatus.Unauthorized);
                 _logger.Error(
