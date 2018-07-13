@@ -9,7 +9,16 @@ namespace SpeedDate
 {
     public static class Util
     {
+        private static readonly Random _random = new Random(DateTime.Now.Millisecond);
         private static readonly byte[] _salt = Encoding.ASCII.GetBytes("o6806642kbM7c5");
+
+        /// <summary>
+        ///     Creates a random integer.
+        /// </summary>
+        public static int CreateRandomInt(int minValue = int.MinValue, int maxValue = int.MaxValue)
+        {
+            return _random.Next(minValue, maxValue);
+        }
 
         /// <summary>
         ///     Creates a random string of a given length.
