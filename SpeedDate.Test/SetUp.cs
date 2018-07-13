@@ -34,8 +34,8 @@ namespace SpeedDate.Test
         };
 
         public static SpeedDateServer Server;
-        public static Mock<ISmtpClient> SmtpClientMock = new Mock<ISmtpClient>();
-        public static Mock<IDbAccess> DatabaseMock = new Mock<IDbAccess>();
+        public static readonly Mock<ISmtpClient> SmtpClientMock = new Mock<ISmtpClient>();
+        public static readonly Mock<IDbAccess> DatabaseMock = new Mock<IDbAccess>();
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
