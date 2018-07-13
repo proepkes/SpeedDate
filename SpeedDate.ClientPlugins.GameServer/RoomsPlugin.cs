@@ -13,9 +13,9 @@ namespace SpeedDate.ClientPlugins.GameServer
     public delegate void RegisterSpawnedProcessCallback(SpawnTaskController taskController);
     public delegate void CompleteSpawnedProcessCallback();
 
-    public class RoomsPlugin : SpeedDateClientPlugin
+    public sealed class RoomsPlugin : SpeedDateClientPlugin
     {
-        private static Dictionary<int, RoomController> _localCreatedRooms;
+        private readonly Dictionary<int, RoomController> _localCreatedRooms = new Dictionary<int, RoomController>();
 
         /// <summary>
         /// Maximum time the master server can wait for a response from game server
@@ -32,11 +32,6 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// Event, invoked when a room is destroyed
         /// </summary>
         public event Action<RoomController> RoomDestroyed;
-
-        public RoomsPlugin()
-        {
-            _localCreatedRooms = new Dictionary<int, RoomController>();
-        }
 
         /// <summary>
         /// Sends a request to register a room to master server
@@ -125,7 +120,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 return;
             }
 
-            var packet = new RoomAccessValidatePacket()
+            var packet = new RoomAccessValidatePacket
             {
                 RoomId = roomId,
                 Token = token
@@ -165,7 +160,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 return;
             }
 
-            var changePacket = new SaveRoomOptionsPacket()
+            var changePacket = new SaveRoomOptionsPacket
             {
                 Options = options,
                 RoomId =  roomId
@@ -197,7 +192,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 return;
             }
 
-            var packet = new PlayerLeftRoomPacket()
+            var packet = new PlayerLeftRoomPacket
             {
                 PeerId = peerId,
                 RoomId = roomId
@@ -236,7 +231,6 @@ namespace SpeedDate.ClientPlugins.GameServer
             return _localCreatedRooms.Values;
         }
 
-
         /// <summary>
         /// This should be called from a process which is spawned.
         /// For example, it can be called from a game server, which is started by the spawner
@@ -267,7 +261,7 @@ namespace SpeedDate.ClientPlugins.GameServer
 
                 var properties = new Dictionary<string, string>().FromBytes(response.AsBytes());
 
-                var process = new SpawnTaskController(this, spawnId, properties, Client);
+                var process = new SpawnTaskController(this, spawnId, properties);
 
                 callback.Invoke(process);
             });
@@ -285,7 +279,7 @@ namespace SpeedDate.ClientPlugins.GameServer
                 return;
             }
 
-            var packet = new SpawnFinalizationPacket()
+            var packet = new SpawnFinalizationPacket
             {
                 SpawnId = spawnId,
                 FinalizationData = finalizationData ?? new Dictionary<string, string>()
