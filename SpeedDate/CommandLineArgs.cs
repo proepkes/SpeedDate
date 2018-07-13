@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using NullGuard;
 
 namespace SpeedDate
 {
@@ -109,9 +108,7 @@ namespace SpeedDate
         #endregion
 
         #region Helper methods
-
         
-        [return: AllowNull]
         public static string ExtractValue(string argName, string defaultValue = null)
         {
             if (!Args.Contains(argName))

@@ -33,9 +33,6 @@
     <_ApplicationManifestFinal Remove="bin\Debug\netstandard2.0\Native.SpeedDate.ServerPlugins.manifest" />
     <_ApplicationManifestFinal Remove="bin\Debug\netstandard2.0\Native.SpeedDate.ServerPlugins.manifest" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NullGuard.Fody" Version="1.8.0" />
-  </ItemGroup>
   <!--<Target Name="PublishModule" AfterTargets="Publish" Inputs="@(ModuleFiles)" Outputs="@(ModuleFiles->'%(DestinationPath)')">
     <Copy SourceFiles="@(ModuleFiles)" DestinationFiles="@(ModuleFiles->'%(DestinationPath)')" />
   </Target>-->

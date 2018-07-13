@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using NullGuard;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
@@ -138,7 +137,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             return _spawnTaskId++;
         }
          
-        private List<RegisteredSpawner> GetSpawners([AllowNull] string region = null, [AllowNull] Dictionary<string, string> properties = null)
+        private List<RegisteredSpawner> GetSpawners(string region = null, Dictionary<string, string> properties = null)
         {
             // If region is not provided, retrieve all spawners
             return string.IsNullOrEmpty(region) ? _spawners.Values.ToList() : _spawners.Values.Where(s => s.Options.Region == region).ToList();

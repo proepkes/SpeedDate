@@ -31,11 +31,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Test", "SpeedDate
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Database.CockroachDb", "SpeedDate.Database.CockroachDb\SpeedDate.Database.CockroachDb.csproj", "{ED4266B1-55C0-4013-8902-A3761956DF1C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{14EE148F-5BDB-4E4D-8755-DEBBEDCEC02B}"
-	ProjectSection(SolutionItems) = preProject
-		FodyWeavers.xml = FodyWeavers.xml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

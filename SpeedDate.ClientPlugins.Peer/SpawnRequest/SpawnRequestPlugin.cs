@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using NullGuard;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -125,7 +124,6 @@ namespace SpeedDate.ClientPlugins.Peer.SpawnRequest
         /// </summary>
         /// <param name="spawnId"></param>
         /// <returns></returns>
-        [return: AllowNull]
         public SpawnRequestController GetRequestController(int spawnId)
         {
             _localSpawnRequests.TryGetValue(spawnId, out var controller);

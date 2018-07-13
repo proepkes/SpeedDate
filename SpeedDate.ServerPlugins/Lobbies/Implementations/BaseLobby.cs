@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NullGuard;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -61,19 +60,13 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         }
 
         public string Name { get; set; }
-        public int PlayerCount { get { return Members.Count; } }
-
-        public int Id { get; private set; }
-        protected LobbiesPlugin Plugin { get; private set; }
-
+        public int PlayerCount => Members.Count;
+        public int Id { get; }
+        protected LobbiesPlugin Plugin { get; }
         public bool IsDestroyed { get; private set; }
-
-        public LobbyConfig Config { get; private set; }
-
+        public LobbyConfig Config { get; }
         public int MaxPlayers { get; protected set; }
         public int MinPlayers { get; protected set; }
-
-        [AllowNull]
         public string Type { get; set; }
         public string GameIp { get; protected set; }
         public int GamePort { get; protected set; }
@@ -81,7 +74,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         public LobbyState State
         {
             get => _state;
-            protected set
+            private set
             {
                 if (_state == value)
                     return;
@@ -102,8 +95,6 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
                 OnStatusTextChange(value);
             }
         }
-        
-        [AllowNull]
         protected LobbyMember GameMaster
         {
             get => _gameMaster;

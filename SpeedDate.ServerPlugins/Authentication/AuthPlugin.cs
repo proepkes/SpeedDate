@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
-using NullGuard;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Authentication;
-using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Database;
 using SpeedDate.ServerPlugins.Database.Entities;
@@ -113,7 +110,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             LoggedOut?.Invoke(extension);
         }
 
-        public bool TryGetLoggedInUser(string username, [AllowNull] out UserExtension value)
+        public bool TryGetLoggedInUser(string username, out UserExtension value)
         {
             var result = _loggedInUsers.TryGetValue(username.ToLower(), out var extension);
             value = extension;

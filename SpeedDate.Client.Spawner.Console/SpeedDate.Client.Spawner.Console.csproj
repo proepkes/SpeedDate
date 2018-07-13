@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NullGuard.Fody" Version="1.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SpeedDate.ClientPlugins.Spawner\SpeedDate.ClientPlugins.Spawner.csproj" />
     <ProjectReference Include="..\SpeedDate.Client\SpeedDate.Client.csproj" />
     <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />

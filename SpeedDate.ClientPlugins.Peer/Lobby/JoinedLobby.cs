@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using NullGuard;
 using SpeedDate.ClientPlugins.Peer.Room;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
@@ -28,7 +27,6 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         public Dictionary<string, LobbyMemberData> Members { get; }
         public Dictionary<string, LobbyTeamData> Teams { get; }
 
-        [AllowNull]
         public ILobbyListener Listener { get; private set; }
 
         public string LobbyName => Data.LobbyName;
