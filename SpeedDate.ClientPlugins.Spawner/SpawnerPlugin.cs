@@ -64,6 +64,11 @@ namespace SpeedDate.ClientPlugins.Spawner
         ///-------------------------------------------------------------------------------------------------
         public void UpdateProcessesCount(int spawnerId, int count)
         {
+            if (!Client.IsConnected)
+            {
+                return;
+            }
+            
             var packet = new IntPairPacket
             {
                 A = spawnerId,
