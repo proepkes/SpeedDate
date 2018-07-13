@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NullGuard;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
-using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 
 namespace SpeedDate.ServerPlugins.Spawner
 {
-    internal class SpawnerPlugin : SpeedDateServerPlugin
+    internal sealed class SpawnerPlugin : SpeedDateServerPlugin
     {
         [Inject] private readonly ILogger _logger;
         [Inject] private readonly SpawnerConfig _config;
@@ -40,7 +40,46 @@ namespace SpeedDate.ServerPlugins.Spawner
             Task.Factory.StartNew(StartQueueUpdater, TaskCreationOptions.LongRunning);
         }
 
-        public virtual RegisteredSpawner CreateSpawner(IPeer peer, SpawnerOptions options)
+        public SpawnTask Spawn(Dictionary<string, string> properties, string region = "", string customArgs = "")
+        {
+            var spawners = GetSpawners(region, properties);
+
+            if (spawners.Count <= 0)
+            {
+                _logger.Warn("No spawner was returned after filtering. " +
+                             (string.IsNullOrEmpty(region) ? "" : "Region: " + region));
+                return null;
+            }
+
+            // Order from least busy server
+            var orderedSpawners = spawners.OrderByDescending(s => s.CalculateFreeSlotsCount());
+            var availableSpawner = orderedSpawners.FirstOrDefault(s => s.CanSpawnAnotherProcess());
+
+            // Ignore, if all of the spawners are busy
+            return availableSpawner == null ? null : Spawn(availableSpawner, properties, customArgs);
+        }
+
+        /// <summary>
+        /// Requests a specific spawner to spawn a process
+        /// </summary>
+        /// <param name="properties"></param>
+        /// <param name="customArgs"></param>
+        /// <param name="spawner"></param>
+        /// <returns></returns>
+        public SpawnTask Spawn(RegisteredSpawner spawner, Dictionary<string, string> properties, string customArgs)
+        {
+            var task = new SpawnTask(GenerateSpawnTaskId(), spawner, properties, customArgs);
+
+            _spawnTasks[task.SpawnId] = task;
+
+            spawner.AddTaskToQueue(task);
+
+            _logger.Debug("Spawner was found, and spawn task created: " + task);
+
+            return task;
+        }
+
+        private RegisteredSpawner CreateSpawner(IPeer peer, SpawnerOptions options)
         {
             var spawner = new RegisteredSpawner(GenerateSpawnerId(), peer, options);
 
@@ -77,7 +116,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             foreach (var registeredSpawner in registeredSpawners) DestroySpawner(registeredSpawner);
         }
 
-        public void DestroySpawner(RegisteredSpawner spawner)
+        private void DestroySpawner(RegisteredSpawner spawner)
         {
             var peer = spawner.Peer;
 
@@ -85,110 +124,40 @@ namespace SpeedDate.ServerPlugins.Spawner
                 peer.GetProperty((int) PeerPropertyKeys.RegisteredSpawners) is Dictionary<int, RegisteredSpawner>
                     peerRooms) peerRooms.Remove(spawner.SpawnerId);
 
-            // Remove the spawner from all spawners
             _spawners.Remove(spawner.SpawnerId);
 
             _logger.Info($"Spawner disconnected. ID: {spawner.SpawnerId}");
         }
 
-        public int GenerateSpawnerId()
+        private int GenerateSpawnerId()
         {
             return _spawnerId++;
         }
 
-        public int GenerateSpawnTaskId()
+        private int GenerateSpawnTaskId()
         {
             return _spawnTaskId++;
         }
-
-        public virtual SpawnTask Spawn(Dictionary<string, string> properties, string region = "",
-            string customArgs = "")
-        {
-            var spawners = GetFilteredSpawners(properties, region);
-
-            if (spawners.Count <= 0)
-            {
-                _logger.Warn("No spawner was returned after filtering. " +
-                             (string.IsNullOrEmpty(region) ? "" : "Region: " + region));
-                return null;
-            }
-
-            // Order from least busy server
-            var orderedSpawners = spawners.OrderByDescending(s => s.CalculateFreeSlotsCount());
-            var availableSpawner = orderedSpawners.FirstOrDefault(s => s.CanSpawnAnotherProcess());
-
-            // Ignore, if all of the spawners are busy
-            return availableSpawner == null ? null : Spawn(properties, customArgs, availableSpawner);
-        }
-
-        /// <summary>
-        ///     Requests a specific spawner to spawn a process
-        /// </summary>
-        /// <param name="properties"></param>
-        /// <param name="customArgs"></param>
-        /// <param name="spawner"></param>
-        /// <returns></returns>
-        public virtual SpawnTask Spawn(Dictionary<string, string> properties, string customArgs,
-            RegisteredSpawner spawner)
-        {
-            var task = new SpawnTask(GenerateSpawnTaskId(), spawner, properties, customArgs);
-
-            _spawnTasks[task.SpawnId] = task;
-
-            spawner.AddTaskToQueue(task);
-
-            _logger.Debug("Spawner was found, and spawn task created: " + task);
-
-            return task;
-        }
-
-        /// <summary>
-        ///     Retrieves a list of spawner that can be used with given properties and region name
-        /// </summary>
-        /// <param name="properties"></param>
-        /// <param name="region"></param>
-        /// <returns></returns>
-        public virtual List<RegisteredSpawner> GetFilteredSpawners(Dictionary<string, string> properties, string region)
-        {
-            return GetSpawners(region);
-        }
-
-        public virtual List<RegisteredSpawner> GetSpawners()
-        {
-            return GetSpawners(null);
-        }
-
-        public virtual List<RegisteredSpawner> GetSpawners(string region)
+         
+        private List<RegisteredSpawner> GetSpawners([AllowNull] string region = null, [AllowNull] Dictionary<string, string> properties = null)
         {
             // If region is not provided, retrieve all spawners
-            return string.IsNullOrEmpty(region) ? _spawners.Values.ToList() : GetSpawnersInRegion(region);
+            return string.IsNullOrEmpty(region) ? _spawners.Values.ToList() : _spawners.Values.Where(s => s.Options.Region == region).ToList();
         }
 
-        public virtual List<RegisteredSpawner> GetSpawnersInRegion(string region)
-        {
-            return _spawners.Values
-                .Where(s => s.Options.Region == region)
-                .ToList();
-        }
-
-        /// <summary>
-        ///     Returns true, if peer has permissions to register a spawner
-        /// </summary>
-        /// <param name="peer"></param>
-        /// <returns></returns>
-        protected virtual bool HasCreationPermissions(IPeer peer)
+        private bool HasCreationPermissions(IPeer peer)
         {
             var extension = peer.GetExtension<PeerSecurityExtension>();
 
             return extension.PermissionLevel >= _config.CreateSpawnerPermissionLevel;
         }
 
-        protected virtual bool CanClientSpawn(IPeer peer, ClientsSpawnRequestPacket data)
+        private bool CanClientSpawn(IPeer peer, ClientsSpawnRequestPacket data)
         {
             return _config.EnableClientSpawnRequests;
         }
 
-        protected virtual async void StartQueueUpdater()
+        private async void StartQueueUpdater()
         {
             while (true)
             {
@@ -207,9 +176,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             }
         }
 
-        #region Message Handlers
-
-        protected virtual void HandleClientsSpawnRequest(IIncommingMessage message)
+        private void HandleClientsSpawnRequest(IIncommingMessage message)
         {
             var data = message.Deserialize<ClientsSpawnRequestPacket>();
             var peer = message.Peer;
@@ -280,7 +247,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             prevRequest.Kill();
         }
 
-        protected virtual void HandleGetCompletionData(IIncommingMessage message)
+        private void HandleGetCompletionData(IIncommingMessage message)
         {
             var spawnId = message.AsInt();
 
@@ -308,7 +275,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             message.Respond(task.FinalizationPacket.FinalizationData.ToBytes(), ResponseStatus.Success);
         }
 
-        protected virtual void HandleRegisterSpawner(IIncommingMessage message)
+        private void HandleRegisterSpawner(IIncommingMessage message)
         {
             if (!HasCreationPermissions(message.Peer))
             {
@@ -327,11 +294,10 @@ namespace SpeedDate.ServerPlugins.Spawner
         }
 
         /// <summary>
-        ///     Handles a message from spawned process. Spawned process send this message
-        ///     to notify server that it was started
+        ///     Handles a message from spawned process. Spawned process send this message to notify server that it was started
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleRegisterSpawnedProcess(IIncommingMessage message)
+        private void HandleRegisterSpawnedProcess(IIncommingMessage message)
         {
             var data = message.Deserialize<RegisterSpawnedProcessPacket>();
 
@@ -356,7 +322,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             message.Respond(task.Properties.ToBytes(), ResponseStatus.Success);
         }
 
-        protected virtual void HandleCompleteSpawnProcess(IIncommingMessage message)
+        private void HandleCompleteSpawnProcess(IIncommingMessage message)
         {
             var data = message.Deserialize<SpawnFinalizationPacket>();
 
@@ -369,7 +335,7 @@ namespace SpeedDate.ServerPlugins.Spawner
                 return;
             }
 
-            if (task.RegisteredPeer != message.Peer)
+            if (task.Handler != message.Peer)
             {
                 message.Respond("Unauthorized", ResponseStatus.Unauthorized);
                 _logger.Error(
@@ -382,7 +348,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleProcessKilled(IIncommingMessage message)
+        private void HandleProcessKilled(IIncommingMessage message)
         {
             var spawnId = message.AsInt();
 
@@ -395,7 +361,7 @@ namespace SpeedDate.ServerPlugins.Spawner
             task.Spawner.OnProcessKilled();
         }
 
-        protected virtual void HandleProcessStarted(IIncommingMessage message)
+        private void HandleProcessStarted(IIncommingMessage message)
         {
             var spawnId = message.AsInt();
 
@@ -416,7 +382,5 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             spawner?.UpdateProcessesCount(packet.B);
         }
-
-        #endregion
     }
 }
