@@ -68,10 +68,7 @@ namespace SpeedDate.Test
             {
                 done.Set();
             },
-            error =>
-            {
-                throw new Exception(error);
-            });
+            error => throw new Exception(error));
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
             
