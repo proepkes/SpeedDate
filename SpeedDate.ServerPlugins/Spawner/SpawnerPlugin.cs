@@ -83,12 +83,11 @@ namespace SpeedDate.ServerPlugins.Spawner
         {
             var spawner = new RegisteredSpawner(GenerateSpawnerId(), peer, options);
 
+            // If this is the first time registering a spawner...
             if (!(peer.GetProperty((int) PeerPropertyKeys.RegisteredSpawners) is Dictionary<int, RegisteredSpawner>
                 peerSpawners))
             {
-                // If this is the first time registering a spawners
-
-                // Save the dictionary
+                //... save the dictionary
                 peerSpawners = new Dictionary<int, RegisteredSpawner>();
                 peer.SetProperty((int) PeerPropertyKeys.RegisteredSpawners, peerSpawners);
 
