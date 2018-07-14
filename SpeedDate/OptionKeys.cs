@@ -1,6 +1,6 @@
 ﻿namespace SpeedDate
 {
-    public class OptionKeys
+    public static class OptionKeys
     {
         public static string MaxPlayers = "sd.maxPlayers";
         public static string RoomName = "sd.roomName";

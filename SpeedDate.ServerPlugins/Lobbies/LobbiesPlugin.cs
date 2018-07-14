@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Configuration;
-using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.Packets.Matchmaking;
-using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Matchmaker;
 using SpeedDate.ServerPlugins.Rooms;
@@ -16,7 +14,7 @@ using SpeedDate.ServerPlugins.Spawner;
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {
-    public class LobbiesPlugin : SpeedDateServerPlugin, IGamesProvider
+    public sealed class LobbiesPlugin : SpeedDateServerPlugin, IGamesProvider
     {
         [Inject] private readonly ILogger _logger;
         [Inject] internal readonly RoomsPlugin RoomsPlugin;
@@ -51,7 +49,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             Server.SetHandler((ushort)OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
         }
 
-        protected virtual bool CheckIfHasPermissionToCreate(IPeer peer)
+        private bool CheckIfHasPermissionToCreate(IPeer peer)
         {
             var extension = peer.GetExtension<PeerSecurityExtension>();
 
@@ -84,13 +82,13 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// Invoked, when lobby is destroyed
         /// </summary>
         /// <param name="lobby"></param>
-        protected virtual void OnLobbyDestroyed(ILobby lobby)
+        private void OnLobbyDestroyed(ILobby lobby)
         {
             Lobbies.Remove(lobby.Id);
             lobby.Destroyed -= OnLobbyDestroyed;
         }
 
-        protected virtual LobbyUserExtension GetOrCreateLobbiesExtension(IPeer peer)
+        private LobbyUserExtension GetOrCreateLobbiesExtension(IPeer peer)
         {
             var extension = peer.GetExtension<LobbyUserExtension>();
 
@@ -107,10 +105,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             return _nextLobbyId++;
         }
-
-        #region Message Handlers
-
-        protected virtual void HandleCreateLobby(IIncommingMessage message)
+        
+        private void HandleCreateLobby(IIncommingMessage message)
         {
             if (!CheckIfHasPermissionToCreate(message.Peer))
             {
@@ -163,7 +159,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// Handles a request from user to join a lobby
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleJoinLobby(IIncommingMessage message)
+        private void HandleJoinLobby(IIncommingMessage message)
         {
             var user = GetOrCreateLobbiesExtension(message.Peer);
 
@@ -197,7 +193,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// Handles a request from user to leave a lobby
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleLeaveLobby(IIncommingMessage message)
+        private void HandleLeaveLobby(IIncommingMessage message)
         {
             var lobbyId = message.AsInt();
 
@@ -210,7 +206,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleSetLobbyProperties(IIncommingMessage message)
+        private void HandleSetLobbyProperties(IIncommingMessage message)
         {
             var data = message.Deserialize<LobbyPropertiesSetPacket>();
 
@@ -268,7 +264,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleSetReadyStatus(IIncommingMessage message)
+        private void HandleSetReadyStatus(IIncommingMessage message)
         {
             var isReady = message.AsInt() > 0;
 
@@ -293,7 +289,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleJoinTeam(IIncommingMessage message)
+        private void HandleJoinTeam(IIncommingMessage message)
         {
             var data = message.Deserialize<LobbyJoinTeamPacket>();
 
@@ -323,7 +319,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleSendChatMessage(IIncommingMessage message)
+        private void HandleSendChatMessage(IIncommingMessage message)
         {
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
             var lobby = lobbiesExt.CurrentLobby;
@@ -337,7 +333,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             lobby.HandleChatMessage(member, message);
         }
 
-        protected virtual void HandleStartGame(IIncommingMessage message)
+        private void HandleStartGame(IIncommingMessage message)
         {
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
             var lobby = lobbiesExt.CurrentLobby;
@@ -351,7 +347,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleGetLobbyRoomAccess(IIncommingMessage message)
+        private void HandleGetLobbyRoomAccess(IIncommingMessage message)
         {
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
             var lobby = lobbiesExt.CurrentLobby;
@@ -364,7 +360,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             lobby.HandleGameAccessRequest(message);
         }
 
-        protected virtual void HandleGetLobbyMemberData(IIncommingMessage message)
+        private void HandleGetLobbyMemberData(IIncommingMessage message)
         {
             var data = message.Deserialize<IntPairPacket>();
             var lobbyId = data.A;
@@ -389,7 +385,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(member.GenerateDataPacket(), ResponseStatus.Success);
         }
 
-        protected virtual void HandleGetLobbyInfo(IIncommingMessage message)
+        private void HandleGetLobbyInfo(IIncommingMessage message)
         {
             var lobbyId = message.AsInt();
 
@@ -403,8 +399,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             message.Respond(lobby.GenerateLobbyData(), ResponseStatus.Success);
         }
-
-        #endregion
 
         public IEnumerable<GameInfoPacket> GetPublicGames(IPeer peer, Dictionary<string, string> filters)
         {
@@ -421,7 +415,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             });
         }
 
-        public virtual Dictionary<string, string> GetPublicLobbyProperties(IPeer peer, ILobby lobby,
+        public Dictionary<string, string> GetPublicLobbyProperties(IPeer peer, ILobby lobby,
             Dictionary<string, string> playerFilters)
         {
             return lobby.GetPublicProperties(peer);

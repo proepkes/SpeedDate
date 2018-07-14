@@ -7,36 +7,29 @@ namespace SpeedDate
     {
         private static readonly string[] Args;
 
-        public static readonly MsfArgNames Names;
-
         static CommandLineArgs()
         {
             Args = Environment.GetCommandLineArgs();
+            
+            MasterPort = ExtractValueInt(SpeedDateArgNames.MasterPort, 60125);
+            MasterIp = ExtractValue(SpeedDateArgNames.MasterIp);
+            MachineIp = ExtractValue(SpeedDateArgNames.MachineIp);
 
-            // Android fix
-            Names = new MsfArgNames();
+            SpawnId = ExtractValueInt(SpeedDateArgNames.SpawnId);
+            AssignedPort = ExtractValueInt(SpeedDateArgNames.AssignedPort);
+            SpawnCode = ExtractValue(SpeedDateArgNames.SpawnCode);
+            ExecutablePath = ExtractValue(SpeedDateArgNames.ExecutablePath);
+            DontSpawnInBatchmode = IsProvided(SpeedDateArgNames.DontSpawnInBatchmode);
+            MaxProcesses = ExtractValueInt(SpeedDateArgNames.MaxProcesses, 0);
 
-            MasterPort = ExtractValueInt(Names.MasterPort, 60125);
-            MasterIp = ExtractValue(Names.MasterIp);
-            MachineIp = ExtractValue(Names.MachineIp);
+            LoadScene = ExtractValue(SpeedDateArgNames.LoadScene);
 
-            SpawnId = ExtractValueInt(Names.SpawnId);
-            AssignedPort = ExtractValueInt(Names.AssignedPort);
-            SpawnCode = ExtractValue(Names.SpawnCode);
-            ExecutablePath = ExtractValue(Names.ExecutablePath);
-            DontSpawnInBatchmode = IsProvided(Names.DontSpawnInBatchmode);
-            MaxProcesses = ExtractValueInt(Names.MaxProcesses, 0);
+            DbConnectionString = ExtractValue(SpeedDateArgNames.DbConnectionString);
 
-            LoadScene = ExtractValue(Names.LoadScene);
-
-            DbConnectionString = ExtractValue(Names.DbConnectionString);
-
-            LobbyId = ExtractValueInt(Names.LobbyId);
-            WebGl = IsProvided(Names.WebGl);
+            LobbyId = ExtractValueInt(SpeedDateArgNames.LobbyId);
+            WebGl = IsProvided(SpeedDateArgNames.WebGl);
             
         }
-
-        #region Arguments
         
         /// <summary>
         /// Port, which will be open on the master server
@@ -104,10 +97,6 @@ namespace SpeedDate
         /// support webgl clients
         /// </summary>
         public static bool WebGl { get; }
-
-        #endregion
-
-        #region Helper methods
         
         public static string ExtractValue(string argName, string defaultValue = null)
         {
@@ -129,23 +118,21 @@ namespace SpeedDate
             return Args.Contains(argName);
         }
 
-        #endregion
-
-        public class MsfArgNames
+        public static class SpeedDateArgNames
         {
-            public string MasterPort => "-sdMasterPort";
-            public string MasterIp => "-sdMasterIp";
-            public string SpawnId => "-sdSpawnId";
-            public string SpawnCode => "-sdSpawnCode";
-            public string AssignedPort => "-sdAssignedPort";
-            public string LoadScene => "-sdLoadScene";
-            public string MachineIp => "-sdMachineIp";
-            public string ExecutablePath => "-sdExe";
-            public string DbConnectionString => "-sdDbConnectionString";
-            public string LobbyId => "-sdLobbyId";
-            public string DontSpawnInBatchmode => "-sdDontSpawnInBatchmode";
-            public string MaxProcesses => "-sdMaxProcesses";
-            public string WebGl => "-sdWebgl";
+            public const string MasterPort = "-sdMasterPort";
+            public const string MasterIp = "-sdMasterIp";
+            public const string SpawnId = "-sdSpawnId";
+            public const string SpawnCode = "-sdSpawnCode";
+            public const string AssignedPort = "-sdAssignedPort";
+            public const string LoadScene = "-sdLoadScene";
+            public const string MachineIp = "-sdMachineIp";
+            public const string ExecutablePath = "-sdExe";
+            public const string DbConnectionString = "-sdDbConnectionString";
+            public const string LobbyId = "-sdLobbyId";
+            public const string DontSpawnInBatchmode = "-sdDontSpawnInBatchmode";
+            public const string MaxProcesses = "-sdMaxProcesses";
+            public const string WebGl = "-sdWebgl";
         }
     }
 }

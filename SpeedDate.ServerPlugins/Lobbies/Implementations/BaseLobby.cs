@@ -25,15 +25,15 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         public event Action<ILobby> Destroyed;
 
-        public Logger Logger = LogManager.GetLogger(typeof(BaseLobby).Name);
+        public readonly Logger Logger = LogManager.GetLogger(typeof(BaseLobby).Name);
 
-        protected Dictionary<string, LobbyMember> Members;
-        protected Dictionary<long, LobbyMember> MembersByPeerId;
-        protected Dictionary<string, string> Properties;
-        protected Dictionary<string, LobbyTeam> Teams;
-        protected HashSet<IPeer> Subscribers;
+        protected readonly Dictionary<string, LobbyMember> Members;
+        protected readonly Dictionary<long, LobbyMember> MembersByPeerId;
+        protected readonly Dictionary<string, string> Properties;
+        protected readonly Dictionary<string, LobbyTeam> Teams;
+        protected readonly HashSet<IPeer> Subscribers;
 
-        protected List<LobbyPropertyData> Controls;
+        protected readonly List<LobbyPropertyData> Controls;
 
         protected SpawnTask GameSpawnTask;
         protected RegisteredRoom Room;
@@ -476,7 +476,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
         protected virtual string GenerateCmdArgs()
         {
-            return CommandLineArgs.Names.LobbyId + " " + Id;
+            return CommandLineArgs.LobbyId + " " + Id;
         }
 
         public void SetGameSpawnTask(SpawnTask task)

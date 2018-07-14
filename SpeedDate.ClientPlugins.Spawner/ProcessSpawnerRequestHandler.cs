@@ -48,7 +48,7 @@ namespace SpeedDate.ClientPlugins.Spawner
 
             // Get the scene name
             var sceneNameArgument = data.Properties.ContainsKey(OptionKeys.SceneName)
-                ? $"{CommandLineArgs.Names.LoadScene} {data.Properties[OptionKeys.SceneName]} "
+                ? $"{CommandLineArgs.LoadScene} {data.Properties[OptionKeys.SceneName]} "
                 : "";
 
             if (!string.IsNullOrEmpty(data.OverrideExePath))
@@ -67,14 +67,14 @@ namespace SpeedDate.ClientPlugins.Spawner
                 UseShellExecute = true,
                 Arguments = " " +
                             (spawnInBatchmode ? "-batchmode -nographics " : "") +
-                            (_spawnerConfig.AddWebGlFlag ? CommandLineArgs.Names.WebGl + " " : "") +
+                            (_spawnerConfig.AddWebGlFlag ? CommandLineArgs.WebGl + " " : "") +
                             sceneNameArgument +
-                            $"{CommandLineArgs.Names.MasterIp} {_client.Config.Network.Address} " +
-                            $"{CommandLineArgs.Names.MasterPort} {_client.Config.Network.Port} " +
-                            $"{CommandLineArgs.Names.SpawnId} {data.SpawnId} " +
-                            $"{CommandLineArgs.Names.AssignedPort} {port} " +
-                            $"{CommandLineArgs.Names.MachineIp} {machineIp} " +
-                            $"{CommandLineArgs.Names.SpawnCode} \"{data.SpawnCode}\" " +
+                            $"{CommandLineArgs.MasterIp} {_client.Config.Network.Address} " +
+                            $"{CommandLineArgs.MasterPort} {_client.Config.Network.Port} " +
+                            $"{CommandLineArgs.SpawnId} {data.SpawnId} " +
+                            $"{CommandLineArgs.AssignedPort} {port} " +
+                            $"{CommandLineArgs.MachineIp} {machineIp} " +
+                            $"{CommandLineArgs.SpawnCode} \"{data.SpawnCode}\" " +
                             data.CustomArgs
             };
 

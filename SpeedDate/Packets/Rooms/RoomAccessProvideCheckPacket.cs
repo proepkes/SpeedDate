@@ -18,7 +18,7 @@ namespace SpeedDate.Packets.Rooms
 
         public override void FromBinaryReader(EndianBinaryReader reader)
         {
-            PeerId = reader.ReadInt32();
+            PeerId = reader.ReadInt64();
             RoomId = reader.ReadInt32();
             Username = reader.ReadString();
         }

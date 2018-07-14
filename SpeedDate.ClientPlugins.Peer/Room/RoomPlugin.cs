@@ -24,8 +24,8 @@ namespace SpeedDate.ClientPlugins.Peer.Room
         ///     Tries to get an access to a room with a given room id, password,
         ///     and some other properties, which will be visible to the room (game server)
         /// </summary>
-        public void GetAccess(int roomId, RoomAccessCallback callback, string password,
-            Dictionary<string, string> properties, ErrorCallback errorCallback)
+        public void GetAccess(int roomId, string password, Dictionary<string, string> properties, RoomAccessCallback callback,
+             ErrorCallback errorCallback)
         {
             if (!Client.IsConnected)
             {

@@ -17,7 +17,7 @@ namespace SpeedDate.ServerPlugins.Database
         {
             try
             {
-                var connectionString = CommandLineArgs.IsProvided(CommandLineArgs.Names.DbConnectionString)
+                var connectionString = CommandLineArgs.IsProvided(CommandLineArgs.DbConnectionString)
                     ? CommandLineArgs.DbConnectionString
                     : DbAccess.BuildConnectionString(_config);
                    

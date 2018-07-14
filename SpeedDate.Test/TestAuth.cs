@@ -84,7 +84,7 @@ namespace SpeedDate.Test
         [Test]
         public void SimultaneousGuestLogins_ShouldGenerateDistinctUsernames()
         {
-            var numberOfClients = 100;
+            var numberOfClients = 20;
             IProducerConsumerCollection<string> generatedUsernames = new ConcurrentBag<string>();
             
             var done = new ManualResetEvent(false);

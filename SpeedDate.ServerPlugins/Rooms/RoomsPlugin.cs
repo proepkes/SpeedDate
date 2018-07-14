@@ -299,8 +299,7 @@ namespace SpeedDate.ServerPlugins.Rooms
         {
             var data = message.Deserialize<RoomAccessRequestPacket>();
 
-            RegisteredRoom room;
-            _rooms.TryGetValue(data.RoomId, out room);
+            _rooms.TryGetValue(data.RoomId, out var room);
 
             if (room == null)
             {
