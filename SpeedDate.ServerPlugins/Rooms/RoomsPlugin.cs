@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using SpeedDate.Interfaces;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Matchmaking;
 using SpeedDate.Packets.Rooms;
-using SpeedDate.Plugin.Interfaces;
 using SpeedDate.Server;
 using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Matchmaker;
@@ -244,7 +241,7 @@ namespace SpeedDate.ServerPlugins.Rooms
 
             if (message.Peer != room.Peer)
             {
-                // Wrong peer unregistering the room
+                // Wrong peer querying the room
                 message.Respond("You're not the creator of the room", ResponseStatus.Unauthorized);
                 return;
             }
@@ -255,7 +252,7 @@ namespace SpeedDate.ServerPlugins.Rooms
                 return;
             }
 
-            var packet = new UsernameAndPeerIdPacket()
+            var packet = new UsernameAndPeerIdPacket
             {
                 PeerId =  playerPeer.ConnectId
             };

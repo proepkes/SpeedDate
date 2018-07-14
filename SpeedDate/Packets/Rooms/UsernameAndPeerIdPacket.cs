@@ -17,12 +17,12 @@ namespace SpeedDate.Packets.Rooms
         public override void FromBinaryReader(EndianBinaryReader reader)
         {
             Username = reader.ReadString();
-            PeerId = reader.ReadInt32();
+            PeerId = reader.ReadInt64();
         }
 
         public override string ToString()
         {
-            return string.Format("[Username: {0}, Peer ID: {1}]", Username, PeerId);
+            return $"[Username: {Username}, Peer ID: {PeerId}]";
         }
     }
 }

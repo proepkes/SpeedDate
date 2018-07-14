@@ -2,6 +2,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.2</LangVersion>
+    <AssemblyName>SpeedDate.ClientPlugins.GameServer</AssemblyName>
+    <RootNamespace>SpeedDate.ClientPlugins.GameServer</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpeedDate.ClientPlugins\SpeedDate.ClientPlugins.csproj" />

@@ -7,24 +7,28 @@ using SpeedDate.ServerPlugins.Database.Entities;
 
 namespace SpeedDate.ServerPlugins.Database
 {
-    public class DatabasePlugin : IPlugin, IDbAccess
+    ///<summary>   
+    /// A database plugin which wraps a concrete dbAccess. 
+    /// This class cannot be inherited. 
+    ///</summary>
+    public sealed class DatabasePlugin : IPlugin, IDbAccess
     {
-        [Inject] private IDbAccess DbAccess;
         [Inject] private ILogger _logger;
         [Inject] private DatabaseConfig _config;
-        
+        [Inject] private IDbAccess _concreteDbAccess;
+
         public void Loaded()
         {
             try
             {
                 var connectionString = CommandLineArgs.IsProvided(CommandLineArgs.DbConnectionString)
                     ? CommandLineArgs.DbConnectionString
-                    : DbAccess.BuildConnectionString(_config);
+                    : _concreteDbAccess.BuildConnectionString(_config);
                    
 
-                DbAccess.SetConnectionString(connectionString);
+                _concreteDbAccess.SetConnectionString(connectionString);
                 
-                if (_config.CheckConnectionOnStartup && !DbAccess.TryConnection(out var e))
+                if (_config.CheckConnectionOnStartup && !_concreteDbAccess.TryConnection(out var e))
                 {
                     _logger.Error(e);
                     throw e;
@@ -43,9 +47,9 @@ namespace SpeedDate.ServerPlugins.Database
         /// <param name="dbAccess"></param>
         public void SetDbAccess(IDbAccess dbAccess)
         {
-            DbAccess = dbAccess;
+            _concreteDbAccess = dbAccess;
 
-            if (_config.CheckConnectionOnStartup && !DbAccess.TryConnection(out var e))
+            if (_config.CheckConnectionOnStartup && !_concreteDbAccess.TryConnection(out var e))
             {
                 _logger.Error(e);
                 throw e;
@@ -54,82 +58,82 @@ namespace SpeedDate.ServerPlugins.Database
 
         public string BuildConnectionString(DatabaseConfig config)
         {
-            return DbAccess.BuildConnectionString(config);
+            return _concreteDbAccess.BuildConnectionString(config);
         }
 
         public void SetConnectionString(string connectionString)
         {
-            DbAccess.SetConnectionString(connectionString);
+            _concreteDbAccess.SetConnectionString(connectionString);
         }
 
         public bool TryConnection(out Exception e)
         {
-            return DbAccess.TryConnection(out e);
+            return _concreteDbAccess.TryConnection(out e);
         }
 
         public AccountData CreateAccountObject()
         {
-            return DbAccess.CreateAccountObject();
+            return _concreteDbAccess.CreateAccountObject();
         }
 
         public AccountData GetAccount(string username)
         {
-            return DbAccess.GetAccount(username);
+            return _concreteDbAccess.GetAccount(username);
         }
 
         public AccountData GetAccountByToken(string token)
         {
-            return DbAccess.GetAccountByToken(token);
+            return _concreteDbAccess.GetAccountByToken(token);
         }
 
         public AccountData GetAccountByEmail(string email)
         {
-            return DbAccess.GetAccountByEmail(email);
+            return _concreteDbAccess.GetAccountByEmail(email);
         }
 
         public void SavePasswordResetCode(AccountData account, string code)
         {
-            DbAccess.SavePasswordResetCode(account, code);
+            _concreteDbAccess.SavePasswordResetCode(account, code);
         }
 
         public PasswordResetData GetPasswordResetData(string email)
         {
-            return DbAccess.GetPasswordResetData(email);
+            return _concreteDbAccess.GetPasswordResetData(email);
         }
 
         public void SaveEmailConfirmationCode(string email, string code)
         {
-            DbAccess.SaveEmailConfirmationCode(email, code);
+            _concreteDbAccess.SaveEmailConfirmationCode(email, code);
         }
 
         public string GetEmailConfirmationCode(string email)
         {
-            return DbAccess.GetEmailConfirmationCode(email);
+            return _concreteDbAccess.GetEmailConfirmationCode(email);
         }
 
         public void UpdateAccount(AccountData account)
         {
-            DbAccess.UpdateAccount(account);
+            _concreteDbAccess.UpdateAccount(account);
         }
 
         public void InsertNewAccount(AccountData account)
         {
-            DbAccess.InsertNewAccount(account);
+            _concreteDbAccess.InsertNewAccount(account);
         }
 
         public void InsertToken(AccountData account, string token)
         {
-            DbAccess.InsertToken(account, token);
+            _concreteDbAccess.InsertToken(account, token);
         }
 
         public void RestoreProfile(ObservableServerProfile profile)
         {
-            DbAccess.RestoreProfile(profile);
+            _concreteDbAccess.RestoreProfile(profile);
         }
 
         public void UpdateProfile(ObservableServerProfile profile)
         {
-            DbAccess.UpdateProfile(profile);
+            _concreteDbAccess.UpdateProfile(profile);
         }
     }
 }

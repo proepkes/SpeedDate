@@ -1,7 +1,4 @@
-﻿
-using SpeedDate.Interfaces;
-using SpeedDate.Network;
-using SpeedDate.Network.Interfaces;
+﻿using SpeedDate.Network;
 using SpeedDate.Packets.Authentication;
 
 namespace SpeedDate.ClientPlugins.GameServer

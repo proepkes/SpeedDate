@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using SpeedDate.Interfaces;
 using SpeedDate.Logging;
 
 namespace SpeedDate.ClientPlugins.GameServer
 {
     public class SpawnTaskController
     {
-        public int SpawnId { get; private set; }
-        public Dictionary<string, string> Properties { get; private set; }
+        public int SpawnId { get; }
+        public Dictionary<string, string> Properties { get; }
 
         private readonly RoomsPlugin _spawnerClient;
 

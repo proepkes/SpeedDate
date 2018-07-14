@@ -33,6 +33,10 @@ namespace SpeedDate.ClientPlugins.GameServer
         /// </summary>
         public event Action<RoomController> RoomDestroyed;
 
+        public override void Loaded()
+        { 
+        }
+
         /// <summary>
         /// Sends a request to register a room to master server
         /// </summary>

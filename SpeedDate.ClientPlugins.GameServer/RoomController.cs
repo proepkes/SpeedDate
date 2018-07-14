@@ -17,7 +17,7 @@ namespace SpeedDate.ClientPlugins.GameServer
     {
         public readonly IClient Client;
 
-        public int RoomId { get; private set; }
+        public int RoomId { get; }
         public RoomOptions Options { get; private set; }
 
         private RoomAccessProvider _accessProvider;
@@ -184,7 +184,7 @@ namespace SpeedDate.ClientPlugins.GameServer
             var accessProvider = roomController._accessProvider ?? DefaultAccessProvider;
             var isProviderDone = false;
 
-            var requester = new UsernameAndPeerIdPacket()
+            var requester = new UsernameAndPeerIdPacket
             {
                 PeerId = data.PeerId,
                 Username = data.Username

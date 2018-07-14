@@ -26,6 +26,8 @@ namespace SpeedDate.Client
         public event Action Started;
         public event Action Stopped;
 
+        public long PeerId => _netPeer.ConnectId;
+
         public SpeedDateClient()
         {
             _handlers = new Dictionary<ushort, IPacketHandler>();

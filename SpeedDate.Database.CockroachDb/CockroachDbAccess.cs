@@ -5,9 +5,10 @@ using Npgsql;
 using SpeedDate.Logging;
 using SpeedDate.Packets;
 using SpeedDate.Plugin.Interfaces;
+using SpeedDate.ServerPlugins.Database;
 using SpeedDate.ServerPlugins.Database.Entities;
 
-namespace SpeedDate.ServerPlugins.Database.CockroachDb
+namespace SpeedDate.Database.CockroachDb
 {
     public class CockroachDbAccess : IDbAccess, IPluginResource<IDbAccess>
     {
