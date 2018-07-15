@@ -49,7 +49,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -83,7 +83,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -121,7 +121,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -162,7 +162,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -195,7 +195,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -217,7 +217,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
@@ -262,7 +262,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -281,7 +281,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobby-listener
@@ -326,7 +326,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -348,7 +348,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobby-listener
@@ -382,7 +382,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -408,7 +408,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
@@ -441,7 +441,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -466,7 +466,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
@@ -507,7 +507,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -541,7 +541,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
@@ -605,7 +605,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -641,7 +641,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
@@ -703,7 +703,7 @@ namespace SpeedDate.Test
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
@@ -739,7 +739,7 @@ namespace SpeedDate.Test
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined

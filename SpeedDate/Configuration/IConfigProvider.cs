@@ -4,6 +4,7 @@ namespace SpeedDate.Configuration
 {
     public interface IConfigProvider
     {
-        SpeedDateConfig Configure(IEnumerable<IConfig> configInstances);
+        SpeedDateConfig Result { get; }
+        void Configure(IEnumerable<IConfig> configInstances);
     }
 }

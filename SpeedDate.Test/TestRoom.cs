@@ -63,7 +63,7 @@ namespace SpeedDate.Test
             };
 
             gameServer.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultGameServerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside GetJoinedChannels
@@ -103,7 +103,7 @@ namespace SpeedDate.Test
             };
 
             gameServer.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultGameServerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside GetJoinedChannels

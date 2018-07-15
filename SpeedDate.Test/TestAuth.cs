@@ -41,7 +41,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
@@ -59,7 +59,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
@@ -119,7 +119,7 @@ namespace SpeedDate.Test
                         };
 
                         client.Start(new DefaultConfigProvider(
-                            new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                            new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                             PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
                         
                     }, clientNumber);
@@ -139,7 +139,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
@@ -163,11 +163,7 @@ namespace SpeedDate.Test
                 {
                     done.Set();
                 },
-                error =>
-                {
-                    //If the server wouldn't generate a new AES-Key for this client, the server would respond with "Insecure request"
-                    throw new Exception(error);
-                });
+                error => throw new Exception(error));
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
         }
@@ -184,7 +180,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
@@ -193,10 +189,7 @@ namespace SpeedDate.Test
                 {
                     done.Set();
                 },
-                error =>
-                {
-                    throw new Exception(error);
-                });
+                error => throw new Exception(error));
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
             
@@ -217,7 +210,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled by Started
@@ -226,10 +219,7 @@ namespace SpeedDate.Test
                 {
                     done.Set();
                 },
-                error =>
-                {
-                    throw new Exception(error);
-                });
+                error => throw new Exception(error));
             
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled by Login
             
@@ -241,10 +231,7 @@ namespace SpeedDate.Test
                 {
                     done.Set();
                 },
-                error =>
-                {
-                    throw new Exception(error);
-                });
+                error => throw new Exception(error));
             
             done.WaitOne(TimeSpan.FromSeconds(5)).ShouldBeTrue();
             

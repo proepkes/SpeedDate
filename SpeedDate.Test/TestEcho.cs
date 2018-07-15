@@ -37,7 +37,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
@@ -72,7 +72,7 @@ namespace SpeedDate.Test
                     };
 
                     client.Start(new DefaultConfigProvider(
-                        new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                        new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                         PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
                 }, clientNumber);

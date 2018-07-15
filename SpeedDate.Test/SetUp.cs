@@ -16,7 +16,8 @@ namespace SpeedDate.Test
     [SetUpFixture]
     public class SetUp
     {
-        public const int Port = 12345;
+        public static readonly IPAddress MasterServerIp = IPAddress.Loopback;
+        public const int MasterServerPort = 12345;
         public const string GuestPrefix = "TestGuest-";
         public const string TestAccountPassword = "testPassword";
         
@@ -52,7 +53,7 @@ namespace SpeedDate.Test
             DatabaseMock.Setup(db => db.GetAccountByToken(It.IsNotIn(TestAccount.Token))).Returns(() => null);
             
             Server = new SpeedDateServer();
-            Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, Port), PluginsConfig.DefaultServerPlugins, new IConfig[]
+            Server.Start(new DefaultConfigProvider(new NetworkConfig(IPAddress.Any, MasterServerPort), PluginsConfig.DefaultServerPlugins, new IConfig[]
             {
                 new DatabaseConfig
                 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,35 +14,43 @@ using SpeedDate.Plugin.Interfaces;
 namespace SpeedDate
 {
     public delegate void KernelStartedCallback(SpeedDateConfig config);
+
     public sealed class SpeedDateKernel
     {
         private SpeedDateConfig _config;
         private TinyIoCContainer _container;
+        private ILogger _logger;
 
-        public void Load(ISpeedDateStartable startable, IConfigProvider configProvider, KernelStartedCallback startedCallback)
+        public void Load(ISpeedDateStartable startable, IConfigProvider configProvider,
+            KernelStartedCallback startedCallback)
         {
-            var logger = LogManager.GetLogger("SpeedDate");
+            _logger = LogManager.GetLogger("SpeedDate");
+
+            _config = configProvider.Result;
             
             _container = CreateContainer(startable);
-            
-            _config = configProvider.Configure(_container.ResolveAll<IConfig>());
-            
+
+            configProvider.Configure(_container.ResolveAll<IConfig>());
+
             _container.BuildUp(startable);
-            
+
             //Filter plugins for namespace & inject configuration into valid plugins
             foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
-                if(_config.Plugins.Namespaces.Split(';').Any(ns => Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns.Trim()))))
+                if (_config.Plugins.Namespaces.Split(';').Any(ns =>
+                    Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns.Trim()))))
                 {
-                    logger.Debug($"Loading plugin: {plugin}");
+                    _logger.Debug($"Loading plugin: {plugin}");
                     //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
-                    var fields = from field in plugin.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+                    var fields = from field in plugin.GetType()
+                            .GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
                         where Attribute.IsDefined(field, typeof(InjectAttribute))
                         select field;
 
                     foreach (var field in fields)
                     {
-                        if (field.GetValue(plugin) == null && _config.TryGetConfig(field.FieldType.FullName, out var config))
+                        if (field.GetValue(plugin) == null &&
+                            _config.TryGetConfig(field.FieldType.FullName, out var config))
                         {
                             field.SetValue(plugin, config);
                         }
@@ -52,18 +61,18 @@ namespace SpeedDate
                     _container.Unregister(typeof(IPlugin), plugin.GetType().FullName);
                 }
             }
-           
+
             //Inject additional dependencies e.g. ILogger 
             foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
                 _container.BuildUp(plugin);
             }
-            
+
             //Finally notify every plugin that loading has finished
             foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
                 plugin.Loaded();
-                logger.Info($"Loaded {plugin.GetType().Name}");
+                _logger.Info($"Loaded {plugin.GetType().Name}");
             }
 
             startedCallback.Invoke(_config);
@@ -74,27 +83,42 @@ namespace SpeedDate
             AppUpdater.Instance.KeepRunning = false;
         }
 
-        private static TinyIoCContainer CreateContainer(ISpeedDateStartable startable)
+        private TinyIoCContainer CreateContainer(ISpeedDateStartable startable)
         {
             var ioc = new TinyIoCContainer();
-            try
+            //Register possible plugin-dependencies
+            ioc.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
+
+            switch (startable)
             {
-                //Register possible plugin-dependencies
-                ioc.Register<ILogger>((container, overloads, requestType) => LogManager.GetLogger(requestType.Name));
+                case IServer _:
+                    ioc.Register((container, overloads, requesttype) => (IServer) startable);
+                    break;
+                case IClient _:
+                    ioc.Register((container, overloads, requesttype) => (IClient) startable);
+                    break;
+            }
 
-                switch (startable)
+            //Register configs & plugins
+            foreach (var dllFile in
+                Directory.GetFiles(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+                    throw new InvalidOperationException(), "*.dll").Where(file =>
                 {
-                    case IServer _:
-                        ioc.Register((container, overloads, requesttype) => (IServer)startable);
-                        break;
-                    case IClient _:
-                        ioc.Register((container, overloads, requesttype) => (IClient)startable);
-                        break;
-                }
+                    foreach (var s in _config.Plugins.ExcludeDlls.Split(';'))
+                    {
+                        if (Regex.IsMatch(Path.GetFileNameWithoutExtension(file), WildCardToRegular(s.Trim())) )
+                        {
+                            return false;
+                        }   
+                    }
 
-                //Register configs & plugins
-                foreach (var dllFile in
-                    Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new InvalidOperationException(), "*.dll"))
+                    return true;
+                }))
+            {
+                _logger.Info($"Loading dll: {dllFile}");
+                
+                try
                 {
                     var assembly = Assembly.LoadFrom(dllFile);
                     foreach (var typeInfo in assembly.DefinedTypes.Where(type => !type.IsAbstract && !type.IsInterface))
@@ -119,11 +143,10 @@ namespace SpeedDate
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                throw;
+                catch (Exception ex)
+                {
+                    _logger.Error($"Exception while loading dll: {ex}");
+                }
             }
 
             return ioc;
@@ -133,11 +156,11 @@ namespace SpeedDate
         {
             return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
         }
-        
+
         private static bool IsAssignableToGenericType(Type givenType, Type genericType, out Type genericTypeArgument)
         {
             genericTypeArgument = null;
-            
+
             var interfaceTypes = givenType.GetInterfaces();
 
             foreach (var it in interfaceTypes)
@@ -155,8 +178,8 @@ namespace SpeedDate
                 return true;
             }
 
-            var baseType = givenType.BaseType;
-            return baseType != null && IsAssignableToGenericType(baseType, genericType, out genericTypeArgument);
+            return givenType.BaseType != null &&
+                   IsAssignableToGenericType(givenType.BaseType, genericType, out genericTypeArgument);
         }
 
         public T GetPlugin<T>() where T : class, IPlugin

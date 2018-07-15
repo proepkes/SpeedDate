@@ -39,7 +39,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside GetJoinedChannels
@@ -72,7 +72,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside GetJoinedChannels
@@ -111,7 +111,7 @@ namespace SpeedDate.Test
             };
 
             masterClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside masterClient.GetJoinedChannels
@@ -131,7 +131,7 @@ namespace SpeedDate.Test
             };
 
             slaveClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside slaveClient.Started
@@ -164,7 +164,7 @@ namespace SpeedDate.Test
             };
 
             slaveClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside slaveClient.SendPrivateMessage
@@ -201,7 +201,7 @@ namespace SpeedDate.Test
             };
 
             masterClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside masterClient.LogInAsGuest
@@ -228,7 +228,7 @@ namespace SpeedDate.Test
             };
 
             slaveClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled inside MessageReceived

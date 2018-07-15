@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Test", "SpeedDate
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeedDate.Database.CockroachDb", "SpeedDate.Database.CockroachDb\SpeedDate.Database.CockroachDb.csproj", "{ED4266B1-55C0-4013-8902-A3761956DF1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Example", "Game.Example\Game.Example.csproj", "{C21A5AA6-C755-4CB8-826A-1C421E41A4E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleGameServer.Example", "ConsoleGameServer.Example\ConsoleGameServer.Example.csproj", "{DDF90BFF-18F2-4E2C-B37F-D574B11DA0E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,10 +89,10 @@ Global
 		{ED4266B1-55C0-4013-8902-A3761956DF1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED4266B1-55C0-4013-8902-A3761956DF1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED4266B1-55C0-4013-8902-A3761956DF1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C21A5AA6-C755-4CB8-826A-1C421E41A4E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C21A5AA6-C755-4CB8-826A-1C421E41A4E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C21A5AA6-C755-4CB8-826A-1C421E41A4E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C21A5AA6-C755-4CB8-826A-1C421E41A4E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDF90BFF-18F2-4E2C-B37F-D574B11DA0E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDF90BFF-18F2-4E2C-B37F-D574B11DA0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDF90BFF-18F2-4E2C-B37F-D574B11DA0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDF90BFF-18F2-4E2C-B37F-D574B11DA0E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

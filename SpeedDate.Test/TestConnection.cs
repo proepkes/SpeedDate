@@ -36,12 +36,12 @@ namespace SpeedDate.Test
             server.Started += () =>
             {
                 client.Start(new DefaultConfigProvider(
-                    new NetworkConfig(IPAddress.Loopback, SetUp.Port+1), //Connect to port 
+                    new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort+1), //Connect to port 
                     PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
             };
 
             server.Start(new DefaultConfigProvider(
-                new NetworkConfig("0.0.0.0", SetUp.Port+1), //Listen in port
+                new NetworkConfig("0.0.0.0", SetUp.MasterServerPort+1), //Listen in port
                 PluginsConfig.DefaultServerPlugins) //Load server-plugins only
             );
 
@@ -73,7 +73,7 @@ namespace SpeedDate.Test
             client.Started += SetAutoResetEvent;
             
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port 
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
 
@@ -97,7 +97,7 @@ namespace SpeedDate.Test
             client.Started += () => done.Set();
             
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port 
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
 
@@ -121,7 +121,7 @@ namespace SpeedDate.Test
             };
             
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), //Connect to port 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port 
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
 

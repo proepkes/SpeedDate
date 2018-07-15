@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading;
 using Moq;
 using NUnit.Framework;
@@ -81,7 +80,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -124,7 +123,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The SpawnRequest has been handled and is now waiting for the process to start
@@ -166,7 +165,7 @@ namespace SpeedDate.Test
             };
 
             gameserver.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultGameServerPlugins)); //Load gameserver-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The SpawnRequest has been finalized ('done' is set by StatusChanged.Finalized (see above))
@@ -204,11 +203,12 @@ namespace SpeedDate.Test
             //------------------------------------------------------
             // 
             // Now the client has to connect to the gameserver and transmit the token.
-            // How this is done is out of scope of SpeedDate. You may use UNET, LiteNetLib, another SpeedDate server or any other custom solution.
+            // How this is done is out of SpeedDate's scope. You may use UNET, LiteNetLib, TcpListener, another SpeedDate server or any other custom solution.
+            // 
             // This test simply uses the same access-object on the server and the client
             // 
             // -----------------------------------------------------
-            
+
             gameserver.GetPlugin<RoomsPlugin>().ValidateAccess(roomAccess.RoomId, roomAccess.Token, id =>
                 {
                     id.PeerId.ShouldBe(client.PeerId);
@@ -235,7 +235,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultSpawnerPlugins)); //Load spawner-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
@@ -244,7 +244,8 @@ namespace SpeedDate.Test
         [Test]
         public void RequestSpawnWithInvalidSpawnerSettings_ShouldAbort()
         {
-            //The default spawnerRequestdelegate would start a new process, which (in this test-context) will fail and kill the spawn-task
+            //The default spawnerRequestdelegate would start a new process. Since the executable cannot be found (in this test-context), the request will fail
+            //  and the spawn-task will be killed
             var spawnerRegionName = TestContext.CurrentContext.Test.Name;
             var done = new AutoResetEvent(false);
 
@@ -262,7 +263,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -293,7 +294,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
@@ -339,7 +340,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), 
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -375,7 +376,7 @@ namespace SpeedDate.Test
                 }, error => throw new Exception(error));
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30))
@@ -397,7 +398,7 @@ namespace SpeedDate.Test
             };
 
             gameserver.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultGameServerPlugins)); //Load gameserver-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The Process has been registered
@@ -446,7 +447,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -484,7 +485,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30))
@@ -506,7 +507,7 @@ namespace SpeedDate.Test
             };
 
             gameserver.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultGameServerPlugins)); //Load gameserver-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The Process has been registered
@@ -549,7 +550,7 @@ namespace SpeedDate.Test
             };
 
             evilClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultGameServerPlugins)); //Load gameserver-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Error occured
@@ -592,7 +593,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port), 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), 
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -626,7 +627,7 @@ namespace SpeedDate.Test
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30))
@@ -641,7 +642,7 @@ namespace SpeedDate.Test
             };
 
             evilClient.Start(new DefaultConfigProvider(
-                new NetworkConfig(IPAddress.Loopback, SetUp.Port),
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultGameServerPlugins)); //Load gameserver-plugins only
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Finalize returned an error

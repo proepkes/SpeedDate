@@ -6,13 +6,13 @@ namespace SpeedDate.Configuration
 {
     public class DefaultConfigProvider : IConfigProvider
     {
-        private readonly SpeedDateConfig _result;
+        public SpeedDateConfig Result { get; }
         
         public DefaultConfigProvider(NetworkConfig networkConfig, 
             PluginsConfig pluginsConfig, 
             IEnumerable<IConfig> additionalConfigs = null)
         {
-            _result = new SpeedDateConfig
+            Result = new SpeedDateConfig
             {
                 Network = networkConfig,
                 Plugins = pluginsConfig
@@ -23,13 +23,12 @@ namespace SpeedDate.Configuration
             
             foreach (var config in additionalConfigs)
             {
-                _result.Add(config);
+                Result.Add(config);
             }
         }
         
-        public SpeedDateConfig Configure(IEnumerable<IConfig> configInstances)
+        public void Configure(IEnumerable<IConfig> configInstances)
         {
-            return _result;
         }
     }
 }

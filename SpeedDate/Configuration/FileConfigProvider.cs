@@ -10,23 +10,21 @@ namespace SpeedDate.Configuration
     public class FileConfigProvider : IConfigProvider
     {
         private readonly string _configFile;
+        
+        public SpeedDateConfig Result { get; }
 
         public FileConfigProvider(string configFile)
         {
             _configFile = configFile;
-        }
-
-        public SpeedDateConfig Configure(IEnumerable<IConfig> configInstances)
-        {
-            var result = new SpeedDateConfig();
+            
+            Result = new SpeedDateConfig();
 
             var configuration = File.ReadAllText(_configFile);
-            
             //xmlParser is build upon TextReader which may not support a "reset" => create a new parser for each config instance everytime we call search...
             var xmlParser = new XmlParser(configuration);
             xmlParser.Search("Network", () =>
             {
-                result.Network = new NetworkConfig
+                Result.Network = new NetworkConfig
                 {
                     Address = xmlParser["Address"],
                     Port = Convert.ToInt32(xmlParser["Port"])
@@ -36,13 +34,20 @@ namespace SpeedDate.Configuration
             xmlParser = new XmlParser(configuration);
             xmlParser.Search("Plugins", () =>
             {
-                result.Plugins = new PluginsConfig
+                Result.Plugins = new PluginsConfig
                 {
-                    Namespaces = xmlParser["Namespaces"]
+                    Namespaces = xmlParser["Namespaces"] ?? "*",
+                    ExcludeDlls = xmlParser["ExcludeDlls"] ?? string.Empty
                 };
             });
+        }
 
 
+        public void Configure(IEnumerable<IConfig> configInstances)
+        {
+            var configuration = File.ReadAllText(_configFile);
+            var xmlParser = new XmlParser(configuration);
+            
             foreach (var instance in configInstances)
             {
                 xmlParser = new XmlParser(configuration);
@@ -69,10 +74,8 @@ namespace SpeedDate.Configuration
                     }
                 });
 
-                result.Add(instance);
+                Result.Add(instance);
             }
-
-            return result;
         }
     }
 }
