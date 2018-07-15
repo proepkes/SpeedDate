@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Shouldly;
 using SpeedDate.Client;
 using SpeedDate.ClientPlugins.GameServer;
+using SpeedDate.ClientPlugins.Peer.Auth;
 using SpeedDate.ClientPlugins.Peer.Room;
 using SpeedDate.ClientPlugins.Peer.SpawnRequest;
 using SpeedDate.ClientPlugins.Spawner;
@@ -102,31 +103,36 @@ namespace SpeedDate.Test
             var client = new SpeedDateClient();
             client.Started += () =>
             {
-                client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(), spawnerRegionName,
-                    controller =>
-                    {
-                        controller.ShouldNotBeNull();
-                        controller.SpawnId.ShouldBeGreaterThanOrEqualTo(0);
-                        controller.Status.ShouldBe(SpawnStatus.None);
-                        controller.StatusChanged += status =>
+                client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(),
+                        spawnerRegionName,
+                        controller =>
                         {
-                            switch (status)
+                            controller.ShouldNotBeNull();
+                            controller.SpawnId.ShouldBeGreaterThanOrEqualTo(0);
+                            controller.Status.ShouldBe(SpawnStatus.None);
+                            controller.StatusChanged += status =>
                             {
-                                case SpawnStatus.WaitingForProcess:
-                                case SpawnStatus.Finalized:
-                                    done.Set();
-                                    break;
-                            }
-                        };
-                        spawnId = controller.SpawnId;
-                    }, error => throw new Exception(error));
+                                switch (status)
+                                {
+                                    case SpawnStatus.WaitingForProcess:
+                                    case SpawnStatus.Finalized:
+                                        done.Set();
+                                        break;
+                                }
+                            };
+                            spawnId = controller.SpawnId;
+                        }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The SpawnRequest has been handled and is now waiting for the process to start
+            done.WaitOne(TimeSpan.FromSeconds(30))
+                .ShouldBeTrue(); //The SpawnRequest has been handled and is now waiting for the process to start
 
             //------------------------------------------------------
             // 
@@ -135,7 +141,7 @@ namespace SpeedDate.Test
             // The spawned process now registers itself at the master, starts a new server and then creates a new room
             // 
             // -----------------------------------------------------
-            
+
             var gameserver = new SpeedDateClient();
             gameserver.Started += () =>
             {
@@ -168,7 +174,8 @@ namespace SpeedDate.Test
                 new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultGameServerPlugins)); //Load gameserver-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The SpawnRequest has been finalized ('done' is set by StatusChanged.Finalized (see above))
+            done.WaitOne(TimeSpan.FromSeconds(30))
+                .ShouldBeTrue(); //The SpawnRequest has been finalized ('done' is set by StatusChanged.Finalized (see above))
 
             //------------------------------------------------------
             // 
@@ -210,10 +217,10 @@ namespace SpeedDate.Test
             // -----------------------------------------------------
 
             gameserver.GetPlugin<RoomsPlugin>().ValidateAccess(roomAccess.RoomId, roomAccess.Token, id =>
-                {
-                    id.PeerId.ShouldBe(client.PeerId);
-                    done.Set();
-                }, error => throw new Exception(error));
+            {
+                id.PeerId.ShouldBe(client.PeerId);
+                done.Set();
+            }, error => throw new Exception(error));
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Gameserver validated access
         }
 
@@ -271,26 +278,51 @@ namespace SpeedDate.Test
                     {
                         Region = spawnerRegionName
                     }
-                })); 
+                }));
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Spawner is registered
 
             var client = new SpeedDateClient();
             client.Started += () =>
             {
-                client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(), spawnerRegionName,
-                    controller =>
-                    {
-                        controller.ShouldNotBeNull();
-                        controller.Status.ShouldBe(SpawnStatus.None);
-                        controller.StatusChanged += status =>
+                client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(),
+                        spawnerRegionName,
+                        controller =>
                         {
-                            if (status == SpawnStatus.Killed)
+                            controller.ShouldNotBeNull();
+                            controller.Status.ShouldBe(SpawnStatus.None);
+                            controller.StatusChanged += status =>
                             {
-                                done.Set();
-                            }
-                        };
-                    }, error => throw new Exception(error));
+                                if (status == SpawnStatus.Killed)
+                                {
+                                    done.Set();
+                                }
+                            };
+                        }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
+            };
+
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+        }
+
+        [Test]
+        public void SpawnRequestWithoutLogin_ShouldNotBeAuthorized()
+        {
+            var spawnerRegionName = TestContext.CurrentContext.Test.Name;
+            var done = new AutoResetEvent(false);
+            
+            var client = new SpeedDateClient();
+            client.Started += () =>
+            {
+                client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(),
+                    spawnerRegionName,
+                    controller => throw new Exception("Should not be authorized"), error => done.Set());
             };
 
             client.Start(new DefaultConfigProvider(
@@ -340,7 +372,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -348,32 +380,38 @@ namespace SpeedDate.Test
                     {
                         Region = spawnerRegionName
                     }
-                })); 
+                }));
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //The spawner has been registered to master
 
             var client = new SpeedDateClient();
-            client.Started += () => client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(
-                new Dictionary<string, string>(), spawnerRegionName,
-                controller =>
+            client.Started += () =>
+            {
+                client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    controller.ShouldNotBeNull();
-                    controller.SpawnId.ShouldBeGreaterThanOrEqualTo(0);
-                    controller.Status.ShouldBe(SpawnStatus.None);
-                    controller.StatusChanged += status =>
-                    {
-                        switch (status)
+                    client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(
+                        new Dictionary<string, string>(), spawnerRegionName,
+                        controller =>
                         {
-                            case SpawnStatus.WaitingForProcess:
-                            case SpawnStatus.ProcessRegistered:
-                            case SpawnStatus.Finalized:
-                                done.Set();
-                                break;
-                        }
-                    };
+                            controller.ShouldNotBeNull();
+                            controller.SpawnId.ShouldBeGreaterThanOrEqualTo(0);
+                            controller.Status.ShouldBe(SpawnStatus.None);
+                            controller.StatusChanged += status =>
+                            {
+                                switch (status)
+                                {
+                                    case SpawnStatus.WaitingForProcess:
+                                    case SpawnStatus.ProcessRegistered:
+                                    case SpawnStatus.Finalized:
+                                        done.Set();
+                                        break;
+                                }
+                            };
 
-                    spawnId = controller.SpawnId;
+                            spawnId = controller.SpawnId;
+                        }, error => throw new Exception(error));
                 }, error => throw new Exception(error));
+            };
 
             client.Start(new DefaultConfigProvider(
                 new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
@@ -462,26 +500,30 @@ namespace SpeedDate.Test
             var client = new SpeedDateClient();
             client.Started += () =>
             {
-                client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(), spawnerRegionName,
-                    controller =>
-                    {
-                        controller.ShouldNotBeNull();
-                        controller.SpawnId.ShouldBeGreaterThanOrEqualTo(0);
-                        controller.Status.ShouldBe(SpawnStatus.None);
-                        controller.StatusChanged += status =>
+                client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(),
+                        spawnerRegionName,
+                        controller =>
                         {
-                            switch (status)
+                            controller.ShouldNotBeNull();
+                            controller.SpawnId.ShouldBeGreaterThanOrEqualTo(0);
+                            controller.Status.ShouldBe(SpawnStatus.None);
+                            controller.StatusChanged += status =>
                             {
-                                case SpawnStatus.WaitingForProcess:
-                                case SpawnStatus.ProcessRegistered:
-                                case SpawnStatus.Finalized:
-                                    done.Set();
-                                    break;
-                            }
-                        };
+                                switch (status)
+                                {
+                                    case SpawnStatus.WaitingForProcess:
+                                    case SpawnStatus.ProcessRegistered:
+                                    case SpawnStatus.Finalized:
+                                        done.Set();
+                                        break;
+                                }
+                            };
 
-                        spawnId = controller.SpawnId;
-                    }, error => throw new Exception(error));
+                            spawnId = controller.SpawnId;
+                        }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             client.Start(new DefaultConfigProvider(
@@ -526,10 +568,8 @@ namespace SpeedDate.Test
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //FinalizationData was correct
         }
 
-       
-
         [Test]
-        public void EvilClientRegisterSpawnedProcess_ShouldError()
+        public void RegisterRandomSpawnedProcess_ShouldError()
         {
             var done = new AutoResetEvent(false);
 
@@ -542,10 +582,7 @@ namespace SpeedDate.Test
                     spawnId: Util.CreateRandomInt(0, 100),
                     spawnCode: Util.CreateRandomString(10),
                     callback: controller => { },
-                    errorCallback: error =>
-                    {
-                        done.Set(); 
-                    }
+                    errorCallback: error => { done.Set(); }
                 );
             };
 
@@ -557,7 +594,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void EvilClientWithCorrectSpawnIdRegisterSpawnedProcess_ShouldNotBeAuthorized()
+        public void WrongPeerWithCorrectSpawnIdRegisterSpawnedProcess_ShouldNotBeAuthorized()
         {
             var done = new AutoResetEvent(false);
 
@@ -593,7 +630,7 @@ namespace SpeedDate.Test
             };
 
             spawner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), 
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultSpawnerPlugins, //Load spawner-plugins only
                 new IConfig[]
                 {
@@ -608,22 +645,26 @@ namespace SpeedDate.Test
             var client = new SpeedDateClient();
             client.Started += () =>
             {
-                client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(), spawnerRegionName,
-                    controller =>
-                    {
-                        controller.StatusChanged += status =>
+                client.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
+                {
+                    client.GetPlugin<SpawnRequestPlugin>().RequestSpawn(new Dictionary<string, string>(),
+                        spawnerRegionName,
+                        controller =>
                         {
-                            switch (status)
+                            controller.StatusChanged += status =>
                             {
-                                case SpawnStatus.WaitingForProcess:
-                                case SpawnStatus.ProcessRegistered:
-                                    done.Set();
-                                    break;
-                            }
-                        };
+                                switch (status)
+                                {
+                                    case SpawnStatus.WaitingForProcess:
+                                    case SpawnStatus.ProcessRegistered:
+                                        done.Set();
+                                        break;
+                                }
+                            };
 
-                        spawnId = controller.SpawnId;
-                    }, error => throw new Exception(error));
+                            spawnId = controller.SpawnId;
+                        }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             client.Start(new DefaultConfigProvider(

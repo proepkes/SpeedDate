@@ -9,6 +9,7 @@ using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Common;
 using SpeedDate.Packets.Spawner;
 using SpeedDate.Server;
+using SpeedDate.ServerPlugins.Authentication;
 
 namespace SpeedDate.ServerPlugins.Spawner
 {
@@ -152,7 +153,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
         private bool CanClientSpawn(IPeer peer, ClientsSpawnRequestPacket data)
         {
-            return _config.EnableClientSpawnRequests;
+            return !_config.SpawnRequestsRequireAuthentication || peer.HasExtension<UserExtension>();
         }
 
         private async void StartQueueUpdater()

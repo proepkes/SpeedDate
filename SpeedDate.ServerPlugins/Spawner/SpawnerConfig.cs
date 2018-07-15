@@ -6,7 +6,7 @@ namespace SpeedDate.ServerPlugins.Spawner
     {
         public int CreateSpawnerPermissionLevel { get; set; }
 
-        public bool EnableClientSpawnRequests { get; set; } = true;
+        public bool SpawnRequestsRequireAuthentication { get; set; } = true;
 
         public int QueueUpdateFrequency { get; set; } = 100;
     }
