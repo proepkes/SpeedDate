@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
-  <Network Address="127.0.0.1" Port="8888"/>
+  <Network Address="127.0.0.1" Port="60125"/>
   <Plugins Namespaces="SpeedDate.ClientPlugins;SpeedDate.ClientPlugins.GameServer*" ExcludeDlls="host*"/>
 </configuration>

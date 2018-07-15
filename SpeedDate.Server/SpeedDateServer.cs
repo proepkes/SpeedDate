@@ -22,6 +22,7 @@ namespace SpeedDate.Server
 
         private readonly NetManager _manager;
         private SpeedDateNetListener _listener;
+        private SpeedDateConfig _config;
 
         public event Action Started;
         public event Action Stopped;
@@ -35,7 +36,7 @@ namespace SpeedDate.Server
             _listener = new SpeedDateNetListener();
             _listener.ConnectionRequestEvent += request =>
             {
-                request.AcceptIfKey("TundraNet");
+                request.AcceptIfKey(_config.Network.Key);
             };
             
             _listener.PeerConnectedEvent += peer =>
@@ -82,6 +83,8 @@ namespace SpeedDate.Server
         {
             _kernel.Load(this, configProvider, config =>
             {
+                _config = config;
+                
                 AppUpdater.Instance.Add(this);
                 if (_manager.Start(config.Network.Port))
                 {

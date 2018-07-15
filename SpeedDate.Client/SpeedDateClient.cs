@@ -73,7 +73,7 @@ namespace SpeedDate.Client
                 
                 AppUpdater.Instance.Add(this);
                 _manager.Start();
-                _netPeer = _manager.Connect(Config.Network.Address, Config.Network.Port, "TundraNet");
+                _netPeer = _manager.Connect(Config.Network.Address, Config.Network.Port, Config.Network.Key);
             }
 
             Stopped += StartAfterStop;
@@ -193,7 +193,7 @@ namespace SpeedDate.Client
                 Config = config;
 
                 _manager.Start();
-                _netPeer = _manager.Connect(config.Network.Address, config.Network.Port, "TundraNet");
+                _netPeer = _manager.Connect(config.Network.Address, config.Network.Port, config.Network.Key);
             });
         }
 

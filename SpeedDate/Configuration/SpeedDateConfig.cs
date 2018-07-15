@@ -57,14 +57,14 @@ namespace SpeedDate.Configuration
             return $"{Address}:{Port}";
         }
 
-        public NetworkConfig(string address = default(string), int port = default(int), string key = "TundraNet")
+        public NetworkConfig(string address = default(string), int port = default(int), string key = "SpeedDate")
         {
             Address = address;
             Port = port;
             Key = key;
         }
 
-        public NetworkConfig(IPAddress address, int port = default(int), string key = "TundraNet")
+        public NetworkConfig(IPAddress address, int port = default(int), string key = "SpeedDate")
         {
             Address = address.ToString();
             Port = port;
