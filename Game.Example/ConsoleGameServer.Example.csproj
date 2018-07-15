@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SpeedDate.ClientPlugins.GameServer\SpeedDate.ClientPlugins.GameServer.csproj" />
+    <ProjectReference Include="..\SpeedDate.Client\SpeedDate.Client.csproj" />
+    <ProjectReference Include="..\SpeedDate\SpeedDate.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="GameServerConfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
