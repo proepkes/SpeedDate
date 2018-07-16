@@ -37,7 +37,7 @@ namespace SpeedDate.Configuration
                 Result.Plugins = new PluginsConfig
                 {
                     Namespaces = xmlParser["Namespaces"] ?? "*",
-                    ExcludeDlls = xmlParser["ExcludeDlls"] ?? string.Empty
+                    IncludeDlls = xmlParser["IncludeDlls"] ?? string.Empty
                 };
             });
         }

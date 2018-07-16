@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using SpeedDate.Network.Utils.Conversion;
 using SpeedDate.Network.Utils.IO;
 
@@ -309,5 +310,11 @@ namespace SpeedDate
         //    ip = ip.Substring(0, ip.IndexOf("<"));
         //    callback.Invoke(ip);
         //}
+        
+        
+        public static string AsRegular(this string value)
+        {
+            return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
+        }
     }
 }

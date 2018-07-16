@@ -19,15 +19,15 @@ namespace SpeedDate.ServerPlugins.Authentication
     /// <summary>
     ///     Authentication module, which handles logging in and registration of accounts
     /// </summary>
-    public class AuthPlugin : SpeedDateServerPlugin
+    public sealed class AuthPlugin : SpeedDateServerPlugin
     {
         public delegate void AuthEventHandler(UserExtension account);
         
         [Inject] private readonly ILogger _logger;
         [Inject] private readonly AuthConfig _config;
-        
-        [Inject] private MailPlugin _mailer;
-        [Inject] public DatabasePlugin _database;
+
+        [Inject] private readonly MailPlugin _mailer;
+        [Inject] private readonly DatabasePlugin _database;
 
         private readonly Dictionary<string, UserExtension> _loggedInUsers = new Dictionary<string, UserExtension>();
         
@@ -75,12 +75,12 @@ namespace SpeedDate.ServerPlugins.Authentication
             message.Respond(ResponseStatus.Success);
         }
 
-        public string GenerateGuestUsername()
+        private string GenerateGuestUsername()
         {
             return _config.GuestPrefix + _nextGuestId++;
         }
 
-        public virtual UserExtension CreateUserExtension(IPeer peer)
+        private UserExtension CreateUserExtension(IPeer peer)
         {
             return new UserExtension(peer);
         }
@@ -117,13 +117,13 @@ namespace SpeedDate.ServerPlugins.Authentication
             return result;
         }
 
-        protected virtual bool IsUsernameValid(string username)
+        private bool IsUsernameValid(string username)
         {
             return !string.IsNullOrEmpty(username) && // If username is empty
                    username == username.Replace(" ", ""); // If username contains spaces
         }
 
-        protected virtual bool ValidateEmail(string email)
+        private bool ValidateEmail(string email)
         {
             return !string.IsNullOrEmpty(email)
                    && email.Contains("@")
@@ -140,14 +140,12 @@ namespace SpeedDate.ServerPlugins.Authentication
         {
             return _loggedInUsers.ContainsKey(username);
         }
-
-        #region Message Handlers
-
+        
         /// <summary>
         ///     Handles client's request to change password
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandlePasswordChange(IIncommingMessage message)
+        private void HandlePasswordChange(IIncommingMessage message)
         {
             var data = new Dictionary<string, string>().FromBytes(message.AsBytes());
 
@@ -180,7 +178,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         ///     Handles a request to retrieve a number of logged in users
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleGetLoggedInCount(IIncommingMessage message)
+        private void HandleGetLoggedInCount(IIncommingMessage message)
         {
             message.Respond(_loggedInUsers.Count, ResponseStatus.Success);
         }
@@ -189,7 +187,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         ///     Handles e-mail confirmation request
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleEmailConfirmation(IIncommingMessage message)
+        private void HandleEmailConfirmation(IIncommingMessage message)
         {
             var code = message.AsString();
 
@@ -238,7 +236,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         ///     Handles password reset request
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandlePasswordResetRequest(IIncommingMessage message)
+        private void HandlePasswordResetRequest(IIncommingMessage message)
         {
             var email = message.AsString();
 
@@ -259,7 +257,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             message.Respond(ResponseStatus.Success);
         }
 
-        protected virtual void HandleRequestEmailConfirmCode(IIncommingMessage message)
+        private void HandleRequestEmailConfirmCode(IIncommingMessage message)
         {
             var extension = message.Peer.GetExtension<UserExtension>();
 
@@ -291,7 +289,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         ///     Handles account registration request
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleRegister(IIncommingMessage message)
+        private void HandleRegister(IIncommingMessage message)
         {
             var encryptedData = message.AsBytes();
 
@@ -389,7 +387,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         ///     Handles a request to retrieve account information
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleGetPeerAccountInfo(IIncommingMessage message)
+        private void HandleGetPeerAccountInfo(IIncommingMessage message)
         {
             if (!HasGetPeerInfoPermissions(message.Peer))
             {
@@ -431,7 +429,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         ///     Handles a request to log in
         /// </summary>
         /// <param name="message"></param>
-        protected virtual void HandleLogIn(IIncommingMessage message)
+        private void HandleLogIn(IIncommingMessage message)
         {
             if (message.Peer.HasExtension<UserExtension>())
             {
@@ -538,7 +536,7 @@ namespace SpeedDate.ServerPlugins.Authentication
         }
 
 
-        protected virtual void HandlePermissionLevelRequest(IIncommingMessage message)
+        private void HandlePermissionLevelRequest(IIncommingMessage message)
         {
             var key = message.AsString();
 
@@ -568,7 +566,7 @@ namespace SpeedDate.ServerPlugins.Authentication
             message.Respond(newLevel, ResponseStatus.Success);
         }
 
-        protected virtual void HandleAesKeyRequest(IIncommingMessage message)
+        private void HandleAesKeyRequest(IIncommingMessage message)
         {
             var extension = message.Peer.GetExtension<PeerSecurityExtension>();
 
@@ -600,11 +598,8 @@ namespace SpeedDate.ServerPlugins.Authentication
                 extension.AesKeyEncrypted = encryptedAes;
                 extension.AesKey = aesKey;
 
-                _logger.Debug("Sending " + encryptedAes + " to " + message.Peer.ConnectId);
                 message.Respond(encryptedAes, ResponseStatus.Success);
             }
         }
-
-        #endregion
     }
 }

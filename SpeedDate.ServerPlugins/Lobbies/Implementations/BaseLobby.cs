@@ -17,8 +17,8 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
     class BaseLobby : ILobby
     {
         private LobbyState _state;
-        private string _statusText = "";
         private LobbyMember _gameMaster;
+        private string _statusText = "";
 
         public event Action<LobbyMember> PlayerAdded;
         public event Action<LobbyMember> PlayerRemoved;
@@ -38,8 +38,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         protected SpawnTask GameSpawnTask;
         protected RegisteredRoom Room;
 
-        public BaseLobby(int lobbyId, IEnumerable<LobbyTeam> teams,
-            LobbiesPlugin plugin, LobbyConfig config)
+        public BaseLobby(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config)
         {
             Id = lobbyId;
             Plugin = plugin;
@@ -578,9 +577,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         {
             return Properties;
         }
-
-        #region Packet generators
-
+        
         public LobbyDataPacket GenerateLobbyData()
         {
             var info = new LobbyDataPacket
@@ -724,11 +721,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         {
             return member.GenerateDataPacket();
         }
-
-        #endregion
-
-        #region Broadcasting
-
+        
         public void Broadcast(IMessage message)
         {
             foreach (var peer in Subscribers)
@@ -775,11 +768,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             member.Extension.Peer.SendMessage(msg, DeliveryMethod.ReliableUnordered);
         }
-
-        #endregion
-
-        #region On... Stuff
-
+        
         protected virtual void OnPlayerAdded(LobbyMember member)
         {
             // Notify others about the new user
@@ -917,7 +906,5 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
 
             StartGame();
         }
-
-        #endregion
     }
 }

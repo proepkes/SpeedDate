@@ -17,8 +17,8 @@ namespace SpeedDate.Test
     public class SetUp
     {
         public static readonly IPAddress MasterServerIp = IPAddress.Loopback;
-        public const int MasterServerPort = 12345;
-        public const string GuestPrefix = "TestGuest-";
+        public const int MasterServerPort = 60125;
+        public const string GuestPrefix = "Guest-";
         public const string TestAccountPassword = "testPassword";
         
         public static readonly AccountData TestAccount = new AccountData
@@ -77,8 +77,8 @@ namespace SpeedDate.Test
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            Server.Stop();
-            Server.Dispose();
+            //Server.Stop();
+            //Server.Dispose();
         }
     }
 }

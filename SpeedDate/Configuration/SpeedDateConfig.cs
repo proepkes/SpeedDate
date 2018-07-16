@@ -36,12 +36,12 @@ namespace SpeedDate.Configuration
         public static readonly PluginsConfig DefaultServerPlugins = new PluginsConfig("SpeedDate.ServerPlugins*");
 
         public string Namespaces { get; set; }
-        public string ExcludeDlls { get; set; }
+        public string IncludeDlls { get; set; }
 
-        public PluginsConfig(string namespaces = "*", string excludeDlls = "")
+        public PluginsConfig(string namespaces = "*", string includeDlls = "*")
         {
             Namespaces = namespaces;
-            ExcludeDlls = excludeDlls;
+            IncludeDlls = includeDlls;
         }
     }
 

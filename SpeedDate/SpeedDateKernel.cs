@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,21 +12,19 @@ using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate
 {
-    public delegate void KernelStartedCallback(SpeedDateConfig config);
-
     public sealed class SpeedDateKernel
     {
+        private ILogger _logger;
         private SpeedDateConfig _config;
         private TinyIoCContainer _container;
-        private ILogger _logger;
 
         public void Load(ISpeedDateStartable startable, IConfigProvider configProvider,
-            KernelStartedCallback startedCallback)
+            Action<SpeedDateConfig> startedCallback)
         {
             _logger = LogManager.GetLogger("SpeedDate");
 
             _config = configProvider.Result;
-            
+
             _container = CreateContainer(startable);
 
             configProvider.Configure(_container.ResolveAll<IConfig>());
@@ -38,7 +35,7 @@ namespace SpeedDate
             foreach (var plugin in _container.ResolveAll<IPlugin>())
             {
                 if (_config.Plugins.Namespaces.Split(';').Any(ns =>
-                    Regex.IsMatch(plugin.GetType().Namespace, WildCardToRegular(ns.Trim()))))
+                    Regex.IsMatch(plugin.GetType().Namespace, ns.Trim().AsRegular())))
                 {
                     _logger.Debug($"Loading plugin: {plugin}");
                     //Inject configs, cannot use _container.BuildUp because the configProvider may have additional IConfigs
@@ -103,21 +100,13 @@ namespace SpeedDate
             foreach (var dllFile in
                 Directory.GetFiles(
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
-                    throw new InvalidOperationException(), "*.dll").Where(file =>
-                {
-                    foreach (var s in _config.Plugins.ExcludeDlls.Split(';'))
-                    {
-                        if (Regex.IsMatch(Path.GetFileNameWithoutExtension(file), WildCardToRegular(s.Trim())) )
-                        {
-                            return false;
-                        }   
-                    }
-
-                    return true;
-                }))
+                    throw new InvalidOperationException(), "*.dll").Where(
+                        file => _config.Plugins.IncludeDlls.Split(';').Any(includeDll =>
+                            Regex.IsMatch(Path.GetFileNameWithoutExtension(file), includeDll.Trim().AsRegular()))
+                ))
             {
                 _logger.Info($"Loading dll: {dllFile}");
-                
+
                 try
                 {
                     var assembly = Assembly.LoadFrom(dllFile);
@@ -150,11 +139,6 @@ namespace SpeedDate
             }
 
             return ioc;
-        }
-
-        private static string WildCardToRegular(string value)
-        {
-            return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
         }
 
         private static bool IsAssignableToGenericType(Type givenType, Type genericType, out Type genericTypeArgument)
