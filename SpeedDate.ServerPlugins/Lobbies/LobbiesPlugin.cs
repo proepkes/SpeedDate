@@ -20,10 +20,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         private readonly bool _dontAllowCreatingIfJoined = true;
 
+        private readonly Dictionary<int, Lobby> _lobbies = new Dictionary<int, Lobby>();
         private readonly Dictionary<string, ILobbyFactory> _factories = new Dictionary<string, ILobbyFactory>();
-        [Inject] private readonly ILogger _logger;
 
-        public readonly Dictionary<int, Lobby> Lobbies = new Dictionary<int, Lobby>();
+        [Inject] private readonly ILogger _logger;
         [Inject] internal readonly RoomsPlugin RoomsPlugin;
         [Inject] internal readonly SpawnerPlugin SpawnerPlugin;
 
@@ -32,7 +32,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public IEnumerable<GameInfoPacket> GetPublicGames(IPeer peer, Dictionary<string, string> filters)
         {
-            return Lobbies.Values.Select(lobby => new GameInfoPacket
+            return _lobbies.Values.Select(lobby => new GameInfoPacket
             {
                 Address = lobby.GameIp + ":" + lobby.GamePort,
                 Id = lobby.Id,
@@ -80,13 +80,13 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public bool AddLobby(Lobby lobby)
         {
-            if (Lobbies.ContainsKey(lobby.Id))
+            if (_lobbies.ContainsKey(lobby.Id))
             {
                 _logger.Error("Failed to add a lobby - lobby with same id already exists");
                 return false;
             }
 
-            Lobbies.Add(lobby.Id, lobby);
+            _lobbies.Add(lobby.Id, lobby);
 
             lobby.Destroyed += OnLobbyDestroyed;
             return true;
@@ -98,7 +98,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="lobby"></param>
         private void OnLobbyDestroyed(Lobby lobby)
         {
-            Lobbies.Remove(lobby.Id);
+            _lobbies.Remove(lobby.Id);
             lobby.Destroyed -= OnLobbyDestroyed;
         }
 
@@ -185,7 +185,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             var lobbyId = message.AsInt();
 
-            Lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbies.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -210,7 +210,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var lobbyId = message.AsInt();
 
-            Lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbies.TryGetValue(lobbyId, out var lobby);
 
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
 
@@ -223,7 +223,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var data = message.Deserialize<LobbyPropertiesSetPacket>();
 
-            Lobbies.TryGetValue(data.LobbyId, out var lobby);
+            _lobbies.TryGetValue(data.LobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -376,7 +376,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var lobbyId = data.A;
             var peerId = data.B;
 
-            Lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbies.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -399,7 +399,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var lobbyId = message.AsInt();
 
-            Lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbies.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {
