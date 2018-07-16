@@ -4,12 +4,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     public class LobbyUserExtension
     {
-        public IPeer Peer { get; private set; }
+        public IPeer Peer { get; }
 
         /// <summary>
         /// Lobby, to which current peer belongs
         /// </summary>
-        public ILobby CurrentLobby { get; set; }
+        public Lobby CurrentLobby { get; set; }
 
         public LobbyUserExtension(IPeer peer)
         {

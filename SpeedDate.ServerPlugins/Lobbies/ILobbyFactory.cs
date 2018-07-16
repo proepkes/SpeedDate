@@ -8,6 +8,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
     {
         string Id { get; }
 
-        ILobby CreateLobby(Dictionary<string, string> properties, IPeer creator);
+        Lobby CreateLobby(Dictionary<string, string> properties, IPeer creator);
     }
 }

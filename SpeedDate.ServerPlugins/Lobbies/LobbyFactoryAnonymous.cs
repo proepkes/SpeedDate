@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SpeedDate.Interfaces;
 using SpeedDate.Network.Interfaces;
 
 namespace SpeedDate.ServerPlugins.Lobbies
@@ -13,7 +12,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         private readonly LobbiesPlugin _plugin;
         private readonly LobbyCreationFactory _factory;
 
-        public delegate ILobby LobbyCreationFactory(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator);
+        public delegate Lobby LobbyCreationFactory(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator);
 
         public LobbyFactoryAnonymous(string id, LobbiesPlugin plugin, LobbyCreationFactory factory)
         {
@@ -22,7 +21,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             _plugin = plugin;
         }
 
-        public ILobby CreateLobby(Dictionary<string, string> properties, IPeer creator)
+        public Lobby CreateLobby(Dictionary<string, string> properties, IPeer creator)
         {
             var lobby = _factory.Invoke(_plugin, properties, creator);
 

@@ -4,14 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using SpeedDate.Packets.Lobbies;
 
-namespace SpeedDate.ServerPlugins.Lobbies.Implementations
+namespace SpeedDate.ServerPlugins.Lobbies
 {
-    class BaseLobbyAuto : BaseLobby
+    class LobbyAuto : Lobby
     {
         public const float WaitSecondsAfterMinPlayersReached = 10;
         public const float WaitSecondsAfterFullTeams = 5;
 
-        public BaseLobbyAuto(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config) : base(lobbyId, teams, plugin, config)
+        public LobbyAuto(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config) : base(lobbyId, teams, plugin, config)
         {
             config.EnableManualStart = true;
             config.PlayAgainEnabled = false;

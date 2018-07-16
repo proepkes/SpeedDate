@@ -12,9 +12,9 @@ using SpeedDate.ServerPlugins.Authentication;
 using SpeedDate.ServerPlugins.Rooms;
 using SpeedDate.ServerPlugins.Spawner;
 
-namespace SpeedDate.ServerPlugins.Lobbies.Implementations
+namespace SpeedDate.ServerPlugins.Lobbies
 {
-    class BaseLobby : ILobby
+    public class Lobby
     {
         private LobbyState _state;
         private LobbyMember _gameMaster;
@@ -23,9 +23,9 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         public event Action<LobbyMember> PlayerAdded;
         public event Action<LobbyMember> PlayerRemoved;
 
-        public event Action<ILobby> Destroyed;
+        public event Action<Lobby> Destroyed;
 
-        public readonly Logger Logger = LogManager.GetLogger(typeof(BaseLobby).Name);
+        public readonly Logger Logger = LogManager.GetLogger(typeof(Lobby).Name);
 
         protected readonly Dictionary<string, LobbyMember> Members;
         protected readonly Dictionary<long, LobbyMember> MembersByPeerId;
@@ -38,7 +38,7 @@ namespace SpeedDate.ServerPlugins.Lobbies.Implementations
         protected SpawnTask GameSpawnTask;
         protected RegisteredRoom Room;
 
-        public BaseLobby(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config)
+        public Lobby(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config)
         {
             Id = lobbyId;
             Plugin = plugin;

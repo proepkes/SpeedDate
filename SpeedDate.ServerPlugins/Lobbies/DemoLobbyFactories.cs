@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using SpeedDate.Interfaces;
 using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Lobbies;
-using SpeedDate.ServerPlugins.Lobbies.Implementations;
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {
@@ -20,7 +18,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby OneVsOne(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
+        public static Lobby OneVsOne(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var teamA = new LobbyTeam("Team Blue")
@@ -41,7 +39,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var config = new LobbyConfig();
 
             // Create the lobby
-            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
+            var lobby = new Lobby(plugin.GenerateLobbyId(),
                 new[] { teamA, teamB }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
@@ -75,7 +73,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby Deathmatch(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
+        public static Lobby Deathmatch(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var team = new LobbyTeam("")
@@ -87,7 +85,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var config = new LobbyConfig();
 
             // Create the lobby
-            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
+            var lobby = new Lobby(plugin.GenerateLobbyId(),
                 new[] { team }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
@@ -114,7 +112,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby TwoVsTwoVsFour(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
+        public static Lobby TwoVsTwoVsFour(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var teamA = new LobbyTeam("Team Blue")
@@ -142,7 +140,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var config = new LobbyConfig();
 
             // Create the lobby
-            var lobby = new BaseLobby(plugin.GenerateLobbyId(),
+            var lobby = new Lobby(plugin.GenerateLobbyId(),
                 new[] { teamA, teamB, teamC }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)
@@ -178,7 +176,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="plugin"></param>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static ILobby ThreeVsThreeQueue(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
+        public static Lobby ThreeVsThreeQueue(LobbiesPlugin plugin, Dictionary<string, string> properties, IPeer creator)
         {
             // Create the teams
             var teamA = new LobbyTeam("Team Blue")
@@ -203,7 +201,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             };
 
             // Create the lobby
-            var lobby = new BaseLobbyAuto(plugin.GenerateLobbyId(),
+            var lobby = new LobbyAuto(plugin.GenerateLobbyId(),
                 new[] { teamA, teamB }, plugin, config)
             {
                 Name = ExtractLobbyName(properties)

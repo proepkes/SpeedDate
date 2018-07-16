@@ -23,7 +23,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         private readonly Dictionary<string, ILobbyFactory> _factories = new Dictionary<string, ILobbyFactory>();
         [Inject] private readonly ILogger _logger;
 
-        public readonly Dictionary<int, ILobby> Lobbies = new Dictionary<int, ILobby>();
+        public readonly Dictionary<int, Lobby> Lobbies = new Dictionary<int, Lobby>();
         [Inject] internal readonly RoomsPlugin RoomsPlugin;
         [Inject] internal readonly SpawnerPlugin SpawnerPlugin;
 
@@ -78,7 +78,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             _factories[factory.Id] = factory;
         }
 
-        public bool AddLobby(ILobby lobby)
+        public bool AddLobby(Lobby lobby)
         {
             if (Lobbies.ContainsKey(lobby.Id))
             {
@@ -96,7 +96,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         ///     Invoked, when lobby is destroyed
         /// </summary>
         /// <param name="lobby"></param>
-        private void OnLobbyDestroyed(ILobby lobby)
+        private void OnLobbyDestroyed(Lobby lobby)
         {
             Lobbies.Remove(lobby.Id);
             lobby.Destroyed -= OnLobbyDestroyed;
@@ -410,7 +410,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(lobby.GenerateLobbyData(), ResponseStatus.Success);
         }
 
-        public Dictionary<string, string> GetPublicLobbyProperties(IPeer peer, ILobby lobby,
+        public Dictionary<string, string> GetPublicLobbyProperties(IPeer peer, Lobby lobby,
             Dictionary<string, string> playerFilters)
         {
             return lobby.GetPublicProperties(peer);
