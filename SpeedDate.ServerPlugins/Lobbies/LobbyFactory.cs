@@ -47,6 +47,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 xmlReader = new XmlParser(config);
                 xmlReader.SearchEach("Control", () =>
                 {
+                    var defaultValue = "";
                     var control = new LobbyPropertyData
                     {
                         PropertyKey = xmlReader["Key"],
@@ -55,9 +56,14 @@ namespace SpeedDate.ServerPlugins.Lobbies
                     };
                     xmlReader.SearchEach("Controloption", () =>
                     {
-                        control.Options.Add(xmlReader["Value"]);
+                        var value = xmlReader["Value"];
+                        if (xmlReader["IsDefault"] != null)
+                        {
+                            defaultValue = value;
+                        }
+                        control.Options.Add(value);
                     });
-                    result.AddControl(control);
+                    result.AddControl(control, defaultValue);
                 });
 
 
