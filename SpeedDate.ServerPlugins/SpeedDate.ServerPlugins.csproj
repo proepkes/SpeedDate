@@ -24,6 +24,9 @@
     <AppConfigFileDestination Remove="bin\Debug\netstandard2.0\SpeedDate.ServerPlugins.dll.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Lobbies\OneVsOne.lobby" />
+  </ItemGroup>
+  <ItemGroup>
     <_DebugSymbolsOutputPath Remove="bin\Debug\netstandard2.0\SpeedDate.ServerPlugins.pdb" />
     <_DebugSymbolsOutputPath Remove="bin\Debug\netstandard2.0\SpeedDate.ServerPlugins.pdb" />
     <_DebugSymbolsOutputPath Remove="bin\Debug\netstandard2.0\SpeedDate.ServerPlugins.pdb" />
@@ -32,6 +35,14 @@
     <_ApplicationManifestFinal Remove="bin\Debug\netstandard2.0\Native.SpeedDate.ServerPlugins.manifest" />
     <_ApplicationManifestFinal Remove="bin\Debug\netstandard2.0\Native.SpeedDate.ServerPlugins.manifest" />
     <_ApplicationManifestFinal Remove="bin\Debug\netstandard2.0\Native.SpeedDate.ServerPlugins.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lobbies\OneVsOne.lobby">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Lobbies\TwoVsTwo.lobby">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <!--<Target Name="PublishModule" AfterTargets="Publish" Inputs="@(ModuleFiles)" Outputs="@(ModuleFiles->'%(DestinationPath)')">
     <Copy SourceFiles="@(ModuleFiles)" DestinationFiles="@(ModuleFiles->'%(DestinationPath)')" />

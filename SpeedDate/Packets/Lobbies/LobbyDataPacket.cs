@@ -10,7 +10,7 @@ namespace SpeedDate.Packets.Lobbies
     public class LobbyDataPacket : SerializablePacket
     {
         public LobbyState LobbyState;
-        public string LobbyType = "";
+        public int LobbyType = 0;
         public string StatusText = "";
         public string GameMaster = "";
         public string CurrentUserUsername = "";
@@ -95,7 +95,7 @@ namespace SpeedDate.Packets.Lobbies
         public override void FromBinaryReader(EndianBinaryReader reader)
         {
             LobbyState = (LobbyState) reader.ReadInt32();
-            LobbyType = reader.ReadString();
+            LobbyType = reader.ReadInt32();
             StatusText = reader.ReadString();
             GameMaster = reader.ReadString();
             CurrentUserUsername = reader.ReadString();

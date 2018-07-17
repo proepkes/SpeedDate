@@ -30,7 +30,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("Deathmatch", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(0, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -101,7 +101,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(1, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -140,7 +140,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -181,7 +181,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -237,7 +237,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -301,7 +301,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -368,7 +368,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -427,7 +427,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -489,7 +489,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -586,7 +586,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -684,7 +684,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("3v3auto", new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SpeedDate.Configuration
 {
-    internal class XmlParser : IDisposable
+    public class XmlParser : IDisposable
     {
         public TextReader Stream { get; private set; }
         public string Text { get; private set; }
@@ -41,7 +41,7 @@ namespace SpeedDate.Configuration
                 ReadText();
             return true;
         }
-        public void Search(string tag, Action a)
+        public bool Search(string tag, Action a)
         {
             while (Read())
             {
@@ -49,8 +49,9 @@ namespace SpeedDate.Configuration
                     continue;
 
                 a();
-                break;
+                return true;
             }
+            return false;
         }
 
         public void Search(string tag, Func<bool> f, Action a)
@@ -72,7 +73,9 @@ namespace SpeedDate.Configuration
                 if (Tag == end)
                     break;
                 if (Tag == tag)
+                {
                     a();
+                }
             }
         }
 

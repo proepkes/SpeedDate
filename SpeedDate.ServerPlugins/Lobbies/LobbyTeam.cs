@@ -5,15 +5,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     public class LobbyTeam
     {
-        /// <summary>
-        /// Members of the team
-        /// </summary>
-        protected Dictionary<string, LobbyMember> Members;
-
-        /// <summary>
-        /// Team properties
-        /// </summary>
-        protected Dictionary<string, string> Properties;
+        private readonly Dictionary<string, string> _properties;
+        private readonly Dictionary<string, LobbyMember> _members;
 
         /// <summary>
         /// Min number of players, required in this team
@@ -25,25 +18,21 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// </summary>
         public int MaxPlayers { get; set; }
 
-        public LobbyTeam(string name)
-        {
-            Name = name;
-
-            MinPlayers = 1;
-            MaxPlayers = 5;
-
-            Members = new Dictionary<string, LobbyMember>();
-            Properties = new Dictionary<string, string>();
-        }
-
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Returns a number of members in this team
         /// </summary>
-        public int PlayerCount
+        public int PlayerCount => _members.Count;
+
+        public LobbyTeam(string name)
         {
-            get { return Members.Count; }
+            _properties = new Dictionary<string, string>();
+            _members = new Dictionary<string, LobbyMember>();
+
+            Name = name;
+            MinPlayers = 1;
+            MaxPlayers = 5;
         }
 
         /// <summary>
@@ -63,12 +52,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <returns></returns>
         public bool AddMember(LobbyMember member)
         {
-            if (Members.ContainsKey(member.Username))
+            if (_members.ContainsKey(member.Username))
             {
                 return false;
             }
 
-            Members.Add(member.Username, member);
+            _members.Add(member.Username, member);
             member.Team = this;
 
             return true;
@@ -80,7 +69,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="member"></param>
         public void RemoveMember(LobbyMember member)
         {
-            Members.Remove(member.Username);
+            _members.Remove(member.Username);
 
             if (member.Team == this)
                 member.Team = null;
@@ -93,7 +82,16 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <param name="value"></param>
         public void SetProperty(string key, string value)
         {
-            Properties[key] = value;
+            _properties[key] = value;
+        }
+
+        /// <summary>
+        /// Returns a MUTABLE dictionary of members
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, LobbyMember> GetTeamMembers()
+        {
+            return _members;
         }
 
         /// <summary>
@@ -102,7 +100,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <returns></returns>
         public Dictionary<string, string> GetTeamProperties()
         {
-            return Properties;
+            return _properties;
         }
 
         /// <summary>
@@ -111,12 +109,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
         /// <returns></returns>
         public LobbyTeamData GenerateData()
         {
-            return new LobbyTeamData()
+            return new LobbyTeamData
             {
                 MaxPlayers = MaxPlayers,
                 MinPlayers = MinPlayers,
                 Name = Name,
-                Properties = Properties
+                Properties = _properties
             };
         }
     }

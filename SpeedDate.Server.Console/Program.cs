@@ -14,9 +14,9 @@ namespace SpeedDate.Server.Console
             var server = new SpeedDateServer();
             server.Start(new FileConfigProvider("ServerConfig.xml"));
 
-            server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("Deathmatch", server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.Deathmatch));
-            server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
-            server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
+            //server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("Deathmatch", server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.Deathmatch));
+            //server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("2v2v4", server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
+            //server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("3v3auto", server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
             System.Console.ReadLine();
         }
     }

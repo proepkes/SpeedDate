@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
@@ -21,7 +22,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         private readonly bool _dontAllowCreatingIfJoined = true;
 
         private readonly Dictionary<int, Lobby> _lobbies = new Dictionary<int, Lobby>();
-        private readonly Dictionary<string, ILobbyFactory> _factories = new Dictionary<string, ILobbyFactory>();
+        private readonly Dictionary<int, Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby>> _factories = new Dictionary<int, Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby>>();
 
         [Inject] private readonly ILogger _logger;
         [Inject] internal readonly RoomsPlugin RoomsPlugin;
@@ -48,34 +49,25 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public override void Loaded()
         {
-            Server.SetHandler((ushort) OpCodes.CreateLobby, HandleCreateLobby);
-            Server.SetHandler((ushort) OpCodes.JoinLobby, HandleJoinLobby);
-            Server.SetHandler((ushort) OpCodes.LeaveLobby, HandleLeaveLobby);
-            Server.SetHandler((ushort) OpCodes.SetLobbyProperties, HandleSetLobbyProperties);
-            Server.SetHandler((ushort) OpCodes.SetMyLobbyProperties, HandleSetMyProperties);
-            Server.SetHandler((ushort) OpCodes.JoinLobbyTeam, HandleJoinTeam);
-            Server.SetHandler((ushort) OpCodes.LobbySendChatMessage, HandleSendChatMessage);
-            Server.SetHandler((ushort) OpCodes.LobbySetReady, HandleSetReadyStatus);
-            Server.SetHandler((ushort) OpCodes.LobbyStartGame, HandleStartGame);
-            Server.SetHandler((ushort) OpCodes.GetLobbyRoomAccess, HandleGetLobbyRoomAccess);
+            Server.SetHandler(OpCodes.CreateLobby, HandleCreateLobby);
+            Server.SetHandler(OpCodes.JoinLobby, HandleJoinLobby);
+            Server.SetHandler(OpCodes.LeaveLobby, HandleLeaveLobby);
+            Server.SetHandler(OpCodes.SetLobbyProperties, HandleSetLobbyProperties);
+            Server.SetHandler(OpCodes.SetMyLobbyProperties, HandleSetMyProperties);
+            Server.SetHandler(OpCodes.JoinLobbyTeam, HandleJoinTeam);
+            Server.SetHandler(OpCodes.LobbySendChatMessage, HandleSendChatMessage);
+            Server.SetHandler(OpCodes.LobbySetReady, HandleSetReadyStatus);
+            Server.SetHandler(OpCodes.LobbyStartGame, HandleStartGame);
+            Server.SetHandler(OpCodes.GetLobbyRoomAccess, HandleGetLobbyRoomAccess);
 
-            Server.SetHandler((ushort) OpCodes.GetLobbyMemberData, HandleGetLobbyMemberData);
-            Server.SetHandler((ushort) OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
+            Server.SetHandler(OpCodes.GetLobbyMemberData, HandleGetLobbyMemberData);
+            Server.SetHandler(OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
         }
 
-        private bool CheckIfHasPermissionToCreate(IPeer peer)
+
+        public void AddFactory(Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby> factory)
         {
-            var extension = peer.GetExtension<PeerSecurityExtension>();
-
-            return extension.PermissionLevel >= CreateLobbiesPermissionLevel;
-        }
-
-        public void AddFactory(ILobbyFactory factory)
-        {
-            if (_factories.ContainsKey(factory.Id))
-                _logger.Warn("You are overriding a factory with same id");
-
-            _factories[factory.Id] = factory;
+            _factories[_factories.Keys.Max() + 1] = factory;
         }
 
         public bool AddLobby(Lobby lobby)
@@ -122,7 +114,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         private void HandleCreateLobby(IIncommingMessage message)
         {
-            if (!CheckIfHasPermissionToCreate(message.Peer))
+            if (message.Peer.HasExtension<PeerSecurityExtension>() == false || message.Peer.GetExtension<PeerSecurityExtension>().PermissionLevel < CreateLobbiesPermissionLevel)
             {
                 message.Respond("Insufficient permissions", ResponseStatus.Unauthorized);
                 return;
@@ -140,22 +132,22 @@ namespace SpeedDate.ServerPlugins.Lobbies
             // Deserialize properties of the lobby
             var properties = new Dictionary<string, string>().FromBytes(message.AsBytes());
 
-            if (!properties.ContainsKey(OptionKeys.LobbyFactoryId))
+            if (!properties.ContainsKey(OptionKeys.LobbyFactoryId) || !int.TryParse(properties[OptionKeys.LobbyFactoryId], out var lobbyTypeId))
             {
                 message.Respond("Invalid request (undefined factory)", ResponseStatus.Failed);
                 return;
             }
 
             // Get the lobby factory
-            _factories.TryGetValue(properties[OptionKeys.LobbyFactoryId], out var factory);
+            _factories.TryGetValue(lobbyTypeId, out var factory);
 
             if (factory == null)
             {
-                message.Respond("Unavailable lobby factory", ResponseStatus.Failed);
+                message.Respond("Unavailable lobby type", ResponseStatus.Failed);
                 return;
             }
 
-            var newLobby = factory.CreateLobby(properties, message.Peer);
+            var newLobby = factory.Invoke(this, properties, message.Peer);
 
             if (!AddLobby(newLobby))
             {

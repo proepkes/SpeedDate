@@ -67,9 +67,15 @@ namespace SpeedDate.Test
             }));
             
             Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
-            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("Deathmatch", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.Deathmatch));
-            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
-            Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactoryAnonymous("3v3auto", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
+            //Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("Deathmatch", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.Deathmatch));
+            //Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
+            //Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("3v3auto", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
+
+//            Server.GetPlugin<LobbiesPlugin>().AddFactory(LobbyFactory.FromFile(@"E:\Repositories\SpeedDate\SpeedDate.ServerPlugins\bin\Debug\netstandard2.0\Lobbies\OneVsOne.lobby"));
+            LobbyFactory
+                .FromFile(
+                    @"E:\Repositories\SpeedDate\SpeedDate.ServerPlugins\bin\Debug\netstandard2.0\Lobbies\OneVsOne.lobby")
+                .Invoke(Server.GetPlugin<LobbiesPlugin>(), new Dictionary<string, string>(), null);
             Server.GetPlugin<MailPlugin>().SetSmtpClient(SmtpClientMock.Object);
             Server.GetPlugin<DatabasePlugin>().SetDbAccess(DatabaseMock.Object);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using SpeedDate.Logging;
 using SpeedDate.Network;
 using SpeedDate.Network.Interfaces;
@@ -16,6 +17,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     public class Lobby
     {
+        private const string DefaultName = "Untitled Lobby";
+        public const float WaitSecondsAfterMinPlayersReached = 10;
+        public const float WaitSecondsAfterFullTeams = 5;
+
         private LobbyState _state;
         private LobbyMember _gameMaster;
         private string _statusText = "";
@@ -38,14 +43,64 @@ namespace SpeedDate.ServerPlugins.Lobbies
         protected SpawnTask GameSpawnTask;
         protected RegisteredRoom Room;
 
-        public Lobby(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin, LobbyConfig config)
+
+        public string DisplayName = DefaultName;
+
+        public bool Autostart = false;
+
+        /// <summary>
+        /// If true, players will be able to switch teams
+        /// </summary>
+        public bool EnableTeamSwitching = true;
+
+        /// <summary>
+        /// If true, after the game is over, lobby will be
+        /// set to preparation state, and players will be able to start the game again
+        /// </summary>
+        public bool PlayAgainEnabled = true;
+
+        /// <summary>
+        /// If true, players will be able to set whether they're ready
+        /// to play or not.
+        /// </summary>
+        public bool EnableReadySystem = true;
+
+        /// <summary>
+        /// If ture, players will be allowed to join lobby when
+        /// game is live (game server is running)
+        /// </summary>
+        public bool AllowJoiningWhenGameIsLive = true;
+
+        /// <summary>
+        /// If true, lobby will have a game master, otherwise
+        /// no player will be assigned as a master
+        /// </summary>
+        public bool EnableGameMasters = true;
+
+        /// <summary>
+        /// If true, game server will start automatically when all players are ready
+        /// </summary>
+        public bool StartGameWhenAllReady = false;
+
+        /// <summary>
+        /// If true, game master will be able to start game
+        /// manually
+        /// </summary>
+        public bool EnableManualStart = true;
+
+        /// <summary>
+        /// If true, lobby will not destroy when last player leaves.
+        /// </summary>
+        public bool KeepAliveWithZeroPlayers = false;
+
+        public bool AllowPlayersChangeLobbyProperties = true;
+
+        public Lobby(int lobbyId, IEnumerable<LobbyTeam> teams, LobbiesPlugin plugin)
         {
             Id = lobbyId;
             Plugin = plugin;
             GameIp = "";
             GamePort = -1;
-
-            Config = config;
 
             Controls = new List<LobbyPropertyData>();
             Members = new Dictionary<string, LobbyMember>();
@@ -63,10 +118,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public int Id { get; }
         protected LobbiesPlugin Plugin { get; }
         public bool IsDestroyed { get; private set; }
-        public LobbyConfig Config { get; }
         public int MaxPlayers { get; protected set; }
         public int MinPlayers { get; protected set; }
-        public string Type { get; set; }
+        public int Type { get; set; }
         public string GameIp { get; protected set; }
         public int GamePort { get; protected set; }
 
@@ -99,7 +153,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             get => _gameMaster;
             set
             {
-                if (!Config.EnableGameMasters)
+                if (!EnableGameMasters)
                     return;
                 _gameMaster = value;
                 OnGameMasterChange();
@@ -146,7 +200,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 return false;
             }
 
-            if (!Config.AllowJoiningWhenGameIsLive && State != LobbyState.Preparations)
+            if (!AllowJoiningWhenGameIsLive && State != LobbyState.Preparations)
             {
                 callback.Invoke("Game is already in progress");
                 return false;
@@ -186,7 +240,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
             OnPlayerAdded(member);
 
             PlayerAdded?.Invoke(member);
-
 
             return true;
         }
@@ -229,10 +282,10 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public virtual bool SetProperty(LobbyUserExtension setter, string key, string value)
         {
-            if (!Config.AllowPlayersChangeLobbyProperties)
+            if (!AllowPlayersChangeLobbyProperties)
                 return false;
 
-            if (Config.EnableGameMasters)
+            if (EnableGameMasters)
             {
                 MembersByPeerId.TryGetValue(setter.Peer.ConnectId, out var member);
 
@@ -338,7 +391,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public bool TryJoinTeam(string teamName, LobbyMember member)
         {
-            if (!Config.EnableTeamSwitching)
+            if (!EnableTeamSwitching)
                 return false;
 
             var currentTeam = member.Team;
@@ -373,7 +426,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         protected virtual void PickNewGameMaster(bool broadcastChange = true)
         {
-            if (!Config.EnableGameMasters)
+            if (!EnableGameMasters)
                 return;
 
             GameMaster = Members.Values.FirstOrDefault();
@@ -522,12 +575,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 // If game was open before
                 if (State == LobbyState.StartingGameServer)
                 {
-                    State = Config.PlayAgainEnabled ? LobbyState.Preparations : LobbyState.FailedToStart;
+                    State = PlayAgainEnabled ? LobbyState.Preparations : LobbyState.FailedToStart;
                     BroadcastChatMessage("Failed to start a game server", true);
                 }
                 else
                 {
-                    State = Config.PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
+                    State = PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
                 }
             }
         }
@@ -570,7 +623,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             GameSpawnTask = null;
 
-            State = Config.PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
+            State = PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
         }
 
         public Dictionary<string, string> GetPublicProperties(IPeer peer)
@@ -582,7 +635,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var info = new LobbyDataPacket
             {
-                LobbyType = Type ?? "",
+                LobbyType = Type,
                 GameMaster = GameMaster != null ? GameMaster.Username : "",
                 LobbyName = Name,
                 LobbyId = Id,
@@ -593,9 +646,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 Controls = Controls,
                 LobbyState = State,
                 MaxPlayers = MaxPlayers,
-                EnableTeamSwitching = Config.EnableTeamSwitching,
-                EnableReadySystem = Config.EnableReadySystem,
-                EnableManualStart = Config.EnableManualStart,
+                EnableTeamSwitching = EnableTeamSwitching,
+                EnableReadySystem = EnableReadySystem,
+                EnableManualStart = EnableManualStart,
                 CurrentUserUsername = ""
             };
 
@@ -606,7 +659,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var info = new LobbyDataPacket
             {
-                LobbyType = Type ?? "",
+                LobbyType = Type,
                 GameMaster = GameMaster != null ? GameMaster.Username : "",
                 LobbyName = Name,
                 LobbyId = Id,
@@ -617,9 +670,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 Controls = Controls,
                 LobbyState = State,
                 MaxPlayers = MaxPlayers,
-                EnableTeamSwitching = Config.EnableTeamSwitching,
-                EnableReadySystem = Config.EnableReadySystem,
-                EnableManualStart = Config.EnableManualStart,
+                EnableTeamSwitching = EnableTeamSwitching,
+                EnableReadySystem = EnableReadySystem,
+                EnableManualStart = EnableManualStart,
                 CurrentUserUsername = TryGetUsername(user.Peer)
             };
 
@@ -665,7 +718,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var member = GetMember(user);
 
-            if (!Config.EnableManualStart)
+            if (!EnableManualStart)
             {
                 SendChatMessage(member, "You cannot start the game manually", true);
                 return false;
@@ -781,7 +834,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         protected virtual void OnPlayerRemoved(LobbyMember member)
         {
             // Destroy lobby if last member left
-            if (!Config.KeepAliveWithZeroPlayers && Members.Count == 0)
+            if (!KeepAliveWithZeroPlayers && Members.Count == 0)
             {
                 Destroy();
                 Logger.Log(LogLevel.Info, $"Lobby \"{Name}\" destroyed due to last player leaving.");
@@ -898,13 +951,73 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         protected virtual void OnAllPlayersReady()
         {
-            if (!Config.StartGameWhenAllReady)
+            if (!StartGameWhenAllReady)
                 return;
 
             if (Teams.Values.Any(t => t.PlayerCount < t.MinPlayers))
                 return;
 
             StartGame();
+        }
+        public async void StartAutomation()
+        {
+            await Task.Run(async () =>
+            {
+                var timeToWait = WaitSecondsAfterMinPlayersReached;
+
+                var initialState = State;
+
+                while (State == LobbyState.Preparations || State == initialState)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+
+                    if (IsDestroyed)
+                        break;
+
+                    // Check if enough players in the room
+                    if (MinPlayers > Members.Count)
+                    {
+                        timeToWait = WaitSecondsAfterMinPlayersReached;
+                        StatusText = "Waiting for players: " + (MinPlayers - Members.Count) + " more";
+                        continue;
+                    }
+
+                    // Check if there are teams that don't
+                    // meet the minimal requirement
+                    var lackingTeam = Teams.Values.FirstOrDefault(t => t.MinPlayers > t.PlayerCount);
+
+                    if (lackingTeam != null)
+                    {
+                        timeToWait = WaitSecondsAfterMinPlayersReached;
+                        StatusText = $"Not enough players in team '{lackingTeam.Name}'";
+                        continue;
+                    }
+
+                    // Reduce the time to wait by one second
+                    timeToWait -= 1;
+
+                    // Check if teams are full
+                    if (Teams.Values.All(t => t.MaxPlayers == t.PlayerCount))
+                    {
+                        // Change the timer only if it's lower than current timer
+                        timeToWait = timeToWait > WaitSecondsAfterFullTeams
+                            ? timeToWait : WaitSecondsAfterFullTeams;
+                    }
+
+                    StatusText = "Starting game in " + timeToWait;
+
+                    if (timeToWait <= 0)
+                    {
+                        StartGame();
+                        break;
+                    }
+                }
+            });
+        }
+
+        public static string ExtractLobbyName(Dictionary<string, string> properties)
+        {
+            return properties.ContainsKey(OptionKeys.LobbyName) ? properties[OptionKeys.LobbyName] : DefaultName;
         }
     }
 }

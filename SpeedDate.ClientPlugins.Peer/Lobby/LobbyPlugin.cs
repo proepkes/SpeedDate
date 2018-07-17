@@ -31,10 +31,10 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// <summary>
         /// Sends a request to create a lobby and joins it
         /// </summary>
-        public void CreateAndJoin(string factory, Dictionary<string, string> properties, 
+        public void CreateAndJoin(int lobbytypeid, Dictionary<string, string> properties, 
             JoinLobbyCallback callback, ErrorCallback errorCallback)
         {
-            CreateLobby(factory, properties, id =>
+            CreateLobby(lobbytypeid, properties, id =>
             {
                 JoinLobby(id, callback.Invoke, error =>
                 {
@@ -46,7 +46,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// <summary>
         /// Sends a request to create a lobby, using a specified factory
         /// </summary>
-        public void CreateLobby(string factory, Dictionary<string, string> properties, 
+        public void CreateLobby(int lobbyTypeId, Dictionary<string, string> properties, 
             CreateLobbyCallback callback, ErrorCallback errorCallback)
         {
             if (!Client.IsConnected)
@@ -55,7 +55,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
                 return;
             }
 
-            properties[OptionKeys.LobbyFactoryId] = factory;
+            properties[OptionKeys.LobbyFactoryId] = lobbyTypeId.ToString();
 
             Client.SendMessage((ushort) OpCodes.CreateLobby, properties.ToBytes(), (status, response) =>
             {
