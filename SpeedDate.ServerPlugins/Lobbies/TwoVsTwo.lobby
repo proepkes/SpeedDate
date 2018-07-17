@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Lobby DisplayName="1 vs 1"
+      Autostart="false"
+      EnableTeamSwitching="true"
+      PlayAgainEnabled="true"
+      EnableReadySystem="true"
+      AllowJoiningWhenGameIsLive="true"
+      EnableGameMasters="true"
+      StartGameWhenAllReady="false"
+      EnableManualStart="true" 
+      KeepAliveWithZeroPlayers="false"
+      AllowPlayersChangeLobbyProperties="true">
+  <Teams>
+    <Team Name="Team Blue" MinPlayers="1" MaxPlayers="1" Color="0000FF"/>
+    <Team Name="Team Red" MinPlayers="1" MaxPlayers="1" Color="FF0000"/>
+  </Teams>
+  <Controls>
+    <Control Key="speed" Label="Game Speed">
+      <Controloption>1x</Controloption>
+      <Controloption IsDefault="true">2x</Controloption>
+      <Controloption>3x</Controloption>
+    </Control>
+    <Control Key="gravity" Label="Gravity">
+      <Controloption>On</Controloption>
+      <Controloption>Off</Controloption>
+    </Control>
+  </Controls>
+</Lobby>
