@@ -10,7 +10,6 @@ namespace SpeedDate.Packets.Lobbies
     public class LobbyDataPacket : SerializablePacket
     {
         public LobbyState LobbyState;
-        public int LobbyType = 0;
         public string StatusText = "";
         public string GameMaster = "";
         public string CurrentUserUsername = "";
@@ -23,8 +22,7 @@ namespace SpeedDate.Packets.Lobbies
 
         public Dictionary<string, LobbyMemberData> Players;
         public Dictionary<string, LobbyTeamData> Teams;
-
-        public List<LobbyPropertyData> Controls;
+        public Dictionary<string, LobbyPropertyData> Controls;
 
         public byte[] AdditionalData;
 
@@ -39,12 +37,12 @@ namespace SpeedDate.Packets.Lobbies
             // Just to avoid handling "null" cases
             Players = new Dictionary<string, LobbyMemberData>();
             Teams = new Dictionary<string, LobbyTeamData>();
+            Controls = new Dictionary<string, LobbyPropertyData>();
         }
 
         public override void ToBinaryWriter(EndianBinaryWriter writer)
         {
             writer.Write((int)LobbyState);
-            writer.Write(LobbyType);
             writer.Write(StatusText);
             writer.Write(GameMaster);
             writer.Write(CurrentUserUsername);
@@ -82,7 +80,9 @@ namespace SpeedDate.Packets.Lobbies
             writer.Write(Controls.Count);
             foreach (var control in Controls)
             {
-                control.ToBinaryWriter(writer);
+                writer.Write(control.Key);
+
+                control.Value.ToBinaryWriter(writer);
             }
 
             // Other settings
@@ -95,7 +95,6 @@ namespace SpeedDate.Packets.Lobbies
         public override void FromBinaryReader(EndianBinaryReader reader)
         {
             LobbyState = (LobbyState) reader.ReadInt32();
-            LobbyType = reader.ReadInt32();
             StatusText = reader.ReadString();
             GameMaster = reader.ReadString();
             CurrentUserUsername = reader.ReadString();
@@ -136,13 +135,14 @@ namespace SpeedDate.Packets.Lobbies
             }
 
             // Read controls
-            Controls = new List<LobbyPropertyData>();
+            Controls.Clear();
             var controlsCount = reader.ReadInt32();
             for (int i = 0; i < controlsCount; i++)
             {
-                var control = new LobbyPropertyData();
-                control.FromBinaryReader(reader);
-                Controls.Add(control);
+                var controlKey = reader.ReadString();
+                var controlData = CreateLobbyPropertyData();
+                controlData.FromBinaryReader(reader);
+                Controls.Add(controlKey, controlData);
             }
 
             // Other settings
@@ -159,6 +159,11 @@ namespace SpeedDate.Packets.Lobbies
         protected virtual LobbyTeamData CreateTeamData()
         {
             return new LobbyTeamData();
+        }
+
+        protected virtual LobbyPropertyData CreateLobbyPropertyData()
+        {
+            return new LobbyPropertyData();
         }
     }
 }

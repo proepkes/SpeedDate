@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using SpeedDate.Configuration;
 using SpeedDate.Logging;
@@ -21,10 +22,12 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         private readonly bool _dontAllowCreatingIfJoined = true;
 
-        private readonly Dictionary<int, Lobby> _lobbies = new Dictionary<int, Lobby>();
-        private readonly Dictionary<int, Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby>> _factories = new Dictionary<int, Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby>>();
+        private readonly Dictionary<int, Lobby> _lobbiesById = new Dictionary<int, Lobby>();
+        private readonly Dictionary<int, string> _lobbyTypeLookup = new Dictionary<int, string>();
+        public readonly Dictionary<string, LobbyBuilder> Factories = new Dictionary<string, LobbyBuilder>();
 
         [Inject] private readonly ILogger _logger;
+        [Inject] private readonly LobbiesConfig _config;
         [Inject] internal readonly RoomsPlugin RoomsPlugin;
         [Inject] internal readonly SpawnerPlugin SpawnerPlugin;
 
@@ -33,7 +36,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public IEnumerable<GameInfoPacket> GetPublicGames(IPeer peer, Dictionary<string, string> filters)
         {
-            return _lobbies.Values.Select(lobby => new GameInfoPacket
+            return _lobbiesById.Values.Select(lobby => new GameInfoPacket
             {
                 Address = lobby.GameIp + ":" + lobby.GamePort,
                 Id = lobby.Id,
@@ -41,14 +44,18 @@ namespace SpeedDate.ServerPlugins.Lobbies
                 MaxPlayers = lobby.MaxPlayers,
                 Name = lobby.Name,
                 OnlinePlayers = lobby.PlayerCount,
-                Properties = GetPublicLobbyProperties(peer, lobby, filters),
+                Properties = lobby.Properties,
                 Type = GameInfoType.Lobby
             });
         }
 
-
         public override void Loaded()
         {
+            foreach (var lobbySettings in _config.ReadAllFiles())
+            {
+                Factories.Add(lobbySettings, LobbiesHelper.CreateLobbyBuilder(new StringReader(lobbySettings)));
+            }
+
             Server.SetHandler(OpCodes.CreateLobby, HandleCreateLobby);
             Server.SetHandler(OpCodes.JoinLobby, HandleJoinLobby);
             Server.SetHandler(OpCodes.LeaveLobby, HandleLeaveLobby);
@@ -58,39 +65,33 @@ namespace SpeedDate.ServerPlugins.Lobbies
             Server.SetHandler(OpCodes.LobbySendChatMessage, HandleSendChatMessage);
             Server.SetHandler(OpCodes.LobbySetReady, HandleSetReadyStatus);
             Server.SetHandler(OpCodes.LobbyStartGame, HandleStartGame);
-            Server.SetHandler(OpCodes.GetLobbyRoomAccess, HandleGetLobbyRoomAccess);
 
+            Server.SetHandler(OpCodes.GetLobbyRoomAccess, HandleGetLobbyRoomAccess);
             Server.SetHandler(OpCodes.GetLobbyMemberData, HandleGetLobbyMemberData);
             Server.SetHandler(OpCodes.GetLobbyInfo, HandleGetLobbyInfo);
+            Server.SetHandler(OpCodes.GetLobbyTypes, HandleGetLobbyTypes);
         }
 
-
-        public void AddFactory(Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby> factory)
+        public bool AddLobby(string type, Lobby lobby)
         {
-            _factories[_factories.Keys.Max() + 1] = factory;
-        }
-
-        public bool AddLobby(Lobby lobby)
-        {
-            if (_lobbies.ContainsKey(lobby.Id))
+            if (_lobbiesById.ContainsKey(lobby.Id))
             {
                 _logger.Error("Failed to add a lobby - lobby with same id already exists");
                 return false;
             }
 
-            _lobbies.Add(lobby.Id, lobby);
+            _lobbiesById.Add(lobby.Id, lobby);
+            _lobbyTypeLookup.Add(lobby.Id, type);
 
             lobby.Destroyed += OnLobbyDestroyed;
             return true;
         }
 
-        /// <summary>
-        ///     Invoked, when lobby is destroyed
-        /// </summary>
-        /// <param name="lobby"></param>
         private void OnLobbyDestroyed(Lobby lobby)
         {
-            _lobbies.Remove(lobby.Id);
+            _lobbyTypeLookup.Remove(lobby.Id);
+            _lobbiesById.Remove(lobby.Id);
+
             lobby.Destroyed -= OnLobbyDestroyed;
         }
 
@@ -132,14 +133,16 @@ namespace SpeedDate.ServerPlugins.Lobbies
             // Deserialize properties of the lobby
             var properties = new Dictionary<string, string>().FromBytes(message.AsBytes());
 
-            if (!properties.ContainsKey(OptionKeys.LobbyFactoryId) || !int.TryParse(properties[OptionKeys.LobbyFactoryId], out var lobbyTypeId))
+            if (!properties.ContainsKey(OptionKeys.LobbyFactoryId))
             {
                 message.Respond("Invalid request (undefined factory)", ResponseStatus.Failed);
                 return;
             }
 
+            var lobbyType = properties[OptionKeys.LobbyFactoryId];
+
             // Get the lobby factory
-            _factories.TryGetValue(lobbyTypeId, out var factory);
+            Factories.TryGetValue(lobbyType, out var factory);
 
             if (factory == null)
             {
@@ -149,7 +152,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             var newLobby = factory.Invoke(this, properties, message.Peer);
 
-            if (!AddLobby(newLobby))
+            if (!AddLobby(lobbyType, newLobby))
             {
                 message.Respond("Lobby registration failed", ResponseStatus.Error);
                 return;
@@ -161,14 +164,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(newLobby.Id, ResponseStatus.Success);
         }
 
-        /// <summary>
-        ///     Handles a request from user to join a lobby
-        /// </summary>
-        /// <param name="message"></param>
         private void HandleJoinLobby(IIncommingMessage message)
         {
             var user = GetOrCreateLobbiesExtension(message.Peer);
-
             if (user.CurrentLobby != null)
             {
                 message.Respond("You're already in a lobby", ResponseStatus.Failed);
@@ -177,7 +175,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             var lobbyId = message.AsInt();
 
-            _lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbiesById.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -202,7 +200,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var lobbyId = message.AsInt();
 
-            _lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbiesById.TryGetValue(lobbyId, out var lobby);
 
             var lobbiesExt = GetOrCreateLobbiesExtension(message.Peer);
 
@@ -215,7 +213,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var data = message.Deserialize<LobbyPropertiesSetPacket>();
 
-            _lobbies.TryGetValue(data.LobbyId, out var lobby);
+            _lobbiesById.TryGetValue(data.LobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -368,7 +366,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             var lobbyId = data.A;
             var peerId = data.B;
 
-            _lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbiesById.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -391,7 +389,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var lobbyId = message.AsInt();
 
-            _lobbies.TryGetValue(lobbyId, out var lobby);
+            _lobbiesById.TryGetValue(lobbyId, out var lobby);
 
             if (lobby == null)
             {
@@ -402,10 +400,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
             message.Respond(lobby.GenerateLobbyData(), ResponseStatus.Success);
         }
 
-        public Dictionary<string, string> GetPublicLobbyProperties(IPeer peer, Lobby lobby,
-            Dictionary<string, string> playerFilters)
+        private void HandleGetLobbyTypes(IIncommingMessage message)
         {
-            return lobby.GetPublicProperties(peer);
+            message.Respond(Factories.Keys.ToBytes(), ResponseStatus.Success);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     public class Lobby
     {
-        private const string DefaultName = "Untitled Lobby";
+        public const string DefaultName = "Untitled Lobby";
         public const float WaitSecondsAfterMinPlayersReached = 10;
         public const float WaitSecondsAfterFullTeams = 5;
 
@@ -30,15 +30,16 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public event Action<Lobby> Destroyed;
 
-        public readonly Logger Logger = LogManager.GetLogger(typeof(Lobby).Name);
+        public readonly Dictionary<string, LobbyPropertyData> Controls;
+        public readonly Dictionary<string, LobbyTeam> Teams;
+        public readonly Logger Logger = LogManager.GetLogger(nameof(Lobby));
 
         protected readonly Dictionary<string, LobbyMember> Members;
         protected readonly Dictionary<long, LobbyMember> MembersByPeerId;
-        protected readonly Dictionary<string, string> Properties;
-        protected readonly Dictionary<string, LobbyTeam> Teams;
+        public readonly Dictionary<string, string> Properties;
         protected readonly HashSet<IPeer> Subscribers;
 
-        protected readonly List<LobbyPropertyData> Controls;
+        
 
         protected SpawnTask GameSpawnTask;
         protected RegisteredRoom Room;
@@ -102,7 +103,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             GameIp = "";
             GamePort = -1;
 
-            Controls = new List<LobbyPropertyData>();
+            Controls = new Dictionary<string, LobbyPropertyData>();
             Members = new Dictionary<string, LobbyMember>();
             MembersByPeerId = new Dictionary<long, LobbyMember>();
             Properties = new Dictionary<string, string>();
@@ -120,7 +121,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public bool IsDestroyed { get; private set; }
         public int MaxPlayers { get; protected set; }
         public int MinPlayers { get; protected set; }
-        public int Type { get; set; }
         public string GameIp { get; protected set; }
         public int GamePort { get; protected set; }
 
@@ -331,7 +331,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             return member;
         }
-
+        
         public bool SetPlayerProperty(LobbyMember player, string key, string value)
         {
             // Invalid property
@@ -373,7 +373,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
         public void AddControl(LobbyPropertyData propertyData, string defaultValue)
         {
             SetProperty(propertyData.PropertyKey, defaultValue);
-            Controls.Add(propertyData);
+            Controls.Add(propertyData.PropertyKey, propertyData);
         }
 
         public void AddControl(LobbyPropertyData propertyData)
@@ -386,7 +386,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
             }
 
             SetProperty(propertyData.PropertyKey, defaultValue);
-            Controls.Add(propertyData);
+            Controls.Add(propertyData.PropertyKey, propertyData);
         }
 
         public bool TryJoinTeam(string teamName, LobbyMember member)
@@ -625,17 +625,11 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
             State = PlayAgainEnabled ? LobbyState.Preparations : LobbyState.GameOver;
         }
-
-        public Dictionary<string, string> GetPublicProperties(IPeer peer)
-        {
-            return Properties;
-        }
         
         public LobbyDataPacket GenerateLobbyData()
         {
             var info = new LobbyDataPacket
             {
-                LobbyType = Type,
                 GameMaster = GameMaster != null ? GameMaster.Username : "",
                 LobbyName = Name,
                 LobbyId = Id,
@@ -659,7 +653,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
         {
             var info = new LobbyDataPacket
             {
-                LobbyType = Type,
                 GameMaster = GameMaster != null ? GameMaster.Username : "",
                 LobbyName = Name,
                 LobbyId = Id,
@@ -1013,11 +1006,6 @@ namespace SpeedDate.ServerPlugins.Lobbies
                     }
                 }
             });
-        }
-
-        public static string ExtractLobbyName(Dictionary<string, string> properties)
-        {
-            return properties.ContainsKey(OptionKeys.LobbyName) ? properties[OptionKeys.LobbyName] : DefaultName;
         }
     }
 }

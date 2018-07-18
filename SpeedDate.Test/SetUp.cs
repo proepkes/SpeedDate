@@ -5,11 +5,11 @@ using NUnit.Framework;
 using Shouldly;
 using SpeedDate.Configuration;
 using SpeedDate.Server;
-using SpeedDate.ServerPlugins.Authentication;
-using SpeedDate.ServerPlugins.Database;
-using SpeedDate.ServerPlugins.Database.Entities;
-using SpeedDate.ServerPlugins.Lobbies;
 using SpeedDate.ServerPlugins.Mail;
+using SpeedDate.ServerPlugins.Lobbies;
+using SpeedDate.ServerPlugins.Database;
+using SpeedDate.ServerPlugins.Authentication;
+using SpeedDate.ServerPlugins.Database.Entities;
 
 namespace SpeedDate.Test
 {
@@ -33,6 +33,36 @@ namespace SpeedDate.Test
             Token = "testToken",
             Username = "TestUser"
         };
+
+        public static readonly string TestLobbyOneVsOneXml = 
+            @"<?xml version=""1.0"" encoding=""utf-8"" ?>
+                <Lobby DisplayName=""1 vs 1""
+                      Autostart=""false""
+                      EnableTeamSwitching=""true""
+                      PlayAgainEnabled=""true""
+                      EnableReadySystem=""true""
+                      AllowJoiningWhenGameIsLive=""true""
+                      EnableGameMasters=""true""
+                      StartGameWhenAllReady=""false""
+                      EnableManualStart=""true"" 
+                      KeepAliveWithZeroPlayers=""false""
+                      AllowPlayersChangeLobbyProperties=""true"">
+                  <Teams>
+                    <Team Name=""Team Blue"" MinPlayers=""1"" MaxPlayers=""1"" Color=""0000FF""/>
+                    <Team Name=""Team Red"" MinPlayers=""1"" MaxPlayers=""1"" Color=""FF0000""/>
+                  </Teams>
+                  <Controls>
+                    <Control Key=""speed"" Label=""Game Speed"">
+                      <Controloption Value=""1x"" />
+                      <Controloption IsDefault=""true"" Value=""2x"" />
+                      <Controloption Value=""3x"" />
+                    </Control>
+                    <Control Key=""gravity"" Label=""Gravity"">
+                      <Controloption Value=""On"" />
+                      <Controloption Value=""Off"" />
+                    </Control>
+                  </Controls>
+                </Lobby>";
 
         public static SpeedDateServer Server;
         public static readonly Mock<ISmtpClient> SmtpClientMock = new Mock<ISmtpClient>();
@@ -67,15 +97,37 @@ namespace SpeedDate.Test
             }));
             
             Server.GetPlugin<LobbiesPlugin>().ShouldNotBeNull();
-            //Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("Deathmatch", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.Deathmatch));
-            //Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("2v2v4", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.TwoVsTwoVsFour));
-            //Server.GetPlugin<LobbiesPlugin>().AddFactory(new LobbyFactory("3v3auto", Server.GetPlugin<LobbiesPlugin>(), DemoLobbyFactories.ThreeVsThreeQueue));
 
-//            Server.GetPlugin<LobbiesPlugin>().AddFactory(LobbyFactory.FromFile(@"E:\Repositories\SpeedDate\SpeedDate.ServerPlugins\bin\Debug\netstandard2.0\Lobbies\OneVsOne.lobby"));
-            LobbyFactory
-                .FromFile(
-                    @"E:\Repositories\SpeedDate\SpeedDate.ServerPlugins\bin\Debug\netstandard2.0\Lobbies\OneVsOne.lobby")
-                .Invoke(Server.GetPlugin<LobbiesPlugin>(), new Dictionary<string, string>(), null);
+            Server.GetPlugin<LobbiesPlugin>().Factories.Add("1v1", (plugin, properties, creator) => 
+                new Lobby(plugin.GenerateLobbyId(), new[]
+                {
+                    new LobbyTeam("Team Blue") { MinPlayers = 1, MaxPlayers = 1}, 
+                    new LobbyTeam("Team Red") { MinPlayers = 1, MaxPlayers = 1}
+                }, plugin)
+                {
+                    Name = properties.ExtractLobbyName()
+                });
+
+            Server.GetPlugin<LobbiesPlugin>().Factories.Add("2v2v4", (plugin, properties, creator) =>
+                new Lobby(plugin.GenerateLobbyId(), new[]
+                {
+                    new LobbyTeam("Team Blue") { MinPlayers = 1, MaxPlayers = 2},
+                    new LobbyTeam("Team Red") { MinPlayers = 1, MaxPlayers = 2},
+                    new LobbyTeam("Team Noobs") { MinPlayers = 1, MaxPlayers = 4}
+                }, plugin)
+                {
+                    Name = properties.ExtractLobbyName()
+                });
+            Server.GetPlugin<LobbiesPlugin>().Factories.Add("3v3auto", (plugin, properties, creator) =>
+                new Lobby(plugin.GenerateLobbyId(), new[] 
+                {
+                    new LobbyTeam("Team Blue") { MinPlayers = 1, MaxPlayers = 3},
+                    new LobbyTeam("Team Red") { MinPlayers = 1, MaxPlayers = 3},
+                }, plugin)
+                {
+                    Name = properties.ExtractLobbyName()
+                });
+
             Server.GetPlugin<MailPlugin>().SetSmtpClient(SmtpClientMock.Object);
             Server.GetPlugin<DatabasePlugin>().SetDbAccess(DatabaseMock.Object);
         }
@@ -83,8 +135,8 @@ namespace SpeedDate.Test
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            //Server.Stop();
-            //Server.Dispose();
+            Server.Stop();
+            Server.Dispose();
         }
     }
 }

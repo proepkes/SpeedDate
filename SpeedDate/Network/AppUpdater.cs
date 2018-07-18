@@ -14,7 +14,6 @@ namespace SpeedDate.Network
 
         private readonly List<IUpdatable> _addList;
         private readonly List<IUpdatable> _removeList;
-
         private readonly List<IUpdatable> _runnables;
 
         public bool KeepRunning = true;
@@ -70,7 +69,7 @@ namespace SpeedDate.Network
                         Console.WriteLine(e);
                     }
 
-                    await Task.Delay(100);
+                    await Task.Delay(10);
                 }
             }, TaskCreationOptions.LongRunning);
         }

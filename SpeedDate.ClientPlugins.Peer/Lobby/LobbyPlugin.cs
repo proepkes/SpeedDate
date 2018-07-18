@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using SpeedDate.ClientPlugins.Peer.Room;
 using SpeedDate.Configuration;
-using SpeedDate.Logging;
 using SpeedDate.Network;
-using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.Packets.Rooms;
-using SpeedDate.Plugin.Interfaces;
 
 namespace SpeedDate.ClientPlugins.Peer.Lobby
 {
@@ -28,10 +25,24 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
 
         [Inject] private RoomPlugin _roomPlugin;
 
+        public void GetLobbyTypes(Action<IList<string>> lobbyTypesCallback, ErrorCallback errorCallback)
+        {
+            Client.SendMessage((ushort)OpCodes.GetLobbyTypes, (status, response) =>
+            {
+                if (status != ResponseStatus.Success)
+                {
+                    errorCallback.Invoke(response.AsString("Unknown error"));
+                    return;
+                }
+                
+                lobbyTypesCallback.Invoke(new List<string>().FromBytes(response.AsBytes()));
+            });
+        }
+
         /// <summary>
         /// Sends a request to create a lobby and joins it
         /// </summary>
-        public void CreateAndJoin(int lobbytypeid, Dictionary<string, string> properties, 
+        public void CreateAndJoin(string lobbytypeid, Dictionary<string, string> properties, 
             JoinLobbyCallback callback, ErrorCallback errorCallback)
         {
             CreateLobby(lobbytypeid, properties, id =>
@@ -46,7 +57,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
         /// <summary>
         /// Sends a request to create a lobby, using a specified factory
         /// </summary>
-        public void CreateLobby(int lobbyTypeId, Dictionary<string, string> properties, 
+        public void CreateLobby(string lobbyTypeId, Dictionary<string, string> properties, 
             CreateLobbyCallback callback, ErrorCallback errorCallback)
         {
             if (!Client.IsConnected)
@@ -55,7 +66,7 @@ namespace SpeedDate.ClientPlugins.Peer.Lobby
                 return;
             }
 
-            properties[OptionKeys.LobbyFactoryId] = lobbyTypeId.ToString();
+            properties[OptionKeys.LobbyFactoryId] = lobbyTypeId;
 
             Client.SendMessage((ushort) OpCodes.CreateLobby, properties.ToBytes(), (status, response) =>
             {

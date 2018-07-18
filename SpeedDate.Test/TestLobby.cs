@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using Moq;
 using NUnit.Framework;
@@ -13,6 +13,7 @@ using SpeedDate.ClientPlugins.Peer.MatchMaker;
 using SpeedDate.Configuration;
 using SpeedDate.Packets.Lobbies;
 using SpeedDate.Packets.Matchmaking;
+using SpeedDate.ServerPlugins.Lobbies;
 
 namespace SpeedDate.Test
 {
@@ -20,7 +21,7 @@ namespace SpeedDate.Test
     public class TestLobby
     {
         [Test]
-        public void ShouldCreateDeathmatchLobby()
+        public void ShouldCreateDeathmatchLobby([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyName = TestContext.CurrentContext.Test.Name;
             var done = new AutoResetEvent(false);
@@ -30,7 +31,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(0, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -44,15 +45,15 @@ namespace SpeedDate.Test
                         lobby.State.ShouldBe(LobbyState.Preparations);
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
         }
 
         [Test]
@@ -71,26 +72,25 @@ namespace SpeedDate.Test
                         {
                             OptionKeys.LobbyName, lobbyName
                         }
-                    }, lobby =>
-                    {
-                        throw new Exception("Got Lobby access without joining a lobby");
-                    }, error =>
+                    }, 
+                    lobby => throw new Exception("Got Lobby access without joining a lobby"), 
+                    error =>
                     {
                         error.ShouldNotBeNullOrEmpty();
                         done.Set();
                     });
-                }, error => { throw new Exception(error); });
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
         }
 
         [Test]
-        public void CreateAndJoinLobby_ShouldBeCreated()
+        public void ShouldCreateAndJoinLobbyAsGuest([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyName = TestContext.CurrentContext.Test.Name;
 
@@ -101,7 +101,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(1, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -116,60 +116,19 @@ namespace SpeedDate.Test
                         lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
         }
 
         [Test]
-        public void CreateAndJoinAutoLobby_ShouldBeCreated()
-        {
-            var lobbyId = -1;
-            var lobbyName = TestContext.CurrentContext.Test.Name;
-
-            var done = new AutoResetEvent(false);
-
-            var lobbyCreator = new SpeedDateClient();
-            lobbyCreator.Started += () =>
-            {
-                lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
-                {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
-                    {
-                        {
-                            OptionKeys.LobbyName, lobbyName
-                        }
-                    }, lobby =>
-                    {
-                        lobby.Data.GameMaster.ShouldBeEmpty();
-                        lobby.Members.ShouldContainKey(info.Username);
-
-                        lobby.LobbyName.ShouldBe(lobbyName);
-                        lobby.Id.ShouldBeGreaterThanOrEqualTo(0);
-                        lobby.State.ShouldBe(LobbyState.Preparations);
-
-                        lobbyId = lobby.Id;
-
-                        done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
-            };
-
-            lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
-                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
-
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
-        }
-
-        [Test]
-        public void JoinLobby_ShouldIncreaseMembersCount()
+        public void JoinLobby_ShouldIncreaseMembersCount([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyName = TestContext.CurrentContext.Test.Name;
             var lobbyId = -1;
@@ -181,7 +140,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -190,15 +149,15 @@ namespace SpeedDate.Test
                     {
                         lobbyId = lobby.Id;
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -212,19 +171,19 @@ namespace SpeedDate.Test
                         joinedLobby.Members.ShouldContainKey(info.Username);
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-joined
         }
 
         [Test]
-        public void JoinLobby_ShouldNotifyListener()
+        public void JoinLobby_ShouldNotifyListener([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyName = TestContext.CurrentContext.Test.Name;
             var lobbyId = -1;
@@ -237,7 +196,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -257,15 +216,15 @@ namespace SpeedDate.Test
                         lobby.SetListener(listener.Object);
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -276,19 +235,19 @@ namespace SpeedDate.Test
                     lobbyJoiner.GetPlugin<LobbyPlugin>().JoinLobby(lobbyId, joinedLobby =>
                     {
                         //Listener will signal done
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobby-listener
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobby-listener
         }
 
         [Test]
-        public void LeaveLobby_ShouldNotifyListener()
+        public void LeaveLobby_ShouldNotifyListener([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyId = -1;
             var joinerUsername = string.Empty;
@@ -301,7 +260,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -321,15 +280,15 @@ namespace SpeedDate.Test
                         lobby.SetListener(listener.Object);
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), 
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -342,21 +301,21 @@ namespace SpeedDate.Test
                         lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () =>
                         {
                             //Listener will signal done
-                        }, error => { throw new Exception(error); });
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                        }, error => throw new Exception(error));
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobby-listener
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobby-listener
         }
 
 
         [Test]
-        public void FindGames_ShouldContainLobby()
+        public void FindGames_ShouldContainLobby([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyName = TestContext.CurrentContext.Test.Name;
             var lobbyId = -1;
@@ -368,7 +327,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(2, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin("2v2v4", new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -377,15 +336,15 @@ namespace SpeedDate.Test
                     {
                         lobbyId = lobby.Id;
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -403,19 +362,19 @@ namespace SpeedDate.Test
 
                         done.Set();
 
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-joined
         }
 
         [Test]
-        public void AutoLobbyFindGames_ShouldContainLobby()
+        public void AutoLobbyFindGames_ShouldContainLobby([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyId = -1;
             var lobbyName = TestContext.CurrentContext.Test.Name;
@@ -427,7 +386,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -436,15 +395,15 @@ namespace SpeedDate.Test
                     {
                         lobbyId = lobby.Id;
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -461,19 +420,19 @@ namespace SpeedDate.Test
                         gameInfo.OnlinePlayers.ShouldBe(1);
                         done.Set();
 
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-joined
         }
 
         [Test]
-        public void JoinTeam_CreatorShouldBeInSameTeam()
+        public void JoinTeam_CreatorShouldBeInSameTeam([Values("2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyId = -1;
             var lobbyName = TestContext.CurrentContext.Test.Name;
@@ -489,7 +448,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -502,15 +461,15 @@ namespace SpeedDate.Test
                         lobbyId = lobby.Id;
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -536,15 +495,15 @@ namespace SpeedDate.Test
                             });
                         joinedLobby.SetListener(joinedLobbyListenerMock.Object);
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
                 new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-joined
 
             //At this point, the joiner and creator should be in different teams
             //Team A:
@@ -556,9 +515,9 @@ namespace SpeedDate.Test
 
             //Let joiner switch to the creator's team
             lobbyJoiner.GetPlugin<LobbyPlugin>().JoinTeam(lobbyId, creatorTeam, () => { },
-                error => { throw new Exception(error); });
+                error => throw new Exception(error));
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for OnMemberTeamChanged
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for OnMemberTeamChanged
 
             //At this point, the joiner has joined the creator's lobby and switched to his team
             //Team A:
@@ -570,7 +529,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void RejoinLobby_CreatorShouldBeInDifferentTeam()
+        public void RejoinLobby_CreatorShouldBeInDifferentTeam([Values("1v1", "2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyId = -1;
             var lobbyName = TestContext.CurrentContext.Test.Name;
@@ -586,7 +545,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -600,15 +559,15 @@ namespace SpeedDate.Test
                         creatorTeam.ShouldNotBeNullOrEmpty();
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
                 new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-created
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-created
 
             var lobbyJoiner = new SpeedDateClient();
             lobbyJoiner.Started += () =>
@@ -636,8 +595,8 @@ namespace SpeedDate.Test
 
                         joinedLobby.SetListener(joinedLobbyListenerMock.Object);
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
@@ -647,7 +606,7 @@ namespace SpeedDate.Test
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
 
             lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () => done.Set(),
-                error => { throw new Exception(error); });
+                error => throw new Exception(error));
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, LeaveLobby
 
@@ -660,7 +619,7 @@ namespace SpeedDate.Test
                 joinerTeam.ShouldNotBeNullOrEmpty();
 
                 done.Set();
-            }, error => { throw new Exception(error); });
+            }, error => throw new Exception(error));
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, JoinLobby
 
@@ -668,7 +627,7 @@ namespace SpeedDate.Test
         }
 
         [Test]
-        public void JoinTeamThenRejoinLobby_CreatorShouldBeInDifferentTeam()
+        public void JoinTeamThenRejoinLobby_CreatorShouldBeInDifferentTeam([Values("2v2v4", "3v3auto")] string lobbyType)
         {
             var lobbyId = -1;
             var lobbyName = TestContext.CurrentContext.Test.Name;
@@ -684,7 +643,7 @@ namespace SpeedDate.Test
             {
                 lobbyCreator.GetPlugin<AuthPlugin>().LogInAsGuest(info =>
                 {
-                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(3, new Dictionary<string, string>
+                    lobbyCreator.GetPlugin<LobbyPlugin>().CreateAndJoin(lobbyType, new Dictionary<string, string>
                     {
                         {
                             OptionKeys.LobbyName, lobbyName
@@ -698,8 +657,8 @@ namespace SpeedDate.Test
                         lobbyId = lobby.Id;
 
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyCreator.Start(new DefaultConfigProvider(
@@ -734,22 +693,22 @@ namespace SpeedDate.Test
 
                         joinedLobby.SetListener(joinedLobbyListenerMock.Object);
                         done.Set();
-                    }, error => { throw new Exception(error); });
-                }, error => { throw new Exception(error); });
+                    }, error => throw new Exception(error));
+                }, error => throw new Exception(error));
             };
 
             lobbyJoiner.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-joined
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for lobbby-joined
 
             //Let joiner switch to the creator's team
-            lobbyJoiner.GetPlugin<LobbyPlugin>().JoinTeam(lobbyId, creatorTeam, () => { }, error => { throw new Exception(error); });
+            lobbyJoiner.GetPlugin<LobbyPlugin>().JoinTeam(lobbyId, creatorTeam, () => { }, error => throw new Exception(error));
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for OnMemberTeamChanged
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Wait for OnMemberTeamChanged
 
-            lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () => done.Set(), error => { throw new Exception(error); });
+            lobbyJoiner.GetPlugin<LobbyPlugin>().LeaveLobby(lobbyId, () => done.Set(), error => throw new Exception(error));
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, LeaveLobby
 
@@ -762,11 +721,75 @@ namespace SpeedDate.Test
                 joinerTeam.ShouldNotBeNullOrEmpty();
 
                 done.Set();
-            }, error => { throw new Exception(error); });
+            }, error => throw new Exception(error));
 
             done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, JoinLobby
 
             joinerTeam.ShouldNotBe(creatorTeam);
+        }
+
+        [Test]
+        public void ShouldReturnLobbyTypes()
+        {
+            var done = new AutoResetEvent(false);
+
+            var client = new SpeedDateClient();
+            client.Started += () =>
+            {
+                client.GetPlugin<LobbyPlugin>().GetLobbyTypes(types =>
+                {
+                    types.ShouldContain("1v1");
+                    types.ShouldContain("2v2v4");
+                    types.ShouldContain("3v3auto");
+                    done.Set();
+                }, error => throw new Exception(error));
+            };
+
+            client.Start(new DefaultConfigProvider(
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
+                PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
+
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled, wait for lobbby-types
+        }
+
+        [Test]
+        public void ShouldCreateOneVsOneLobbyBuilderFromXmlString()
+        {
+            var lobbyFactory = LobbiesHelper.CreateLobbyBuilder(new StringReader(SetUp.TestLobbyOneVsOneXml));
+            var lobby = lobbyFactory.Invoke(SetUp.Server.GetPlugin<LobbiesPlugin>(), new Dictionary<string, string>(), null);
+
+            //General information
+            lobby.DisplayName.ShouldBe("1 vs 1");
+            lobby.Autostart.ShouldBe(false);
+            lobby.EnableTeamSwitching.ShouldBe(true);
+            lobby.StartGameWhenAllReady.ShouldBe(false);
+
+            //Teams
+            lobby.Teams.Count.ShouldBe(2);
+            lobby.Teams.ShouldContainKey("Team Red");
+            lobby.Teams.ShouldContainKey("Team Blue");
+
+            lobby.Teams["Team Red"].MinPlayers.ShouldBe(1);
+            lobby.Teams["Team Red"].MaxPlayers.ShouldBe(1);
+
+            lobby.Teams["Team Blue"].MinPlayers.ShouldBe(1);
+            lobby.Teams["Team Blue"].MaxPlayers.ShouldBe(1);
+
+            //Controls
+            lobby.Controls.Count.ShouldBe(2);
+            lobby.Controls.ShouldContainKey("speed");
+            lobby.Controls.ShouldContainKey("gravity");
+
+            lobby.Controls["speed"].Label.ShouldBe("Game Speed");
+            lobby.Controls["speed"].Options.Count.ShouldBe(3);
+            lobby.Controls["speed"].Options.ShouldContain("1x");
+            lobby.Controls["speed"].Options.ShouldContain("2x");
+            lobby.Controls["speed"].Options.ShouldContain("3x");
+
+            lobby.Controls["gravity"].Label.ShouldBe("Gravity");
+            lobby.Controls["gravity"].Options.Count.ShouldBe(2);
+            lobby.Controls["gravity"].Options.ShouldContain("On");
+            lobby.Controls["gravity"].Options.ShouldContain("Off");
         }
     }
 }

@@ -132,6 +132,5 @@ namespace SpeedDate.Network.Interfaces
         /// <param name="packetCreator"></param>
         /// <returns></returns>
         IEnumerable<T> DeserializeList<T>() where T : ISerializablePacket, new();
-
     }
 }

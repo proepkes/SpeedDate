@@ -132,10 +132,7 @@ namespace SpeedDate.Network
         /// <summary>
         ///     Returns true if message contains any data
         /// </summary>
-        public bool HasData
-        {
-            get { return _data.Length > 0; }
-        }
+        public bool HasData => _data.Length > 0;
 
         /// <summary>
         ///     Returns contents of this message. Mutable
@@ -182,7 +179,7 @@ namespace SpeedDate.Network
         /// <returns></returns>
         public T Deserialize<T>() where T : ISerializablePacket, new()
         {
-            T packetToBeFilled = new T();
+            var packetToBeFilled = new T();
             return MessageHelper.Deserialize(_data, packetToBeFilled);
         }
 

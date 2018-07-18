@@ -87,6 +87,7 @@
         GetLobbyRoomAccess,
         GetLobbyMemberData,
         GetLobbyInfo,
+        GetLobbyTypes,
 
         // Profiles
         ClientProfileRequest,

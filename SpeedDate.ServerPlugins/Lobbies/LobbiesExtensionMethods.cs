@@ -1,27 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using SpeedDate.Configuration;
-using SpeedDate.Network.Interfaces;
 using SpeedDate.Packets.Lobbies;
 
 namespace SpeedDate.ServerPlugins.Lobbies
 {
-    public class LobbyFactory
+    public static class LobbiesHelper
     {
-        public static Func<LobbiesPlugin, Dictionary<string, string>, IPeer, Lobby> FromFile(string file)
+        public static string ExtractLobbyName(this Dictionary<string, string> properties)
         {
-            var config = File.ReadAllText(file);
+            return properties.ContainsKey(OptionKeys.LobbyName) ? properties[OptionKeys.LobbyName] : Lobby.DefaultName;
+        }
+
+        public static LobbyBuilder CreateLobbyBuilder(StringReader reader)
+        {
+            var config = reader.ReadToEnd();
 
             return (plugin, properties, creator) =>
             {
                 Lobby result = null;
+
                 var xmlReader = new XmlParser(config);
 
                 var teams = new List<LobbyTeam>();
                 xmlReader.SearchEach("Team", () =>
                 {
-                    teams.Add(new LobbyTeam(xmlReader["Name"]));
+                    teams.Add(new LobbyTeam(xmlReader["Name"])
+                    {
+                        MinPlayers = Convert.ToInt32(xmlReader["MinPlayers"]),
+                        MaxPlayers = Convert.ToInt32(xmlReader["MaxPlayers"])
+                    });
                 });
 
                 xmlReader = new XmlParser(config);
@@ -77,5 +87,3 @@ namespace SpeedDate.ServerPlugins.Lobbies
         }
     }
 }
-
-

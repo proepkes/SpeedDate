@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Threading;
 using NUnit.Framework;
 using Shouldly;
@@ -30,23 +27,20 @@ namespace SpeedDate.Test
                         echo.ShouldBe(message);
                         done.Set();
                     },
-                    error =>
-                    {
-                        throw new Exception(error);
-                    });
+                    error => throw new Exception(error));
             };
 
             client.Start(new DefaultConfigProvider(
-                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                 PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
         }
 
         [Test]
         public void EchoFromMultipleClients_ShouldBeEchoed()
         {
-            var numberOfClients = 100;
+            var numberOfClients = 50;
 
             var done = new AutoResetEvent(false);
 
@@ -65,20 +59,17 @@ namespace SpeedDate.Test
                                 if (Interlocked.Decrement(ref numberOfClients) == 0)
                                     done.Set();
                             },
-                            error =>
-                            {
-                                throw new Exception(error);
-                            });
+                            error => throw new Exception(error));
                     };
 
                     client.Start(new DefaultConfigProvider(
-                        new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort), //Connect to port
+                        new NetworkConfig(SetUp.MasterServerIp, SetUp.MasterServerPort),
                         PluginsConfig.DefaultPeerPlugins)); //Load peer-plugins only
 
                 }, clientNumber);
             }
 
-            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue(); //Should be signaled
+            done.WaitOne(TimeSpan.FromSeconds(30)).ShouldBeTrue();
         }
     }
 }

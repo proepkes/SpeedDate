@@ -17,6 +17,7 @@ namespace SpeedDate.Test
             
             Util.ValidatePassword(password, string.Empty).ShouldBeFalse();
             Util.ValidatePassword(password, hash).ShouldBeTrue();
+            Should.Throw<FormatException>(() => Util.ValidatePassword(password, password));
         }
 
         [Test]
