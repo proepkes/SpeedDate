@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using SpeedDate.Configuration;
 
@@ -6,7 +7,7 @@ namespace SpeedDate.ServerPlugins.Lobbies
 {
     class LobbiesConfig : IConfig
     {
-        public string LobbyFiles { get; set; }
+        public string LobbyFiles { get; set; } = string.Empty;
 
         public IEnumerable<string> ReadAllFiles()
         {
