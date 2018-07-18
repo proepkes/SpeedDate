@@ -51,9 +51,9 @@ namespace SpeedDate.ServerPlugins.Lobbies
 
         public override void Loaded()
         {
-            foreach (var lobbySettings in _config.ReadAllFiles())
+            foreach (var lobbyFile in _config.ReadAllFiles())
             {
-                Factories.Add(lobbySettings, LobbiesHelper.CreateLobbyBuilder(new StringReader(lobbySettings)));
+                Factories.Add(lobbyFile.filename , LobbiesHelper.CreateLobbyBuilder(new StringReader(lobbyFile.content)));
             }
 
             Server.SetHandler(OpCodes.CreateLobby, HandleCreateLobby);

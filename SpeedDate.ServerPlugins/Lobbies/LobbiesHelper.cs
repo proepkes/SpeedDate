@@ -50,7 +50,8 @@ namespace SpeedDate.ServerPlugins.Lobbies
                         EnableReadySystem = Convert.ToBoolean(xmlReader["EnableReadySystem"]),
                         EnableTeamSwitching = Convert.ToBoolean(xmlReader["EnableTeamSwitching"]),
                         PlayAgainEnabled = Convert.ToBoolean(xmlReader["PlayAgainEnabled"]),
-                        StartGameWhenAllReady = Convert.ToBoolean(xmlReader["StartGameWhenAllReady"])
+                        StartGameWhenAllReady = Convert.ToBoolean(xmlReader["StartGameWhenAllReady"]),
+                        Name = properties.ExtractLobbyName()
                     };
                 });
 

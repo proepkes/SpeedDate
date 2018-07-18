@@ -16,13 +16,13 @@
   </Teams>
   <Controls>
     <Control Key="speed" Label="Game Speed">
-      <Controloption IsDefault="true">1x</Controloption>
-      <Controloption>2x</Controloption>
-      <Controloption>3x</Controloption>
+      <Controloption IsDefault="true" Value="1x" />
+      <Controloption Value="2x" />
+      <Controloption Value="3x" />
     </Control>
     <Control Key="gravity" Label="Gravity">
-      <Controloption>On</Controloption>
-      <Controloption>Off</Controloption>
+      <Controloption Value="On" />
+      <Controloption Value="Off" />
     </Control>
   </Controls>
 </Lobby>
