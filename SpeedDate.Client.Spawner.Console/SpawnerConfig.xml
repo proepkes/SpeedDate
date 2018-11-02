@@ -7,6 +7,7 @@
     MachineIp="127.0.0.1"
     AddWebGlFlag="false"
     ExecutablePath="E:\\Repositories\\SpeedDate\\ConsoleGame\\bin\\Debug\\ConsoleGame.exe"
-    SpawnInBatchMode="true" />
+    SpawnInBatchMode="true"
+    Region="EU" />
 
 </configuration>

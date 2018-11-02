@@ -286,7 +286,7 @@ namespace SpeedDate.ServerPlugins.Spawner
 
             var spawner = CreateSpawner(message.Peer, options);
 
-            _logger.Info($"New Spawner registered. ID: {spawner.SpawnerId}");
+            _logger.Info($"New Spawner registered. ID: {spawner.SpawnerId}. Region: {options.Region}");
 
             // Respond with spawner id
             message.Respond(spawner.SpawnerId, ResponseStatus.Success);
