@@ -42,7 +42,6 @@ namespace SpeedDate.Configuration
             });
         }
 
-
         public void Configure(IEnumerable<IConfig> configInstances)
         {
             var configuration = File.ReadAllText(_configFile);

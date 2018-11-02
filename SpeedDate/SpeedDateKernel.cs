@@ -95,15 +95,21 @@ namespace SpeedDate
                     ioc.Register((container, overloads, requesttype) => (IClient) startable);
                     break;
             }
-
-            //Register configs & plugins
-            foreach (var dllFile in
-                Directory.GetFiles(
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
-                    throw new InvalidOperationException(), "*.dll").Where(
+            
+            var allFiles = Directory.GetFiles(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+                throw new InvalidOperationException(), "*.dll");
+            
+            if (_config.Plugins.IncludeDlls.Length > 0)
+            {
+                allFiles = allFiles.Where(
                         file => _config.Plugins.IncludeDlls.Split(';').Any(includeDll =>
-                            Regex.IsMatch(Path.GetFileNameWithoutExtension(file), includeDll.Trim().AsRegular()))
-                ))
+                            Regex.IsMatch(Path.GetFileNameWithoutExtension(file), includeDll.Trim().AsRegular())))
+                    .ToArray();
+            }
+            
+            //Register configs & plugins
+            foreach (var dllFile in allFiles)
             {
                 _logger.Info($"Loading dll: {dllFile}");
 
