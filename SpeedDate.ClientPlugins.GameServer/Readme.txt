@@ -1,1 +1,0 @@
-﻿These Plugins inherit from SpeedDate>>ClientPlugin<< because for the MasterServer, a GameServer acts as a >>client<<.
