@@ -7,10 +7,12 @@ import (
 	u "github.com/satori/go.uuid"
 )
 
+// User in the server
 type User struct {
-	ID       u.UUID `json:"id"`
-	Title    string `json:"title"`
-	Complete bool   `json:"complete"`
+	ID          u.UUID `json:"id"`
+	Username    string `json:"username"`
+	DisplayName string `json:"displayName"`
+	Online      bool   `json:"online"`
 }
 
 func (t User) String() string {
@@ -32,6 +34,7 @@ type basicUserService struct{}
 
 func (b *basicUserService) Get(ctx context.Context, id u.UUID) (u User, err error) {
 	// TODO implement the business logic of Get
+
 	return u, err
 }
 func (b *basicUserService) Add(ctx context.Context, user User) (u User, err error) {
@@ -46,7 +49,7 @@ func NewBasicUserService() UserService {
 
 // New returns a UserService with all of the expected middleware wired in.
 func New(middleware []Middleware) UserService {
-	var svc UserService = NewBasicUserService()
+	svc := NewBasicUserService()
 	for _, m := range middleware {
 		svc = m(svc)
 	}
