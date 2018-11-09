@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	http1 "net/http"
+
 	http "github.com/go-kit/kit/transport/http"
 	handlers "github.com/gorilla/handlers"
 	mux "github.com/gorilla/mux"
 	endpoint "github.com/proepkes/SpeedDate/user/pkg/endpoint"
-	http1 "net/http"
 )
 
 // makeGetHandler creates the handler logic

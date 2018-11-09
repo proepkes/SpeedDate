@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"context"
+
 	endpoint "github.com/go-kit/kit/endpoint"
 	service "github.com/proepkes/SpeedDate/user/pkg/service"
 	gouuid "github.com/satori/go.uuid"
