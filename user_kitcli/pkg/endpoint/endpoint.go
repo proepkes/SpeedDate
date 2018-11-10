@@ -15,18 +15,18 @@ type GetRequest struct {
 
 // GetResponse collects the response parameters for the Get method.
 type GetResponse struct {
-	U   service.User `json:"u"`
-	Err error        `json:"err"`
+	User service.User `json:"user"`
+	Err  error        `json:"err"`
 }
 
 // MakeGetEndpoint returns an endpoint that invokes Get on the service.
 func MakeGetEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRequest)
-		u, err := s.Get(ctx, req.Id)
+		user, err := s.Get(ctx, req.Id)
 		return GetResponse{
-			Err: err,
-			U:   u,
+			Err:  err,
+			User: user,
 		}, nil
 	}
 }
@@ -78,7 +78,7 @@ func (e Endpoints) Get(ctx context.Context, id gouuid.UUID) (u service.User, err
 	if err != nil {
 		return
 	}
-	return response.(GetResponse).U, response.(GetResponse).Err
+	return response.(GetResponse).User, response.(GetResponse).Err
 }
 
 // Add implements Service. Primarily useful in a client.

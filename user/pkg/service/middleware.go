@@ -1,38 +1,47 @@
-package service
+package greeterservice
 
 import (
-	"context"
+	"time"
 
-	log "github.com/go-kit/kit/log"
-	gouuid "github.com/satori/go.uuid"
+	"github.com/go-kit/kit/log"
 )
 
-// Middleware describes a service middleware.
-type Middleware func(UserService) UserService
+// ServiceMiddleware describes a service middleware.
+type ServiceMiddleware func(Service) Service
+
+// LoggingMiddleware takes a logger as a dependency and returns a ServiceMiddleware.
+func LoggingMiddleware(logger log.Logger) ServiceMiddleware {
+	return func(next Service) Service {
+		return loggingMiddleware{next, logger}
+	}
+}
 
 type loggingMiddleware struct {
+	Service
 	logger log.Logger
-	next   UserService
 }
 
-// LoggingMiddleware takes a logger as a dependency
-// and returns a UserService Middleware.
-func LoggingMiddleware(logger log.Logger) Middleware {
-	return func(next UserService) UserService {
-		return &loggingMiddleware{logger, next}
-	}
-
+func (m loggingMiddleware) Health() (healthy bool) {
+	defer func(begin time.Time) {
+		m.logger.Log(
+			"method", "Health",
+			"healthy", healthy,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	healthy = m.Service.Health()
+	return
 }
 
-func (l loggingMiddleware) Get(ctx context.Context, id gouuid.UUID) (u User, err error) {
-	defer func() {
-		l.logger.Log("method", "Get", "id", id, "u", u, "err", err)
-	}()
-	return l.next.Get(ctx, id)
-}
-func (l loggingMiddleware) Add(ctx context.Context, user User) (u User, err error) {
-	defer func() {
-		l.logger.Log("method", "Add", "user", user, "u", u, "err", err)
-	}()
-	return l.next.Add(ctx, user)
+func (m loggingMiddleware) Greeting(name string) (greeting string) {
+	defer func(begin time.Time) {
+		m.logger.Log(
+			"method", "Greeting",
+			"name", name,
+			"greeting", greeting,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	greeting = m.Service.Greeting(name)
+	return
 }
