@@ -10,19 +10,34 @@ import (
 	handlers "github.com/gorilla/handlers"
 	mux "github.com/gorilla/mux"
 	endpoint "github.com/proepkes/SpeedDate/user/pkg/endpoint"
+	u "github.com/satori/go.uuid"
+)
+
+var (
+	// ErrBadRouting is returned when an expected path variable is missing.
+	// It always indicates programmer error.
+	ErrBadRouting = errors.New("inconsistent mapping between route and handler (programmer error)")
+	ErrBadRequest = errors.New("Unable to handle your request")
 )
 
 // makeGetHandler creates the handler logic
 func makeGetHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http.ServerOption) {
-	m.Methods("GET").Path("/get").Handler(handlers.CORS(handlers.AllowedMethods([]string{"GET"}), handlers.AllowedOrigins([]string{"*"}))(http.NewServer(endpoints.GetEndpoint, decodeGetRequest, encodeGetResponse, options...)))
+	m.Methods("GET").Path("/get/{id}").Handler(handlers.CORS(handlers.AllowedMethods([]string{"GET"}), handlers.AllowedOrigins([]string{"*"}))(http.NewServer(endpoints.GetEndpoint, decodeGetRequest, encodeGetResponse, options...)))
 }
 
 // decodeGetResponse  is a transport/http.DecodeRequestFunc that decodes a
 // JSON-encoded request from the HTTP request body.
 func decodeGetRequest(_ context.Context, r *http1.Request) (interface{}, error) {
-	req := endpoint.GetRequest{}
-	// err := json.NewDecoder(r.Body).Decode(&req)
-	return req, nil
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+	uuid, err := u.FromString(id)
+	if err != nil {
+		return nil, ErrBadRequest
+	}
+	return endpoint.GetRequest{Id: uuid}, nil
 }
 
 // encodeGetResponse is a transport/http.EncodeResponseFunc that encodes

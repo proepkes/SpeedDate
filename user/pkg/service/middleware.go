@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	log "github.com/go-kit/kit/log"
 	gouuid "github.com/satori/go.uuid"
 )

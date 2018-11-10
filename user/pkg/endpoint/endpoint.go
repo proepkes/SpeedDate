@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"context"
-
 	endpoint "github.com/go-kit/kit/endpoint"
 	service "github.com/proepkes/SpeedDate/user/pkg/service"
 	gouuid "github.com/satori/go.uuid"
@@ -10,23 +9,23 @@ import (
 
 // GetRequest collects the request parameters for the Get method.
 type GetRequest struct {
-	ID gouuid.UUID `json:"id"`
+	Id gouuid.UUID `json:"id"`
 }
 
 // GetResponse collects the response parameters for the Get method.
 type GetResponse struct {
-	User service.User `json:"user"`
-	Err  error        `json:"err"`
+	U   service.User `json:"u"`
+	Err error        `json:"err"`
 }
 
 // MakeGetEndpoint returns an endpoint that invokes Get on the service.
 func MakeGetEndpoint(s service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRequest)
-		user, err := s.Get(ctx, req.ID)
+		u, err := s.Get(ctx, req.Id)
 		return GetResponse{
-			Err:  err,
-			User: user,
+			Err: err,
+			U:   u,
 		}, nil
 	}
 }
@@ -64,7 +63,7 @@ func (r AddResponse) Failed() error {
 	return r.Err
 }
 
-// Failure is an interface that should be implemented by response types.
+// Failer is an interface that should be implemented by response types.
 // Response encoders can check if responses are Failer, and if so they've
 // failed, and if so encode them using a separate write path based on the error.
 type Failure interface {
@@ -73,12 +72,12 @@ type Failure interface {
 
 // Get implements Service. Primarily useful in a client.
 func (e Endpoints) Get(ctx context.Context, id gouuid.UUID) (u service.User, err error) {
-	request := GetRequest{ID: id}
+	request := GetRequest{Id: id}
 	response, err := e.GetEndpoint(ctx, request)
 	if err != nil {
 		return
 	}
-	return response.(GetResponse).User, response.(GetResponse).Err
+	return response.(GetResponse).U, response.(GetResponse).Err
 }
 
 // Add implements Service. Primarily useful in a client.
