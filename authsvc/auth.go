@@ -2,7 +2,6 @@ package authsvc
 
 import (
 	"context"
-	"fmt"
 
 	"goa.design/goa/security"
 )
@@ -24,5 +23,5 @@ func AuthorizeBasicAuth(ctx context.Context, user, pass string, s *security.Basi
 	//
 	//    return ctx, goa.PermanentError("unauthorized", "invalid token")
 	//
-	return ctx, fmt.Errorf("not implemented")
+	return ctx, nil // fmt.Errorf("not implemented")
 }

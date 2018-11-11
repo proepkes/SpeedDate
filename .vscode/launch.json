@@ -8,14 +8,14 @@
 			"name": "authsvc",
 			"type": "go",
 			"request": "launch",
-			"mode": "debug",
+			"mode": "auto",
             "program": "${workspaceRoot}/authsvc/cmd/authorize",
 		},
 		{
 			"name": "usersvc",
 			"type": "go",
 			"request": "launch",
-			"mode": "debug",
+			"mode": "auto",
             "program": "${workspaceRoot}/usersvc/cmd/user",
 			"env": {},
 			"args": []

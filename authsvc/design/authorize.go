@@ -28,7 +28,7 @@ var _ = Service("authorize", func() {
 		})
 
 		HTTP(func() {
-			POST("/signin")
+			POST("/login")
 			// Use Authorization header to provide basic auth value.
 			Response(StatusNoContent)
 		})

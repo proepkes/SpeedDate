@@ -13,7 +13,7 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /signin:
+  /login:
     post:
       tags:
       - authorize
