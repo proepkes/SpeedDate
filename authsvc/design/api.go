@@ -2,13 +2,13 @@ package design
 
 import . "goa.design/goa/http/dsl"
 
-var _ = API("usersvc", func() {
+var _ = API("authsvc", func() {
 	Title("Speeddate Userservice")
 	Description("HTTP service for managing users in the SpeedDate-system")
 
-	Server("auth", func() {
+	Server("authorize", func() {
 		Description("Serves repository and swagger service")
-		Services("auth", "swagger")
+		Services("authorize", "swagger")
 		Host("localhost", func() {
 			Description("Host on local machine")
 			URI("http://localhost:8001")

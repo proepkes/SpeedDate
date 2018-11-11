@@ -1,4 +1,4 @@
-package authsvc
+package usersvc
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"goa.design/goa/security"
 )
 
-// AuthorizeBasicAuth implements the authorization logic for service
-// "authorize" for the "basic" security scheme.
-func AuthorizeBasicAuth(ctx context.Context, user, pass string, s *security.BasicScheme) (context.Context, error) {
+// RepositoryJWTAuth implements the authorization logic for service
+// "repository" for the "jwt" security scheme.
+func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme) (context.Context, error) {
 	//
 	// TBD: add authorization logic.
 	//

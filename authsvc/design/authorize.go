@@ -3,7 +3,7 @@ package design
 import . "goa.design/goa/http/design"
 import . "goa.design/goa/http/dsl"
 
-var _ = Service("auth", func() {
+var _ = Service("authorize", func() {
 	Description("The service makes it possible to ...")
 
 	HTTP(func() {

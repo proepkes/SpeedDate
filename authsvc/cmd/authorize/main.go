@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"time"
 
-	usersvc "."
-	auth "github.com/proepkes/speeddate/authsvc/gen/auth"
-	authsvr "github.com/proepkes/speeddate/authsvc/gen/http/auth/server"
+	"github.com/proepkes/speeddate/authsvc"
+	authorize "github.com/proepkes/speeddate/authsvc/gen/authorize"
+	authorizesvr "github.com/proepkes/speeddate/authsvc/gen/http/authorize/server"
 	swaggersvr "github.com/proepkes/speeddate/authsvc/gen/http/swagger/server"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
@@ -35,25 +35,25 @@ func main() {
 		logger  *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[usersvc] ", log.Ltime)
+		logger = log.New(os.Stderr, "[authsvc] ", log.Ltime)
 		adapter = middleware.NewLogger(logger)
 	}
 
 	// Create the structs that implement the services.
 	var (
-		authSvc auth.Service
+		authorizeSvc authorize.Service
 	)
 	{
-		authSvc = usersvc.NewAuth(logger)
+		authorizeSvc = authsvc.NewAuthorize(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
 	var (
-		authEndpoints *auth.Endpoints
+		authorizeEndpoints *authorize.Endpoints
 	)
 	{
-		authEndpoints = auth.NewEndpoints(authSvc, usersvc.AuthBasicAuth)
+		authorizeEndpoints = authorize.NewEndpoints(authorizeSvc, authsvc.AuthorizeBasicAuth)
 	}
 
 	// Provide the transport specific request decoder and response encoder.
@@ -77,17 +77,17 @@ func main() {
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		authServer    *authsvr.Server
-		swaggerServer *swaggersvr.Server
+		authorizeServer *authorizesvr.Server
+		swaggerServer   *swaggersvr.Server
 	)
 	{
 		eh := ErrorHandler(logger)
-		authServer = authsvr.New(authEndpoints, mux, dec, enc, eh)
+		authorizeServer = authorizesvr.New(authorizeEndpoints, mux, dec, enc, eh)
 		swaggerServer = swaggersvr.New(nil, mux, dec, enc, eh)
 	}
 
 	// Configure the mux.
-	authsvr.Mount(mux, authServer)
+	authorizesvr.Mount(mux, authorizeServer)
 	swaggersvr.Mount(mux)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
@@ -117,7 +117,7 @@ func main() {
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}
 	go func() {
-		for _, m := range authServer.Mounts {
+		for _, m := range authorizeServer.Mounts {
 			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 		}
 		for _, m := range swaggerServer.Mounts {

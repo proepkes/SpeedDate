@@ -16,10 +16,10 @@ paths:
   /signin:
     post:
       tags:
-      - auth
-      summary: login auth
+      - authorize
+      summary: login authorize
       description: Creates a valid JWT
-      operationId: auth#login
+      operationId: authorize#login
       responses:
         "204":
           description: No Content response.

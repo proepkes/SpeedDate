@@ -5,10 +5,17 @@
     "version": "0.2.0",
     "configurations": [    
 		{
-			"name": "Launch",
+			"name": "authsvc",
 			"type": "go",
 			"request": "launch",
-			"mode": "auto",
+			"mode": "debug",
+            "program": "${workspaceRoot}/authsvc/cmd/authorize",
+		},
+		{
+			"name": "usersvc",
+			"type": "go",
+			"request": "launch",
+			"mode": "debug",
             "program": "${workspaceRoot}/usersvc/cmd/user",
 			"env": {},
 			"args": []
