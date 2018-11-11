@@ -11,6 +11,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strings"
 
 	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
 	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
@@ -104,9 +105,10 @@ func EncodeGetResponse(encoder func(context.Context, http.ResponseWriter) goahtt
 func DecodeGetRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
-			id   string
-			view *string
-			err  error
+			id    string
+			view  *string
+			token *string
+			err   error
 
 			params = mux.Vars(r)
 		)
@@ -120,10 +122,21 @@ func DecodeGetRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Dec
 				err = goa.MergeErrors(err, goa.InvalidEnumValueError("view", *view, []interface{}{"default", "tiny"}))
 			}
 		}
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
 		if err != nil {
 			return nil, err
 		}
-		payload := NewGetPayload(id, view)
+		payload := NewGetPayload(id, view, token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
 
 		return payload, nil
 	}

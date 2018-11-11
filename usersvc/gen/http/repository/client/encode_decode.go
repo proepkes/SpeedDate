@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
 	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
@@ -169,6 +170,13 @@ func EncodeGetRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 		p, ok := v.(*repository.GetPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("repository", "get", "*repository.GetPayload", v)
+		}
+		if p.Token != nil {
+			if !strings.Contains(*p.Token, " ") {
+				req.Header.Set("Authorization", "Bearer "+*p.Token)
+			} else {
+				req.Header.Set("Authorization", *p.Token)
+			}
 		}
 		values := req.URL.Query()
 		if p.View != nil {

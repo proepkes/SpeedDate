@@ -24,7 +24,7 @@ func BuildInsertPayload(repositoryInsertBody string) (*repository.User, error) {
 	{
 		err = json.Unmarshal([]byte(repositoryInsertBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"name\": \"qdv\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"name\": \"mdp\"\n   }'")
 		}
 		if utf8.RuneCountInString(body.Name) > 50 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", body.Name, utf8.RuneCountInString(body.Name), 50, false))
@@ -57,7 +57,7 @@ func BuildDeletePayload(repositoryDeleteID string) (*repository.DeletePayload, e
 
 // BuildGetPayload builds the payload for the repository get endpoint from CLI
 // flags.
-func BuildGetPayload(repositoryGetID string, repositoryGetView string) (*repository.GetPayload, error) {
+func BuildGetPayload(repositoryGetID string, repositoryGetView string, repositoryGetToken string) (*repository.GetPayload, error) {
 	var id string
 	{
 		id = repositoryGetID
@@ -68,9 +68,16 @@ func BuildGetPayload(repositoryGetID string, repositoryGetView string) (*reposit
 			view = &repositoryGetView
 		}
 	}
+	var token *string
+	{
+		if repositoryGetToken != "" {
+			token = &repositoryGetToken
+		}
+	}
 	payload := &repository.GetPayload{
-		ID:   id,
-		View: view,
+		ID:    id,
+		View:  view,
+		Token: token,
 	}
 	return payload, nil
 }

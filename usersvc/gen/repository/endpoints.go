@@ -11,6 +11,7 @@ import (
 	"context"
 
 	goa "goa.design/goa"
+	"goa.design/goa/security"
 )
 
 // Endpoints wraps the "repository" service endpoints.
@@ -21,11 +22,11 @@ type Endpoints struct {
 }
 
 // NewEndpoints wraps the methods of the "repository" service with endpoints.
-func NewEndpoints(s Service) *Endpoints {
+func NewEndpoints(s Service, authJWTFn security.AuthJWTFunc) *Endpoints {
 	return &Endpoints{
 		Insert: NewInsertEndpoint(s),
 		Delete: NewDeleteEndpoint(s),
-		Get:    NewGetEndpoint(s),
+		Get:    NewGetEndpoint(s, authJWTFn),
 	}
 }
 
@@ -56,9 +57,23 @@ func NewDeleteEndpoint(s Service) goa.Endpoint {
 
 // NewGetEndpoint returns an endpoint function that calls the method "get" of
 // service "repository".
-func NewGetEndpoint(s Service) goa.Endpoint {
+func NewGetEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*GetPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"api:read", "api:write"},
+			RequiredScopes: []string{"api:read"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
 		res, view, err := s.Get(ctx, p)
 		if err != nil {
 			return nil, err

@@ -50,6 +50,8 @@ type DeletePayload struct {
 
 // GetPayload is the payload type of the repository service get method.
 type GetPayload struct {
+	// JWT used for authentication
+	Token *string
 	// Get user by ID
 	ID string
 	// View to render

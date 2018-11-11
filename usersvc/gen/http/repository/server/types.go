@@ -101,10 +101,11 @@ func NewDeletePayload(id string) *repository.DeletePayload {
 }
 
 // NewGetPayload builds a repository service get endpoint payload.
-func NewGetPayload(id string, view *string) *repository.GetPayload {
+func NewGetPayload(id string, view *string, token *string) *repository.GetPayload {
 	return &repository.GetPayload{
-		ID:   id,
-		View: view,
+		ID:    id,
+		View:  view,
+		Token: token,
 	}
 }
 

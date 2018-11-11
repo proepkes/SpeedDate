@@ -36,6 +36,10 @@ paths:
       tags:
       - repository
       summary: get repository
+      description: |2-
+
+        Required security scopes:
+          * `api:read`
       operationId: repository#get
       parameters:
       - name: view
@@ -51,6 +55,11 @@ paths:
         description: Get user by ID
         required: true
         type: string
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
       responses:
         "200":
           description: OK response.
@@ -64,6 +73,22 @@ paths:
             - description
             - message
             - id
+      schemes:
+      - http
+      security:
+      - jwt: []
+  /health:
+    get:
+      tags:
+      - health
+      summary: checkHealth health
+      description: Health check endpoint
+      operationId: health#checkHealth
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            type: string
       schemes:
       - http
   /insert:
@@ -108,19 +133,19 @@ definitions:
       description:
         type: string
         description: Description of error
-        example: Voluptatem eos.
+        example: Vitae ad aut vitae.
       id:
         type: string
         description: ID of missing user
-        example: Expedita possimus repellendus est voluptatum.
+        example: Voluptas odit nobis odit et.
       message:
         type: string
         description: Message of error
         example: User 1 not found
     description: User not found
     example:
-      description: Inventore qui dicta sit nulla modi.
-      id: Vitae atque est ut.
+      description: Nulla aliquid quam ratione sunt quia.
+      id: Dolorem temporibus excepturi dolores.
       message: User 1 not found
     required:
     - description
@@ -137,17 +162,17 @@ definitions:
       name:
         type: string
         description: The username
-        example: qhm
+        example: 7zj
         maxLength: 50
       online:
         type: boolean
         description: Indicates whether the user is currently online.
-        example: false
+        example: true
     description: GetResponseBody result type (default view)
     example:
       id: f923e008-e511-11e8-9f32-f2801f1b9fd1
-      name: lqg
-      online: true
+      name: 0zl
+      online: false
     required:
     - id
     - name
@@ -158,9 +183,19 @@ definitions:
       name:
         type: string
         description: The username
-        example: wyx
+        example: 7vn
         maxLength: 50
     example:
-      name: wxb
+      name: 5ld
     required:
     - name
+securityDefinitions:
+  jwt:
+    type: apiKey
+    description: |-
+      Secures endpoint by requiring a valid JWT token retrieved via the signin endpoint. Supports scopes "api:read" and "api:write".
+      **Security Scopes**:
+        * `api:read`: Read-only access
+        * `api:write`: Read and write access
+    name: Authorization
+    in: header

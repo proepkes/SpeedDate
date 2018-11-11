@@ -23,14 +23,16 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `repository (insert|delete|get)
+	return `health check-health
+repository (insert|delete|get)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` repository insert --body '{
-      "name": "qdv"
+	return os.Args[0] + ` health check-health` + "\n" +
+		os.Args[0] + ` repository insert --body '{
+      "name": "mdp"
    }'` + "\n" +
 		""
 }
@@ -45,6 +47,10 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
+		healthFlags = flag.NewFlagSet("health", flag.ContinueOnError)
+
+		healthCheckHealthFlags = flag.NewFlagSet("check-health", flag.ExitOnError)
+
 		repositoryFlags = flag.NewFlagSet("repository", flag.ContinueOnError)
 
 		repositoryInsertFlags    = flag.NewFlagSet("insert", flag.ExitOnError)
@@ -53,10 +59,14 @@ func ParseEndpoint(
 		repositoryDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
 		repositoryDeleteIDFlag = repositoryDeleteFlags.String("id", "REQUIRED", "ID of user to remove")
 
-		repositoryGetFlags    = flag.NewFlagSet("get", flag.ExitOnError)
-		repositoryGetIDFlag   = repositoryGetFlags.String("id", "REQUIRED", "Get user by ID")
-		repositoryGetViewFlag = repositoryGetFlags.String("view", "", "")
+		repositoryGetFlags     = flag.NewFlagSet("get", flag.ExitOnError)
+		repositoryGetIDFlag    = repositoryGetFlags.String("id", "REQUIRED", "Get user by ID")
+		repositoryGetViewFlag  = repositoryGetFlags.String("view", "", "")
+		repositoryGetTokenFlag = repositoryGetFlags.String("token", "", "")
 	)
+	healthFlags.Usage = healthUsage
+	healthCheckHealthFlags.Usage = healthCheckHealthUsage
+
 	repositoryFlags.Usage = repositoryUsage
 	repositoryInsertFlags.Usage = repositoryInsertUsage
 	repositoryDeleteFlags.Usage = repositoryDeleteUsage
@@ -77,6 +87,8 @@ func ParseEndpoint(
 	{
 		svcn = os.Args[1+flag.NFlag()]
 		switch svcn {
+		case "health":
+			svcf = healthFlags
 		case "repository":
 			svcf = repositoryFlags
 		default:
@@ -94,6 +106,13 @@ func ParseEndpoint(
 	{
 		epn = os.Args[2+flag.NFlag()+svcf.NFlag()]
 		switch svcn {
+		case "health":
+			switch epn {
+			case "check-health":
+				epf = healthCheckHealthFlags
+
+			}
+
 		case "repository":
 			switch epn {
 			case "insert":
@@ -127,6 +146,13 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
+		case "health":
+			c := healthc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "check-health":
+				endpoint = c.CheckHealth()
+				data = nil
+			}
 		case "repository":
 			c := repositoryc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -138,7 +164,7 @@ func ParseEndpoint(
 				data, err = repositoryc.BuildDeletePayload(*repositoryDeleteIDFlag)
 			case "get":
 				endpoint = c.Get()
-				data, err = repositoryc.BuildGetPayload(*repositoryGetIDFlag, *repositoryGetViewFlag)
+				data, err = repositoryc.BuildGetPayload(*repositoryGetIDFlag, *repositoryGetViewFlag, *repositoryGetTokenFlag)
 			}
 		}
 	}
@@ -147,6 +173,29 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
+}
+
+// healthUsage displays the usage of the health command and its subcommands.
+func healthUsage() {
+	fmt.Fprintf(os.Stderr, `Service is the health service interface.
+Usage:
+    %s [globalflags] health COMMAND [flags]
+
+COMMAND:
+    check-health: Health check endpoint
+
+Additional help:
+    %s health COMMAND --help
+`, os.Args[0], os.Args[0])
+}
+func healthCheckHealthUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] health check-health
+
+Health check endpoint
+
+Example:
+    `+os.Args[0]+` health check-health
+`, os.Args[0])
 }
 
 // repositoryUsage displays the usage of the repository command and its
@@ -173,7 +222,7 @@ Add new user and return its ID.
 
 Example:
     `+os.Args[0]+` repository insert --body '{
-      "name": "qdv"
+      "name": "mdp"
    }'
 `, os.Args[0])
 }
@@ -185,18 +234,19 @@ Remove user from storage
     -id STRING: ID of user to remove
 
 Example:
-    `+os.Args[0]+` repository delete --id "Aut ipsam natus."
+    `+os.Args[0]+` repository delete --id "Est est assumenda excepturi et expedita officia."
 `, os.Args[0])
 }
 
 func repositoryGetUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] repository get -id STRING -view STRING
+	fmt.Fprintf(os.Stderr, `%s [flags] repository get -id STRING -view STRING -token STRING
 
 Get implements get.
     -id STRING: Get user by ID
     -view STRING: 
+    -token STRING: 
 
 Example:
-    `+os.Args[0]+` repository get --id "Voluptates impedit libero vitae officia blanditiis voluptas." --view "default"
+    `+os.Args[0]+` repository get --id "Et cum nam ab." --view "tiny" --token "Commodi aut temporibus ea doloribus sunt velit."
 `, os.Args[0])
 }
