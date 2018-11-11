@@ -17,6 +17,13 @@ var _ = API("usersvc", func() {
 	})
 })
 
+// JWTAuth defines a security scheme that uses JWT tokens.
+var JWTAuth = JWTSecurity("jwt", func() {
+	Description(`Secures endpoint by requiring a valid JWT token retrieved via the signin endpoint. Supports scopes "api:read" and "api:write".`)
+	Scope("api:read", "Read-only access")
+	Scope("api:write", "Read and write access")
+})
+
 var User = Type("User", func() {
 	Description("User in the system.")
 	Attribute("name", String, "The username", func() {

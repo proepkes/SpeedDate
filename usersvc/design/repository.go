@@ -34,9 +34,15 @@ var _ = Service("repository", func() {
 	})
 
 	Method("get", func() {
+		Security(JWTAuth, func() { // Use JWT to auth requests to this endpoint.
+			Scope("api:read") // Enforce presence of "api:read" scope in JWT claims.
+		})
 		Result(StoredUser)
 		Error("not_found", NotFound, "User not found")
 		Payload(func() {
+			Token("token", String, func() {
+				Description("JWT used for authentication")
+			})
 			Attribute("id", String, "Get user by ID")
 			Attribute("view", String, "View to render", func() {
 				Enum("default", "tiny")
