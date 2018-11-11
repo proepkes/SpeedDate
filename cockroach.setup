@@ -1,0 +1,3 @@
+ CREATE USER IF NOT EXISTS speeddateuser;
+ CREATE DATABASE speeddate;
+ GRANT ALL ON DATABASE speeddate TO speeddateuser;

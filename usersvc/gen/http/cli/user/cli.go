@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	usersvcc "speeddate/usersvc/gen/http/user/client"
+	repositoryc "speeddate/usersvc/gen/http/repository/client"
 
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
@@ -23,15 +23,14 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `user (insert|delete|get)
+	return `repository (insert|delete|get)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` user insert --body '{
-      "name": "cfy",
-      "online": false
+	return os.Args[0] + ` repository insert --body '{
+      "name": "qdv"
    }'` + "\n" +
 		""
 }
@@ -46,21 +45,22 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
-		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
+		repositoryFlags = flag.NewFlagSet("repository", flag.ContinueOnError)
 
-		userInsertFlags    = flag.NewFlagSet("insert", flag.ExitOnError)
-		userInsertBodyFlag = userInsertFlags.String("body", "REQUIRED", "")
+		repositoryInsertFlags    = flag.NewFlagSet("insert", flag.ExitOnError)
+		repositoryInsertBodyFlag = repositoryInsertFlags.String("body", "REQUIRED", "")
 
-		userDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
-		userDeleteIDFlag = userDeleteFlags.String("id", "REQUIRED", "ID of bottle to remove")
+		repositoryDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		repositoryDeleteIDFlag = repositoryDeleteFlags.String("id", "REQUIRED", "ID of user to remove")
 
-		userGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
-		userGetIDFlag = userGetFlags.String("id", "REQUIRED", "ID of bottle to remove")
+		repositoryGetFlags    = flag.NewFlagSet("get", flag.ExitOnError)
+		repositoryGetIDFlag   = repositoryGetFlags.String("id", "REQUIRED", "Get user by ID")
+		repositoryGetViewFlag = repositoryGetFlags.String("view", "", "")
 	)
-	userFlags.Usage = userUsage
-	userInsertFlags.Usage = userInsertUsage
-	userDeleteFlags.Usage = userDeleteUsage
-	userGetFlags.Usage = userGetUsage
+	repositoryFlags.Usage = repositoryUsage
+	repositoryInsertFlags.Usage = repositoryInsertUsage
+	repositoryDeleteFlags.Usage = repositoryDeleteUsage
+	repositoryGetFlags.Usage = repositoryGetUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -77,8 +77,8 @@ func ParseEndpoint(
 	{
 		svcn = os.Args[1+flag.NFlag()]
 		switch svcn {
-		case "user":
-			svcf = userFlags
+		case "repository":
+			svcf = repositoryFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -94,16 +94,16 @@ func ParseEndpoint(
 	{
 		epn = os.Args[2+flag.NFlag()+svcf.NFlag()]
 		switch svcn {
-		case "user":
+		case "repository":
 			switch epn {
 			case "insert":
-				epf = userInsertFlags
+				epf = repositoryInsertFlags
 
 			case "delete":
-				epf = userDeleteFlags
+				epf = repositoryDeleteFlags
 
 			case "get":
-				epf = userGetFlags
+				epf = repositoryGetFlags
 
 			}
 
@@ -127,18 +127,18 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "user":
-			c := usersvcc.NewClient(scheme, host, doer, enc, dec, restore)
+		case "repository":
+			c := repositoryc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
 			case "insert":
 				endpoint = c.Insert()
-				data, err = usersvcc.BuildInsertPayload(*userInsertBodyFlag)
+				data, err = repositoryc.BuildInsertPayload(*repositoryInsertBodyFlag)
 			case "delete":
 				endpoint = c.Delete()
-				data, err = usersvcc.BuildDeletePayload(*userDeleteIDFlag)
+				data, err = repositoryc.BuildDeletePayload(*repositoryDeleteIDFlag)
 			case "get":
 				endpoint = c.Get()
-				data, err = usersvcc.BuildGetPayload(*userGetIDFlag)
+				data, err = repositoryc.BuildGetPayload(*repositoryGetIDFlag, *repositoryGetViewFlag)
 			}
 		}
 	}
@@ -149,53 +149,54 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// userUsage displays the usage of the user command and its subcommands.
-func userUsage() {
-	fmt.Fprintf(os.Stderr, `The storage service makes it possible to view, add or remove wine bottles.
+// repositoryUsage displays the usage of the repository command and its
+// subcommands.
+func repositoryUsage() {
+	fmt.Fprintf(os.Stderr, `The service makes it possible to insert, delete or get users.
 Usage:
-    %s [globalflags] user COMMAND [flags]
+    %s [globalflags] repository COMMAND [flags]
 
 COMMAND:
-    insert: Add new bottle and return its ID.
-    delete: Remove bottle from storage
+    insert: Add new user and return its ID.
+    delete: Remove user from storage
     get: Get implements get.
 
 Additional help:
-    %s user COMMAND --help
+    %s repository COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func userInsertUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] user insert -body JSON
+func repositoryInsertUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] repository insert -body JSON
 
-Add new bottle and return its ID.
+Add new user and return its ID.
     -body JSON: 
 
 Example:
-    `+os.Args[0]+` user insert --body '{
-      "name": "cfy",
-      "online": false
+    `+os.Args[0]+` repository insert --body '{
+      "name": "qdv"
    }'
 `, os.Args[0])
 }
 
-func userDeleteUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] user delete -id STRING
+func repositoryDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] repository delete -id STRING
 
-Remove bottle from storage
-    -id STRING: ID of bottle to remove
+Remove user from storage
+    -id STRING: ID of user to remove
 
 Example:
-    `+os.Args[0]+` user delete --id "Reprehenderit ea quam optio placeat."
+    `+os.Args[0]+` repository delete --id "Aut ipsam natus."
 `, os.Args[0])
 }
 
-func userGetUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] user get -id STRING
+func repositoryGetUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] repository get -id STRING -view STRING
 
 Get implements get.
-    -id STRING: ID of bottle to remove
+    -id STRING: Get user by ID
+    -view STRING: 
 
 Example:
-    `+os.Args[0]+` user get --id "Occaecati ut excepturi et deleniti quis."
+    `+os.Args[0]+` repository get --id "Voluptates impedit libero vitae officia blanditiis voluptas." --view "default"
 `, os.Args[0])
 }

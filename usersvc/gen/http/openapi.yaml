@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  title: Speeddate Masterserver
-  description: HTTP service for managing your users
+  title: Speeddate Userservice
+  description: HTTP service for managing users in the SpeedDate-system
   version: ""
 host: localhost:8000
 consumes:
@@ -16,14 +16,14 @@ paths:
   /delete/{id}:
     delete:
       tags:
-      - user
-      summary: delete user
-      description: Remove bottle from storage
-      operationId: user#delete
+      - repository
+      summary: delete repository
+      description: Remove user from storage
+      operationId: repository#delete
       parameters:
       - name: id
         in: path
-        description: ID of bottle to remove
+        description: ID of user to remove
         required: true
         type: string
       responses:
@@ -34,39 +34,43 @@ paths:
   /get/{id}:
     get:
       tags:
-      - user
-      summary: get user
-      operationId: user#get
+      - repository
+      summary: get repository
+      operationId: repository#get
       parameters:
+      - name: view
+        in: query
+        description: View to render
+        required: false
+        type: string
+        enum:
+        - default
+        - tiny
       - name: id
         in: path
-        description: ID of bottle to remove
+        description: Get user by ID
         required: true
         type: string
       responses:
         "200":
           description: OK response.
           schema:
-            $ref: '#/definitions/UserGetResponseBody'
-        "404":
-          description: Not Found response.
-          schema:
-            $ref: '#/definitions/GetNoMatchResponseBody'
+            $ref: '#/definitions/RepositoryGetResponseBody'
       schemes:
       - http
   /insert:
     post:
       tags:
-      - user
-      summary: insert user
-      description: Add new bottle and return its ID.
-      operationId: user#insert
+      - repository
+      summary: insert repository
+      description: Add new user and return its ID.
+      operationId: repository#insert
       parameters:
       - name: InsertRequestBody
         in: body
         required: true
         schema:
-          $ref: '#/definitions/UserInsertRequestBody'
+          $ref: '#/definitions/RepositoryInsertRequestBody'
           required:
           - name
       responses:
@@ -89,12 +93,7 @@ paths:
       schemes:
       - http
 definitions:
-  GetNoMatchResponseBody:
-    title: GetNoMatchResponseBody
-    type: string
-    description: No bottle matched given criteria
-    example: Voluptatibus at consequatur.
-  UserGetResponseBody:
+  RepositoryGetResponseBody:
     title: 'Mediatype identifier: application/sd.data.stored-user; view=default'
     type: object
     properties:
@@ -105,36 +104,30 @@ definitions:
       name:
         type: string
         description: The username
-        example: 1rd
+        example: vk0
         maxLength: 50
       online:
         type: boolean
         description: Indicates whether the user is currently online.
-        default: false
-        example: true
+        example: false
     description: GetResponseBody result type (default view)
     example:
       id: f923e008-e511-11e8-9f32-f2801f1b9fd1
-      name: 1sq
+      name: vl5
       online: false
     required:
     - id
-  UserInsertRequestBody:
-    title: UserInsertRequestBody
+    - name
+  RepositoryInsertRequestBody:
+    title: RepositoryInsertRequestBody
     type: object
     properties:
       name:
         type: string
         description: The username
-        example: le6
+        example: 75p
         maxLength: 50
-      online:
-        type: boolean
-        description: Indicates whether the user is currently online.
-        default: false
-        example: true
     example:
-      name: "880"
-      online: false
+      name: z26
     required:
     - name

@@ -8,12 +8,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	user "speeddate/usersvc"
+	"speeddate/usersvc"
+	repositorysvr "speeddate/usersvc/gen/http/repository/server"
 	swaggersvr "speeddate/usersvc/gen/http/swagger/server"
-	usersvcsvr "speeddate/usersvc/gen/http/user/server"
-	usersvc "speeddate/usersvc/gen/user"
+	repository "speeddate/usersvc/gen/repository"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 )
@@ -35,25 +36,48 @@ func main() {
 		logger  *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[user] ", log.Ltime)
+		logger = log.New(os.Stderr, "[usersvc] ", log.Ltime)
 		adapter = middleware.NewLogger(logger)
+	}
+
+	// Initialize service dependencies such as databases.
+	var (
+		db *gorm.DB
+	)
+	{
+		var err error
+
+		// Connect to the "bank" database as the "maxroach" user.
+		const addr = "postgresql://speeddateuser@192.168.178.100:8888/speeddate?sslmode=disable"
+		db, err = gorm.Open("postgres", addr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+
+		// Automatically create the "accounts" table based on the Account model.
+		db.AutoMigrate(&repository.StoredUser{})
 	}
 
 	// Create the structs that implement the services.
 	var (
-		userSvc usersvc.Service
+		repositorySvc repository.Service
 	)
 	{
-		userSvc = user.NewUser(logger)
+		var err error
+		repositorySvc, err = usersvc.NewRepository(db, logger)
+		if err != nil {
+			logger.Fatalf("error creating database: %s", err)
+		}
 	}
 
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
 	var (
-		userEndpoints *usersvc.Endpoints
+		repositoryEndpoints *repository.Endpoints
 	)
 	{
-		userEndpoints = usersvc.NewEndpoints(userSvc)
+		repositoryEndpoints = repository.NewEndpoints(repositorySvc)
 	}
 
 	// Provide the transport specific request decoder and response encoder.
@@ -77,17 +101,17 @@ func main() {
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		userServer    *usersvcsvr.Server
-		swaggerServer *swaggersvr.Server
+		repositoryServer *repositorysvr.Server
+		swaggerServer    *swaggersvr.Server
 	)
 	{
 		eh := ErrorHandler(logger)
-		userServer = usersvcsvr.New(userEndpoints, mux, dec, enc, eh)
+		repositoryServer = repositorysvr.New(repositoryEndpoints, mux, dec, enc, eh)
 		swaggerServer = swaggersvr.New(nil, mux, dec, enc, eh)
 	}
 
 	// Configure the mux.
-	usersvcsvr.Mount(mux, userServer)
+	repositorysvr.Mount(mux, repositoryServer)
 	swaggersvr.Mount(mux)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
@@ -117,7 +141,7 @@ func main() {
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}
 	go func() {
-		for _, m := range userServer.Mounts {
+		for _, m := range repositoryServer.Mounts {
 			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 		}
 		for _, m := range swaggerServer.Mounts {
