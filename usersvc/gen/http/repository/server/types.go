@@ -3,15 +3,15 @@
 // repository HTTP server types
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package server
 
 import (
-	repository "speeddate/usersvc/gen/repository"
-	repositoryviews "speeddate/usersvc/gen/repository/views"
 	"unicode/utf8"
 
+	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
+	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
 	goa "goa.design/goa"
 )
 

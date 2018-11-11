@@ -3,13 +3,14 @@
 // repository service
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package repository
 
 import (
 	"context"
-	repositoryviews "speeddate/usersvc/gen/repository/views"
+
+	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
 )
 
 // The service makes it possible to insert, delete or get users.

@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	cli "speeddate/usersvc/gen/http/cli/user"
 	"strings"
 	"time"
 
+	cli "github.com/proepkes/speeddate/usersvc/gen/http/cli/user"
 	goahttp "goa.design/goa/http"
 )
 

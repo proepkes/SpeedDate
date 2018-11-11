@@ -3,7 +3,7 @@
 // repository HTTP server encoders and decoders
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package server
 
@@ -11,9 +11,9 @@ import (
 	"context"
 	"io"
 	"net/http"
-	repository "speeddate/usersvc/gen/repository"
-	repositoryviews "speeddate/usersvc/gen/repository/views"
 
+	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
+	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
 )

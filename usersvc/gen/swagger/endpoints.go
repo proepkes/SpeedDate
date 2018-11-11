@@ -3,7 +3,7 @@
 // swagger endpoints
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package swagger
 

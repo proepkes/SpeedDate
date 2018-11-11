@@ -8,15 +8,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"speeddate/usersvc"
-	repositorysvr "speeddate/usersvc/gen/http/repository/server"
-	swaggersvr "speeddate/usersvc/gen/http/swagger/server"
-	repository "speeddate/usersvc/gen/repository"
 	"time"
 
 	"github.com/jinzhu/gorm"
-	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
+
+	goahttp "goa.design/goa/http"
+
+	"github.com/proepkes/speeddate/usersvc"
+	"github.com/proepkes/speeddate/usersvc/gen/repository"
+
+	repositorysvr "github.com/proepkes/speeddate/usersvc/gen/http/repository/server"
+	swaggersvr "github.com/proepkes/speeddate/usersvc/gen/http/swagger/server"
 )
 
 func main() {

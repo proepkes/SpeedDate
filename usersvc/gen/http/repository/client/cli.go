@@ -3,16 +3,16 @@
 // repository HTTP client CLI support package
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package client
 
 import (
 	"encoding/json"
 	"fmt"
-	repository "speeddate/usersvc/gen/repository"
 	"unicode/utf8"
 
+	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
 	goa "goa.design/goa"
 )
 

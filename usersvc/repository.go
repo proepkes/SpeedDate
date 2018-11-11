@@ -3,9 +3,9 @@ package usersvc
 import (
 	"context"
 	"log"
-	repository "speeddate/usersvc/gen/repository"
 
 	"github.com/jinzhu/gorm"
+	"github.com/proepkes/speeddate/usersvc/gen/repository"
 )
 
 // repository service example implementation.

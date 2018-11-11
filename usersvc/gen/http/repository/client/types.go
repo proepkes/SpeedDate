@@ -3,14 +3,13 @@
 // repository HTTP client types
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package client
 
 import (
-	repository "speeddate/usersvc/gen/repository"
-	repositoryviews "speeddate/usersvc/gen/repository/views"
-
+	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
+	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
 	goa "goa.design/goa"
 )
 

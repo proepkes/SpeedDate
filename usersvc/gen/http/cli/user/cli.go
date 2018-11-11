@@ -3,7 +3,7 @@
 // user HTTP client CLI support package
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package cli
 
@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	repositoryc "speeddate/usersvc/gen/http/repository/client"
 
+	repositoryc "github.com/proepkes/speeddate/usersvc/gen/http/repository/client"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
 )

@@ -3,7 +3,7 @@
 // HTTP request path constructors for the repository service.
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package client
 

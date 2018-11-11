@@ -3,15 +3,15 @@
 // swagger HTTP server
 //
 // Command:
-// $ goa gen speeddate/usersvc/design
+// $ goa gen github.com/proepkes/speeddate/usersvc/design
 
 package server
 
 import (
 	"context"
 	"net/http"
-	swagger "speeddate/usersvc/gen/swagger"
 
+	swagger "github.com/proepkes/speeddate/usersvc/gen/swagger"
 	goahttp "goa.design/goa/http"
 )
 
