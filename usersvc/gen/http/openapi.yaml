@@ -1,0 +1,140 @@
+swagger: "2.0"
+info:
+  title: Speeddate Masterserver
+  description: HTTP service for managing your users
+  version: ""
+host: localhost:8000
+consumes:
+- application/json
+- application/xml
+- application/gob
+produces:
+- application/json
+- application/xml
+- application/gob
+paths:
+  /delete/{id}:
+    delete:
+      tags:
+      - user
+      summary: delete user
+      description: Remove bottle from storage
+      operationId: user#delete
+      parameters:
+      - name: id
+        in: path
+        description: ID of bottle to remove
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content response.
+      schemes:
+      - http
+  /get/{id}:
+    get:
+      tags:
+      - user
+      summary: get user
+      operationId: user#get
+      parameters:
+      - name: id
+        in: path
+        description: ID of bottle to remove
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/UserGetResponseBody'
+        "404":
+          description: Not Found response.
+          schema:
+            $ref: '#/definitions/GetNoMatchResponseBody'
+      schemes:
+      - http
+  /insert:
+    post:
+      tags:
+      - user
+      summary: insert user
+      description: Add new bottle and return its ID.
+      operationId: user#insert
+      parameters:
+      - name: InsertRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/UserInsertRequestBody'
+          required:
+          - name
+      responses:
+        "201":
+          description: Created response.
+          schema:
+            type: string
+      schemes:
+      - http
+  /swagger/swagger.json:
+    get:
+      summary: Download ../../gen/http/openapi.json
+      description: JSON document containing the API swagger definition
+      operationId: swagger#/swagger/swagger.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+definitions:
+  GetNoMatchResponseBody:
+    title: GetNoMatchResponseBody
+    type: string
+    description: No bottle matched given criteria
+    example: Voluptatibus at consequatur.
+  UserGetResponseBody:
+    title: 'Mediatype identifier: application/sd.data.stored-user; view=default'
+    type: object
+    properties:
+      id:
+        type: string
+        description: UUID is the unique id of the user.
+        example: f923e008-e511-11e8-9f32-f2801f1b9fd1
+      name:
+        type: string
+        description: The username
+        example: 1rd
+        maxLength: 50
+      online:
+        type: boolean
+        description: Indicates whether the user is currently online.
+        default: false
+        example: true
+    description: GetResponseBody result type (default view)
+    example:
+      id: f923e008-e511-11e8-9f32-f2801f1b9fd1
+      name: 1sq
+      online: false
+    required:
+    - id
+  UserInsertRequestBody:
+    title: UserInsertRequestBody
+    type: object
+    properties:
+      name:
+        type: string
+        description: The username
+        example: le6
+        maxLength: 50
+      online:
+        type: boolean
+        description: Indicates whether the user is currently online.
+        default: false
+        example: true
+    example:
+      name: "880"
+      online: false
+    required:
+    - name

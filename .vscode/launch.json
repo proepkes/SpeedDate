@@ -9,7 +9,7 @@
 			"type": "go",
 			"request": "launch",
 			"mode": "auto",
-            "program": "${workspaceRoot}/profile/cmd",
+            "program": "${workspaceRoot}/profilesvc/cmd",
 			"env": {},
 			"args": []
 		}
