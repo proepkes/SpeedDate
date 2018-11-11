@@ -72,6 +72,8 @@ type NotFound struct {
 	ID string
 	// Message of error
 	Message string
+	// Description of error
+	Description string
 }
 
 // Error returns an error description.

@@ -42,6 +42,17 @@ type GetResponseBodyTiny struct {
 	Name string `form:"name" json:"name" xml:"name"`
 }
 
+// GetNotFoundResponseBody is the type of the "repository" service "get"
+// endpoint HTTP response body for the "not_found" error.
+type GetNotFoundResponseBody struct {
+	// ID of missing user
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message of error
+	Message string `form:"message" json:"message" xml:"message"`
+	// Description of error
+	Description string `form:"description" json:"description" xml:"description"`
+}
+
 // NewGetResponseBody builds the HTTP response body from the result of the
 // "get" endpoint of the "repository" service.
 func NewGetResponseBody(res *repositoryviews.StoredUserView) *GetResponseBody {
@@ -59,6 +70,17 @@ func NewGetResponseBodyTiny(res *repositoryviews.StoredUserView) *GetResponseBod
 	body := &GetResponseBodyTiny{
 		ID:   *res.ID,
 		Name: *res.Name,
+	}
+	return body
+}
+
+// NewGetNotFoundResponseBody builds the HTTP response body from the result of
+// the "get" endpoint of the "repository" service.
+func NewGetNotFoundResponseBody(res *repository.NotFound) *GetNotFoundResponseBody {
+	body := &GetNotFoundResponseBody{
+		ID:          res.ID,
+		Message:     res.Message,
+		Description: res.Description,
 	}
 	return body
 }

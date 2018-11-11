@@ -50,7 +50,7 @@ func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
 
 // Get calls the "get" endpoint of the "repository" service.
 // Get may return the following errors:
-//	- "record not found" (type *NotFound): User not found
+//	- "not_found" (type *NotFound): User not found
 //	- error: internal error
 func (c *Client) Get(ctx context.Context, p *GetPayload) (res *StoredUser, err error) {
 	var ires interface{}

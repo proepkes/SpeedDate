@@ -11,6 +11,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	repository "speeddate/usersvc/gen/repository"
 	repositoryviews "speeddate/usersvc/gen/repository/views"
 
 	goa "goa.design/goa"
@@ -125,5 +126,28 @@ func DecodeGetRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Dec
 		payload := NewGetPayload(id, view)
 
 		return payload, nil
+	}
+}
+
+// EncodeGetError returns an encoder for errors returned by the get repository
+// endpoint.
+func EncodeGetError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		en, ok := v.(ErrorNamer)
+		if !ok {
+			return encodeError(ctx, w, v)
+		}
+		switch en.ErrorName() {
+		case "not_found":
+			res := v.(*repository.NotFound)
+			enc := encoder(ctx, w)
+			body := NewGetNotFoundResponseBody(res)
+			w.Header().Set("goa-error", "not_found")
+			w.WriteHeader(http.StatusNotFound)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }

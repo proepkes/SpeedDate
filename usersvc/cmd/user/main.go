@@ -55,6 +55,7 @@ func main() {
 		}
 		defer db.Close()
 
+		db.LogMode(true)
 		// Automatically create the "accounts" table based on the Account model.
 		db.AutoMigrate(&repository.StoredUser{})
 	}

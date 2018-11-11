@@ -10,6 +10,8 @@ package client
 import (
 	repository "speeddate/usersvc/gen/repository"
 	repositoryviews "speeddate/usersvc/gen/repository/views"
+
+	goa "goa.design/goa"
 )
 
 // InsertRequestBody is the type of the "repository" service "insert" endpoint
@@ -30,6 +32,17 @@ type GetResponseBody struct {
 	Online *bool `form:"online,omitempty" json:"online,omitempty" xml:"online,omitempty"`
 }
 
+// GetNotFoundResponseBody is the type of the "repository" service "get"
+// endpoint HTTP response body for the "not_found" error.
+type GetNotFoundResponseBody struct {
+	// ID of missing user
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Description of error
+	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+}
+
 // NewInsertRequestBody builds the HTTP request body from the payload of the
 // "insert" endpoint of the "repository" service.
 func NewInsertRequestBody(p *repository.User) *InsertRequestBody {
@@ -48,4 +61,28 @@ func NewGetStoredUserOK(body *GetResponseBody) *repositoryviews.StoredUserView {
 		Online: body.Online,
 	}
 	return v
+}
+
+// NewGetNotFound builds a repository service get endpoint not_found error.
+func NewGetNotFound(body *GetNotFoundResponseBody) *repository.NotFound {
+	v := &repository.NotFound{
+		ID:          *body.ID,
+		Message:     *body.Message,
+		Description: *body.Description,
+	}
+	return v
+}
+
+// Validate runs the validations defined on GetNotFoundResponseBody
+func (body *GetNotFoundResponseBody) Validate() (err error) {
+	if body.Description == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("description", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	return
 }

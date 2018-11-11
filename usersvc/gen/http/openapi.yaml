@@ -56,6 +56,14 @@ paths:
           description: OK response.
           schema:
             $ref: '#/definitions/RepositoryGetResponseBody'
+        "404":
+          description: Not Found response.
+          schema:
+            $ref: '#/definitions/GetNotFoundResponseBody'
+            required:
+            - description
+            - message
+            - id
       schemes:
       - http
   /insert:
@@ -93,6 +101,31 @@ paths:
       schemes:
       - http
 definitions:
+  GetNotFoundResponseBody:
+    title: GetNotFoundResponseBody
+    type: object
+    properties:
+      description:
+        type: string
+        description: Description of error
+        example: Voluptatem eos.
+      id:
+        type: string
+        description: ID of missing user
+        example: Expedita possimus repellendus est voluptatum.
+      message:
+        type: string
+        description: Message of error
+        example: User 1 not found
+    description: User not found
+    example:
+      description: Inventore qui dicta sit nulla modi.
+      id: Vitae atque est ut.
+      message: User 1 not found
+    required:
+    - description
+    - message
+    - id
   RepositoryGetResponseBody:
     title: 'Mediatype identifier: application/sd.data.stored-user; view=default'
     type: object
@@ -104,7 +137,7 @@ definitions:
       name:
         type: string
         description: The username
-        example: vk0
+        example: qhm
         maxLength: 50
       online:
         type: boolean
@@ -113,8 +146,8 @@ definitions:
     description: GetResponseBody result type (default view)
     example:
       id: f923e008-e511-11e8-9f32-f2801f1b9fd1
-      name: vl5
-      online: false
+      name: lqg
+      online: true
     required:
     - id
     - name
@@ -125,9 +158,9 @@ definitions:
       name:
         type: string
         description: The username
-        example: 75p
+        example: wyx
         maxLength: 50
     example:
-      name: z26
+      name: wxb
     required:
     - name

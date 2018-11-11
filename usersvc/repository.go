@@ -56,8 +56,9 @@ func (s *repositorySvc) Get(ctx context.Context, p *repository.GetPayload) (res 
 	if err = s.db.GetUser(p.ID, &res); err != nil {
 		if err == ErrNotFound {
 			return nil, view, &repository.NotFound{
-				Message: err.Error(),
-				ID:      p.ID,
+				Description: err.Error(),
+				Message:     "not_found",
+				ID:          p.ID,
 			}
 		}
 		return nil, view, err // internal error

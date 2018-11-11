@@ -35,7 +35,7 @@ var _ = Service("repository", func() {
 
 	Method("get", func() {
 		Result(StoredUser)
-		Error("record not found", NotFound, "User not found")
+		Error("not_found", NotFound, "User not found")
 		Payload(func() {
 			Attribute("id", String, "Get user by ID")
 			Attribute("view", String, "View to render", func() {
@@ -47,7 +47,7 @@ var _ = Service("repository", func() {
 			GET("/get/{id}")
 			Param("view")
 			Response(StatusOK)
-			Response("record not found", StatusNotFound)
+			Response("not_found", StatusNotFound)
 		})
 	})
 })

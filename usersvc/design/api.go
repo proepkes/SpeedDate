@@ -61,5 +61,6 @@ var NotFound = Type("NotFound", func() {
 		Metadata("struct:error:name")
 		Example("User 1 not found")
 	})
-	Required("message", "id")
+	Attribute("description", String, "Description of error")
+	Required("description", "message", "id")
 })

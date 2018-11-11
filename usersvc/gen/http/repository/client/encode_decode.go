@@ -182,6 +182,9 @@ func EncodeGetRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 // DecodeGetResponse returns a decoder for responses returned by the repository
 // get endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
+// DecodeGetResponse may return the following errors:
+//	- "not_found" (type *repository.NotFound): http.StatusNotFound
+//	- error: internal error
 func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
@@ -214,6 +217,20 @@ func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 			}
 			res := repository.NewStoredUser(vres)
 			return res, nil
+		case http.StatusNotFound:
+			var (
+				body GetNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("repository", "get", err)
+			}
+			err = body.Validate()
+			if err != nil {
+				return nil, goahttp.ErrValidationError("repository", "get", err)
+			}
+			return nil, NewGetNotFound(&body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("repository", "get", resp.StatusCode, string(body))
