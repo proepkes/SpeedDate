@@ -48,6 +48,7 @@ func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme)
 		return privKey, nil
 	})
 
+	//TODO: better way of error handling? Possible to remove dependency to repository?
 	if err != nil {
 		return ctx, &repository.Unauthorized{
 			Message: "unauthorized",
