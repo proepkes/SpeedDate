@@ -22,7 +22,7 @@ func main() {
 	// Define command line flags, add any other flag required to configure
 	// the service.
 	var (
-		addr = flag.String("listen", "localhost:8001", "HTTP listen `address`")
+		addr = flag.String("listen", "localhost:8002", "HTTP listen `address`")
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
 	flag.Parse()

@@ -24,5 +24,16 @@ func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme)
 	//
 	//    return ctx, goa.PermanentError("unauthorized", "invalid token")
 	//
+
+	// tokenResult, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// 	// Don't forget to validate the alg is what you expect:
+	// 	if _, ok := token.Method.(*jwt.SigningMethodES512); !ok {
+	// 		return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+	// 	}
+
+	// 	// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+	// 	return hmacSampleSecret, nil
+	// })
+
 	return ctx, fmt.Errorf("not implemented")
 }
