@@ -13,8 +13,8 @@ import (
 
 // NewLoginResultNoContent builds a "authorize" service "login" endpoint result
 // from a HTTP "NoContent" response.
-func NewLoginResultNoContent(auth string) *authorize.LoginResult {
+func NewLoginResultNoContent(token string) *authorize.LoginResult {
 	return &authorize.LoginResult{
-		Auth: auth,
+		Token: token,
 	}
 }

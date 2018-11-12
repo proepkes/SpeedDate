@@ -21,7 +21,7 @@ import (
 func EncodeLoginResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		res := v.(*authorize.LoginResult)
-		w.Header().Set("Authorization", res.Auth)
+		w.Header().Set("Authorization", res.Token)
 		w.WriteHeader(http.StatusNoContent)
 		return nil
 	}

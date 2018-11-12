@@ -10,10 +10,9 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"goa.design/goa/security"
-)
 
-// validScopeClaimKeys are the claims under which scopes may be found in a token
-var validScopeClaimKeys = []string{"scope", "scopes"}
+	"github.com/proepkes/speeddate/usersvc/gen/repository"
+)
 
 // RepositoryJWTAuth implements the authorization logic for service
 // "repository" for the "jwt" security scheme.
@@ -33,11 +32,12 @@ func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme)
 	//    return ctx, goa.PermanentError("unauthorized", "invalid token")
 	//
 
-	//TODO: configurable path to secret
+	//TODO: configurable path to public key, move key-parsing somewhere else
 	abs, _ := filepath.Abs("../../../secret/secret.key.pub")
 	b, err := ioutil.ReadFile(abs)
 	privKey, err := jwt.ParseECPublicKeyFromPEM(b)
 	if err != nil {
+
 		return ctx, fmt.Errorf("not implemented")
 	}
 
@@ -45,19 +45,35 @@ func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme)
 		if _, ok := t.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 		}
-
 		return privKey, nil
 	})
-	if parsedToken == nil {
-		return ctx, fmt.Errorf("not implemented")
+
+	if err != nil {
+		return ctx, &repository.Unauthorized{
+			Message: "unauthorized",
+		}
 	}
+
 	if !parsedToken.Valid {
-		return ctx, fmt.Errorf("not implemented")
+		return ctx, &repository.Unauthorized{
+			Message: "unauthorized",
+		}
 	}
 
-	parseClaimScopes(parsedToken)
+	scopesMap, _, err := parseClaimScopes(parsedToken)
+	if err != nil {
+		return ctx, &repository.Unauthorized{
+			Message: "unauthorized",
+		}
+	}
 
-	return ctx, fmt.Errorf("not implemented")
+	if !scopesMap["api:read"] {
+		return ctx, &repository.Unauthorized{
+			Message: "unauthorized",
+		}
+	}
+
+	return ctx, nil
 }
 
 // parseClaimScopes parses the "scope" or "scopes" parameter in the Claims. It
@@ -65,10 +81,12 @@ func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme)
 //
 // * a list of strings
 //
-// * a single string with space-separated scopes (akin to OAuth2's "scope").
+// * a single string with space-separated scopes
 //
 // An empty string is an explicit claim of no scopes.
 func parseClaimScopes(token *jwt.Token) (map[string]bool, []string, error) {
+	var validScopeClaimKeys = []string{"scope", "scopes"}
+
 	scopesInClaim := make(map[string]bool)
 	var scopesInClaimList []string
 	claims, ok := token.Claims.(jwt.MapClaims)

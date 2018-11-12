@@ -42,6 +42,13 @@ type GetNotFoundResponseBody struct {
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 }
 
+// GetUnauthorizedResponseBody is the type of the "repository" service "get"
+// endpoint HTTP response body for the "unauthorized" error.
+type GetUnauthorizedResponseBody struct {
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // NewInsertRequestBody builds the HTTP request body from the payload of the
 // "insert" endpoint of the "repository" service.
 func NewInsertRequestBody(p *repository.User) *InsertRequestBody {
@@ -72,6 +79,15 @@ func NewGetNotFound(body *GetNotFoundResponseBody) *repository.NotFound {
 	return v
 }
 
+// NewGetUnauthorized builds a repository service get endpoint unauthorized
+// error.
+func NewGetUnauthorized(body *GetUnauthorizedResponseBody) *repository.Unauthorized {
+	v := &repository.Unauthorized{
+		Message: *body.Message,
+	}
+	return v
+}
+
 // Validate runs the validations defined on GetNotFoundResponseBody
 func (body *GetNotFoundResponseBody) Validate() (err error) {
 	if body.Description == nil {
@@ -82,6 +98,14 @@ func (body *GetNotFoundResponseBody) Validate() (err error) {
 	}
 	if body.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	return
+}
+
+// Validate runs the validations defined on GetUnauthorizedResponseBody
+func (body *GetUnauthorizedResponseBody) Validate() (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }

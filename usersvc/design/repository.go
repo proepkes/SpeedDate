@@ -39,6 +39,7 @@ var _ = Service("repository", func() {
 		})
 		Result(StoredUser)
 		Error("not_found", NotFound, "User not found")
+		Error("unauthorized", Unauthorized)
 		Payload(func() {
 			Token("token", String, func() {
 				Description("JWT used for authentication")
@@ -54,6 +55,7 @@ var _ = Service("repository", func() {
 			Param("view")
 			Response(StatusOK)
 			Response("not_found", StatusNotFound)
+			Response("unauthorized", StatusUnauthorized)
 		})
 	})
 })

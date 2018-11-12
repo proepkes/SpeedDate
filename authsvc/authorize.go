@@ -55,12 +55,11 @@ func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (re
 
 	s.logger.Print("authorize.login")
 
-	in1000m := time.Now().Add(time.Duration(1000) * time.Minute).Unix()
 	// Create the Claims
 	claims := defaultClaims{
 		"api:read",
 		jwt.StandardClaims{
-			ExpiresAt: in1000m,
+			ExpiresAt: time.Now().Add(time.Duration(24) * time.Hour).Unix(),
 			Issuer:    "SpeedDate",
 		},
 	}
@@ -72,7 +71,7 @@ func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (re
 		return nil, fmt.Errorf("failed to sign token: %s", err) // internal error
 	}
 
-	res.Auth = signedToken
+	res.Token = signedToken
 
 	return
 }

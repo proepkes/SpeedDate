@@ -159,6 +159,13 @@ func EncodeGetError(encoder func(context.Context, http.ResponseWriter) goahttp.E
 			w.Header().Set("goa-error", "not_found")
 			w.WriteHeader(http.StatusNotFound)
 			return enc.Encode(body)
+		case "unauthorized":
+			res := v.(*repository.Unauthorized)
+			enc := encoder(ctx, w)
+			body := NewGetUnauthorizedResponseBody(res)
+			w.Header().Set("goa-error", "unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
 		default:
 			return encodeError(ctx, w, v)
 		}

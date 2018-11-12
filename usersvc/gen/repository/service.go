@@ -79,6 +79,12 @@ type NotFound struct {
 	Description string
 }
 
+// Unauthorized
+type Unauthorized struct {
+	// Message of error
+	Message string
+}
+
 // Error returns an error description.
 func (e *NotFound) Error() string {
 	return "NotFound is the type returned when attempting to get or delete a user that does not exist."
@@ -86,6 +92,16 @@ func (e *NotFound) Error() string {
 
 // ErrorName returns "NotFound".
 func (e *NotFound) ErrorName() string {
+	return e.Message
+}
+
+// Error returns an error description.
+func (e *Unauthorized) Error() string {
+	return "Unauthorized"
+}
+
+// ErrorName returns "Unauthorized".
+func (e *Unauthorized) ErrorName() string {
 	return e.Message
 }
 

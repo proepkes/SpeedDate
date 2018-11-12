@@ -71,3 +71,12 @@ var NotFound = Type("NotFound", func() {
 	Attribute("description", String, "Description of error")
 	Required("description", "message", "id")
 })
+
+var Unauthorized = Type("Unauthorized", func() {
+	Description("Unauthorized")
+	Attribute("message", String, "Message of error", func() {
+		Metadata("struct:error:name")
+		Example("Invalid token")
+	})
+	Required("message")
+})

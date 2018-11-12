@@ -192,6 +192,7 @@ func EncodeGetRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 // restored after having been read.
 // DecodeGetResponse may return the following errors:
 //	- "not_found" (type *repository.NotFound): http.StatusNotFound
+//	- "unauthorized" (type *repository.Unauthorized): http.StatusUnauthorized
 //	- error: internal error
 func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
@@ -239,6 +240,20 @@ func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 				return nil, goahttp.ErrValidationError("repository", "get", err)
 			}
 			return nil, NewGetNotFound(&body)
+		case http.StatusUnauthorized:
+			var (
+				body GetUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("repository", "get", err)
+			}
+			err = body.Validate()
+			if err != nil {
+				return nil, goahttp.ErrValidationError("repository", "get", err)
+			}
+			return nil, NewGetUnauthorized(&body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("repository", "get", resp.StatusCode, string(body))

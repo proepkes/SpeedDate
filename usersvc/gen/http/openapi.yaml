@@ -65,6 +65,12 @@ paths:
           description: OK response.
           schema:
             $ref: '#/definitions/RepositoryGetResponseBody'
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/GetUnauthorizedResponseBody'
+            required:
+            - message
         "404":
           description: Not Found response.
           schema:
@@ -151,6 +157,18 @@ definitions:
     - description
     - message
     - id
+  GetUnauthorizedResponseBody:
+    title: GetUnauthorizedResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        description: Message of error
+        example: Invalid token
+    example:
+      message: Invalid token
+    required:
+    - message
   RepositoryGetResponseBody:
     title: 'Mediatype identifier: application/sd.data.stored-user; view=default'
     type: object

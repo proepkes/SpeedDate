@@ -53,6 +53,13 @@ type GetNotFoundResponseBody struct {
 	Description string `form:"description" json:"description" xml:"description"`
 }
 
+// GetUnauthorizedResponseBody is the type of the "repository" service "get"
+// endpoint HTTP response body for the "unauthorized" error.
+type GetUnauthorizedResponseBody struct {
+	// Message of error
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // NewGetResponseBody builds the HTTP response body from the result of the
 // "get" endpoint of the "repository" service.
 func NewGetResponseBody(res *repositoryviews.StoredUserView) *GetResponseBody {
@@ -81,6 +88,15 @@ func NewGetNotFoundResponseBody(res *repository.NotFound) *GetNotFoundResponseBo
 		ID:          res.ID,
 		Message:     res.Message,
 		Description: res.Description,
+	}
+	return body
+}
+
+// NewGetUnauthorizedResponseBody builds the HTTP response body from the result
+// of the "get" endpoint of the "repository" service.
+func NewGetUnauthorizedResponseBody(res *repository.Unauthorized) *GetUnauthorizedResponseBody {
+	body := &GetUnauthorizedResponseBody{
+		Message: res.Message,
 	}
 	return body
 }

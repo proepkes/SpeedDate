@@ -67,18 +67,18 @@ func DecodeLoginResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			var (
-				auth string
-				err  error
+				token string
+				err   error
 			)
-			authRaw := resp.Header.Get("Authorization")
-			if authRaw == "" {
+			tokenRaw := resp.Header.Get("Authorization")
+			if tokenRaw == "" {
 				err = goa.MergeErrors(err, goa.MissingFieldError("Authorization", "header"))
 			}
-			auth = authRaw
+			token = tokenRaw
 			if err != nil {
 				return nil, goahttp.ErrValidationError("authorize", "login", err)
 			}
-			res := NewLoginResultNoContent(auth)
+			res := NewLoginResultNoContent(token)
 			return res, nil
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)

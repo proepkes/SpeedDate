@@ -35,8 +35,8 @@ type LoginPayload struct {
 	Password string
 }
 
-// Result defines a single field which is the sum.
+// Result defines a JWT Token.
 type LoginResult struct {
-	// Resulting sum
-	Auth string
+	// Resulting token
+	Token string
 }

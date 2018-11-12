@@ -27,15 +27,15 @@ var _ = Service("authorize", func() {
 			Required("username", "password")
 		})
 		Result(func() {
-			Description("Result defines a single field which is the sum.")
-			Attribute("auth", String, "Resulting sum")
-			Required("auth")
+			Description("Result defines a JWT Token.")
+			Attribute("token", String, "Resulting token")
+			Required("token")
 		})
 		HTTP(func() {
 			POST("/login")
 			// Use Authorization header to provide basic auth value.
 			Response(StatusNoContent, func() {
-				Header("auth:Authorization", String, "Generated JWT")
+				Header("token:Authorization", String, "Generated JWT")
 			})
 		})
 	})
