@@ -12,8 +12,7 @@ var _ = Service("health", func() {
 		Result(String)
 		HTTP(func() {
 			GET("/")
-			Response(func() {
-				Code(StatusOK)
+			Response(StatusOK, func() {
 				ContentType("text/plain")
 			})
 		})

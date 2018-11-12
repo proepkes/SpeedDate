@@ -15,6 +15,7 @@ import (
 	"net/url"
 
 	authorize "github.com/proepkes/speeddate/authsvc/gen/authorize"
+	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
 )
 
@@ -65,7 +66,20 @@ func DecodeLoginResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 		}
 		switch resp.StatusCode {
 		case http.StatusNoContent:
-			return nil, nil
+			var (
+				auth string
+				err  error
+			)
+			authRaw := resp.Header.Get("Authorization")
+			if authRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("Authorization", "header"))
+			}
+			auth = authRaw
+			if err != nil {
+				return nil, goahttp.ErrValidationError("authorize", "login", err)
+			}
+			res := NewLoginResultNoContent(auth)
+			return res, nil
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("authorize", "login", resp.StatusCode, string(body))

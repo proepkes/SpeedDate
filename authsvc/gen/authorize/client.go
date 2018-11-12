@@ -26,7 +26,11 @@ func NewClient(login goa.Endpoint) *Client {
 }
 
 // Login calls the "login" endpoint of the "authorize" service.
-func (c *Client) Login(ctx context.Context, p *LoginPayload) (err error) {
-	_, err = c.LoginEndpoint(ctx, p)
-	return
+func (c *Client) Login(ctx context.Context, p *LoginPayload) (res *LoginResult, err error) {
+	var ires interface{}
+	ires, err = c.LoginEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*LoginResult), nil
 }

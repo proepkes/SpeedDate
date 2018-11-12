@@ -44,6 +44,6 @@ func NewLoginEndpoint(s Service, authBasicFn security.AuthBasicFunc) goa.Endpoin
 		if err != nil {
 			return nil, err
 		}
-		return nil, s.Login(ctx, p)
+		return s.Login(ctx, p)
 	}
 }

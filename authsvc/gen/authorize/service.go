@@ -14,7 +14,7 @@ import (
 // The service makes it possible to ...
 type Service interface {
 	// Creates a valid JWT
-	Login(context.Context, *LoginPayload) (err error)
+	Login(context.Context, *LoginPayload) (res *LoginResult, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -33,4 +33,10 @@ type LoginPayload struct {
 	Username string
 	// Password used to perform signin
 	Password string
+}
+
+// Result defines a single field which is the sum.
+type LoginResult struct {
+	// Resulting sum
+	Auth string
 }

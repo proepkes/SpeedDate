@@ -23,6 +23,10 @@ paths:
       responses:
         "204":
           description: No Content response.
+          headers:
+            Authorization:
+              description: Generated JWT
+              type: string
       schemes:
       - http
       security:
