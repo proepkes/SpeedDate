@@ -11,6 +11,7 @@ import (
 	"context"
 
 	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
+	"goa.design/goa/security"
 )
 
 // The service makes it possible to insert, delete or get users.
@@ -24,6 +25,12 @@ type Service interface {
 	//	- "default"
 	//	- "tiny"
 	Get(context.Context, *GetPayload) (res *StoredUser, view string, err error)
+}
+
+// Auther defines the authorization functions to be implemented by the service.
+type Auther interface {
+	// JWTAuth implements the authorization logic for the JWT security scheme.
+	JWTAuth(ctx context.Context, token string, schema *security.JWTScheme) (context.Context, error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the

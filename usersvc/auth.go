@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"goa.design/goa/security"
-
 	"github.com/proepkes/speeddate/usersvc/gen/repository"
+	"goa.design/goa/security"
 )
 
-// RepositoryJWTAuth implements the authorization logic for service
-// "repository" for the "jwt" security scheme.
-func RepositoryJWTAuth(ctx context.Context, token string, s *security.JWTScheme) (context.Context, error) {
+// JWTAuth implements the authorization logic for service "repository" for the
+// "jwt" security scheme.
+func (s *repositorySvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 	//
 	// TBD: add authorization logic.
 	//

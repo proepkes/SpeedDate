@@ -84,7 +84,7 @@ func main() {
 		repositoryEndpoints *repository.Endpoints
 	)
 	{
-		repositoryEndpoints = repository.NewEndpoints(repositorySvc, usersvc.RepositoryJWTAuth)
+		repositoryEndpoints = repository.NewEndpoints(repositorySvc)
 	}
 
 	// Provide the transport specific request decoder and response encoder.

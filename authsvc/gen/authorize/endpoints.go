@@ -20,9 +20,11 @@ type Endpoints struct {
 }
 
 // NewEndpoints wraps the methods of the "authorize" service with endpoints.
-func NewEndpoints(s Service, authBasicFn security.AuthBasicFunc) *Endpoints {
+func NewEndpoints(s Service) *Endpoints {
+	// Casting service to Auther interface
+	a := s.(Auther)
 	return &Endpoints{
-		Login: NewLoginEndpoint(s, authBasicFn),
+		Login: NewLoginEndpoint(s, a.BasicAuth),
 	}
 }
 

@@ -1,6 +1,6 @@
 cd $GOPATH/src/github.com/proepkes/speeddate/usersvc
 goa gen github.com/proepkes/speeddate/usersvc/design
-# goa example speeddate/usersvc/design
+goa example github.com/proepkes/speeddate/usersvc/design
 
 
 cd $GOPATH/src/github.com/proepkes/speeddate/authsvc

@@ -9,12 +9,20 @@ package authorize
 
 import (
 	"context"
+
+	"goa.design/goa/security"
 )
 
 // The service makes it possible to ...
 type Service interface {
 	// Creates a valid JWT
 	Login(context.Context, *LoginPayload) (res *LoginResult, err error)
+}
+
+// Auther defines the authorization functions to be implemented by the service.
+type Auther interface {
+	// BasicAuth implements the authorization logic for the Basic security scheme.
+	BasicAuth(ctx context.Context, user, pass string, schema *security.BasicScheme) (context.Context, error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the

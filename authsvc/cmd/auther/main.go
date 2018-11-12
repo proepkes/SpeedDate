@@ -54,7 +54,7 @@ func main() {
 		authorizeEndpoints *authorize.Endpoints
 	)
 	{
-		authorizeEndpoints = authorize.NewEndpoints(authorizeSvc, authsvc.AuthorizeBasicAuth)
+		authorizeEndpoints = authorize.NewEndpoints(authorizeSvc)
 	}
 
 	// Provide the transport specific request decoder and response encoder.

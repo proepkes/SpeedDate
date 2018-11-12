@@ -22,11 +22,13 @@ type Endpoints struct {
 }
 
 // NewEndpoints wraps the methods of the "repository" service with endpoints.
-func NewEndpoints(s Service, authJWTFn security.AuthJWTFunc) *Endpoints {
+func NewEndpoints(s Service) *Endpoints {
+	// Casting service to Auther interface
+	a := s.(Auther)
 	return &Endpoints{
 		Insert: NewInsertEndpoint(s),
 		Delete: NewDeleteEndpoint(s),
-		Get:    NewGetEndpoint(s, authJWTFn),
+		Get:    NewGetEndpoint(s, a.JWTAuth),
 	}
 }
 

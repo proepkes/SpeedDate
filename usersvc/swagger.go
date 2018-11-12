@@ -3,7 +3,7 @@ package usersvc
 import (
 	"log"
 
-	"github.com/proepkes/speeddate/usersvc/gen/swagger"
+	swagger "github.com/proepkes/speeddate/usersvc/gen/swagger"
 )
 
 // swagger service example implementation.
