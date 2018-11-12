@@ -30,7 +30,11 @@ var _ = Service("authorize", func() {
 		HTTP(func() {
 			POST("/login")
 			// Use Authorization header to provide basic auth value.
-			Response(StatusNoContent)
+			Response(StatusNoContent, func() {
+				Headers(func() {
+					Header("Authorization", String, "Generated JWT")
+				})
+			})
 		})
 	})
 })
