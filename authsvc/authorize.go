@@ -44,7 +44,9 @@ func NewAuthorize(logger *log.Logger) authorize.Service {
 }
 
 // Creates a valid JWT
-func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (err error) {
+func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (res *authorize.LoginResult, err error) {
+	res = &authorize.LoginResult{}
+
 	s.logger.Print("authorize.login")
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
@@ -61,12 +63,10 @@ func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (er
 	})
 	signedToken, err := token.SignedString(s.privateKey)
 	if err != nil {
-		return fmt.Errorf("failed to sign token: %s", err) // internal error
+		return nil, fmt.Errorf("failed to sign token: %s", err) // internal error
 	}
 
-	log.Println(signedToken)
-	// Set auth header for client retrieval
-	// ctx.ResponseData.Header().Set("Authorization", "Bearer "+signedToken)
+	res.Auth = signedToken
 
 	return
 }
