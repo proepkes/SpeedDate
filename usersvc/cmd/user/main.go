@@ -26,6 +26,7 @@ func main() {
 	// Define command line flags, add any other flag required to configure
 	// the service.
 	var (
+		//TODO: configurable listen address
 		addr = flag.String("listen", "localhost:8001", "HTTP listen `address`")
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
@@ -50,9 +51,10 @@ func main() {
 	{
 		var err error
 
+		//TODO: configurable connectionstring
 		// Connect to the "bank" database as the "maxroach" user.
-		const addr = "postgresql://speeddateuser@localhost:8888/speeddate?sslmode=disable"
-		// const addr = "postgresql://speeddateuser@192.168.178.100:8888/speeddate?sslmode=disable"
+		// const addr = "postgresql://speeddateuser@localhost:8888/speeddate?sslmode=disable"
+		const addr = "postgresql://speeddateuser@192.168.178.100:8888/speeddate?sslmode=disable"
 		db, err = gorm.Open("postgres", addr)
 		if err != nil {
 			log.Fatal(err)

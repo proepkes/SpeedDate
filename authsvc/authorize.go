@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"time"
 
 	authorize "github.com/proepkes/speeddate/authsvc/gen/authorize"
-
-	"github.com/satori/go.uuid"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	jwtgo "github.com/dgrijalva/jwt-go"
@@ -23,9 +22,16 @@ type authorizeSvc struct {
 	privateKey *ecdsa.PrivateKey
 }
 
+type defaultClaims struct {
+	Scopes string `json:"scopes"`
+	jwt.StandardClaims
+}
+
 // NewAuthorize returns the authorize service implementation.
 func NewAuthorize(logger *log.Logger) authorize.Service {
-	b, err := ioutil.ReadFile("./secret/secret.key")
+	//TODO: configurable path or secret
+	abs, _ := filepath.Abs("../../../secret/secret.key")
+	b, err := ioutil.ReadFile(abs)
 	if err != nil {
 		logger.Fatalln(err)
 		return nil
@@ -49,19 +55,18 @@ func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (re
 
 	s.logger.Print("authorize.login")
 
+	in1000m := time.Now().Add(time.Duration(1000) * time.Minute).Unix()
+	// Create the Claims
+	claims := defaultClaims{
+		"api:read",
+		jwt.StandardClaims{
+			ExpiresAt: in1000m,
+			Issuer:    "SpeedDate",
+		},
+	}
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
-	in10m := time.Now().Add(time.Duration(10) * time.Minute).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodES512, jwt.MapClaims{
-		"iss":    "Issuer",                         // who creates the token and signs it
-		"aud":    "Audience",                       // to whom the token is intended to be sent
-		"exp":    in10m,                            // time when the token will expire (10 minutes from now)
-		"jti":    uuid.Must(uuid.NewV4()).String(), // a unique identifier for the token
-		"iat":    time.Now().Unix(),                // when the token was issued/created (now)
-		"nbf":    2,                                // time before which the token is not yet valid (2 minutes ago)
-		"sub":    "subject",                        // the subject/principal is whom the token is about
-		"scopes": "api:access",                     // token scope - not a standard claim
-	})
+	token := jwt.NewWithClaims(jwt.SigningMethodES512, claims)
 	signedToken, err := token.SignedString(s.privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign token: %s", err) // internal error
