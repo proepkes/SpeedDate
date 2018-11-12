@@ -48,6 +48,7 @@ func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (re
 	res = &authorize.LoginResult{}
 
 	s.logger.Print("authorize.login")
+
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	in10m := time.Now().Add(time.Duration(10) * time.Minute).Unix()
