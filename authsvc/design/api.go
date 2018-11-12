@@ -6,7 +6,7 @@ var _ = API("authsvc", func() {
 	Title("Speeddate Userservice")
 	Description("HTTP service for managing users in the SpeedDate-system")
 
-	Server("authorize", func() {
+	Server("auther", func() {
 		Description("Serves repository and swagger service")
 		Services("authorize", "swagger")
 		Host("localhost", func() {

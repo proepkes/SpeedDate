@@ -51,7 +51,7 @@ func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (re
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	in10m := time.Now().Add(time.Duration(10) * time.Minute).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodES512, jwt.MapClaims{
 		"iss":    "Issuer",                         // who creates the token and signs it
 		"aud":    "Audience",                       // to whom the token is intended to be sent
 		"exp":    in10m,                            // time when the token will expire (10 minutes from now)

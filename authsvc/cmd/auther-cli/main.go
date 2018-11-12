@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	cli "github.com/proepkes/speeddate/authsvc/gen/http/cli/authorize"
+	cli "github.com/proepkes/speeddate/authsvc/gen/http/cli/auther"
 	goahttp "goa.design/goa/http"
 )
 
@@ -87,7 +87,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `%s is a command line client for the authorize server.
+	fmt.Fprintf(os.Stderr, `%s is a command line client for the auther server.
 
 Usage:
     %s [-url URL][-timeout SECONDS][-verbose|-v] SERVICE ENDPOINT [flags]

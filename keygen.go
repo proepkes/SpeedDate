@@ -21,7 +21,7 @@ import (
 // openssl rsa -inform PEM -in privateKey.pem
 func main() {
 
-	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	key, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
 		log.Fatal(err)
 	}
