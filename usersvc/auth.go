@@ -16,22 +16,6 @@ import (
 // JWTAuth implements the authorization logic for service "repository" for the
 // "jwt" security scheme.
 func (s *repositorySvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
-	//
-	// TBD: add authorization logic.
-	//
-	// In case of authorization failure this function should return
-	// one of the generated error structs, e.g.:
-	//
-	//    return ctx, myservice.MakeUnauthorizedError("invalid token")
-	//
-	// Alternatively this function may return an instance of
-	// goa.ServiceError with a Name field value that matches one of
-	// the design error names, e.g:
-	//
-	//    return ctx, goa.PermanentError("unauthorized", "invalid token")
-	//
-
-	//TODO: configurable path to public key, move key-parsing somewhere else
 	abs, _ := filepath.Abs("../../../secret/secret.key.pub")
 	b, err := ioutil.ReadFile(abs)
 	privKey, err := jwt.ParseECPublicKeyFromPEM(b)
@@ -47,30 +31,21 @@ func (s *repositorySvc) JWTAuth(ctx context.Context, token string, scheme *secur
 		return privKey, nil
 	})
 
-	//TODO: better way of error handling? Possible to remove dependency to repository?
 	if err != nil {
-		return ctx, &repository.Unauthorized{
-			Message: "unauthorized",
-		}
+		return ctx, repository.MakeUnauthorized(err)
 	}
 
 	if !parsedToken.Valid {
-		return ctx, &repository.Unauthorized{
-			Message: "unauthorized",
-		}
+		return ctx, repository.MakeUnauthorized(fmt.Errorf("Token invalid"))
 	}
 
 	scopesMap, _, err := parseClaimScopes(parsedToken)
 	if err != nil {
-		return ctx, &repository.Unauthorized{
-			Message: "unauthorized",
-		}
+		return ctx, repository.MakeUnauthorized(err)
 	}
 
 	if !scopesMap["api:read"] {
-		return ctx, &repository.Unauthorized{
-			Message: "unauthorized",
-		}
+		return ctx, repository.MakeUnauthorized(fmt.Errorf("Scope invalid"))
 	}
 
 	return ctx, nil

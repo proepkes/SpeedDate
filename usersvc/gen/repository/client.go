@@ -41,7 +41,7 @@ func (c *Client) Insert(ctx context.Context, p *User) (res string, err error) {
 
 // Delete calls the "delete" endpoint of the "repository" service.
 // Delete may return the following errors:
-//	- "not_found" (type *NotFound): User not found
+//	- "not_found" (type *goa.ServiceError)
 //	- error: internal error
 func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
 	_, err = c.DeleteEndpoint(ctx, p)
@@ -50,8 +50,8 @@ func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
 
 // Get calls the "get" endpoint of the "repository" service.
 // Get may return the following errors:
-//	- "not_found" (type *NotFound): User not found
-//	- "unauthorized" (type *Unauthorized)
+//	- "not_found" (type *goa.ServiceError)
+//	- "unauthorized" (type *goa.ServiceError)
 //	- error: internal error
 func (c *Client) Get(ctx context.Context, p *GetPayload) (res *StoredUser, err error) {
 	var ires interface{}

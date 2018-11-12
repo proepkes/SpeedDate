@@ -26,7 +26,7 @@ var _ = Service("repository", func() {
 			Attribute("id", String, "ID of user to remove")
 			Required("id")
 		})
-		Error("not_found", NotFound, "User not found")
+		Error("not_found")
 		HTTP(func() {
 			DELETE("/delete/{id}")
 			Response(StatusNoContent)
@@ -38,8 +38,8 @@ var _ = Service("repository", func() {
 			Scope("api:read") // Enforce presence of "api:read" scope in JWT claims.
 		})
 		Result(StoredUser)
-		Error("not_found", NotFound, "User not found")
-		Error("unauthorized", Unauthorized)
+		Error("not_found")
+		Error("unauthorized")
 		Payload(func() {
 			Token("token", String, func() {
 				Description("JWT used for authentication")

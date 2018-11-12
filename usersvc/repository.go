@@ -2,6 +2,7 @@ package usersvc
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/jinzhu/gorm"
@@ -55,11 +56,7 @@ func (s *repositorySvc) Get(ctx context.Context, p *repository.GetPayload) (res 
 
 	if err = s.db.GetUser(p.ID, &res); err != nil {
 		if err == ErrNotFound {
-			return nil, view, &repository.NotFound{
-				Description: err.Error(),
-				Message:     "not_found",
-				ID:          p.ID,
-			}
+			return nil, view, repository.MakeNotFound(fmt.Errorf("User not found"))
 		}
 		return nil, view, err // internal error
 	}

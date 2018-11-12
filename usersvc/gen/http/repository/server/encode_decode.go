@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"strings"
 
-	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
 	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
@@ -153,14 +152,14 @@ func EncodeGetError(encoder func(context.Context, http.ResponseWriter) goahttp.E
 		}
 		switch en.ErrorName() {
 		case "not_found":
-			res := v.(*repository.NotFound)
+			res := v.(*goa.ServiceError)
 			enc := encoder(ctx, w)
 			body := NewGetNotFoundResponseBody(res)
 			w.Header().Set("goa-error", "not_found")
 			w.WriteHeader(http.StatusNotFound)
 			return enc.Encode(body)
 		case "unauthorized":
-			res := v.(*repository.Unauthorized)
+			res := v.(*goa.ServiceError)
 			enc := encoder(ctx, w)
 			body := NewGetUnauthorizedResponseBody(res)
 			w.Header().Set("goa-error", "unauthorized")

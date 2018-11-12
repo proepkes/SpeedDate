@@ -191,8 +191,8 @@ func EncodeGetRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 // get endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeGetResponse may return the following errors:
-//	- "not_found" (type *repository.NotFound): http.StatusNotFound
-//	- "unauthorized" (type *repository.Unauthorized): http.StatusUnauthorized
+//	- "not_found" (type *goa.ServiceError): http.StatusNotFound
+//	- "unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //	- error: internal error
 func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {

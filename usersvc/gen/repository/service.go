@@ -11,6 +11,7 @@ import (
 	"context"
 
 	repositoryviews "github.com/proepkes/speeddate/usersvc/gen/repository/views"
+	"goa.design/goa"
 	"goa.design/goa/security"
 )
 
@@ -75,41 +76,22 @@ type StoredUser struct {
 	Online *bool
 }
 
-// NotFound is the type returned when attempting to get or delete a user that
-// does not exist.
-type NotFound struct {
-	// ID of missing user
-	ID string
-	// Message of error
-	Message string
-	// Description of error
-	Description string
+// MakeNotFound builds a goa.ServiceError from an error.
+func MakeNotFound(err error) *goa.ServiceError {
+	return &goa.ServiceError{
+		Name:    "not_found",
+		ID:      goa.NewErrorID(),
+		Message: err.Error(),
+	}
 }
 
-// Unauthorized
-type Unauthorized struct {
-	// Message of error
-	Message string
-}
-
-// Error returns an error description.
-func (e *NotFound) Error() string {
-	return "NotFound is the type returned when attempting to get or delete a user that does not exist."
-}
-
-// ErrorName returns "NotFound".
-func (e *NotFound) ErrorName() string {
-	return e.Message
-}
-
-// Error returns an error description.
-func (e *Unauthorized) Error() string {
-	return "Unauthorized"
-}
-
-// ErrorName returns "Unauthorized".
-func (e *Unauthorized) ErrorName() string {
-	return e.Message
+// MakeUnauthorized builds a goa.ServiceError from an error.
+func MakeUnauthorized(err error) *goa.ServiceError {
+	return &goa.ServiceError{
+		Name:    "unauthorized",
+		ID:      goa.NewErrorID(),
+		Message: err.Error(),
+	}
 }
 
 // NewStoredUser initializes result type StoredUser from viewed result type

@@ -45,19 +45,37 @@ type GetResponseBodyTiny struct {
 // GetNotFoundResponseBody is the type of the "repository" service "get"
 // endpoint HTTP response body for the "not_found" error.
 type GetNotFoundResponseBody struct {
-	// ID of missing user
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
 	ID string `form:"id" json:"id" xml:"id"`
-	// Message of error
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
 	Message string `form:"message" json:"message" xml:"message"`
-	// Description of error
-	Description string `form:"description" json:"description" xml:"description"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // GetUnauthorizedResponseBody is the type of the "repository" service "get"
 // endpoint HTTP response body for the "unauthorized" error.
 type GetUnauthorizedResponseBody struct {
-	// Message of error
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
 	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // NewGetResponseBody builds the HTTP response body from the result of the
@@ -83,20 +101,28 @@ func NewGetResponseBodyTiny(res *repositoryviews.StoredUserView) *GetResponseBod
 
 // NewGetNotFoundResponseBody builds the HTTP response body from the result of
 // the "get" endpoint of the "repository" service.
-func NewGetNotFoundResponseBody(res *repository.NotFound) *GetNotFoundResponseBody {
+func NewGetNotFoundResponseBody(res *goa.ServiceError) *GetNotFoundResponseBody {
 	body := &GetNotFoundResponseBody{
-		ID:          res.ID,
-		Message:     res.Message,
-		Description: res.Description,
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
 	}
 	return body
 }
 
 // NewGetUnauthorizedResponseBody builds the HTTP response body from the result
 // of the "get" endpoint of the "repository" service.
-func NewGetUnauthorizedResponseBody(res *repository.Unauthorized) *GetUnauthorizedResponseBody {
+func NewGetUnauthorizedResponseBody(res *goa.ServiceError) *GetUnauthorizedResponseBody {
 	body := &GetUnauthorizedResponseBody{
-		Message: res.Message,
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
 	}
 	return body
 }

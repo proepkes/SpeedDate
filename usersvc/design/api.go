@@ -60,23 +60,3 @@ var StoredUser = ResultType("application/sd.data.stored-user", func() {
 
 	Required("id")
 })
-
-var NotFound = Type("NotFound", func() {
-	Description("NotFound is the type returned when attempting to get or delete a user that does not exist.")
-	Attribute("id", String, "ID of missing user")
-	Attribute("message", String, "Message of error", func() {
-		Metadata("struct:error:name")
-		Example("User 1 not found")
-	})
-	Attribute("description", String, "Description of error")
-	Required("description", "message", "id")
-})
-
-var Unauthorized = Type("Unauthorized", func() {
-	Description("Unauthorized")
-	Attribute("message", String, "Message of error", func() {
-		Metadata("struct:error:name")
-		Example("Invalid token")
-	})
-	Required("message")
-})

@@ -68,17 +68,11 @@ paths:
         "401":
           description: Unauthorized response.
           schema:
-            $ref: '#/definitions/GetUnauthorizedResponseBody'
-            required:
-            - message
+            $ref: '#/definitions/RepositoryGetUnauthorizedResponseBody'
         "404":
           description: Not Found response.
           schema:
-            $ref: '#/definitions/GetNotFoundResponseBody'
-            required:
-            - description
-            - message
-            - id
+            $ref: '#/definitions/RepositoryGetNotFoundResponseBody'
       schemes:
       - http
       security:
@@ -132,43 +126,51 @@ paths:
       schemes:
       - http
 definitions:
-  GetNotFoundResponseBody:
-    title: GetNotFoundResponseBody
+  RepositoryGetNotFoundResponseBody:
+    title: 'Mediatype identifier: application/vnd.goa.error; view=default'
     type: object
     properties:
-      description:
-        type: string
-        description: Description of error
-        example: Vitae ad aut vitae.
+      fault:
+        type: boolean
+        description: Is the error a server-side fault?
+        example: false
       id:
         type: string
-        description: ID of missing user
-        example: Voluptas odit nobis odit et.
+        description: ID is a unique identifier for this particular occurrence of the
+          problem.
+        example: 123abc
       message:
         type: string
-        description: Message of error
-        example: User 1 not found
-    description: User not found
+        description: Message is a human-readable explanation specific to this occurrence
+          of the problem.
+        example: parameter 'p' must be an integer
+      name:
+        type: string
+        description: Name is the name of this class of errors.
+        example: bad_request
+      temporary:
+        type: boolean
+        description: Is the error temporary?
+        example: false
+      timeout:
+        type: boolean
+        description: Is the error a timeout?
+        example: false
+    description: GetNotFoundResponseBody result type (default view)
     example:
-      description: Nulla aliquid quam ratione sunt quia.
-      id: Dolorem temporibus excepturi dolores.
-      message: User 1 not found
+      fault: false
+      id: 123abc
+      message: parameter 'p' must be an integer
+      name: bad_request
+      temporary: true
+      timeout: false
     required:
-    - description
-    - message
+    - name
     - id
-  GetUnauthorizedResponseBody:
-    title: GetUnauthorizedResponseBody
-    type: object
-    properties:
-      message:
-        type: string
-        description: Message of error
-        example: Invalid token
-    example:
-      message: Invalid token
-    required:
     - message
+    - temporary
+    - timeout
+    - fault
   RepositoryGetResponseBody:
     title: 'Mediatype identifier: application/sd.data.stored-user; view=default'
     type: object
@@ -180,20 +182,65 @@ definitions:
       name:
         type: string
         description: The username
-        example: 7zj
+        example: 0zw
         maxLength: 50
       online:
         type: boolean
         description: Indicates whether the user is currently online.
-        example: true
+        example: false
     description: GetResponseBody result type (default view)
     example:
       id: f923e008-e511-11e8-9f32-f2801f1b9fd1
-      name: 0zl
-      online: false
+      name: 44l
+      online: true
     required:
     - id
     - name
+  RepositoryGetUnauthorizedResponseBody:
+    title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+    type: object
+    properties:
+      fault:
+        type: boolean
+        description: Is the error a server-side fault?
+        example: false
+      id:
+        type: string
+        description: ID is a unique identifier for this particular occurrence of the
+          problem.
+        example: 123abc
+      message:
+        type: string
+        description: Message is a human-readable explanation specific to this occurrence
+          of the problem.
+        example: parameter 'p' must be an integer
+      name:
+        type: string
+        description: Name is the name of this class of errors.
+        example: bad_request
+      temporary:
+        type: boolean
+        description: Is the error temporary?
+        example: false
+      timeout:
+        type: boolean
+        description: Is the error a timeout?
+        example: true
+    description: GetUnauthorizedResponseBody result type (default view)
+    example:
+      fault: true
+      id: 123abc
+      message: parameter 'p' must be an integer
+      name: bad_request
+      temporary: false
+      timeout: false
+    required:
+    - name
+    - id
+    - message
+    - temporary
+    - timeout
+    - fault
   RepositoryInsertRequestBody:
     title: RepositoryInsertRequestBody
     type: object
@@ -201,10 +248,10 @@ definitions:
       name:
         type: string
         description: The username
-        example: 7vn
+        example: vv1
         maxLength: 50
     example:
-      name: 5ld
+      name: g2j
     required:
     - name
 securityDefinitions:
