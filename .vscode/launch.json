@@ -5,20 +5,22 @@
     "version": "0.2.0",
     "configurations": [    
 		{
-			"name": "authsvc",
+			"name": "dbg authsvc",
 			"type": "go",
 			"request": "launch",
-			"mode": "auto",
+			"mode": "debug",
             "program": "${workspaceRoot}/authsvc/cmd/auther",
+			"env": {},
+			"args": ["-debug", "true"]
 		},
 		{
-			"name": "usersvc",
+			"name": "dbg usersvc",
 			"type": "go",
 			"request": "launch",
-			"mode": "auto",
+			"mode": "debug",
             "program": "${workspaceRoot}/usersvc/cmd/user",
 			"env": {},
-			"args": []
+			"args": ["-debug", "true"]
 		}
     ]
 }

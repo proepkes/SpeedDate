@@ -1,5 +1,5 @@
 
 Todo:
-  ☐ Better way of loading private key for auther
+  ☐ Better way of loading private key for authsvc (k8s secrets?)
 
 Archive:
