@@ -10,6 +10,7 @@ hosts:
 
 usersvcSettings:
   Port: 8001
+  HealthPort: 8002
   DbIP: 192.168.178.46
   DbHostname: cockroachdb.external.service
   DbPort: 8888

@@ -50,7 +50,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 8001
+            port: 8002
           initialDelaySeconds: 25
           periodSeconds: 25
         resources:
@@ -134,8 +134,6 @@ spec:
   - match:
     - uri:
         prefix: /user/
-    - uri:
-        prefix: /
     route:
     - destination:
         host: usersvc
