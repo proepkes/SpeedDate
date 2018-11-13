@@ -1,0 +1,11 @@
+# Golang application builder steps
+FROM golang:latest as builder
+WORKDIR /go/src/github.com/proepkes/speeddate/usersvc
+COPY usersvc .
+RUN go get -v ./...
+WORKDIR /go/src/github.com/proepkes/speeddate/usersvc/cmd/user
+RUN CGO_ENABLED=0 GOOS=linux go build
+
+FROM scratch
+COPY --from=builder /go/src/github.com/proepkes/SpeedDate/profile/user/user . 
+ENTRYPOINT ["./user"]

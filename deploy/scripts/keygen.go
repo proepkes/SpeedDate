@@ -1,7 +1,6 @@
 /*
- * Genarate rsa keys.
-   https://gist.github.com/rajulbhatnagar/b9f5f3214978caf4532a8ab5cb116977
-*/
+ * Genarate ecdsa keys.
+ */
 
 package main
 
@@ -16,9 +15,6 @@ import (
 	"os"
 )
 
-// You can also verify the generated key files with openssl
-// openssl rsa -inform PEM -pubin -in pubkey.pem
-// openssl rsa -inform PEM -in privateKey.pem
 func main() {
 
 	key, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
@@ -27,7 +23,7 @@ func main() {
 	}
 	checkError(err)
 
-	pemKeyPair("/secret/secret.key", key)
+	pemKeyPair("../../secret/secret.key", key)
 }
 
 func pemKeyPair(fileName string, key *ecdsa.PrivateKey) (privKeyPEM []byte, pubKeyPEM []byte, err error) {

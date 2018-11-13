@@ -1,0 +1,46 @@
+---
+# Source: speeddate-istio/templates/gateway.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: sd-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - api.speeddate.local
+---
+---
+# Source: speeddate-istio/templates/api-vs.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-vs
+spec:
+  hosts:
+  - api.speeddate.local
+  gateways:
+  - sd-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /user/
+    route:
+    - destination:
+        host: usersvc
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: /auth/
+    route:
+    - destination:
+        host: authsvc
+        port:
+          number: 80
+---

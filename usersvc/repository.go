@@ -29,6 +29,7 @@ func NewRepository(db *gorm.DB, logger *log.Logger) (repository.Service, error) 
 		return nil, err
 	}
 
+	//TODO: configurable path or secret
 	abs, _ := filepath.Abs("../../../secret/secret.key.pub")
 	b, err := ioutil.ReadFile(abs)
 	if err != nil {
