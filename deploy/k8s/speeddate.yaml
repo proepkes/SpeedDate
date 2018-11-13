@@ -1,5 +1,68 @@
 ---
-# Source: speeddate-istio/templates/gateway.yaml
+# Source: speeddate/templates/usersvc-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: usersvc
+  namespace: default
+  labels:
+    app: usersvc
+spec:
+  ports:
+  - port: 80
+    targetPort: 8001
+    name: http
+  selector:
+    app: usersvc
+---
+---
+# Source: speeddate/templates/usersvc-dep.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: usersvc-v1
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: usersvc
+        version: v1
+    spec:
+      containers:
+      - name: usersvc
+        image: docker.io/proepkes/usersvc:dev
+        imagePullPolicy: Always
+        env:
+        - name: DB_IP
+          value: cockroachdb.external.service
+        - name: DB_PORT
+          value: "8888"
+        - name: DB_USER
+          value: speeddateuser
+        - name: DB_NAME
+          value: speeddate
+        - name: DB_PASSWORD
+          value: password
+        ports:
+        - containerPort: 8001
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 8001
+        #   initialDelaySeconds: 2
+        #   periodSeconds: 2
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+---
+---
+# Source: speeddate/templates/gateway.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -13,10 +76,51 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - api.speeddate.local
+    #- api.speeddate.local
+    - "*"
 ---
 ---
-# Source: speeddate-istio/templates/api-vs.yaml
+# Source: speeddate/templates/usersvc-cockroachdb-se.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cockroachdb-external
+spec:
+  hosts:
+  - cockroachdb.external.service
+  addresses:
+  - 192.168.178.46/32
+  ports:
+  - name: tcp
+    number: 8888
+    protocol: tcp
+  location: MESH_EXTERNAL
+---
+
+
+
+
+# Source: speeddate/templates/usersvc-cockroachdb-se.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cockroachdb-external
+spec:
+  hosts:
+  - cockroachdb.external.service
+  ports:
+  - name: tcp
+    number: 8888
+    protocol: tcp
+  location: MESH_EXTERNAL
+  resolution: STATIC  
+  endpoints:
+  - address: 192.168.178.46
+    ports:
+      tcp: 8888
+---
+---
+# Source: speeddate/templates/api-vs.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:

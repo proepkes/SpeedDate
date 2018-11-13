@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 
+	healthc "github.com/proepkes/speeddate/usersvc/gen/http/health/client"
 	repositoryc "github.com/proepkes/speeddate/usersvc/gen/http/repository/client"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"

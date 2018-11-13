@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cockroachdb-external
+spec:
+  hosts:
+  - {{ .Values.usersvcSettings.DbHostname }}
+  addresses:
+  - {{ .Values.usersvcSettings.DbIP }}/32
+  ports:
+  - name: tcp
+    number: {{ .Values.usersvcSettings.DbPort }}
+    protocol: tcp
+  location: MESH_EXTERNAL
+---
+
+
+
+
+# Source: speeddate/templates/usersvc-cockroachdb-se.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cockroachdb-external
+spec:
+  hosts:
+  - cockroachdb.external.service
+  ports:
+  - name: tcp
+    number: 8888
+    protocol: tcp
+  location: MESH_EXTERNAL
+  resolution: STATIC  
+  endpoints:
+  - address: 192.168.178.46
+    ports:
+      tcp: 8888
+---

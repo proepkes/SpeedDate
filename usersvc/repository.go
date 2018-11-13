@@ -26,20 +26,21 @@ func NewRepository(db *gorm.DB, logger *log.Logger) (repository.Service, error) 
 	// Setup database
 	cockroach, err := NewCockroachDB(db)
 	if err != nil {
+		logger.Fatalln("1. " + err.Error())
 		return nil, err
 	}
 
 	//TODO: configurable path or secret
-	abs, _ := filepath.Abs("../../../secret/secret.key.pub")
+	abs, _ := filepath.Abs("../../keys/auth.key.pub")
 	b, err := ioutil.ReadFile(abs)
 	if err != nil {
-		logger.Fatalln(err)
+		logger.Fatalln("2. " + err.Error())
 		return nil, err
 	}
 
 	pubKey, err := jwt.ParseECPublicKeyFromPEM(b)
 	if err != nil {
-		logger.Fatalln(err)
+		logger.Fatalln("3. " + err.Error())
 		return nil, err
 	}
 

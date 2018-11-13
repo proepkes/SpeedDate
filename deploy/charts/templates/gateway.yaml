@@ -11,5 +11,6 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - {{ .Values.hosts.api }}
+    #- {{ .Values.hosts.api }}
+    - "*"
 ---

@@ -10,17 +10,25 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/caarlos0/env"
 	"github.com/jinzhu/gorm"
-	"goa.design/goa/http/middleware"
-
-	goahttp "goa.design/goa/http"
-
 	"github.com/proepkes/speeddate/usersvc"
-	"github.com/proepkes/speeddate/usersvc/gen/repository"
-
+	health "github.com/proepkes/speeddate/usersvc/gen/health"
+	healthsvr "github.com/proepkes/speeddate/usersvc/gen/http/health/server"
 	repositorysvr "github.com/proepkes/speeddate/usersvc/gen/http/repository/server"
 	swaggersvr "github.com/proepkes/speeddate/usersvc/gen/http/swagger/server"
+	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
+	goahttp "goa.design/goa/http"
+	"goa.design/goa/http/middleware"
 )
+
+type config struct {
+	DbIP       string `env:"DB_IP" envDefault:"127.0.0.1"`
+	DbPort     string `env:"DB_PORT" envDefault:"8888"`
+	DbName     string `env:"DB_NAME" envDefault:"speeddate"`
+	DbUser     string `env:"DB_USER" envDefault:"speeddateuser"`
+	DbPassword string `env:"DB_PASSWORD" envDefault:""`
+}
 
 func main() {
 	// Define command line flags, add any other flag required to configure
@@ -31,6 +39,9 @@ func main() {
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
 	flag.Parse()
+
+	cfg := config{}
+	env.Parse(&cfg)
 
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice. The goa.design/middleware/logging/...
@@ -50,28 +61,30 @@ func main() {
 	)
 	{
 		var err error
+		//TODO: secure dbpass + configurable sslmode
+		address := "postgresql://" + cfg.DbUser + "@" + cfg.DbIP + ":" + cfg.DbPort + "/" + cfg.DbName + "?sslmode=disable"
+		log.Println("Connecting to " + address)
 
-		//TODO: configurable connectionstring
-		// Connect to the "bank" database as the "maxroach" user.
-		// const addr = "postgresql://speeddateuser@localhost:8888/speeddate?sslmode=disable"
-		const addr = "postgresql://speeddateuser@localhost:8888/speeddate?sslmode=disable"
-		db, err = gorm.Open("postgres", addr)
+		db, err = gorm.Open("postgres", address)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer db.Close()
 
 		db.LogMode(true)
-		// Automatically create the "accounts" table based on the Account model.
+
+		// Automatically create the "stored_users" table based on the StoredUser model.
 		db.AutoMigrate(&repository.StoredUser{})
 	}
 
 	// Create the structs that implement the services.
 	var (
+		healthSvc     health.Service
 		repositorySvc repository.Service
 	)
 	{
 		var err error
+		healthSvc = usersvc.NewHealth(logger)
 		repositorySvc, err = usersvc.NewRepository(db, logger)
 		if err != nil {
 			logger.Fatalf("error creating database: %s", err)
@@ -81,9 +94,11 @@ func main() {
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
 	var (
+		healthEndpoints     *health.Endpoints
 		repositoryEndpoints *repository.Endpoints
 	)
 	{
+		healthEndpoints = health.NewEndpoints(healthSvc)
 		repositoryEndpoints = repository.NewEndpoints(repositorySvc)
 	}
 
@@ -108,16 +123,19 @@ func main() {
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
+		healthServer     *healthsvr.Server
 		repositoryServer *repositorysvr.Server
 		swaggerServer    *swaggersvr.Server
 	)
 	{
 		eh := ErrorHandler(logger)
+		healthServer = healthsvr.New(healthEndpoints, mux, dec, enc, eh)
 		repositoryServer = repositorysvr.New(repositoryEndpoints, mux, dec, enc, eh)
 		swaggerServer = swaggersvr.New(nil, mux, dec, enc, eh)
 	}
 
 	// Configure the mux.
+	healthsvr.Mount(mux, healthServer)
 	repositorysvr.Mount(mux, repositoryServer)
 	swaggersvr.Mount(mux)
 
@@ -148,6 +166,9 @@ func main() {
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}
 	go func() {
+		for _, m := range healthServer.Mounts {
+			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
+		}
 		for _, m := range repositoryServer.Mounts {
 			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 		}

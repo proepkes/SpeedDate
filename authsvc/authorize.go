@@ -30,7 +30,7 @@ type defaultClaims struct {
 // NewAuthorize returns the authorize service implementation.
 func NewAuthorize(logger *log.Logger) authorize.Service {
 	//TODO: configurable path or secret
-	abs, _ := filepath.Abs("../../../secret/secret.key")
+	abs, _ := filepath.Abs("../../secret/secret.key")
 	b, err := ioutil.ReadFile(abs)
 	if err != nil {
 		logger.Fatalln(err)
