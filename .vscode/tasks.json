@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "start cockroachdb",
+        "type": "shell",
+        "command": "cockroach start --insecure --listen-addr=localhost:8888",
+        "auto": true
+      }
+    ]
+  }

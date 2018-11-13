@@ -2,9 +2,13 @@ package usersvc
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"path/filepath"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/proepkes/speeddate/usersvc/gen/repository"
 )
@@ -12,8 +16,9 @@ import (
 // repository service example implementation.
 // The example methods log the requests and return zero values.
 type repositorySvc struct {
-	db     *Cockroach
-	logger *log.Logger
+	db        *Cockroach
+	publicKey *ecdsa.PublicKey
+	logger    *log.Logger
 }
 
 // NewRepository returns the repository service implementation.
@@ -23,8 +28,22 @@ func NewRepository(db *gorm.DB, logger *log.Logger) (repository.Service, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	abs, _ := filepath.Abs("../../../secret/secret.key.pub")
+	b, err := ioutil.ReadFile(abs)
+	if err != nil {
+		logger.Fatalln(err)
+		return nil, err
+	}
+
+	pubKey, err := jwt.ParseECPublicKeyFromPEM(b)
+	if err != nil {
+		logger.Fatalln(err)
+		return nil, err
+	}
+
 	// Build and return service implementation.
-	return &repositorySvc{cockroach, logger}, nil
+	return &repositorySvc{cockroach, pubKey, logger}, nil
 }
 
 // Add new user and return its ID.

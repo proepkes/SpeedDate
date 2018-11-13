@@ -54,7 +54,7 @@ func main() {
 		//TODO: configurable connectionstring
 		// Connect to the "bank" database as the "maxroach" user.
 		// const addr = "postgresql://speeddateuser@localhost:8888/speeddate?sslmode=disable"
-		const addr = "postgresql://speeddateuser@192.168.178.100:8888/speeddate?sslmode=disable"
+		const addr = "postgresql://speeddateuser@localhost:8888/speeddate?sslmode=disable"
 		db, err = gorm.Open("postgres", addr)
 		if err != nil {
 			log.Fatal(err)

@@ -3,8 +3,6 @@ package usersvc
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -16,19 +14,12 @@ import (
 // JWTAuth implements the authorization logic for service "repository" for the
 // "jwt" security scheme.
 func (s *repositorySvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
-	abs, _ := filepath.Abs("../../../secret/secret.key.pub")
-	b, err := ioutil.ReadFile(abs)
-	privKey, err := jwt.ParseECPublicKeyFromPEM(b)
-	if err != nil {
-
-		return ctx, fmt.Errorf("not implemented")
-	}
 
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
 		}
-		return privKey, nil
+		return s.publicKey, nil
 	})
 
 	if err != nil {

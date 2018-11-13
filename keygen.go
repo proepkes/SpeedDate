@@ -27,7 +27,7 @@ func main() {
 	}
 	checkError(err)
 
-	pemKeyPair("secret.key", key)
+	pemKeyPair("/secret/secret.key", key)
 }
 
 func pemKeyPair(fileName string, key *ecdsa.PrivateKey) (privKeyPEM []byte, pubKeyPEM []byte, err error) {
