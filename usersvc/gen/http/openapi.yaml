@@ -25,6 +25,7 @@ paths:
           description: OK response.
           schema:
             type: string
+            format: byte
       schemes:
       - http
   /swagger/swagger.json:

@@ -52,7 +52,7 @@ func DecodeCheckHealthResponse(decoder func(*http.Response) goahttp.Decoder, res
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body []byte
 				err  error
 			)
 			err = decoder(resp).Decode(&body)

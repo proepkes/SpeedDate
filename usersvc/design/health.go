@@ -9,11 +9,11 @@ var _ = Service("health", func() {
 	})
 	Method("checkHealth", func() {
 		Description("Health check endpoint")
-		Result(String)
+		Result(Bytes)
 		HTTP(func() {
 			GET("/")
 			Response(StatusOK, func() {
-				ContentType("text/plain")
+				ContentType("application/octet-stream")
 			})
 		})
 	})
