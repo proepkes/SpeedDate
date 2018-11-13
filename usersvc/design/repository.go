@@ -7,7 +7,7 @@ var _ = Service("repository", func() {
 	Description("The service makes it possible to insert, delete or get users.")
 
 	HTTP(func() {
-		Path("/")
+		Path("/user")
 	})
 
 	Method("insert", func() {

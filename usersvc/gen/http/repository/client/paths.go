@@ -13,15 +13,15 @@ import (
 
 // InsertRepositoryPath returns the URL path to the repository service insert HTTP endpoint.
 func InsertRepositoryPath() string {
-	return "/insert"
+	return "/user/insert"
 }
 
 // DeleteRepositoryPath returns the URL path to the repository service delete HTTP endpoint.
 func DeleteRepositoryPath(id string) string {
-	return fmt.Sprintf("/delete/%v", id)
+	return fmt.Sprintf("/user/delete/%v", id)
 }
 
 // GetRepositoryPath returns the URL path to the repository service get HTTP endpoint.
 func GetRepositoryPath(id string) string {
-	return fmt.Sprintf("/get/%v", id)
+	return fmt.Sprintf("/user/get/%v", id)
 }

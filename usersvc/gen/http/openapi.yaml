@@ -3,7 +3,7 @@ info:
   title: Speeddate Userservice
   description: HTTP service for managing users in the SpeedDate-system
   version: ""
-host: localhost:8000
+host: localhost:8001
 consumes:
 - application/json
 - application/xml
@@ -13,7 +13,33 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /delete/{id}:
+  /health:
+    get:
+      tags:
+      - health
+      summary: checkHealth health
+      description: Health check endpoint
+      operationId: health#checkHealth
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            type: string
+      schemes:
+      - http
+  /swagger/swagger.json:
+    get:
+      summary: Download ../../gen/http/openapi.json
+      description: JSON document containing the API swagger definition
+      operationId: swagger#/swagger/swagger.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+  /user/delete/{id}:
     delete:
       tags:
       - repository
@@ -31,7 +57,7 @@ paths:
           description: No Content response.
       schemes:
       - http
-  /get/{id}:
+  /user/get/{id}:
     get:
       tags:
       - repository
@@ -77,21 +103,7 @@ paths:
       - http
       security:
       - jwt: []
-  /health:
-    get:
-      tags:
-      - health
-      summary: checkHealth health
-      description: Health check endpoint
-      operationId: health#checkHealth
-      responses:
-        "200":
-          description: OK response.
-          schema:
-            type: string
-      schemes:
-      - http
-  /insert:
+  /user/insert:
     post:
       tags:
       - repository
@@ -111,18 +123,6 @@ paths:
           description: Created response.
           schema:
             type: string
-      schemes:
-      - http
-  /swagger/swagger.json:
-    get:
-      summary: Download ../../gen/http/openapi.json
-      description: JSON document containing the API swagger definition
-      operationId: swagger#/swagger/swagger.json
-      responses:
-        "200":
-          description: File downloaded
-          schema:
-            type: file
       schemes:
       - http
 definitions:

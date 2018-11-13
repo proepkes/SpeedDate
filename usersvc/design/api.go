@@ -12,7 +12,7 @@ var _ = API("usersvc", func() {
 		Services("health", "repository", "swagger")
 		Host("localhost", func() {
 			Description("Host on local machine")
-			URI("http://localhost:8001/user")
+			URI("http://localhost:8001")
 		})
 	})
 })

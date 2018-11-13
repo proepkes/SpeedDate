@@ -51,9 +51,9 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Insert", "POST", "/insert"},
-			{"Delete", "DELETE", "/delete/{id}"},
-			{"Get", "GET", "/get/{id}"},
+			{"Insert", "POST", "/user/insert"},
+			{"Delete", "DELETE", "/user/delete/{id}"},
+			{"Get", "GET", "/user/get/{id}"},
 		},
 		Insert: NewInsertHandler(e.Insert, mux, dec, enc, eh),
 		Delete: NewDeleteHandler(e.Delete, mux, dec, enc, eh),
@@ -87,7 +87,7 @@ func MountInsertHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/insert", f)
+	mux.Handle("POST", "/user/insert", f)
 }
 
 // NewInsertHandler creates a HTTP handler which loads the HTTP request and
@@ -137,7 +137,7 @@ func MountDeleteHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("DELETE", "/delete/{id}", f)
+	mux.Handle("DELETE", "/user/delete/{id}", f)
 }
 
 // NewDeleteHandler creates a HTTP handler which loads the HTTP request and
@@ -187,7 +187,7 @@ func MountGetHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("GET", "/get/{id}", f)
+	mux.Handle("GET", "/user/get/{id}", f)
 }
 
 // NewGetHandler creates a HTTP handler which loads the HTTP request and calls
