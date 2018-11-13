@@ -7,7 +7,7 @@
 
 package client
 
-// CheckHealthHealthPath returns the URL path to the health service checkHealth HTTP endpoint.
-func CheckHealthHealthPath() string {
+// CheckHealthPath returns the URL path to the health service check HTTP endpoint.
+func CheckHealthPath() string {
 	return "/health"
 }

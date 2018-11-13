@@ -17,13 +17,13 @@ import (
 	goahttp "goa.design/goa/http"
 )
 
-// BuildCheckHealthRequest instantiates a HTTP request object with method and
-// path set to call the "health" service "checkHealth" endpoint
-func (c *Client) BuildCheckHealthRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CheckHealthHealthPath()}
+// BuildCheckRequest instantiates a HTTP request object with method and path
+// set to call the "health" service "check" endpoint
+func (c *Client) BuildCheckRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CheckHealthPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("health", "checkHealth", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("health", "check", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -32,10 +32,10 @@ func (c *Client) BuildCheckHealthRequest(ctx context.Context, v interface{}) (*h
 	return req, nil
 }
 
-// DecodeCheckHealthResponse returns a decoder for responses returned by the
-// health checkHealth endpoint. restoreBody controls whether the response body
-// should be restored after having been read.
-func DecodeCheckHealthResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+// DecodeCheckResponse returns a decoder for responses returned by the health
+// check endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+func DecodeCheckResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := ioutil.ReadAll(resp.Body)
@@ -57,12 +57,12 @@ func DecodeCheckHealthResponse(decoder func(*http.Response) goahttp.Decoder, res
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("health", "checkHealth", err)
+				return nil, goahttp.ErrDecodingError("health", "check", err)
 			}
 			return body, nil
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("health", "checkHealth", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("health", "check", resp.StatusCode, string(body))
 		}
 	}
 }

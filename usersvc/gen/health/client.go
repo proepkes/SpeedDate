@@ -15,20 +15,20 @@ import (
 
 // Client is the "health" service client.
 type Client struct {
-	CheckHealthEndpoint goa.Endpoint
+	CheckEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "health" service client given the endpoints.
-func NewClient(checkHealth goa.Endpoint) *Client {
+func NewClient(check goa.Endpoint) *Client {
 	return &Client{
-		CheckHealthEndpoint: checkHealth,
+		CheckEndpoint: check,
 	}
 }
 
-// CheckHealth calls the "checkHealth" endpoint of the "health" service.
-func (c *Client) CheckHealth(ctx context.Context) (res string, err error) {
+// Check calls the "check" endpoint of the "health" service.
+func (c *Client) Check(ctx context.Context) (res string, err error) {
 	var ires interface{}
-	ires, err = c.CheckHealthEndpoint(ctx, nil)
+	ires, err = c.CheckEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}

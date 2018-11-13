@@ -18,8 +18,8 @@ import (
 
 // Server lists the health service endpoint HTTP handlers.
 type Server struct {
-	Mounts      []*MountPoint
-	CheckHealth http.Handler
+	Mounts []*MountPoint
+	Check  http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -49,9 +49,9 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"CheckHealth", "GET", "/health"},
+			{"Check", "GET", "/health"},
 		},
-		CheckHealth: NewCheckHealthHandler(e.CheckHealth, mux, dec, enc, eh),
+		Check: NewCheckHandler(e.Check, mux, dec, enc, eh),
 	}
 }
 
@@ -60,17 +60,17 @@ func (s *Server) Service() string { return "health" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.CheckHealth = m(s.CheckHealth)
+	s.Check = m(s.Check)
 }
 
 // Mount configures the mux to serve the health endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountCheckHealthHandler(mux, h.CheckHealth)
+	MountCheckHandler(mux, h.Check)
 }
 
-// MountCheckHealthHandler configures the mux to serve the "health" service
-// "checkHealth" endpoint.
-func MountCheckHealthHandler(mux goahttp.Muxer, h http.Handler) {
+// MountCheckHandler configures the mux to serve the "health" service "check"
+// endpoint.
+func MountCheckHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -80,9 +80,9 @@ func MountCheckHealthHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("GET", "/health", f)
 }
 
-// NewCheckHealthHandler creates a HTTP handler which loads the HTTP request
-// and calls the "health" service "checkHealth" endpoint.
-func NewCheckHealthHandler(
+// NewCheckHandler creates a HTTP handler which loads the HTTP request and
+// calls the "health" service "check" endpoint.
+func NewCheckHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	dec func(*http.Request) goahttp.Decoder,
@@ -90,12 +90,12 @@ func NewCheckHealthHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
-		encodeResponse = EncodeCheckHealthResponse(enc)
+		encodeResponse = EncodeCheckResponse(enc)
 		encodeError    = goahttp.ErrorEncoder(enc)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "checkHealth")
+		ctx = context.WithValue(ctx, goa.MethodKey, "check")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "health")
 
 		res, err := endpoint(ctx, nil)

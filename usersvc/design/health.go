@@ -7,7 +7,7 @@ var _ = Service("health", func() {
 	HTTP(func() {
 		Path("/health")
 	})
-	Method("checkHealth", func() {
+	Method("check", func() {
 		Description("Health check endpoint")
 		Result(String)
 		HTTP(func() {

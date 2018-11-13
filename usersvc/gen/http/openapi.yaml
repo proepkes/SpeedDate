@@ -3,7 +3,7 @@ info:
   title: Speeddate Userservice
   description: HTTP service for managing users in the SpeedDate-system
   version: ""
-host: localhost:8001
+host: :8001
 consumes:
 - application/json
 - application/xml
@@ -17,9 +17,9 @@ paths:
     get:
       tags:
       - health
-      summary: checkHealth health
+      summary: check health
       description: Health check endpoint
-      operationId: health#checkHealth
+      operationId: health#check
       responses:
         "200":
           description: OK response.

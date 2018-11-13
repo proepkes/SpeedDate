@@ -19,7 +19,7 @@ func NewHealth(logger *log.Logger) health.Service {
 }
 
 // Health check endpoint
-func (s *healthSvc) CheckHealth(ctx context.Context) (string, error) {
-	s.logger.Print("health.checkHealth")
+func (s *healthSvc) Check(ctx context.Context) (string, error) {
+	s.logger.Print("health.check")
 	return "ok", nil
 }

@@ -24,14 +24,14 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `health check-health
+	return `health check
 repository (insert|delete|get)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` health check-health` + "\n" +
+	return os.Args[0] + ` health check` + "\n" +
 		os.Args[0] + ` repository insert --body '{
       "name": "mdp"
    }'` + "\n" +
@@ -50,7 +50,7 @@ func ParseEndpoint(
 	var (
 		healthFlags = flag.NewFlagSet("health", flag.ContinueOnError)
 
-		healthCheckHealthFlags = flag.NewFlagSet("check-health", flag.ExitOnError)
+		healthCheckFlags = flag.NewFlagSet("check", flag.ExitOnError)
 
 		repositoryFlags = flag.NewFlagSet("repository", flag.ContinueOnError)
 
@@ -66,7 +66,7 @@ func ParseEndpoint(
 		repositoryGetTokenFlag = repositoryGetFlags.String("token", "", "")
 	)
 	healthFlags.Usage = healthUsage
-	healthCheckHealthFlags.Usage = healthCheckHealthUsage
+	healthCheckFlags.Usage = healthCheckUsage
 
 	repositoryFlags.Usage = repositoryUsage
 	repositoryInsertFlags.Usage = repositoryInsertUsage
@@ -109,8 +109,8 @@ func ParseEndpoint(
 		switch svcn {
 		case "health":
 			switch epn {
-			case "check-health":
-				epf = healthCheckHealthFlags
+			case "check":
+				epf = healthCheckFlags
 
 			}
 
@@ -150,8 +150,8 @@ func ParseEndpoint(
 		case "health":
 			c := healthc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "check-health":
-				endpoint = c.CheckHealth()
+			case "check":
+				endpoint = c.Check()
 				data = nil
 			}
 		case "repository":
@@ -183,19 +183,19 @@ Usage:
     %s [globalflags] health COMMAND [flags]
 
 COMMAND:
-    check-health: Health check endpoint
+    check: Health check endpoint
 
 Additional help:
     %s health COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func healthCheckHealthUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] health check-health
+func healthCheckUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] health check
 
 Health check endpoint
 
 Example:
-    `+os.Args[0]+` health check-health
+    `+os.Args[0]+` health check
 `, os.Args[0])
 }
 

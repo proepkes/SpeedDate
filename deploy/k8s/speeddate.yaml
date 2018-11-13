@@ -135,7 +135,7 @@ spec:
     - uri:
         prefix: /user/
     - uri:
-        prefix: /health/
+        prefix: /
     route:
     - destination:
         host: usersvc

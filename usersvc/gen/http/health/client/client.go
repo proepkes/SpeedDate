@@ -17,9 +17,8 @@ import (
 
 // Client lists the health service endpoint HTTP clients.
 type Client struct {
-	// CheckHealth Doer is the HTTP client used to make requests to the checkHealth
-	// endpoint.
-	CheckHealthDoer goahttp.Doer
+	// Check Doer is the HTTP client used to make requests to the check endpoint.
+	CheckDoer goahttp.Doer
 
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
@@ -41,7 +40,7 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		CheckHealthDoer:     doer,
+		CheckDoer:           doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -50,21 +49,21 @@ func NewClient(
 	}
 }
 
-// CheckHealth returns an endpoint that makes HTTP requests to the health
-// service checkHealth server.
-func (c *Client) CheckHealth() goa.Endpoint {
+// Check returns an endpoint that makes HTTP requests to the health service
+// check server.
+func (c *Client) Check() goa.Endpoint {
 	var (
-		decodeResponse = DecodeCheckHealthResponse(c.decoder, c.RestoreResponseBody)
+		decodeResponse = DecodeCheckResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildCheckHealthRequest(ctx, v)
+		req, err := c.BuildCheckRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.CheckHealthDoer.Do(req)
+		resp, err := c.CheckDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("health", "checkHealth", err)
+			return nil, goahttp.ErrRequestError("health", "check", err)
 		}
 		return decodeResponse(resp)
 	}

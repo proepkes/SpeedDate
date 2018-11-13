@@ -14,9 +14,9 @@ import (
 	goahttp "goa.design/goa/http"
 )
 
-// EncodeCheckHealthResponse returns an encoder for responses returned by the
-// health checkHealth endpoint.
-func EncodeCheckHealthResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeCheckResponse returns an encoder for responses returned by the health
+// check endpoint.
+func EncodeCheckResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		res := v.(string)
 		enc := encoder(ctx, w)

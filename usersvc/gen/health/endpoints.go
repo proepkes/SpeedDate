@@ -15,25 +15,25 @@ import (
 
 // Endpoints wraps the "health" service endpoints.
 type Endpoints struct {
-	CheckHealth goa.Endpoint
+	Check goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "health" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		CheckHealth: NewCheckHealthEndpoint(s),
+		Check: NewCheckEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "health" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.CheckHealth = m(e.CheckHealth)
+	e.Check = m(e.Check)
 }
 
-// NewCheckHealthEndpoint returns an endpoint function that calls the method
-// "checkHealth" of service "health".
-func NewCheckHealthEndpoint(s Service) goa.Endpoint {
+// NewCheckEndpoint returns an endpoint function that calls the method "check"
+// of service "health".
+func NewCheckEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.CheckHealth(ctx)
+		return s.Check(ctx)
 	}
 }
