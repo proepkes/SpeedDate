@@ -35,7 +35,7 @@ func main() {
 	// the service.
 	var (
 		//TODO: configurable listen address
-		addr = flag.String("listen", "localhost:8001", "HTTP listen `address`")
+		addr = flag.String("listen", ":8001", "HTTP listen `address`")
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
 	flag.Parse()

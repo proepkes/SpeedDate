@@ -47,12 +47,12 @@ spec:
           value: password
         ports:
         - containerPort: 8001
-        # livenessProbe:
-        #   httpGet:
-        #     path: /health
-        #     port: 8001
-        #   initialDelaySeconds: 2
-        #   periodSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 25
+          periodSeconds: 25
         resources:
           requests:
             memory: "200Mi"
@@ -134,6 +134,8 @@ spec:
   - match:
     - uri:
         prefix: /user/
+    - uri:
+        prefix: /health/
     route:
     - destination:
         host: usersvc

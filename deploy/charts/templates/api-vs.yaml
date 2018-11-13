@@ -11,6 +11,8 @@ spec:
   - match:
     - uri:
         prefix: /user/
+    - uri:
+        prefix: /health/
     route:
     - destination:
         host: usersvc

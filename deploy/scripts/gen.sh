@@ -13,5 +13,6 @@ docker build --tag=proepkes/usersvc:dev -f $GOPATH/src/github.com/proepkes/speed
 docker push proepkes/usersvc:dev
 
 # Generate k8s-yaml
+cd $GOPATH/src/github.com/proepkes/speeddate
 helm template deploy/charts/ -f deploy/charts/values.yaml > deploy/k8s/speeddate.yaml
 kubectl apply -f deploy/k8s/speeddate.yaml

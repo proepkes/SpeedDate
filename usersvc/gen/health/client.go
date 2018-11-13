@@ -26,11 +26,11 @@ func NewClient(checkHealth goa.Endpoint) *Client {
 }
 
 // CheckHealth calls the "checkHealth" endpoint of the "health" service.
-func (c *Client) CheckHealth(ctx context.Context) (res []byte, err error) {
+func (c *Client) CheckHealth(ctx context.Context) (res string, err error) {
 	var ires interface{}
 	ires, err = c.CheckHealthEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}
-	return ires.([]byte), nil
+	return ires.(string), nil
 }

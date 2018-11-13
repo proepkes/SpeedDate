@@ -25,7 +25,10 @@ paths:
           description: OK response.
           schema:
             type: string
-            format: byte
+        "500":
+          description: Internal Server Error response.
+          schema:
+            type: string
       schemes:
       - http
   /swagger/swagger.json:

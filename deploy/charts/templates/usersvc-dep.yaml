@@ -28,12 +28,12 @@ spec:
           value: {{ .Values.usersvcSettings.DbPassword }}
         ports:
         - containerPort: {{ .Values.usersvcSettings.Port }}
-        # livenessProbe:
-        #   httpGet:
-        #     path: /health
-        #     port: {{ .Values.usersvcSettings.Port }}
-        #   initialDelaySeconds: 2
-        #   periodSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.usersvcSettings.Port }}
+          initialDelaySeconds: 25
+          periodSeconds: 25
         resources:
           requests:
             memory: "200Mi"
