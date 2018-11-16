@@ -1,11 +1,12 @@
-{
-    "version": "2.0.0",
-    "tasks": [
-      {
-        "label": "start cockroachdb",
-        "type": "shell",
-        "command": "cockroach start --insecure --listen-addr=0.0.0.0:8888",
-        "auto": true
-      }
-    ]
-  }
+{ 
+  // autolaunch task on startup: https://marketplace.visualstudio.com/items?itemName=philfontaine.autolaunch
+  "version": "2.0.0",
+  "tasks": [
+  {
+      "label": "start cockroachdb",
+      "type": "shell",
+      "command": "cockroach start --insecure --listen-addr=0.0.0.0:8888",
+      "auto": true
+    }
+  ]
+}

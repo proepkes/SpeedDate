@@ -24,4 +24,4 @@ authsvcSettings:
   HealthPort: 9000
 
 speeddateui:
-  Port: 8080
+  Port: 80

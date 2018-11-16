@@ -27,7 +27,7 @@ metadata:
 spec:
   ports:
   - port: 80
-    targetPort: 8080
+    targetPort: 80
     name: http
   selector:
     app: speeddateui
@@ -104,7 +104,7 @@ spec:
         image: docker.io/proepkes/speeddateui:dev
         imagePullPolicy: Always        
         ports:
-        - containerPort: 8080
+        - containerPort: 80
         resources:
           requests:
             memory: "200Mi"
@@ -184,26 +184,6 @@ spec:
     - ui.speeddate.local
 ---
 ---
-# Source: speeddate/templates/usersvc-cockroachdb-se.yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: ServiceEntry
-metadata:
-  name: cockroachdb-external
-spec:
-  hosts:
-  - cockroachdb.external.service
-  addresses:
-  - 192.168.178.46/32
-  ports:
-  - name: tcp
-    number: 8888
-    protocol: tcp
-  location: MESH_EXTERNAL
----
-
-
-
-
 # Source: speeddate/templates/usersvc-cockroachdb-se.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
