@@ -7,7 +7,7 @@ var _ = Service("authorize", func() {
 	Description("The service makes it possible to ...")
 
 	HTTP(func() {
-		Path("/")
+		Path("/auth")
 	})
 
 	Method("login", func() {

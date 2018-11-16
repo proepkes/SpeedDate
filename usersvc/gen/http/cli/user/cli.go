@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 
-	healthc "github.com/proepkes/speeddate/usersvc/gen/http/health/client"
 	repositoryc "github.com/proepkes/speeddate/usersvc/gen/http/repository/client"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
@@ -24,16 +23,14 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `health check
-repository (insert|delete|get)
+	return `repository (insert|delete|get)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` health check` + "\n" +
-		os.Args[0] + ` repository insert --body '{
-      "name": "mdp"
+	return os.Args[0] + ` repository insert --body '{
+      "name": "717"
    }'` + "\n" +
 		""
 }
@@ -48,10 +45,6 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
-		healthFlags = flag.NewFlagSet("health", flag.ContinueOnError)
-
-		healthCheckFlags = flag.NewFlagSet("check", flag.ExitOnError)
-
 		repositoryFlags = flag.NewFlagSet("repository", flag.ContinueOnError)
 
 		repositoryInsertFlags    = flag.NewFlagSet("insert", flag.ExitOnError)
@@ -65,9 +58,6 @@ func ParseEndpoint(
 		repositoryGetViewFlag  = repositoryGetFlags.String("view", "", "")
 		repositoryGetTokenFlag = repositoryGetFlags.String("token", "", "")
 	)
-	healthFlags.Usage = healthUsage
-	healthCheckFlags.Usage = healthCheckUsage
-
 	repositoryFlags.Usage = repositoryUsage
 	repositoryInsertFlags.Usage = repositoryInsertUsage
 	repositoryDeleteFlags.Usage = repositoryDeleteUsage
@@ -88,8 +78,6 @@ func ParseEndpoint(
 	{
 		svcn = os.Args[1+flag.NFlag()]
 		switch svcn {
-		case "health":
-			svcf = healthFlags
 		case "repository":
 			svcf = repositoryFlags
 		default:
@@ -107,13 +95,6 @@ func ParseEndpoint(
 	{
 		epn = os.Args[2+flag.NFlag()+svcf.NFlag()]
 		switch svcn {
-		case "health":
-			switch epn {
-			case "check":
-				epf = healthCheckFlags
-
-			}
-
 		case "repository":
 			switch epn {
 			case "insert":
@@ -147,13 +128,6 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "health":
-			c := healthc.NewClient(scheme, host, doer, enc, dec, restore)
-			switch epn {
-			case "check":
-				endpoint = c.Check()
-				data = nil
-			}
 		case "repository":
 			c := repositoryc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -174,29 +148,6 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
-}
-
-// healthUsage displays the usage of the health command and its subcommands.
-func healthUsage() {
-	fmt.Fprintf(os.Stderr, `Service is the health service interface.
-Usage:
-    %s [globalflags] health COMMAND [flags]
-
-COMMAND:
-    check: Health check endpoint
-
-Additional help:
-    %s health COMMAND --help
-`, os.Args[0], os.Args[0])
-}
-func healthCheckUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] health check
-
-Health check endpoint
-
-Example:
-    `+os.Args[0]+` health check
-`, os.Args[0])
 }
 
 // repositoryUsage displays the usage of the repository command and its
@@ -223,7 +174,7 @@ Add new user and return its ID.
 
 Example:
     `+os.Args[0]+` repository insert --body '{
-      "name": "mdp"
+      "name": "717"
    }'
 `, os.Args[0])
 }
@@ -235,7 +186,7 @@ Remove user from storage
     -id STRING: ID of user to remove
 
 Example:
-    `+os.Args[0]+` repository delete --id "Est est assumenda excepturi et expedita officia."
+    `+os.Args[0]+` repository delete --id "Dignissimos sint."
 `, os.Args[0])
 }
 
@@ -248,6 +199,6 @@ Get implements get.
     -token STRING: 
 
 Example:
-    `+os.Args[0]+` repository get --id "Et cum nam ab." --view "tiny" --token "Commodi aut temporibus ea doloribus sunt velit."
+    `+os.Args[0]+` repository get --id "Ducimus autem sequi iure rerum necessitatibus et." --view "default" --token "Cum nam ab molestias dignissimos commodi."
 `, os.Args[0])
 }

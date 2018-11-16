@@ -24,7 +24,7 @@ func BuildInsertPayload(repositoryInsertBody string) (*repository.User, error) {
 	{
 		err = json.Unmarshal([]byte(repositoryInsertBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"name\": \"mdp\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"name\": \"717\"\n   }'")
 		}
 		if utf8.RuneCountInString(body.Name) > 50 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", body.Name, utf8.RuneCountInString(body.Name), 50, false))

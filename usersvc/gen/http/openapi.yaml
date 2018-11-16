@@ -13,24 +13,6 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /health:
-    get:
-      tags:
-      - health
-      summary: check health
-      description: Health check endpoint
-      operationId: health#check
-      responses:
-        "200":
-          description: OK response.
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error response.
-          schema:
-            type: string
-      schemes:
-      - http
   /swagger/swagger.json:
     get:
       summary: Download ../../gen/http/openapi.json
@@ -137,7 +119,7 @@ definitions:
       fault:
         type: boolean
         description: Is the error a server-side fault?
-        example: false
+        example: true
       id:
         type: string
         description: ID is a unique identifier for this particular occurrence of the
@@ -162,7 +144,7 @@ definitions:
         example: false
     description: GetNotFoundResponseBody result type (default view)
     example:
-      fault: false
+      fault: true
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
@@ -186,16 +168,16 @@ definitions:
       name:
         type: string
         description: The username
-        example: 0zw
+        example: 1fg
         maxLength: 50
       online:
         type: boolean
         description: Indicates whether the user is currently online.
-        example: false
+        example: true
     description: GetResponseBody result type (default view)
     example:
       id: f923e008-e511-11e8-9f32-f2801f1b9fd1
-      name: 44l
+      name: w0z
       online: true
     required:
     - id
@@ -229,14 +211,14 @@ definitions:
       timeout:
         type: boolean
         description: Is the error a timeout?
-        example: true
+        example: false
     description: GetUnauthorizedResponseBody result type (default view)
     example:
-      fault: true
+      fault: false
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
-      temporary: false
+      temporary: true
       timeout: false
     required:
     - name
@@ -252,10 +234,10 @@ definitions:
       name:
         type: string
         description: The username
-        example: vv1
+        example: wye
         maxLength: 50
     example:
-      name: g2j
+      name: oyv
     required:
     - name
 securityDefinitions:

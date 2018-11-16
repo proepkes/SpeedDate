@@ -9,7 +9,7 @@ var _ = API("usersvc", func() {
 
 	Server("user", func() {
 		Description("Serves repository and swagger service")
-		Services("health", "repository", "swagger")
+		Services("repository", "swagger")
 		Host("localhost", func() {
 			Description("Host on local machine")
 			URI("http://:8001")

@@ -114,6 +114,14 @@ func main() {
 		errc <- fmt.Errorf("%s", <-c)
 	}()
 
+	srvHealth := http.NewServeMux()
+	srvHealth.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok"))
+	})
+	go func() {
+		http.ListenAndServe(":9000", srvHealth)
+	}()
+
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}

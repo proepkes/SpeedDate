@@ -13,15 +13,11 @@ spec:
         prefix: /user/
     route:
     - destination:
-        host: usersvc
-        port:
-          number: 80
+        host: usersvc.default.svc.cluster.local
   - match:
     - uri:
         prefix: /auth/
     route:
     - destination:
-        host: authsvc
-        port:
-          number: 80
+        host: authsvc.default.svc.cluster.local
 ---

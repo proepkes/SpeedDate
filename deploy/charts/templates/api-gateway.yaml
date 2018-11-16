@@ -7,10 +7,16 @@ spec:
     istio: ingressgateway # use istio default controller
   servers:
   - port:
+      #DOC: Ports have to be opened by istio, https://github.com/istio/istio/issues/7242
+      number: 31400
+      name: api
+      protocol: HTTP
+    hosts:
+    - {{ .Values.hosts.api }}
+  - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    #- {{ .Values.hosts.api }}
-    - "*"
+    - {{ .Values.hosts.ui }}
 ---

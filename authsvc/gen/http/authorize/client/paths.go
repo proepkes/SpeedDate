@@ -9,5 +9,5 @@ package client
 
 // LoginAuthorizePath returns the URL path to the authorize service login HTTP endpoint.
 func LoginAuthorizePath() string {
-	return "/login"
+	return "/auth/login"
 }

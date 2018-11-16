@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: authsvc-v1
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authsvc
+        version: v1
+    spec:
+      containers:
+      - name: authsvc
+        image: {{.Values.image.imageRegistry}}/authsvc:{{.Values.image.dockerTag}}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}      
+        ports:
+        - containerPort: {{ .Values.authsvcSettings.Port }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.authsvcSettings.HealthPort }}
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+---

@@ -13,8 +13,6 @@ import (
 	"github.com/caarlos0/env"
 	"github.com/jinzhu/gorm"
 	"github.com/proepkes/speeddate/usersvc"
-	health "github.com/proepkes/speeddate/usersvc/gen/health"
-	healthsvr "github.com/proepkes/speeddate/usersvc/gen/http/health/server"
 	repositorysvr "github.com/proepkes/speeddate/usersvc/gen/http/repository/server"
 	swaggersvr "github.com/proepkes/speeddate/usersvc/gen/http/swagger/server"
 	repository "github.com/proepkes/speeddate/usersvc/gen/repository"
@@ -79,12 +77,10 @@ func main() {
 
 	// Create the structs that implement the services.
 	var (
-		healthSvc     health.Service
 		repositorySvc repository.Service
 	)
 	{
 		var err error
-		healthSvc = usersvc.NewHealth(logger)
 		repositorySvc, err = usersvc.NewRepository(db, logger)
 		if err != nil {
 			logger.Fatalf("error creating database: %s", err)
@@ -94,11 +90,9 @@ func main() {
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
 	var (
-		healthEndpoints     *health.Endpoints
 		repositoryEndpoints *repository.Endpoints
 	)
 	{
-		healthEndpoints = health.NewEndpoints(healthSvc)
 		repositoryEndpoints = repository.NewEndpoints(repositorySvc)
 	}
 
@@ -123,19 +117,16 @@ func main() {
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		healthServer     *healthsvr.Server
 		repositoryServer *repositorysvr.Server
 		swaggerServer    *swaggersvr.Server
 	)
 	{
 		eh := ErrorHandler(logger)
-		healthServer = healthsvr.New(healthEndpoints, mux, dec, enc, eh)
 		repositoryServer = repositorysvr.New(repositoryEndpoints, mux, dec, enc, eh)
 		swaggerServer = swaggersvr.New(nil, mux, dec, enc, eh)
 	}
 
 	// Configure the mux.
-	healthsvr.Mount(mux, healthServer)
 	repositorysvr.Mount(mux, repositoryServer)
 	swaggersvr.Mount(mux)
 
@@ -162,20 +153,17 @@ func main() {
 		errc <- fmt.Errorf("%s", <-c)
 	}()
 
-	server8002 := http.NewServeMux()
-	server8002.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	srvHealth := http.NewServeMux()
+	srvHealth.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
 	go func() {
-		http.ListenAndServe(":8002", server8002)
+		http.ListenAndServe(":8002", srvHealth)
 	}()
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}
 	go func() {
-		for _, m := range healthServer.Mounts {
-			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
-		}
 		for _, m := range repositoryServer.Mounts {
 			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 		}

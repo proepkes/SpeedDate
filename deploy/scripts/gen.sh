@@ -12,6 +12,10 @@ goa example github.com/proepkes/speeddate/authsvc/design
 docker build --tag=proepkes/usersvc:dev -f $GOPATH/src/github.com/proepkes/speeddate/deploy/docker/Dockerfile.usersvc $GOPATH/src/github.com/proepkes/speeddate/usersvc
 docker push proepkes/usersvc:dev
 
+# Build & Tag & push authservice
+docker build --tag=proepkes/authsvc:dev -f $GOPATH/src/github.com/proepkes/speeddate/deploy/docker/Dockerfile.authsvc $GOPATH/src/github.com/proepkes/speeddate/authsvc
+docker push proepkes/authsvc:dev
+
 # Generate k8s-yaml
 cd $GOPATH/src/github.com/proepkes/speeddate
 helm template deploy/charts/ -f deploy/charts/values.yaml > deploy/k8s/speeddate.yaml

@@ -6,6 +6,7 @@ image:
   dockerTag: dev
 
 hosts:
+  ui: ui.speeddate.local
   api: api.speeddate.local
 
 usersvcSettings:
@@ -17,3 +18,10 @@ usersvcSettings:
   DbName: speeddate
   DbUser: speeddateuser
   DbPassword: password
+
+authsvcSettings:
+  Port: 8002
+  HealthPort: 9000
+
+speeddateui:
+  Port: 8080
