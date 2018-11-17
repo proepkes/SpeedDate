@@ -2,18 +2,20 @@ package design
 
 import (
 	. "goa.design/goa/http/design"
-	. "goa.design/goa/http/dsl"
 	_ "goa.design/plugins/cors"
+	. "goa.design/plugins/cors/dsl"
 )
 
 var _ = Service("authorize", func() {
-	Description("The service makes it possible to ...")
+	Description("The service makes it possible to generate login-tokens for valid authentification")
+
+	// Sets CORS response headers for requests with any Origin header
+	Origin("*")
 
 	HTTP(func() {
 		Path("/auth")
 	})
-	// Sets CORS response headers for requests with any Origin header
-	Origin("*")
+
 	Method("login", func() {
 		Description("Creates a valid JWT")
 
