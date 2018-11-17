@@ -158,7 +158,7 @@ func main() {
 		w.Write([]byte("ok"))
 	})
 	go func() {
-		http.ListenAndServe(":8002", srvHealth)
+		http.ListenAndServe(":9000", srvHealth)
 	}()
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
