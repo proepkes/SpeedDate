@@ -24,7 +24,7 @@ paths:
         "204":
           description: No Content response.
           headers:
-            Authorization:
+            Access-token:
               description: Generated JWT
               type: string
       schemes:

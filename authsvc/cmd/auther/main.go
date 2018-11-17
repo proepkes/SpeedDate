@@ -89,7 +89,7 @@ func main() {
 
 	// Configure the mux.
 	authorizesvr.Mount(mux, authorizeServer)
-	swaggersvr.Mount(mux)
+	swaggersvr.Mount(mux, swaggerServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.

@@ -1,9 +1,13 @@
 package design
 
-import . "goa.design/goa/http/dsl"
+import (
+	_ "goa.design/plugins/cors"
+	. "goa.design/plugins/cors/dsl"
+)
 
 var _ = Service("swagger", func() {
 	Description("The swagger service serves the API swagger definition.")
+
 	HTTP(func() {
 		Path("/swagger")
 	})

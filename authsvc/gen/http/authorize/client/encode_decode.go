@@ -70,9 +70,9 @@ func DecodeLoginResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 				token string
 				err   error
 			)
-			tokenRaw := resp.Header.Get("Authorization")
+			tokenRaw := resp.Header.Get("Access-token")
 			if tokenRaw == "" {
-				err = goa.MergeErrors(err, goa.MissingFieldError("Authorization", "header"))
+				err = goa.MergeErrors(err, goa.MissingFieldError("Access-token", "header"))
 			}
 			token = tokenRaw
 			if err != nil {

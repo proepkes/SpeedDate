@@ -10,7 +10,12 @@ var _ = Service("authorize", func() {
 	Description("The service makes it possible to generate login-tokens for valid authentification")
 
 	// Sets CORS response headers for requests with any Origin header
-	Origin("*")
+	Origin("*", func() {
+		Headers("Authorization")
+		Methods("OPTIONS", "POST")
+		Expose("Access-token")
+		MaxAge(600)
+	})
 
 	HTTP(func() {
 		Path("/auth")
@@ -41,7 +46,7 @@ var _ = Service("authorize", func() {
 			POST("/login")
 			// Use Authorization header to provide basic auth value.
 			Response(StatusNoContent, func() {
-				Header("token:Authorization", String, "Generated JWT")
+				Header("token:Access-token", String, "Generated JWT")
 			})
 		})
 	})

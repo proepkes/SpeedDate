@@ -14,12 +14,14 @@ import (
 	authorize "github.com/proepkes/speeddate/authsvc/gen/authorize"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
+	"goa.design/plugins/cors"
 )
 
 // Server lists the authorize service endpoint HTTP handlers.
 type Server struct {
 	Mounts []*MountPoint
 	Login  http.Handler
+	CORS   http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -50,8 +52,10 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"Login", "POST", "/auth/login"},
+			{"CORS", "OPTIONS", "/auth/login"},
 		},
 		Login: NewLoginHandler(e.Login, mux, dec, enc, eh),
+		CORS:  NewCORSHandler(),
 	}
 }
 
@@ -61,17 +65,19 @@ func (s *Server) Service() string { return "authorize" }
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Login = m(s.Login)
+	s.CORS = m(s.CORS)
 }
 
 // Mount configures the mux to serve the authorize endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountLoginHandler(mux, h.Login)
+	MountCORSHandler(mux, h.CORS)
 }
 
 // MountLoginHandler configures the mux to serve the "authorize" service
 // "login" endpoint.
 func MountLoginHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
+	f, ok := handleAuthorizeOrigin(h).(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
@@ -115,5 +121,54 @@ func NewLoginHandler(
 		if err := encodeResponse(ctx, w, res); err != nil {
 			eh(ctx, w, err)
 		}
+	})
+}
+
+// MountCORSHandler configures the mux to serve the CORS endpoints for the
+// service authorize.
+func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
+	h = handleAuthorizeOrigin(h)
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("OPTIONS", "/auth/login", f)
+}
+
+// NewCORSHandler creates a HTTP handler which returns a simple 200 response.
+func NewCORSHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+}
+
+// handleAuthorizeOrigin applies the CORS response headers corresponding to the
+// origin for the service authorize.
+func handleAuthorizeOrigin(h http.Handler) http.Handler {
+	origHndlr := h.(http.HandlerFunc)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			origHndlr(w, r)
+			return
+		}
+		if cors.MatchOrigin(origin, "*") {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Expose-Headers", "Access-token")
+			w.Header().Set("Access-Control-Max-Age", "600")
+			w.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
+				w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+			}
+			origHndlr(w, r)
+			return
+		}
+		origHndlr(w, r)
+		return
 	})
 }

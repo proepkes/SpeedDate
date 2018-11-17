@@ -13,7 +13,8 @@ import (
 	"goa.design/goa/security"
 )
 
-// The service makes it possible to ...
+// The service makes it possible to generate login-tokens for valid
+// authentification
 type Service interface {
 	// Creates a valid JWT
 	Login(context.Context, *LoginPayload) (res *LoginResult, err error)

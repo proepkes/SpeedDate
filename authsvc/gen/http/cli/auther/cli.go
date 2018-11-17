@@ -130,7 +130,7 @@ func ParseEndpoint(
 // authorizeUsage displays the usage of the authorize command and its
 // subcommands.
 func authorizeUsage() {
-	fmt.Fprintf(os.Stderr, `The service makes it possible to ...
+	fmt.Fprintf(os.Stderr, `The service makes it possible to generate login-tokens for valid authentification
 Usage:
     %s [globalflags] authorize COMMAND [flags]
 
