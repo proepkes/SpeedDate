@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/proepkes/speeddate/storagesvc/gen/authstorage"
 	"goa.design/goa/security"
 )
@@ -35,8 +35,10 @@ func (s *authstorageSvc) JWTAuth(ctx context.Context, token string, scheme *secu
 		return ctx, authstorage.MakeUnauthorized(err)
 	}
 
-	if !scopesMap["api:read"] {
-		return ctx, authstorage.MakeUnauthorized(fmt.Errorf("Scope invalid"))
+	for _, scope := range scheme.RequiredScopes {
+		if !scopesMap[scope] {
+			return ctx, authstorage.MakeUnauthorized(fmt.Errorf("Insufficent permissions"))
+		}
 	}
 
 	return ctx, nil
