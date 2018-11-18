@@ -1,5 +1,20 @@
 Under construction
 
+## Requirements:
+Kubernetes-cluster
+Istio
+Cockroachdb
+
+
+## Development:
+
+Minikube
+- minikube start --memory=4096 --cpus=4 
+- kubectl apply -f dev/setup/minikube/metallb.yaml
+- kubectl apply -f dev/setup/minikube/metallb-config.yaml
+
+
+
 https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html
 
 
