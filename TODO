@@ -2,4 +2,5 @@
 Todo:
   ☐ Better way of loading private key for authsvc (k8s secrets?)
   ☐ Test HTTPS, replace httpbin
-Archive:
+
+https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
