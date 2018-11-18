@@ -13,25 +13,13 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /swagger/swagger.json:
-    get:
-      summary: Download ../../gen/http/openapi.json
-      description: JSON document containing the API swagger definition
-      operationId: swagger#/swagger/swagger.json
-      responses:
-        "200":
-          description: File downloaded
-          schema:
-            type: file
-      schemes:
-      - http
-  /user/delete/{id}:
+  /storage/auth/delete/{id}:
     delete:
       tags:
-      - repository
-      summary: delete repository
+      - authstorage
+      summary: delete authstorage
       description: Remove user from storage
-      operationId: repository#delete
+      operationId: authstorage#delete
       parameters:
       - name: id
         in: path
@@ -43,16 +31,16 @@ paths:
           description: No Content response.
       schemes:
       - http
-  /user/get/{id}:
+  /storage/auth/get/{id}:
     get:
       tags:
-      - repository
-      summary: get repository
+      - authstorage
+      summary: get authstorage
       description: |2-
 
         Required security scopes:
           * `api:read`
-      operationId: repository#get
+      operationId: authstorage#get
       parameters:
       - name: view
         in: query
@@ -76,32 +64,32 @@ paths:
         "200":
           description: OK response.
           schema:
-            $ref: '#/definitions/RepositoryGetResponseBody'
+            $ref: '#/definitions/AuthstorageGetResponseBody'
         "401":
           description: Unauthorized response.
           schema:
-            $ref: '#/definitions/RepositoryGetUnauthorizedResponseBody'
+            $ref: '#/definitions/AuthstorageGetUnauthorizedResponseBody'
         "404":
           description: Not Found response.
           schema:
-            $ref: '#/definitions/RepositoryGetNotFoundResponseBody'
+            $ref: '#/definitions/AuthstorageGetNotFoundResponseBody'
       schemes:
       - http
       security:
       - jwt: []
-  /user/insert:
+  /storage/auth/insert:
     post:
       tags:
-      - repository
-      summary: insert repository
+      - authstorage
+      summary: insert authstorage
       description: Add new user and return its ID.
-      operationId: repository#insert
+      operationId: authstorage#insert
       parameters:
       - name: InsertRequestBody
         in: body
         required: true
         schema:
-          $ref: '#/definitions/RepositoryInsertRequestBody'
+          $ref: '#/definitions/AuthstorageInsertRequestBody'
           required:
           - name
       responses:
@@ -111,8 +99,20 @@ paths:
             type: string
       schemes:
       - http
+  /swagger/swagger.json:
+    get:
+      summary: Download ../../gen/http/openapi.json
+      description: JSON document containing the API swagger definition
+      operationId: swagger#/swagger/swagger.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
 definitions:
-  RepositoryGetNotFoundResponseBody:
+  AuthstorageGetNotFoundResponseBody:
     title: 'Mediatype identifier: application/vnd.goa.error; view=default'
     type: object
     properties:
@@ -137,18 +137,18 @@ definitions:
       temporary:
         type: boolean
         description: Is the error temporary?
-        example: false
+        example: true
       timeout:
         type: boolean
         description: Is the error a timeout?
-        example: false
+        example: true
     description: GetNotFoundResponseBody result type (default view)
     example:
       fault: true
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
-      temporary: true
+      temporary: false
       timeout: false
     required:
     - name
@@ -157,8 +157,8 @@ definitions:
     - temporary
     - timeout
     - fault
-  RepositoryGetResponseBody:
-    title: 'Mediatype identifier: application/sd.data.stored-user; view=default'
+  AuthstorageGetResponseBody:
+    title: 'Mediatype identifier: application/sd.data.stored-authuser; view=default'
     type: object
     properties:
       id:
@@ -168,7 +168,7 @@ definitions:
       name:
         type: string
         description: The username
-        example: 1fg
+        example: nyk
         maxLength: 50
       online:
         type: boolean
@@ -177,19 +177,19 @@ definitions:
     description: GetResponseBody result type (default view)
     example:
       id: f923e008-e511-11e8-9f32-f2801f1b9fd1
-      name: w0z
+      name: 8fh
       online: true
     required:
     - id
     - name
-  RepositoryGetUnauthorizedResponseBody:
+  AuthstorageGetUnauthorizedResponseBody:
     title: 'Mediatype identifier: application/vnd.goa.error; view=default'
     type: object
     properties:
       fault:
         type: boolean
         description: Is the error a server-side fault?
-        example: false
+        example: true
       id:
         type: string
         description: ID is a unique identifier for this particular occurrence of the
@@ -207,19 +207,19 @@ definitions:
       temporary:
         type: boolean
         description: Is the error temporary?
-        example: false
+        example: true
       timeout:
         type: boolean
         description: Is the error a timeout?
-        example: false
+        example: true
     description: GetUnauthorizedResponseBody result type (default view)
     example:
-      fault: false
+      fault: true
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
-      temporary: true
-      timeout: false
+      temporary: false
+      timeout: true
     required:
     - name
     - id
@@ -227,17 +227,17 @@ definitions:
     - temporary
     - timeout
     - fault
-  RepositoryInsertRequestBody:
-    title: RepositoryInsertRequestBody
+  AuthstorageInsertRequestBody:
+    title: AuthstorageInsertRequestBody
     type: object
     properties:
       name:
         type: string
         description: The username
-        example: wye
+        example: g6b
         maxLength: 50
     example:
-      name: oyv
+      name: fg6
     required:
     - name
 securityDefinitions:

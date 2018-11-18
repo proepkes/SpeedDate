@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/proepkes/speeddate/storagesvc/gen/repository"
+	"github.com/proepkes/speeddate/storagesvc/gen/authstorage"
 	"goa.design/goa/security"
 )
 
 // JWTAuth implements the authorization logic for service "repository" for the
 // "jwt" security scheme.
-func (s *repositorySvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
+func (s *authstorageSvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodECDSA); !ok {
@@ -23,20 +23,20 @@ func (s *repositorySvc) JWTAuth(ctx context.Context, token string, scheme *secur
 	})
 
 	if err != nil {
-		return ctx, repository.MakeUnauthorized(err)
+		return ctx, authstorage.MakeUnauthorized(err)
 	}
 
 	if !parsedToken.Valid {
-		return ctx, repository.MakeUnauthorized(fmt.Errorf("Token invalid"))
+		return ctx, authstorage.MakeUnauthorized(fmt.Errorf("Token invalid"))
 	}
 
 	scopesMap, _, err := parseClaimScopes(parsedToken)
 	if err != nil {
-		return ctx, repository.MakeUnauthorized(err)
+		return ctx, authstorage.MakeUnauthorized(err)
 	}
 
 	if !scopesMap["api:read"] {
-		return ctx, repository.MakeUnauthorized(fmt.Errorf("Scope invalid"))
+		return ctx, authstorage.MakeUnauthorized(fmt.Errorf("Scope invalid"))
 	}
 
 	return ctx, nil
