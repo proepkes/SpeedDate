@@ -14,11 +14,11 @@
 			"args": ["-debug", "true"]
 		},
 		{
-			"name": "dbg usersvc",
+			"name": "dbg storagesvc",
 			"type": "go",
 			"request": "launch",
 			"mode": "debug",
-            "program": "${workspaceRoot}/usersvc/cmd/user",
+            "program": "${workspaceRoot}/storagesvc/cmd/user",
 			"env": {},
 			"args": ["-debug", "true"]
 		}

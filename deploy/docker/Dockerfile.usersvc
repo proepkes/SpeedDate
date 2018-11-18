@@ -1,13 +1,13 @@
 # Golang application builder steps
 FROM golang:latest as builder
-WORKDIR /go/src/github.com/proepkes/speeddate/usersvc
+WORKDIR /go/src/github.com/proepkes/speeddate/storagesvc
 COPY . .
 RUN go get -v ./...
-WORKDIR /go/src/github.com/proepkes/speeddate/usersvc/cmd/user
+WORKDIR /go/src/github.com/proepkes/speeddate/storagesvc/cmd/user
 RUN CGO_ENABLED=0 GOOS=linux go build
 
 FROM scratch 
-COPY --from=builder /go/src/github.com/proepkes/speeddate/usersvc/keys ./keys
-COPY --from=builder /go/src/github.com/proepkes/speeddate/usersvc/gen/http/openapi.json .
-COPY --from=builder /go/src/github.com/proepkes/speeddate/usersvc/cmd/user/user . 
+COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/keys ./keys
+COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/gen/http/openapi.json .
+COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/cmd/user/user . 
 ENTRYPOINT ["./user"]

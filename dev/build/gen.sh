@@ -1,16 +1,16 @@
 # Generate user-service
 
 
-cd $GOPATH/src/github.com/proepkes/speeddate/build/scripts
+cd $GOPATH/src/github.com/proepkes/speeddate/dev/build
 
-./gensvc.sh usersvc
+./gensvc.sh storagesvc
 ./gensvc.sh authsvc
-./gensvc.sh gamehostsvc
+./gensvc.sh spawnsvc
 ./gensvc.sh mmsvc
 
-./docker.sh usersvc
+./docker.sh storagesvc
 ./docker.sh authsvc
-./docker.sh gamehostsvc
+./docker.sh spawnsvc
 ./docker.sh mmsvc
 
 # Generate k8s-yaml

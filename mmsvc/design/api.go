@@ -6,9 +6,9 @@ var _ = API("mmsvc", func() {
 	Title("Speeddate Userservice")
 	Description("HTTP service for managing users in the SpeedDate-system")
 
-	Server("user", func() {
+	Server("matchmaker", func() {
 		Description("Serves repository and swagger service")
-		Services("repository", "swagger")
+		Services("matchmaking", "swagger")
 		Host("localhost", func() {
 			Description("Host on local machine")
 			URI("http://:8003")

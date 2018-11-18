@@ -1,37 +1,37 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: usersvc-v1
+  name: storagesvc-v1
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: usersvc
+        app: storagesvc
         version: v1
     spec:
       containers:
-      - name: usersvc
-        image: {{.Values.image.imageRegistry}}/usersvc:{{.Values.image.dockerTag}}
+      - name: storagesvc
+        image: {{.Values.image.imageRegistry}}/storagesvc:{{.Values.image.dockerTag}}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: DB_IP
-          value: {{ .Values.usersvcSettings.DbHostname }}
+          value: {{ .Values.storagesvcSettings.DbHostname }}
         - name: DB_PORT
-          value: "{{ .Values.usersvcSettings.DbPort }}"
+          value: "{{ .Values.storagesvcSettings.DbPort }}"
         - name: DB_USER
-          value: {{ .Values.usersvcSettings.DbUser }}
+          value: {{ .Values.storagesvcSettings.DbUser }}
         - name: DB_NAME
-          value: {{ .Values.usersvcSettings.DbName }}
+          value: {{ .Values.storagesvcSettings.DbName }}
         - name: DB_PASSWORD
-          value: {{ .Values.usersvcSettings.DbPassword }}
+          value: {{ .Values.storagesvcSettings.DbPassword }}
         ports:
-        - containerPort: {{ .Values.usersvcSettings.Port }}
+        - containerPort: {{ .Values.storagesvcSettings.Port }}
         livenessProbe:
           httpGet:
             path: /health
-            port: {{ .Values.usersvcSettings.HealthPort }}
+            port: {{ .Values.storagesvcSettings.HealthPort }}
           initialDelaySeconds: 25
           periodSeconds: 25
         resources:

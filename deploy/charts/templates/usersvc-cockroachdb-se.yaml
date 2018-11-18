@@ -4,15 +4,15 @@ metadata:
   name: cockroachdb-external
 spec:
   hosts:
-  - {{ .Values.usersvcSettings.DbHostname }}
+  - {{ .Values.storagesvcSettings.DbHostname }}
   ports:
   - name: tcp
-    number: {{ .Values.usersvcSettings.DbPort }}
+    number: {{ .Values.storagesvcSettings.DbPort }}
     protocol: tcp
   location: MESH_EXTERNAL
   resolution: STATIC  
   endpoints:
-  - address: {{ .Values.usersvcSettings.DbIP }}
+  - address: {{ .Values.storagesvcSettings.DbIP }}
     ports:
-      tcp: {{ .Values.usersvcSettings.DbPort }}
+      tcp: {{ .Values.storagesvcSettings.DbPort }}
 ---

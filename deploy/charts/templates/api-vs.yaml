@@ -13,7 +13,7 @@ spec:
         prefix: /user/
     route:
     - destination:
-        host: usersvc.default.svc.cluster.local
+        host: storagesvc.default.svc.cluster.local
   - match:
     - uri:
         prefix: /auth/

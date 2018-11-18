@@ -1,3 +1,4 @@
+rbacEnabled: true
 fullnameOverride: speeddate
 image:
   repository: https://github.com/proepkes/SpeedDate/tree/go
@@ -9,7 +10,7 @@ hosts:
   ui: ui.speeddate.local
   api: api.speeddate.local
 
-usersvcSettings:
+storagesvcSettings:
   Port: 8001
   HealthPort: 9000
   DbIP: 192.168.178.46
