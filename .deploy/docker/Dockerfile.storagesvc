@@ -3,11 +3,11 @@ FROM golang:latest as builder
 WORKDIR /go/src/github.com/proepkes/speeddate/storagesvc
 COPY . .
 RUN go get -v ./...
-WORKDIR /go/src/github.com/proepkes/speeddate/storagesvc/cmd/user
+WORKDIR /go/src/github.com/proepkes/speeddate/storagesvc/cmd/storager
 RUN CGO_ENABLED=0 GOOS=linux go build
 
 FROM scratch 
 COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/keys ./keys
 COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/gen/http/openapi.json .
-COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/cmd/user/user . 
-ENTRYPOINT ["./user"]
+COPY --from=builder /go/src/github.com/proepkes/speeddate/storagesvc/cmd/storager/storager . 
+ENTRYPOINT ["./storager"]
