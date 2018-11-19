@@ -1,0 +1,284 @@
+---
+# Source: speeddate/templates/crds/gameserver.yaml
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: gameservers.speeddate.dev
+  labels:
+    component: crd
+  annotations:
+    "helm.sh/hook": "crd-install"
+spec:
+  group: speeddate.dev
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: GameServer
+    plural: gameservers
+    shortNames:
+    - gs
+    singular: gameserver
+
+---
+# Source: speeddate/templates/speeddate/authsvc-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: authsvc
+  namespace: default
+  labels:
+    app: authsvc
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8002
+    name: http
+  selector:
+    app: authsvc
+
+---
+# Source: speeddate/templates/speeddate/ui-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: speeddateui
+  namespace: default
+  labels:
+    app: speeddateui
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http
+  selector:
+    app: speeddateui
+
+---
+# Source: speeddate/templates/speeddate/usersvc-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: storagesvc
+  namespace: default
+  labels:
+    app: storagesvc
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8001
+    name: http
+  selector:
+    app: storagesvc
+
+---
+# Source: speeddate/templates/speeddate/authsvc-dep.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: authsvc-v1
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authsvc
+        version: v1
+    spec:
+      containers:
+      - name: authsvc
+        image: docker.io/proepkes/authsvc:dev
+        imagePullPolicy: Always      
+        ports:
+        - containerPort: 8002
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9000
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+
+---
+# Source: speeddate/templates/speeddate/ui-dep.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: speeddateui-v1
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: speeddateui
+        version: v1
+    spec:
+      containers:
+      - name: speeddateui
+        image: docker.io/proepkes/speeddateui:dev
+        imagePullPolicy: Always        
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+
+---
+# Source: speeddate/templates/speeddate/usersvc-dep.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: storagesvc-v1
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: storagesvc
+        version: v1
+    spec:
+      containers:
+      - name: storagesvc
+        image: docker.io/proepkes/storagesvc:dev
+        imagePullPolicy: Always
+        env:
+        - name: DB_IP
+          value: cockroachdb.external.service
+        - name: DB_PORT
+          value: "8888"
+        - name: DB_USER
+          value: speeddateuser
+        - name: DB_NAME
+          value: speeddate
+        - name: DB_PASSWORD
+          value: password
+        ports:
+        - containerPort: 8001
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9000
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+
+---
+# Source: speeddate/templates/istio/api-gateway.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: sd-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      #DOC: Ports have to be opened by istio, https://github.com/istio/istio/issues/7242
+      number: 31400
+      name: api
+      protocol: HTTP
+    hosts:
+    - api.speeddate.local
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - ui.speeddate.local
+  #TODO: test https https://istio.io/docs/tasks/traffic-management/secure-ingress/
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+    hosts:
+    - "httpbin.example.com"
+
+---
+# Source: speeddate/templates/istio/usersvc-cockroachdb-se.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cockroachdb-external
+spec:
+  hosts:
+  - cockroachdb.external.service
+  ports:
+  - name: tcp
+    number: 8888
+    protocol: tcp
+  location: MESH_EXTERNAL
+  resolution: STATIC  
+  endpoints:
+  - address: 192.168.178.46
+    ports:
+      tcp: 8888
+
+---
+# Source: speeddate/templates/istio/api-vs.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-vs
+spec:
+  hosts:
+  - api.speeddate.local
+  gateways:
+  - sd-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /user/
+    route:
+    - destination:
+        host: storagesvc.default.svc.cluster.local
+  - match:
+    - uri:
+        prefix: /auth/
+    route:
+    - destination:
+        host: authsvc.default.svc.cluster.local
+
+---
+# Source: speeddate/templates/istio/ui-vs.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ui-vs
+spec:
+  hosts:
+  - ui.speeddate.local
+  - "httpbin.example.com"
+  gateways:
+  - sd-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: speeddateui
+        port:
+          number: 80
+

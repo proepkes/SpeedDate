@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: storagesvc-v1
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: storagesvc
+        version: v1
+    spec:
+      containers:
+      - name: storagesvc
+        image: {{.Values.image.imageRegistry}}/storagesvc:{{.Values.image.dockerTag}}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: DB_IP
+          value: {{ .Values.storagesvcSettings.DbHostname }}
+        - name: DB_PORT
+          value: "{{ .Values.storagesvcSettings.DbPort }}"
+        - name: DB_USER
+          value: {{ .Values.storagesvcSettings.DbUser }}
+        - name: DB_NAME
+          value: {{ .Values.storagesvcSettings.DbName }}
+        - name: DB_PASSWORD
+          value: {{ .Values.storagesvcSettings.DbPassword }}
+        ports:
+        - containerPort: {{ .Values.storagesvcSettings.Port }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.storagesvcSettings.HealthPort }}
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"

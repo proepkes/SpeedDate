@@ -1,0 +1,28 @@
+rbacEnabled: true
+fullnameOverride: speeddate
+image:
+  repository: https://github.com/proepkes/SpeedDate/tree/go
+  pullPolicy: Always #IfNotPresent
+  imageRegistry: docker.io/proepkes
+  dockerTag: dev
+
+hosts:
+  ui: ui.speeddate.local
+  api: api.speeddate.local
+
+storagesvcSettings:
+  Port: 8001
+  HealthPort: 9000
+  DbIP: 192.168.178.46
+  DbHostname: cockroachdb.external.service
+  DbPort: 8888
+  DbName: speeddate
+  DbUser: speeddateuser
+  DbPassword: password
+
+authsvcSettings:
+  Port: 8002
+  HealthPort: 9000
+
+speeddateui:
+  Port: 80
