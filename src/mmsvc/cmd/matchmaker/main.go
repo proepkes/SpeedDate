@@ -14,8 +14,20 @@ import (
 	matchmakingsvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/matchmaking/server"
 	swaggersvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/swagger/server"
 	"github.com/proepkes/speeddate/src/mmsvc/gen/matchmaking"
+	clientset "github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
+	informers "github.com/proepkes/speeddate/src/pkg/client/informers/externalversions"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
+
+	kubeinformers "k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/kubernetes/staging/src/k8s.io/sample-controller/pkg/signals"
+)
+
+var (
+	masterURL  string
+	kubeconfig string
 )
 
 func main() {
@@ -26,6 +38,28 @@ func main() {
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
 	flag.Parse()
+
+	// set up signals so we handle the first shutdown signal gracefully
+	stopCh := signals.SetupSignalHandler()
+	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	if err != nil {
+		fmt.Errorf("Error building kubeconfig: %s", err.Error())
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		fmt.Errorf("Error building kubernetes clientset: %s", err.Error())
+	}
+
+	exampleClient, err := clientset.NewForConfig(cfg)
+	if err != nil {
+		fmt.Errorf("Error building example clientset: %s", err.Error())
+	}
+
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
+	exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
+	kubeInformerFactory.Start(stopCh)
+	exampleInformerFactory.Start(stopCh)
 
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice.
