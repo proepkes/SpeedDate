@@ -1,6 +1,0 @@
-package: github.com/proepkes/speeddate # e.g. github.com/foo/bar
-import:
-- package: k8s.io/client-go
-  version: v9.0.0 # replace v9.0.0 with the required version
-- package: k8s.io/code-generator
-- package: k8s.io/gengo
