@@ -1,3 +1,0 @@
-Get accessing to application as following URLs: 
-
-http://{{ .Values.hosts.api }}
