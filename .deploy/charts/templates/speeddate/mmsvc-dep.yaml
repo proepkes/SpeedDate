@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.mmsvcSettings.DeploymentName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mmsvcSettings.ImageName }}
+        version: v1
+    spec:
+      containers:
+      - name: {{ .Values.mmsvcSettings.ImageName }}
+        image: {{ .Values.image.imageRegistry }}/{{ .Values.mmsvcSettings.ImageName }}:{{ .Values.image.dockerTag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}      
+        ports:
+        - containerPort: {{ .Values.authsvcSettings.Port }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.authsvcSettings.HealthPort }}
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"

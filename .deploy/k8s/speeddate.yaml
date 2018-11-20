@@ -37,6 +37,23 @@ spec:
     app: authsvc
 
 ---
+# Source: speeddate/templates/speeddate/mmsvc-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mmsvc
+  namespace: default
+  labels:
+    app: mmsvc
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8003
+    name: http
+  selector:
+    app: mmsvc
+
+---
 # Source: speeddate/templates/speeddate/ui-svc.yaml
 apiVersion: v1
 kind: Service
@@ -88,6 +105,41 @@ spec:
       containers:
       - name: authsvc
         image: docker.io/proepkes/authsvc:dev
+        imagePullPolicy: Always      
+        ports:
+        - containerPort: 8002
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9000
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+
+---
+# Source: speeddate/templates/speeddate/mmsvc-dep.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mmsvc-v1
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mmsvc
+        version: v1
+    spec:
+      containers:
+      - name: mmsvc
+        image: docker.io/proepkes/mmsvc:dev
         imagePullPolicy: Always      
         ports:
         - containerPort: 8002

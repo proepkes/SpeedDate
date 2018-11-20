@@ -21,5 +21,5 @@ cd $GOPATH/src/github.com/proepkes/speeddate/.dev/build
 
 # Generate k8s-yaml
 cd $GOPATH/src/github.com/proepkes/speeddate
-helm.exe template .deploy/charts/ -f .deploy/charts/values.yaml > .deploy/k8s/speeddate.yaml
+helm template .deploy/charts/ -f .deploy/charts/values.yaml > .deploy/k8s/speeddate.yaml
 kubectl apply -f .deploy/k8s/speeddate.yaml

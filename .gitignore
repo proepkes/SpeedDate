@@ -2,6 +2,7 @@
 cockroach-data
 glide.lock
 .idea
+debug
 
 # Created by https://www.gitignore.io/api/go,git,osx,linux,windows,intellij,jetbrains
 # Edit at https://www.gitignore.io/?templates=go,git,osx,linux,windows,intellij,jetbrains

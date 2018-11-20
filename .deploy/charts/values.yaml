@@ -24,5 +24,11 @@ authsvcSettings:
   Port: 8002
   HealthPort: 9000
 
+mmsvcSettings:
+  DeploymentName: mmsvc-v1
+  ImageName: mmsvc
+  Port: 8003
+  HealthPort: 9000
+
 speeddateui:
   Port: 80
