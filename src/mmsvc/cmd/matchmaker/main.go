@@ -14,21 +14,17 @@ import (
 	matchmakingsvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/matchmaking/server"
 	swaggersvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/swagger/server"
 	"github.com/proepkes/speeddate/src/mmsvc/gen/matchmaking"
-	clientset "github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
-	informers "github.com/proepkes/speeddate/src/pkg/client/informers/externalversions"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 
-	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/kubernetes/staging/src/k8s.io/sample-controller/pkg/signals"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/api/resource"
+	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 )
 
-var (
-	masterURL  string
-	kubeconfig string
-)
+
 
 func main() {
 	// Define command line flags, add any other flag required to configure
@@ -39,27 +35,25 @@ func main() {
 	)
 	flag.Parse()
 
-	// set up signals so we handle the first shutdown signal gracefully
-	stopCh := signals.SetupSignalHandler()
-	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	clientConf, err := rest.InClusterConfig()
 	if err != nil {
-		fmt.Errorf("Error building kubeconfig: %s", err.Error())
+		fmt.Errorf("Could not create in cluster config")
 	}
 
-	kubeClient, err := kubernetes.NewForConfig(cfg)
+	kubeClient, err := kubernetes.NewForConfig(clientConf)
 	if err != nil {
-		fmt.Errorf("Error building kubernetes clientset: %s", err.Error())
+		fmt.Errorf("Could not create the kubernetes clientset")
 	}
 
-	exampleClient, err := clientset.NewForConfig(cfg)
+	extClient, err := extclientset.NewForConfig(clientConf)
 	if err != nil {
-		fmt.Errorf("Error building example clientset: %s", err.Error())
+		fmt.Errorf("Could not create the api extension clientset")
 	}
 
-	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
-	exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
-	kubeInformerFactory.Start(stopCh)
-	exampleInformerFactory.Start(stopCh)
+	c, err := versioned.NewForConfig(clientConf)
+	if err != nil {
+		fmt.Errorf("Could not create the api clientset")
+	}
 
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice.
