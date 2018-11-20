@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Generate CRD-API
-cd $GOPATH/src/github.com/proepkes/speeddate
-vendor/k8s.io/code-generator/generate-groups.sh all github.com/proepkes/speeddate/src/pkg/client github.com/proepkes/speeddate/src/pkg/apis dev:v1
+cd $GOPATH/src/k8s.io/code-generator
+./generate-groups.sh all github.com/proepkes/speeddate/src/pkg/client github.com/proepkes/speeddate/src/pkg/apis dev:v1
 
 
 # Generate services
