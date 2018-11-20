@@ -643,7 +643,7 @@
   revision = "c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d"
 
 [[projects]]
-  digest = "1:fad89f10f7449f047870add350e29c17fa5f5b87bfca20061197c2517f307479"
+  digest = "1:f5b467dc6781e9ab4d329d80ba1b7943460c7f0bc5bffa489b107f24de7ab26e"
   name = "k8s.io/kubernetes"
   packages = ["staging/src/k8s.io/sample-controller/pkg/signals"]
   pruneopts = "UT"
