@@ -14,17 +14,13 @@ import (
 	matchmakingsvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/matchmaking/server"
 	swaggersvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/swagger/server"
 	"github.com/proepkes/speeddate/src/mmsvc/gen/matchmaking"
+	"github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/informers"
 	"k8s.io/client-go/rest"
-	"k8s.io/apimachinery/pkg/api/resource"
-	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 )
-
-
 
 func main() {
 	// Define command line flags, add any other flag required to configure
@@ -34,26 +30,6 @@ func main() {
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
 	flag.Parse()
-
-	clientConf, err := rest.InClusterConfig()
-	if err != nil {
-		fmt.Errorf("Could not create in cluster config")
-	}
-
-	kubeClient, err := kubernetes.NewForConfig(clientConf)
-	if err != nil {
-		fmt.Errorf("Could not create the kubernetes clientset")
-	}
-
-	extClient, err := extclientset.NewForConfig(clientConf)
-	if err != nil {
-		fmt.Errorf("Could not create the api extension clientset")
-	}
-
-	c, err := versioned.NewForConfig(clientConf)
-	if err != nil {
-		fmt.Errorf("Could not create the api clientset")
-	}
 
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice.
@@ -65,6 +41,23 @@ func main() {
 		logger = log.New(os.Stderr, "[mmsvc] ", log.Ltime)
 		adapter = middleware.NewLogger(logger)
 	}
+
+	clientConf, err := rest.InClusterConfig()
+	if err != nil {
+		fmt.Errorf("Could not create in cluster config")
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(clientConf)
+	if err != nil {
+		fmt.Errorf("Could not create the kubernetes clientset")
+	}
+
+	c, err := versioned.NewForConfig(clientConf)
+	if err != nil {		
+		fmt.Errorf("Could not create the api clientset")
+	}
+	logger.Println(kubeClient)
+	logger.Println(c)
 
 	// Create the structs that implement the services.
 	var (
