@@ -245,12 +245,13 @@
   revision = "795b5e3961ea1912fde60af417ad85e86acc0d6a"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a13a3b372f7b019be5251eaf2a5fff36fd0f296c5a4a3c10dbba3dea546f8e88"
+  branch = "v2"
+  digest = "1:e46d2cfd57b1415857cffd448690b675bbf2d56986d84fa83c2eb60eea3c264a"
   name = "goa.design/goa"
   packages = [
     ".",
     "codegen",
+    "codegen/generator",
     "codegen/service",
     "design",
     "dsl",
@@ -667,6 +668,7 @@
     "github.com/jinzhu/gorm/dialects/postgres",
     "github.com/satori/go.uuid",
     "goa.design/goa",
+    "goa.design/goa/codegen/generator",
     "goa.design/goa/http",
     "goa.design/goa/http/design",
     "goa.design/goa/http/dsl",
