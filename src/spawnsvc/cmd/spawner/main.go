@@ -10,12 +10,22 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
+	"github.com/proepkes/speeddate/src/pkg/client/informers/externalversions"
 	"github.com/proepkes/speeddate/src/spawnsvc"
 	spawnsvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/spawn/server"
 	swaggersvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/swagger/server"
 	"github.com/proepkes/speeddate/src/spawnsvc/gen/spawn"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
+
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+)
+
+const (
+	defaultResync = 30 * time.Second
 )
 
 func main() {
@@ -38,12 +48,33 @@ func main() {
 		adapter = middleware.NewLogger(logger)
 	}
 
+	clientConf, err := rest.InClusterConfig()
+	if err != nil {
+		logger.Panicf("Could not create in cluster config")
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(clientConf)
+	if err != nil {
+		logger.Panicf("Could not create the kubernetes clientset")
+	}
+
+	c, err := versioned.NewForConfig(clientConf)
+	if err != nil {
+		logger.Panicf("Could not create the api clientset")
+	}
+
+	sdInformerFactory := externalversions.NewSharedInformerFactory(c, defaultResync)
+	k8sInformerFactory := informers.NewSharedInformerFactory(kubeClient, defaultResync)
+	gameServers := sdInformerFactory.Dev().V1().GameServers()
+	gsInformer := gameServers.Informer()
+	logger.Println(gsInformer)
+
 	// Create the structs that implement the services.
 	var (
 		spawnSvc spawn.Service
 	)
 	{
-		spawnSvc = spawnsvc.NewSpawn(logger)
+		spawnSvc = spawnsvc.NewSpawn(logger, k8sInformerFactory)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other
@@ -107,6 +138,15 @@ func main() {
 		signal.Notify(c, os.Interrupt)
 		errc <- fmt.Errorf("%s", <-c)
 	}()
+
+	srvHealth := http.NewServeMux()
+	srvHealth.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok"))
+	})
+	go func() {
+		http.ListenAndServe(":9000", srvHealth)
+	}()
+
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}

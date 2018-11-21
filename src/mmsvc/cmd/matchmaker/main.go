@@ -14,17 +14,8 @@ import (
 	matchmakingsvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/matchmaking/server"
 	swaggersvr "github.com/proepkes/speeddate/src/mmsvc/gen/http/swagger/server"
 	"github.com/proepkes/speeddate/src/mmsvc/gen/matchmaking"
-	"github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
-	"github.com/proepkes/speeddate/src/pkg/client/informers/externalversions"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
-
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-)
-
-const (
-	defaultResync = 30 * time.Second
 )
 
 func main() {
@@ -46,27 +37,6 @@ func main() {
 		logger = log.New(os.Stderr, "[mmsvc] ", log.Ltime)
 		adapter = middleware.NewLogger(logger)
 	}
-
-	clientConf, err := rest.InClusterConfig()
-	if err != nil {
-		logger.Panicf("Could not create in cluster config")
-	}
-
-	kubeClient, err := kubernetes.NewForConfig(clientConf)
-	if err != nil {
-		logger.Panicf("Could not create the kubernetes clientset")
-	}
-
-	c, err := versioned.NewForConfig(clientConf)
-	if err != nil {
-		logger.Panicf("Could not create the api clientset")
-	}
-	logger.Println(kubeClient)
-
-	informerFactory := externalversions.NewSharedInformerFactory(c, defaultResync)
-	gameServers := informerFactory.Dev().V1().GameServers()
-	gsInformer := gameServers.Informer()
-	logger.Println(gsInformer)
 
 	// Create the structs that implement the services.
 	var (

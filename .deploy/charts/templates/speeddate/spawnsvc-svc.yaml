@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.spawnsvcSettings.ImageName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.spawnsvcSettings.ImageName }}
+spec:
+  ports:
+  - port: 8001
+    targetPort: {{ .Values.spawnsvcSettings.Port }}
+    name: http
+  selector:
+    app: {{ .Values.spawnsvcSettings.ImageName }}

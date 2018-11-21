@@ -5,6 +5,7 @@ import (
 	"log"
 
 	spawn "github.com/proepkes/speeddate/src/spawnsvc/gen/spawn"
+	"k8s.io/client-go/informers"
 )
 
 // spawn service example implementation.
@@ -14,7 +15,7 @@ type spawnSvc struct {
 }
 
 // NewSpawn returns the spawn service implementation.
-func NewSpawn(logger *log.Logger) spawn.Service {
+func NewSpawn(logger *log.Logger, k8sInformerFactory informers.SharedInformerFactory) spawn.Service {
 	return &spawnSvc{logger}
 }
 

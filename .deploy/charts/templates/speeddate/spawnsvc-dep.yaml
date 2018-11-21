@@ -1,26 +1,26 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Values.mmsvcSettings.DeploymentName }}
+  name: {{ .Values.spawnsvcSettings.DeploymentName }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{ .Values.mmsvcSettings.ImageName }}
+        app: {{ .Values.spawnsvcSettings.ImageName }}
         version: v1
     spec:
       containers:
-      - name: {{ .Values.mmsvcSettings.ImageName }}
-        image: {{ .Values.image.imageRegistry }}/{{ .Values.mmsvcSettings.ImageName }}:{{ .Values.image.dockerTag }}
+      - name: {{ .Values.spawnsvcSettings.ImageName }}
+        image: {{ .Values.image.imageRegistry }}/{{ .Values.spawnsvcSettings.ImageName }}:{{ .Values.image.dockerTag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}      
         ports:
-        - containerPort: {{ .Values.mmsvcSettings.Port }}
+        - containerPort: {{ .Values.spawnsvcSettings.Port }}
         livenessProbe:
           httpGet:
             path: /health
-            port: {{ .Values.mmsvcSettings.HealthPort }}
+            port: {{ .Values.spawnsvcSettings.HealthPort }}
           initialDelaySeconds: 25
           periodSeconds: 25
         resources:

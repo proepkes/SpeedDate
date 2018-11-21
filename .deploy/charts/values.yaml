@@ -30,5 +30,11 @@ mmsvcSettings:
   Port: 8003
   HealthPort: 9000
 
+spawnsvcSettings:
+  DeploymentName: spawnsvc-v1
+  ImageName: spawnsvc
+  Port: 8003
+  HealthPort: 9000
+
 speeddateui:
   Port: 80
