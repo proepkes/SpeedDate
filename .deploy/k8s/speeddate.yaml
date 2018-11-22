@@ -54,6 +54,23 @@ spec:
     app: mmsvc
 
 ---
+# Source: speeddate/templates/speeddate/spawnsvc-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: spawnsvc
+  namespace: default
+  labels:
+    app: spawnsvc
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8003
+    name: http
+  selector:
+    app: spawnsvc
+
+---
 # Source: speeddate/templates/speeddate/ui-svc.yaml
 apiVersion: v1
 kind: Service
@@ -142,7 +159,42 @@ spec:
         image: docker.io/proepkes/mmsvc:dev
         imagePullPolicy: Always      
         ports:
-        - containerPort: 8002
+        - containerPort: 8003
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9000
+          initialDelaySeconds: 25
+          periodSeconds: 25
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "50m"
+          limits:
+            memory: "400Mi"
+            cpu: "100m"
+
+---
+# Source: speeddate/templates/speeddate/spawnsvc-dep.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: spawnsvc-v1
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: spawnsvc
+        version: v1
+    spec:
+      containers:
+      - name: spawnsvc
+        image: docker.io/proepkes/spawnsvc:dev
+        imagePullPolicy: Always      
+        ports:
+        - containerPort: 8003
         livenessProbe:
           httpGet:
             path: /health

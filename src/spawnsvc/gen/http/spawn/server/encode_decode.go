@@ -14,9 +14,9 @@ import (
 	goahttp "goa.design/goa/http"
 )
 
-// EncodeNewResponse returns an encoder for responses returned by the spawn new
-// endpoint.
-func EncodeNewResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeAllocateResponse returns an encoder for responses returned by the
+// spawn allocate endpoint.
+func EncodeAllocateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		res := v.(string)
 		enc := encoder(ctx, w)

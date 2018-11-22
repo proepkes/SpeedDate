@@ -7,7 +7,7 @@
 
 package client
 
-// NewSpawnPath returns the URL path to the spawn service new HTTP endpoint.
-func NewSpawnPath() string {
+// AllocateSpawnPath returns the URL path to the spawn service allocate HTTP endpoint.
+func AllocateSpawnPath() string {
 	return "/spawn"
 }

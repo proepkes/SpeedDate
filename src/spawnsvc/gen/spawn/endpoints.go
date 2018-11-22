@@ -15,25 +15,25 @@ import (
 
 // Endpoints wraps the "spawn" service endpoints.
 type Endpoints struct {
-	New goa.Endpoint
+	Allocate goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "spawn" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		New: NewNewEndpoint(s),
+		Allocate: NewAllocateEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "spawn" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.New = m(e.New)
+	e.Allocate = m(e.Allocate)
 }
 
-// NewNewEndpoint returns an endpoint function that calls the method "new" of
-// service "spawn".
-func NewNewEndpoint(s Service) goa.Endpoint {
+// NewAllocateEndpoint returns an endpoint function that calls the method
+// "allocate" of service "spawn".
+func NewAllocateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.New(ctx)
+		return s.Allocate(ctx)
 	}
 }

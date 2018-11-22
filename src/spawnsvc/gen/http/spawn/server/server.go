@@ -18,8 +18,8 @@ import (
 
 // Server lists the spawn service endpoint HTTP handlers.
 type Server struct {
-	Mounts []*MountPoint
-	New    http.Handler
+	Mounts   []*MountPoint
+	Allocate http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -49,9 +49,9 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"New", "POST", "/spawn"},
+			{"Allocate", "POST", "/spawn"},
 		},
-		New: NewNewHandler(e.New, mux, dec, enc, eh),
+		Allocate: NewAllocateHandler(e.Allocate, mux, dec, enc, eh),
 	}
 }
 
@@ -60,17 +60,17 @@ func (s *Server) Service() string { return "spawn" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.New = m(s.New)
+	s.Allocate = m(s.Allocate)
 }
 
 // Mount configures the mux to serve the spawn endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountNewHandler(mux, h.New)
+	MountAllocateHandler(mux, h.Allocate)
 }
 
-// MountNewHandler configures the mux to serve the "spawn" service "new"
-// endpoint.
-func MountNewHandler(mux goahttp.Muxer, h http.Handler) {
+// MountAllocateHandler configures the mux to serve the "spawn" service
+// "allocate" endpoint.
+func MountAllocateHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -80,9 +80,9 @@ func MountNewHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("POST", "/spawn", f)
 }
 
-// NewNewHandler creates a HTTP handler which loads the HTTP request and calls
-// the "spawn" service "new" endpoint.
-func NewNewHandler(
+// NewAllocateHandler creates a HTTP handler which loads the HTTP request and
+// calls the "spawn" service "allocate" endpoint.
+func NewAllocateHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	dec func(*http.Request) goahttp.Decoder,
@@ -90,12 +90,12 @@ func NewNewHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
-		encodeResponse = EncodeNewResponse(enc)
+		encodeResponse = EncodeAllocateResponse(enc)
 		encodeError    = goahttp.ErrorEncoder(enc)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "new")
+		ctx = context.WithValue(ctx, goa.MethodKey, "allocate")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "spawn")
 
 		res, err := endpoint(ctx, nil)

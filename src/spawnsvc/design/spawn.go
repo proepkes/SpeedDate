@@ -10,7 +10,7 @@ var _ = Service("spawn", func() {
 		Path("/spawn")
 	})
 
-	Method("new", func() {
+	Method("allocate", func() {
 		Description("Spawn a new gameserver.")
 		Result(String)
 		HTTP(func() {

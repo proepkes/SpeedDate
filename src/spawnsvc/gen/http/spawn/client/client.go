@@ -17,8 +17,9 @@ import (
 
 // Client lists the spawn service endpoint HTTP clients.
 type Client struct {
-	// New Doer is the HTTP client used to make requests to the new endpoint.
-	NewDoer goahttp.Doer
+	// Allocate Doer is the HTTP client used to make requests to the allocate
+	// endpoint.
+	AllocateDoer goahttp.Doer
 
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
@@ -40,7 +41,7 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		NewDoer:             doer,
+		AllocateDoer:        doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -49,21 +50,21 @@ func NewClient(
 	}
 }
 
-// New returns an endpoint that makes HTTP requests to the spawn service new
-// server.
-func (c *Client) New() goa.Endpoint {
+// Allocate returns an endpoint that makes HTTP requests to the spawn service
+// allocate server.
+func (c *Client) Allocate() goa.Endpoint {
 	var (
-		decodeResponse = DecodeNewResponse(c.decoder, c.RestoreResponseBody)
+		decodeResponse = DecodeAllocateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildNewRequest(ctx, v)
+		req, err := c.BuildAllocateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.NewDoer.Do(req)
+		resp, err := c.AllocateDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("spawn", "new", err)
+			return nil, goahttp.ErrRequestError("spawn", "allocate", err)
 		}
 		return decodeResponse(resp)
 	}

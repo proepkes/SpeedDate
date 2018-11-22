@@ -17,9 +17,9 @@ paths:
     post:
       tags:
       - spawn
-      summary: new spawn
+      summary: allocate spawn
       description: Spawn a new gameserver.
-      operationId: spawn#new
+      operationId: spawn#allocate
       responses:
         "201":
           description: Created response.

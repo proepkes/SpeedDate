@@ -15,20 +15,20 @@ import (
 
 // Client is the "spawn" service client.
 type Client struct {
-	NewEndpoint goa.Endpoint
+	AllocateEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "spawn" service client given the endpoints.
-func NewClient(new goa.Endpoint) *Client {
+func NewClient(allocate goa.Endpoint) *Client {
 	return &Client{
-		NewEndpoint: new,
+		AllocateEndpoint: allocate,
 	}
 }
 
-// New calls the "new" endpoint of the "spawn" service.
-func (c *Client) New(ctx context.Context) (res string, err error) {
+// Allocate calls the "allocate" endpoint of the "spawn" service.
+func (c *Client) Allocate(ctx context.Context) (res string, err error) {
 	var ires interface{}
-	ires, err = c.NewEndpoint(ctx, nil)
+	ires, err = c.AllocateEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}

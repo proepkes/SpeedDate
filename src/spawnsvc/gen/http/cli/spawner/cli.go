@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `spawn new
+	return `spawn allocate
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` spawn new` + "\n" +
+	return os.Args[0] + ` spawn allocate` + "\n" +
 		""
 }
 
@@ -45,10 +45,10 @@ func ParseEndpoint(
 	var (
 		spawnFlags = flag.NewFlagSet("spawn", flag.ContinueOnError)
 
-		spawnNewFlags = flag.NewFlagSet("new", flag.ExitOnError)
+		spawnAllocateFlags = flag.NewFlagSet("allocate", flag.ExitOnError)
 	)
 	spawnFlags.Usage = spawnUsage
-	spawnNewFlags.Usage = spawnNewUsage
+	spawnAllocateFlags.Usage = spawnAllocateUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -84,8 +84,8 @@ func ParseEndpoint(
 		switch svcn {
 		case "spawn":
 			switch epn {
-			case "new":
-				epf = spawnNewFlags
+			case "allocate":
+				epf = spawnAllocateFlags
 
 			}
 
@@ -112,8 +112,8 @@ func ParseEndpoint(
 		case "spawn":
 			c := spawnc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "new":
-				endpoint = c.New()
+			case "allocate":
+				endpoint = c.Allocate()
 				data = nil
 			}
 		}
@@ -132,18 +132,18 @@ Usage:
     %s [globalflags] spawn COMMAND [flags]
 
 COMMAND:
-    new: Spawn a new gameserver.
+    allocate: Spawn a new gameserver.
 
 Additional help:
     %s spawn COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func spawnNewUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] spawn new
+func spawnAllocateUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] spawn allocate
 
 Spawn a new gameserver.
 
 Example:
-    `+os.Args[0]+` spawn new
+    `+os.Args[0]+` spawn allocate
 `, os.Args[0])
 }
