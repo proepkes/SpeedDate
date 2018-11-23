@@ -6,18 +6,17 @@ import (
 	"log"
 	"time"
 
-	spawn "github.com/proepkes/speeddate/src/spawnsvc/gen/spawn"
+	armada "github.com/proepkes/speeddate/src/spawnsvc/gen/armada"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
-// spawn service example implementation.
+// armada service example implementation.
 // The example methods log the requests and return zero values.
-type spawnSvc struct {
+type armadaSvc struct {
 	logger    *log.Logger
 	clientset kubernetes.Interface
 	queue     workqueue.RateLimitingInterface
@@ -25,54 +24,54 @@ type spawnSvc struct {
 	handler   Handler
 }
 
-// NewSpawn returns the spawn service implementation.
-func NewSpawn(logger *log.Logger, clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, handler Handler) spawn.Service {
-	return &spawnSvc{logger, clientset, queue, informer, handler}
+// NewArmada returns the armada service implementation.
+func NewArmada(logger *log.Logger, clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, handler Handler) armada.Service {
+	return &armadaSvc{logger, clientset, queue, informer, handler}
 }
 
-// Spawn a new gameserver.
-func (s *spawnSvc) Allocate(ctx context.Context) (res string, err error) {
-	s.logger.Print("spawn.allocate")
+// Add a new gameserver to the armada.
+func (s *armadaSvc) Add(ctx context.Context) (res string, err error) {
+	s.logger.Print("armada.add")
 	return
 }
 
 // Run is the main path of execution for the controller loop
-func (c *spawnSvc) Run(stopCh <-chan struct{}) {
+func (s *armadaSvc) Run(stopCh <-chan struct{}) {
 	// handle a panic with logging and exiting
 	defer utilruntime.HandleCrash()
 	// ignore new items in the queue but when all goroutines
 	// have completed existing items then shutdown
-	defer c.queue.ShutDown()
+	defer s.queue.ShutDown()
 
-	c.logger.Println("Controller.Run: initiating")
+	s.logger.Println("Controller.Run: initiating")
 
 	// run the informer to start listing and watching resources
-	go c.informer.Run(stopCh)
+	go s.informer.Run(stopCh)
 
 	// do the initial synchronization (one time) to populate resources
-	if !cache.WaitForCacheSync(stopCh, c.HasSynced) {
+	if !cache.WaitForCacheSync(stopCh, s.HasSynced) {
 		utilruntime.HandleError(fmt.Errorf("Error syncing cache"))
 		return
 	}
-	c.logger.Println("Controller.Run: cache sync complete")
+	s.logger.Println("Controller.Run: cache sync complete")
 
 	// run the runWorker method every second with a stop channel
-	wait.Until(c.runWorker, time.Second, stopCh)
+	wait.Until(s.runWorker, time.Second, stopCh)
 }
 
 // HasSynced allows us to satisfy the Controller interface
 // by wiring up the informer's HasSynced method to it
-func (c *spawnSvc) HasSynced() bool {
-	return c.informer.HasSynced()
+func (s *armadaSvc) HasSynced() bool {
+	return s.informer.HasSynced()
 }
 
 // runWorker executes the loop to process new items added to the queue
-func (c *spawnSvc) runWorker() {
+func (s *armadaSvc) runWorker() {
 	log.Println("Controller.runWorker: starting")
 
 	// invoke processNextItem to fetch and consume the next change
 	// to a watched or listed resource
-	for c.processNextItem() {
+	for s.processNextItem() {
 		log.Println("Controller.runWorker: processing next item")
 	}
 
@@ -82,13 +81,13 @@ func (c *spawnSvc) runWorker() {
 // processNextItem retrieves each queued item and takes the
 // necessary handler action based off of if the item was
 // created or deleted
-func (c *spawnSvc) processNextItem() bool {
+func (s *armadaSvc) processNextItem() bool {
 	log.Println("Controller.processNextItem: start")
 
 	// fetch the next item (blocking) from the queue to process or
 	// if a shutdown is requested then return out of this to stop
 	// processing
-	key, quit := c.queue.Get()
+	key, quit := s.queue.Get()
 
 	// stop the worker loop from running as this indicates we
 	// have sent a shutdown message that the queue has indicated
@@ -97,7 +96,7 @@ func (c *spawnSvc) processNextItem() bool {
 		return false
 	}
 
-	defer c.queue.Done(key)
+	defer s.queue.Done(key)
 
 	// assert the string out of the key (format `namespace/name`)
 	keyRaw := key.(string)
@@ -112,14 +111,14 @@ func (c *spawnSvc) processNextItem() bool {
 	// then we want to retry this particular queue key a certain
 	// number of times (5 here) before we forget the queue key
 	// and throw an error
-	item, exists, err := c.informer.GetIndexer().GetByKey(keyRaw)
+	item, exists, err := s.informer.GetIndexer().GetByKey(keyRaw)
 	if err != nil {
-		if c.queue.NumRequeues(key) < 5 {
+		if s.queue.NumRequeues(key) < 5 {
 			fmt.Errorf("Controller.processNextItem: Failed processing item with key %s with error %v, retrying", key, err)
-			c.queue.AddRateLimited(key)
+			s.queue.AddRateLimited(key)
 		} else {
 			fmt.Errorf("Controller.processNextItem: Failed processing item with key %s with error %v, no more retries", key, err)
-			c.queue.Forget(key)
+			s.queue.Forget(key)
 			utilruntime.HandleError(err)
 		}
 	}
@@ -131,13 +130,13 @@ func (c *spawnSvc) processNextItem() bool {
 	// after both instances, we want to forget the key from the queue, as this indicates
 	// a code path of successful queue key processing
 	if !exists {
-		c.logger.Printf("Controller.processNextItem: object deleted detected: %s", keyRaw)
-		c.handler.ObjectDeleted(item)
-		c.queue.Forget(key)
+		s.logger.Printf("Controller.processNextItem: object deleted detected: %s", keyRaw)
+		s.handler.ObjectDeleted(item)
+		s.queue.Forget(key)
 	} else {
-		c.logger.Printf("Controller.processNextItem: object created detected: %s", keyRaw)
-		c.handler.ObjectCreated(item)
-		c.queue.Forget(key)
+		s.logger.Printf("Controller.processNextItem: object created detected: %s", keyRaw)
+		s.handler.ObjectCreated(item)
+		s.queue.Forget(key)
 	}
 
 	// keep the worker loop running by returning true

@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	spawnc "github.com/proepkes/speeddate/src/spawnsvc/gen/http/spawn/client"
+	armadac "github.com/proepkes/speeddate/src/spawnsvc/gen/http/armada/client"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
 )
@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `spawn allocate
+	return `armada add
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` spawn allocate` + "\n" +
+	return os.Args[0] + ` armada add` + "\n" +
 		""
 }
 
@@ -43,12 +43,12 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
-		spawnFlags = flag.NewFlagSet("spawn", flag.ContinueOnError)
+		armadaFlags = flag.NewFlagSet("armada", flag.ContinueOnError)
 
-		spawnAllocateFlags = flag.NewFlagSet("allocate", flag.ExitOnError)
+		armadaAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
 	)
-	spawnFlags.Usage = spawnUsage
-	spawnAllocateFlags.Usage = spawnAllocateUsage
+	armadaFlags.Usage = armadaUsage
+	armadaAddFlags.Usage = armadaAddUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -65,8 +65,8 @@ func ParseEndpoint(
 	{
 		svcn = os.Args[1+flag.NFlag()]
 		switch svcn {
-		case "spawn":
-			svcf = spawnFlags
+		case "armada":
+			svcf = armadaFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -82,10 +82,10 @@ func ParseEndpoint(
 	{
 		epn = os.Args[2+flag.NFlag()+svcf.NFlag()]
 		switch svcn {
-		case "spawn":
+		case "armada":
 			switch epn {
-			case "allocate":
-				epf = spawnAllocateFlags
+			case "add":
+				epf = armadaAddFlags
 
 			}
 
@@ -109,11 +109,11 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "spawn":
-			c := spawnc.NewClient(scheme, host, doer, enc, dec, restore)
+		case "armada":
+			c := armadac.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "allocate":
-				endpoint = c.Allocate()
+			case "add":
+				endpoint = c.Add()
 				data = nil
 			}
 		}
@@ -125,25 +125,25 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// spawnUsage displays the usage of the spawn command and its subcommands.
-func spawnUsage() {
-	fmt.Fprintf(os.Stderr, `The service makes it possible to spawn gameservers
+// armadaUsage displays the usage of the armada command and its subcommands.
+func armadaUsage() {
+	fmt.Fprintf(os.Stderr, `The service makes it possible to manage gameservers
 Usage:
-    %s [globalflags] spawn COMMAND [flags]
+    %s [globalflags] armada COMMAND [flags]
 
 COMMAND:
-    allocate: Spawn a new gameserver.
+    add: Add a new gameserver to the armada.
 
 Additional help:
-    %s spawn COMMAND --help
+    %s armada COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func spawnAllocateUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] spawn allocate
+func armadaAddUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] armada add
 
-Spawn a new gameserver.
+Add a new gameserver to the armada.
 
 Example:
-    `+os.Args[0]+` spawn allocate
+    `+os.Args[0]+` armada add
 `, os.Args[0])
 }

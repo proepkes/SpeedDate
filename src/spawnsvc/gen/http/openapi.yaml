@@ -13,13 +13,13 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /spawn:
+  /armada:
     post:
       tags:
-      - spawn
-      summary: allocate spawn
-      description: Spawn a new gameserver.
-      operationId: spawn#allocate
+      - armada
+      summary: add armada
+      description: Add a new gameserver to the armada.
+      operationId: armada#add
       responses:
         "201":
           description: Created response.

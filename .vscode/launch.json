@@ -10,7 +10,7 @@
 			"type": "go",
 			"request": "launch",
 			"mode": "debug",
-            "program": "${workspaceRoot}/authsvc/cmd/auther",
+            "program": "${workspaceRoot}/src/authsvc/cmd/auther",
 			"env": {},
 			"args": ["-debug", "true"]
 		},
@@ -19,7 +19,7 @@
 			"type": "go",
 			"request": "launch",
 			"mode": "debug",
-            "program": "${workspaceRoot}/storagesvc/cmd/user",
+            "program": "${workspaceRoot}/src/storagesvc/cmd/user",
 			"env": {},
 			"args": ["-debug", "true"]
 		},
