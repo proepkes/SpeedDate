@@ -5,7 +5,7 @@
   {
       "label": "start cockroachdb",
       "type": "shell",
-      "command": "cockroach start --insecure --listen-addr=0.0.0.0:8888",
+      "command": "cockroach start --insecure --listen-addr=0.0.0.0",
       "auto": true
     }
   ]

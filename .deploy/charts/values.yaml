@@ -17,7 +17,7 @@ storagesvcSettings:
   HealthPort: 9000
   DbIP: 192.168.178.46
   DbHostname: cockroachdb.external.service
-  DbPort: 8888
+  DbPort: 26257
   DbName: speeddate
   DbUser: speeddateuser
   DbPassword: password
