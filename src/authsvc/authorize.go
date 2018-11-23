@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	. "github.com/proepkes/speeddate/src/authsvc/gen/authorize"
+	"github.com/proepkes/speeddate/src/authsvc/gen/authorize"
 
 	jwtgo "github.com/dgrijalva/jwt-go"
 )
@@ -27,7 +27,7 @@ type defaultClaims struct {
 }
 
 // NewAuthorize returns the authorize service implementation.
-func NewAuthorize(logger *log.Logger) Service {
+func NewAuthorize(logger *log.Logger) authorize.Service {
 	//TODO: configurable path or secret
 	abs, _ := filepath.Abs("../../keys/secret.key")
 	b, err := ioutil.ReadFile(abs)
@@ -49,8 +49,8 @@ func NewAuthorize(logger *log.Logger) Service {
 }
 
 // Creates a valid JWT
-func (s *authorizeSvc) Login(ctx context.Context, p *LoginPayload) (res *LoginResult, err error) {
-	res = &LoginResult{}
+func (s *authorizeSvc) Login(ctx context.Context, p *authorize.LoginPayload) (res *authorize.LoginResult, err error) {
+	res = &authorize.LoginResult{}
 
 	s.logger.Print("authorize.login")
 
