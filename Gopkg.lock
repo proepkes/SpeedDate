@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
+  name = "github.com/Sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:a571648c5f1a3f20fa405d1cf924b941c5bb236ea6d0565a63c0994e38dd8f82"
   name = "github.com/caarlos0/env"
   packages = ["."]
@@ -127,14 +135,6 @@
   revision = "a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4"
 
 [[projects]]
-  digest = "1:3e260afa138eab6492b531a3b3d10ab4cb70512d423faa78b8949dec76e66a21"
-  name = "github.com/imdario/mergo"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "9316a62528ac99aaecb4e47eadd6dc8aa6533d58"
-  version = "v0.3.5"
-
-[[projects]]
   digest = "1:6895fbe5a10c5aebd1965cac6f6905dcdb21bee01e08912d3ba6a805c2485f6a"
   name = "github.com/jinzhu/gorm"
   packages = [
@@ -159,6 +159,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "f2b4162afba35581b6d4a50d3b8f34e33c144682"
+
+[[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
 
 [[projects]]
   digest = "1:b18ffc558326ebaed3b4a175617f1e12ed4e3f53d6ebfe5ba372a3de16d22278"
@@ -227,14 +235,6 @@
   pruneopts = "UT"
   revision = "1744e2970ca51c86172c8190fadad617561ed6e7"
   version = "v1.0.0"
-
-[[projects]]
-  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
-  name = "github.com/spf13/pflag"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -489,7 +489,7 @@
   revision = "1b0702fe2927f82126da9c2ecf567f14676f6072"
 
 [[projects]]
-  digest = "1:9a80c0f43b7c563c0ce60a1c10b37d1315a06c70a4c62fe0677c2dce07ed02ad"
+  digest = "1:525f91799e07e9086d380c507d5025e158cad3705bef72d9e2adf920cf9ba4cc"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -606,12 +606,8 @@
     "rest",
     "rest/watch",
     "testing",
-    "tools/auth",
     "tools/cache",
-    "tools/clientcmd",
     "tools/clientcmd/api",
-    "tools/clientcmd/api/latest",
-    "tools/clientcmd/api/v1",
     "tools/metrics",
     "tools/pager",
     "tools/reference",
@@ -620,9 +616,9 @@
     "util/cert",
     "util/connrotation",
     "util/flowcontrol",
-    "util/homedir",
     "util/integer",
     "util/retry",
+    "util/workqueue",
   ]
   pruneopts = "UT"
   revision = "1638f8970cefaa404ff3a62950f88b08292b2696"
@@ -643,14 +639,6 @@
   revision = "c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d"
 
 [[projects]]
-  digest = "1:f5b467dc6781e9ab4d329d80ba1b7943460c7f0bc5bffa489b107f24de7ab26e"
-  name = "k8s.io/kubernetes"
-  packages = ["staging/src/k8s.io/sample-controller/pkg/signals"]
-  pruneopts = "UT"
-  revision = "17c77c7898218073f14c8d573582e8d2313dc740"
-  version = "v1.12.2"
-
-[[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
   name = "sigs.k8s.io/yaml"
   packages = ["."]
@@ -662,6 +650,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Sirupsen/logrus",
     "github.com/caarlos0/env",
     "github.com/dgrijalva/jwt-go",
     "github.com/jinzhu/gorm",
@@ -676,6 +665,7 @@
     "goa.design/goa/security",
     "goa.design/plugins/cors",
     "goa.design/plugins/cors/dsl",
+    "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",
@@ -684,6 +674,7 @@
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/runtime",
+    "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
@@ -692,9 +683,8 @@
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
-    "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/util/flowcontrol",
-    "k8s.io/kubernetes/staging/src/k8s.io/sample-controller/pkg/signals",
+    "k8s.io/client-go/util/workqueue",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
