@@ -1,19 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: authsvc-v1
+  name: {{ .Values.authsvcSettings.DeploymentName }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: authsvc
+        app: {{ .Values.authsvcSettings.ImageName }}
         version: v1
     spec:
       containers:
-      - name: authsvc
-        image: {{ .Values.image.imageRegistry }}/authsvc:{{ .Values.image.dockerTag }}
+      - name: {{ .Values.authsvcSettings.ImageName }}
+        image: {{ .Values.image.imageRegistry }}/{{ .Values.authsvcSettings.ImageName }}:{{ .Values.image.dockerTag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}      
         ports:
         - containerPort: {{ .Values.authsvcSettings.Port }}

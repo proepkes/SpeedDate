@@ -11,6 +11,8 @@ hosts:
   api: api.speeddate.local
 
 storagesvcSettings:
+  DeploymentName: storagesvc-v1
+  ImageName: storagesvc
   Port: 8001
   HealthPort: 9000
   DbIP: 192.168.178.46
@@ -21,6 +23,8 @@ storagesvcSettings:
   DbPassword: password
 
 authsvcSettings:
+  DeploymentName: authsvc-v1
+  ImageName: authsvc
   Port: 8002
   HealthPort: 9000
 

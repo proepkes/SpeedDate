@@ -1,19 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: storagesvc-v1
+  name: {{ .Values.storagesvcSettings.DeploymentName }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: storagesvc
+        app: {{ .Values.storagesvcSettings.ImageName }}
         version: v1
     spec:
       containers:
-      - name: storagesvc
-        image: {{.Values.image.imageRegistry}}/storagesvc:{{.Values.image.dockerTag}}
+      - name: {{ .Values.storagesvcSettings.ImageName }}
+        image: {{.Values.image.imageRegistry}}/{{ .Values.storagesvcSettings.ImageName }}:{{.Values.image.dockerTag}}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: DB_IP

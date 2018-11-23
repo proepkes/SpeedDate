@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: authsvc
+  name: {{ .Values.authsvcSettings.ImageName }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: authsvc
+    app: {{ .Values.authsvcSettings.ImageName }}
 spec:
   ports:
   - port: 8001
     targetPort: {{ .Values.authsvcSettings.Port }}
     name: http
   selector:
-    app: authsvc
+    app: {{ .Values.authsvcSettings.ImageName }}
