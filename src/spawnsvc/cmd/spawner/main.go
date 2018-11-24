@@ -76,6 +76,7 @@ func getClientInCluster() (kubernetes.Interface, *clientset.Clientset) {
 }
 
 func main() {
+	flag.Set("logtostderr", "true")
 	flag.Parse()
 
 	// get the Kubernetes client for connectivity
