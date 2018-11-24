@@ -20,10 +20,12 @@ import (
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 
-	"k8s.io/client-go/informers"
+	informers "github.com/proepkes/speeddate/src/pkg/client/informers/externalversions"
+	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog"
 )
 
 // retrieve the Kubernetes cluster client from outside of the cluster
@@ -115,11 +117,21 @@ func main() {
 		armadaSvc armada.Service
 	)
 	{
-		armadaSvc = spawnsvc.NewArmada(k8sClient, client,
+		armadaSvc = spawnsvc.NewArmada(
+			k8sClient,
+			client,
 			kubeInformerFactory.Apps().V1().Deployments(),
-			exampleInformerFactory.arst().V1alpha1().Foos())
+			exampleInformerFactory.Dev().V1().GameServers())
 	}
 
+	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
+	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
+	kubeInformerFactory.Start(stopCh)
+	exampleInformerFactory.Start(stopCh)
+
+	if err := armadaSvc.Run(2, stopCh); err != nil {
+		klog.Fatalf("Error running controller: %s", err.Error())
+	}
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
 	var (
