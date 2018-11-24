@@ -93,6 +93,7 @@ func NewGameServerController(kubeclientset kubernetes.Interface,
 	}
 
 	klog.Info("Setting up event handlers")
+	klog.Info("Setting up event handlers2")
 	// Set up an event handler for when GameServer resources change
 	gameServerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: svc.enqueueGameServer,
