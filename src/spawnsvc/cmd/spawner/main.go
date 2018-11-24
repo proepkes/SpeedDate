@@ -17,7 +17,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/klog"
 )
 
 // retrieve the Kubernetes cluster client from outside of the cluster
@@ -99,6 +98,6 @@ func main() {
 		exampleInformerFactory.Dev().V1().GameServers())
 
 	if err := gsController.Run(1, stopCh); err != nil {
-		klog.Infof("Error running controller: %s", err.Error())
+		log.Fatalf("Error running controller: %s", err.Error())
 	}
 }

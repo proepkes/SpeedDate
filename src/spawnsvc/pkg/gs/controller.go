@@ -2,6 +2,7 @@ package gs
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	devv1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/apis/dev/v1"
@@ -26,10 +27,10 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
-	"k8s.io/klog"
 )
 
 type GameServerController struct {
+	logger *log.Logger
 	// kubeclientset is a standard kubernetes clientset
 	kubeclientset kubernetes.Interface
 	// sampleclientset is a clientset for our own API group
@@ -75,9 +76,8 @@ func NewGameServerController(kubeclientset kubernetes.Interface,
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
 	// logged for sample-controller types.
 	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
-	// klog.V(4).Info("Creating event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(klog.Infof)
+	eventBroadcaster.StartLogging(log.Printf)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
@@ -92,7 +92,7 @@ func NewGameServerController(kubeclientset kubernetes.Interface,
 		recorder:          recorder,
 	}
 
-	// klog.Info("Setting up event handlers")
+	// log.Println("Setting up event handlers")
 	// Set up an event handler for when GameServer resources change
 	gameServerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: svc.enqueueGameServer,
@@ -134,24 +134,24 @@ func (s *GameServerController) Run(threadiness int, stopCh <-chan struct{}) erro
 	defer s.workqueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches
-	klog.Info("Starting Gameserver controller")
+	log.Println("Starting Gameserver controller")
 
 	// Wait for the caches to be synced before starting workers
-	klog.Info("Waiting for informer caches to sync")
+	log.Println("Waiting for informer caches to sync")
 	if ok := cache.WaitForCacheSync(stopCh, s.deploymentsSynced, s.gameServersSynced); !ok {
-		klog.Errorf("failed to wait for caches to sync")
+		log.Fatalln("failed to wait for caches to sync")
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
-	klog.Info("Starting workers")
+	log.Println("Starting workers")
 	// Launch two workers to process Gameserver resources
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(s.runWorker, time.Second, stopCh)
 	}
 
-	klog.Info("Started workers")
+	log.Println("Started workers")
 	<-stopCh
-	klog.Info("Shutting down workers")
+	log.Println("Shutting down workers")
 
 	return nil
 }
@@ -207,7 +207,7 @@ func (s *GameServerController) processNextWorkItem() bool {
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queued again until another change happens.
 		s.workqueue.Forget(obj)
-		klog.Infof("Successfully synced '%s'", key)
+		log.Printf("Successfully synced '%s'", key)
 		return nil
 	}(obj)
 
@@ -278,7 +278,7 @@ func (s *GameServerController) syncHandler(key string) error {
 	// number does not equal the current desired replicas on the Deployment, we
 	// should update the Deployment resource.
 	if gs.Spec.Replicas != nil && *gs.Spec.Replicas != *deployment.Spec.Replicas {
-		klog.V(4).Infof("Gameserver %s replicas: %d, deployment replicas: %d", name, *gs.Spec.Replicas, *deployment.Spec.Replicas)
+		log.Printf("Gameserver %s replicas: %d, deployment replicas: %d", name, *gs.Spec.Replicas, *deployment.Spec.Replicas)
 		deployment, err = s.kubeclientset.AppsV1().Deployments(gs.Namespace).Update(newDeployment(gs))
 	}
 
@@ -346,20 +346,20 @@ func (s *GameServerController) handleObject(obj interface{}) {
 			runtime.HandleError(fmt.Errorf("error decoding object tombstone, invalid type"))
 			return
 		}
-		klog.V(4).Infof("Recovered deleted object '%s' from tombstone", object.GetName())
+		log.Printf("Recovered deleted object '%s' from tombstone", object.GetName())
 	}
-	klog.V(4).Infof("Processing object: %s", object.GetName())
+	log.Printf("Processing object: %s", object.GetName())
 	if ownerRef := metav1.GetControllerOf(object); ownerRef != nil {
 		// If this object is not owned by a GameServer, we should not do anything more
 		// with it.
 		if ownerRef.Kind != "GameServer" {
-			klog.V(4).Infof("ignoring '%s'", ownerRef.Kind)
+			log.Printf("ignoring '%s'", ownerRef.Kind)
 			return
 		}
 
 		gs, err := s.gameServerLister.GameServers(object.GetNamespace()).Get(ownerRef.Name)
 		if err != nil {
-			klog.V(4).Infof("ignoring orphaned object '%s' of gs '%s'", object.GetSelfLink(), ownerRef.Name)
+			log.Printf("ignoring orphaned object '%s' of gs '%s'", object.GetSelfLink(), ownerRef.Name)
 			return
 		}
 
