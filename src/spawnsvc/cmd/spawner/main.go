@@ -114,7 +114,7 @@ func main() {
 	)
 	{
 		// logger = log.New(os.Stderr, "[spawnsvc] ", log.Ltime)
-		adapter = middleware.NewLogger(logger)
+		// adapter = middleware.NewLogger(logger)
 	}
 
 	// get the Kubernetes client for connectivity
