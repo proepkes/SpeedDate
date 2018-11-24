@@ -4,142 +4,171 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
+	clientset "github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
+	"github.com/proepkes/speeddate/src/pkg/client/clientset/versioned/scheme"
+	samplescheme "github.com/proepkes/speeddate/src/pkg/client/clientset/versioned/scheme"
+
+	informers "github.com/proepkes/speeddate/src/pkg/client/informers/externalversions/dev/v1"
+	listers "github.com/proepkes/speeddate/src/pkg/client/listers/dev/v1"
 	armada "github.com/proepkes/speeddate/src/spawnsvc/gen/armada"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
+	appsinformers "k8s.io/client-go/informers/apps/v1"
 	"k8s.io/client-go/kubernetes"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	appslisters "k8s.io/client-go/listers/apps/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
+	"k8s.io/klog"
 )
 
 // armada service example implementation.
 // The example methods log the requests and return zero values.
 type armadaSvc struct {
-	logger    *log.Logger
-	clientset kubernetes.Interface
-	informer  cache.SharedIndexInformer
-	queue     workqueue.RateLimitingInterface
-	handler   Handler
+	// kubeclientset is a standard kubernetes clientset
+	kubeclientset kubernetes.Interface
+	// sampleclientset is a clientset for our own API group
+	sampleclientset clientset.Interface
+
+	deploymentsLister appslisters.DeploymentLister
+	deploymentsSynced cache.InformerSynced
+	foosLister        listers.GameServerLister
+	foosSynced        cache.InformerSynced
+
+	// workqueue is a rate limited work queue. This is used to queue work to be
+	// processed instead of performing it as soon as a change happens. This
+	// means we can ensure we only process a fixed amount of resources at a
+	// time, and makes it easy to ensure we are never processing the same item
+	// simultaneously in two different workers.
+	workqueue workqueue.RateLimitingInterface
+	// recorder is an event recorder for recording Event resources to the
+	// Kubernetes API.
+	recorder record.EventRecorder
 }
 
+const controllerAgentName = "armada-controller"
+
 // NewArmada returns the armada service implementation.
-func NewArmada(logger *log.Logger, clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, handler Handler) armada.Service {
-	return &armadaSvc{logger, clientset, informer, queue, handler}
+func NewArmada(logger *log.Logger,
+	kubeclientset kubernetes.Interface,
+	sampleclientset clientset.Interface,
+	deploymentInformer appsinformers.DeploymentInformer,
+	fooInformer informers.GameServerInformer) armada.Service {
+
+	// Create event broadcaster
+	// Add sample-controller types to the default Kubernetes Scheme so Events can be
+	// logged for sample-controller types.
+	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
+	klog.V(4).Info("Creating event broadcaster")
+	eventBroadcaster := record.NewBroadcaster()
+	eventBroadcaster.StartLogging(klog.Infof)
+	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
+	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+
+	svc := armadaSvc{
+		kubeclientset:     kubeclientset,
+		sampleclientset:   sampleclientset,
+		deploymentsLister: deploymentInformer.Lister(),
+		deploymentsSynced: deploymentInformer.Informer().HasSynced,
+		foosLister:        fooInformer.Lister(),
+		foosSynced:        fooInformer.Informer().HasSynced,
+		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Foos"),
+		recorder:          recorder,
+	}
+
+	klog.Info("Setting up event handlers")
+	// Set up an event handler for when Foo resources change
+	fooInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: svc.enqueueFoo,
+		UpdateFunc: func(old, new interface{}) {
+			svc.enqueueFoo(new)
+		},
+	})
+
+	// Set up an event handler for when Deployment resources change. This
+	// handler will lookup the owner of the given Deployment, and if it is
+	// owned by a Foo resource will enqueue that Foo resource for
+	// processing. This way, we don't need to implement custom logic for
+	// handling Deployment resources. More info on this pattern:
+	// https://github.com/kubernetes/community/blob/8cafef897a22026d42f5e5bb3f104febe7e29830/contributors/devel/controllers.md
+	deploymentInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: svc.handleObject,
+		UpdateFunc: func(old, new interface{}) {
+			newDepl := new.(*appsv1.Deployment)
+			oldDepl := old.(*appsv1.Deployment)
+			if newDepl.ResourceVersion == oldDepl.ResourceVersion {
+				// Periodic resync will send update events for all known Deployments.
+				// Two different versions of the same Deployment will always have different RVs.
+				return
+			}
+			svc.handleObject(new)
+		},
+		DeleteFunc: svc.handleObject,
+	})
+
+	return svc
 }
 
 // Add a new gameserver to the armada.
 func (s *armadaSvc) Add(ctx context.Context) (res string, err error) {
-	s.logger.Print("armada.add")
+	// s.logger.Print("armada.add")
 	return
 }
 
-// Run is the main path of execution for the controller loop
-func (s *armadaSvc) Run(stopCh <-chan struct{}) {
-	// handle a panic with logging and exiting
-	defer utilruntime.HandleCrash()
-	// ignore new items in the queue but when all goroutines
-	// have completed existing items then shutdown
-	defer s.queue.ShutDown()
-
-	s.logger.Println("Controller.Run: initiating")
-
-	// run the informer to start listing and watching resources
-	go s.informer.Run(stopCh)
-
-	// do the initial synchronization (one time) to populate resources
-	if !cache.WaitForCacheSync(stopCh, s.HasSynced) {
-		utilruntime.HandleError(fmt.Errorf("Error syncing cache"))
+// enqueueFoo takes a Foo resource and converts it into a namespace/name
+// string which is then put onto the work queue. This method should *not* be
+// passed resources of any type other than Foo.
+func (c *armadaSvc) enqueueFoo(obj interface{}) {
+	var key string
+	var err error
+	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
+		runtime.HandleError(err)
 		return
 	}
-	s.logger.Println("Controller.Run: cache sync complete")
-
-	// run the runWorker method every second with a stop channel
-	wait.Until(s.runWorker, time.Second, stopCh)
+	c.workqueue.AddRateLimited(key)
 }
 
-// HasSynced allows us to satisfy the Controller interface
-// by wiring up the informer's HasSynced method to it
-func (s *armadaSvc) HasSynced() bool {
-	return s.informer.HasSynced()
-}
-
-// runWorker executes the loop to process new items added to the queue
-func (s *armadaSvc) runWorker() {
-	log.Println("Controller.runWorker: starting")
-
-	// invoke processNextItem to fetch and consume the next change
-	// to a watched or listed resource
-	for s.processNextItem() {
-		log.Println("Controller.runWorker: processing next item")
-	}
-
-	log.Println("Controller.runWorker: completed")
-}
-
-// processNextItem retrieves each queued item and takes the
-// necessary handler action based off of if the item was
-// created or deleted
-func (s *armadaSvc) processNextItem() bool {
-	log.Println("Controller.processNextItem: start")
-
-	// fetch the next item (blocking) from the queue to process or
-	// if a shutdown is requested then return out of this to stop
-	// processing
-	key, quit := s.queue.Get()
-
-	log.Println("Processing...")
-	// stop the worker loop from running as this indicates we
-	// have sent a shutdown message that the queue has indicated
-	// from the Get method
-	if quit {
-		return false
-	}
-
-	defer s.queue.Done(key)
-
-	// assert the string out of the key (format `namespace/name`)
-	keyRaw := key.(string)
-
-	// take the string key and get the object out of the indexer
-	//
-	// item will contain the complex object for the resource and
-	// exists is a bool that'll indicate whether or not the
-	// resource was created (true) or deleted (false)
-	//
-	// if there is an error in getting the key from the index
-	// then we want to retry this particular queue key a certain
-	// number of times (5 here) before we forget the queue key
-	// and throw an error
-	item, exists, err := s.informer.GetIndexer().GetByKey(keyRaw)
-	if err != nil {
-		if s.queue.NumRequeues(key) < 5 {
-			fmt.Errorf("Controller.processNextItem: Failed processing item with key %s with error %v, retrying", key, err)
-			s.queue.AddRateLimited(key)
-		} else {
-			fmt.Errorf("Controller.processNextItem: Failed processing item with key %s with error %v, no more retries", key, err)
-			s.queue.Forget(key)
-			utilruntime.HandleError(err)
+// handleObject will take any resource implementing metav1.Object and attempt
+// to find the Foo resource that 'owns' it. It does this by looking at the
+// objects metadata.ownerReferences field for an appropriate OwnerReference.
+// It then enqueues that Foo resource to be processed. If the object does not
+// have an appropriate OwnerReference, it will simply be skipped.
+func (c *armadaSvc) handleObject(obj interface{}) {
+	var object metav1.Object
+	var ok bool
+	if object, ok = obj.(metav1.Object); !ok {
+		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			runtime.HandleError(fmt.Errorf("error decoding object, invalid type"))
+			return
 		}
+		object, ok = tombstone.Obj.(metav1.Object)
+		if !ok {
+			runtime.HandleError(fmt.Errorf("error decoding object tombstone, invalid type"))
+			return
+		}
+		klog.V(4).Infof("Recovered deleted object '%s' from tombstone", object.GetName())
 	}
+	klog.V(4).Infof("Processing object: %s", object.GetName())
+	if ownerRef := metav1.GetControllerOf(object); ownerRef != nil {
+		// If this object is not owned by a Foo, we should not do anything more
+		// with it.
+		if ownerRef.Kind != "Foo" {
+			return
+		}
 
-	// if the item doesn't exist then it was deleted and we need to fire off the handler's
-	// ObjectDeleted method. but if the object does exist that indicates that the object
-	// was created (or updated) so run the ObjectCreated method
-	//
-	// after both instances, we want to forget the key from the queue, as this indicates
-	// a code path of successful queue key processing
-	if !exists {
-		s.logger.Printf("Controller.processNextItem: object deleted detected: %s", keyRaw)
-		s.handler.ObjectDeleted(item)
-		s.queue.Forget(key)
-	} else {
-		s.logger.Printf("Controller.processNextItem: object created detected: %s", keyRaw)
-		s.handler.ObjectCreated(item)
-		s.queue.Forget(key)
+		foo, err := c.foosLister.GameServers(object.GetNamespace()).Get(ownerRef.Name)
+		if err != nil {
+			klog.V(4).Infof("ignoring orphaned object '%s' of foo '%s'", object.GetSelfLink(), ownerRef.Name)
+			return
+		}
+
+		c.enqueueFoo(foo)
+		return
 	}
-
-	// keep the worker loop running by returning true
-	return true
 }

@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
+	clientset "github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
+	"github.com/proepkes/speeddate/src/pkg/signals"
 	"github.com/proepkes/speeddate/src/spawnsvc"
 	armada "github.com/proepkes/speeddate/src/spawnsvc/gen/armada"
 	armadasvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/armada/server"
@@ -19,19 +20,14 @@ import (
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 
-	api_v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/workqueue"
 )
 
 // retrieve the Kubernetes cluster client from outside of the cluster
-func getClientLocal() kubernetes.Interface {
+func getClientLocal() (kubernetes.Interface, *clientset.Clientset) {
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println(home)
@@ -48,29 +44,41 @@ func getClientLocal() kubernetes.Interface {
 	}
 
 	// generate the client based off of the config
-	client, err := kubernetes.NewForConfig(config)
+	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
 	}
 
+	client, err := clientset.NewForConfig(config)
+	if err != nil {
+		log.Fatalf("Error building example clientset: %s", err.Error())
+	}
+
 	log.Println("Successfully constructed k8s client")
-	return client
+
+	return k8sClient, client
 }
 
-func getClientInCluster() kubernetes.Interface {
+func getClientInCluster() (kubernetes.Interface, *clientset.Clientset) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
 	}
 
 	// generate the client based off of the config
-	client, err := kubernetes.NewForConfig(config)
+	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
 	}
 
+	client, err := clientset.NewForConfig(config)
+	if err != nil {
+		log.Fatalf("Error building example clientset: %s", err.Error())
+	}
+
 	log.Println("Successfully constructed k8s client")
-	return client
+
+	return k8sClient, client
 }
 
 func main() {
@@ -94,58 +102,23 @@ func main() {
 	}
 
 	// get the Kubernetes client for connectivity
-	client := getClientLocal()
+	k8sClient, client := getClientLocal()
 
-	// create the informer so that we can not only list resources
-	// but also watch them for all pods in the default namespace
-	// informer := externalversions.NewSharedInformerFactory(client, 30*time.Second)
-	// create the informer so that we can not only list resources
-	// but also watch them for all pods in the default namespace
-	informer := cache.NewSharedIndexInformer(
-		// the ListWatch contains two different functions that our
-		// informer requires: ListFunc to take care of listing and watching
-		// the resources we want to handle
-		&cache.ListWatch{
-			ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-				// list all of the pods (core resource) in the deafult namespace
-				return client.CoreV1().Pods(meta_v1.NamespaceDefault).List(options)
-			},
-			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-				// watch all of the pods (core resource) in the default namespace
-				return client.CoreV1().Pods(meta_v1.NamespaceDefault).Watch(options)
-			},
-		},
-		&api_v1.Pod{}, // the target type (Pod)
-		0,             // no resync (period of 0)
-		cache.Indexers{},
-	)
-	// create a new queue so that when the informer gets a resource that is either
-	// a result of listing or watching, we can add an idenfitying key to the queue
-	// so that it can be handled in the handler
-	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	// set up signals so we handle the first shutdown signal gracefully
+	stopCh := signals.SetupSignalHandler()
+
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(k8sClient, time.Second*30)
+	exampleInformerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
 	// Create the structs that implement the services.
 	var (
 		armadaSvc armada.Service
 	)
 	{
-		armadaSvc = spawnsvc.NewArmada(logger, client, queue, informer, &spawnsvc.TestHandler{})
+		armadaSvc = spawnsvc.NewArmada(k8sClient, client,
+			kubeInformerFactory.Apps().V1().Deployments(),
+			exampleInformerFactory.arst().V1alpha1().Foos())
 	}
-
-	// use a channel to synchronize the finalization for a graceful shutdown
-	stopCh := make(chan struct{})
-	defer close(stopCh)
-
-	go informer.Run(stopCh)
-	// run the controller loop to process items
-	go armadaSvc.Run(stopCh)
-
-	// use a channel to handle OS signals to terminate and gracefully shut
-	// down processing
-	sigTerm := make(chan os.Signal, 1)
-	signal.Notify(sigTerm, syscall.SIGTERM)
-	signal.Notify(sigTerm, syscall.SIGINT)
-	<-sigTerm
 
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
