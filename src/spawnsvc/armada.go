@@ -19,14 +19,14 @@ import (
 type armadaSvc struct {
 	logger    *log.Logger
 	clientset kubernetes.Interface
-	queue     workqueue.RateLimitingInterface
 	informer  cache.SharedIndexInformer
+	queue     workqueue.RateLimitingInterface
 	handler   Handler
 }
 
 // NewArmada returns the armada service implementation.
 func NewArmada(logger *log.Logger, clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, handler Handler) armada.Service {
-	return &armadaSvc{logger, clientset, queue, informer, handler}
+	return &armadaSvc{logger, clientset, informer, queue, handler}
 }
 
 // Add a new gameserver to the armada.
@@ -89,6 +89,7 @@ func (s *armadaSvc) processNextItem() bool {
 	// processing
 	key, quit := s.queue.Get()
 
+	log.Println("Processing...")
 	// stop the worker loop from running as this indicates we
 	// have sent a shutdown message that the queue has indicated
 	// from the Get method

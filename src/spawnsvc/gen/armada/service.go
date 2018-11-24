@@ -15,6 +15,7 @@ import (
 type Service interface {
 	// Add a new gameserver to the armada.
 	Add(context.Context) (res string, err error)
+	Run(stopCh <-chan struct{})
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
