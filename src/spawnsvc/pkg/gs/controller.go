@@ -139,6 +139,7 @@ func (s *GameServerController) Run(threadiness int, stopCh <-chan struct{}) erro
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
 	if ok := cache.WaitForCacheSync(stopCh, s.deploymentsSynced, s.gameServersSynced); !ok {
+		klog.Errorf("failed to wait for caches to sync")
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
