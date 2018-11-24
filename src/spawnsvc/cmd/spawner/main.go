@@ -77,7 +77,7 @@ func main() {
 	flag.Parse()
 
 	// get the Kubernetes client for connectivity
-	k8sClient, extClient, client := getClientLocal()
+	k8sClient, extClient, client := getClientInCluster()
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
