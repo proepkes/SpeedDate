@@ -2,7 +2,7 @@
 
 # Generate CRD-API
 cd $GOPATH/src/k8s.io/code-generator
-./generate-groups.sh all github.com/proepkes/speeddate/src/pkg/client github.com/proepkes/speeddate/src/pkg/apis dev:v1
+./generate-groups.sh all github.com/proepkes/speeddate/src/spawnsvc/pkg/client github.com/proepkes/speeddate/src/spawnsvc/pkg/apis dev:v1
 
 
 # Generate services

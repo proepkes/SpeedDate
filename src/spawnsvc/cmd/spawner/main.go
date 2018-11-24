@@ -11,16 +11,17 @@ import (
 	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
-	clientset "github.com/proepkes/speeddate/src/pkg/client/clientset/versioned"
-	"github.com/proepkes/speeddate/src/pkg/signals"
 	"github.com/proepkes/speeddate/src/spawnsvc"
 	armada "github.com/proepkes/speeddate/src/spawnsvc/gen/armada"
 	armadasvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/armada/server"
 	swaggersvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/swagger/server"
+	clientset "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
+	"github.com/proepkes/speeddate/src/spawnsvc/pkg/gs"
+	"github.com/proepkes/speeddate/src/spawnsvc/pkg/signals"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 
-	informers "github.com/proepkes/speeddate/src/pkg/client/informers/externalversions"
+	informers "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -104,7 +105,7 @@ func main() {
 	}
 
 	// get the Kubernetes client for connectivity
-	k8sClient, client := getClientLocal()
+	k8sClient, client := getClientInCluster()
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
@@ -117,11 +118,7 @@ func main() {
 		armadaSvc armada.Service
 	)
 	{
-		armadaSvc = spawnsvc.NewArmada(
-			k8sClient,
-			client,
-			kubeInformerFactory.Apps().V1().Deployments(),
-			exampleInformerFactory.Dev().V1().GameServers())
+		armadaSvc = spawnsvc.NewArmada(logger)
 	}
 
 	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
@@ -129,7 +126,13 @@ func main() {
 	kubeInformerFactory.Start(stopCh)
 	exampleInformerFactory.Start(stopCh)
 
-	if err := armadaSvc.Run(2, stopCh); err != nil {
+	gsController := gs.NewGameServerController(
+		k8sClient,
+		client,
+		kubeInformerFactory.Apps().V1().Deployments(),
+		exampleInformerFactory.Dev().V1().GameServers())
+
+	if err := gsController.Run(1, stopCh); err != nil {
 		klog.Fatalf("Error running controller: %s", err.Error())
 	}
 	// Wrap the services in endpoints that can be invoked from other
