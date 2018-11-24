@@ -75,7 +75,7 @@ func NewGameServerController(kubeclientset kubernetes.Interface,
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
 	// logged for sample-controller types.
 	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
-	klog.V(4).Info("Creating event broadcaster")
+	// klog.V(4).Info("Creating event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(klog.Infof)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
@@ -92,7 +92,7 @@ func NewGameServerController(kubeclientset kubernetes.Interface,
 		recorder:          recorder,
 	}
 
-	klog.Info("Setting up event handlers")
+	// klog.Info("Setting up event handlers")
 	// Set up an event handler for when GameServer resources change
 	gameServerInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: svc.enqueueGameServer,
