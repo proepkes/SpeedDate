@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -13,6 +14,7 @@ import (
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/signals"
 
 	informers "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
+	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -20,7 +22,7 @@ import (
 )
 
 // retrieve the Kubernetes cluster client from outside of the cluster
-func getClientLocal() (kubernetes.Interface, *clientset.Clientset) {
+func getClientLocal() (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println(home)
@@ -36,32 +38,29 @@ func getClientLocal() (kubernetes.Interface, *clientset.Clientset) {
 		log.Fatalf("getClusterConfig: %v", err)
 	}
 
-	// generate the client based off of the config
-	k8sClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("getClusterConfig: %v", err)
-	}
-
-	client, err := clientset.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("Error building example clientset: %s", err.Error())
-	}
-
-	log.Println("Successfully constructed k8s client")
-
-	return k8sClient, client
+	return createClients(config)
 }
 
-func getClientInCluster() (kubernetes.Interface, *clientset.Clientset) {
+func getClientInCluster() (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
 	}
 
+	return createClients(config)
+}
+
+func createClients(config *rest.Config) (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
+
 	// generate the client based off of the config
 	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
+	}
+
+	extClient, err := extclientset.NewForConfig(config)
+	if err != nil {
+		log.Fatalf("Could not create the api extension clientset")
 	}
 
 	client, err := clientset.NewForConfig(config)
@@ -69,16 +68,16 @@ func getClientInCluster() (kubernetes.Interface, *clientset.Clientset) {
 		log.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	log.Println("Successfully constructed k8s client")
+	log.Println("Successfully constructed clients")
 
-	return k8sClient, client
+	return k8sClient, extClient, client
 }
 
 func main() {
 	flag.Parse()
 
 	// get the Kubernetes client for connectivity
-	k8sClient, client := getClientInCluster()
+	k8sClient, extClient, client := getClientLocal()
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
@@ -90,12 +89,8 @@ func main() {
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	kubeInformerFactory.Start(stopCh)
 	exampleInformerFactory.Start(stopCh)
-
-	gsController := gs.NewGameServerController(
-		k8sClient,
-		client,
-		kubeInformerFactory.Apps().V1().Deployments(),
-		exampleInformerFactory.Dev().V1().GameServers())
+	allocationMutex := &sync.Mutex{}
+	gsController := gs.NewGameServerController(allocationMutex, k8sClient, kubeInformerFactory, extClient, client, exampleInformerFactory)
 
 	if err := gsController.Run(1, stopCh); err != nil {
 		log.Fatalf("Error running controller: %s", err.Error())

@@ -39,7 +39,6 @@
 			"mode": "debug",
             "program": "${workspaceRoot}/src/spawnsvc/cmd/spawner",
 			"env": {},
-			"args": ["-debug", "true"]
 		}
     ]
 }
