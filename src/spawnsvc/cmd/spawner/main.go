@@ -133,7 +133,7 @@ func main() {
 		exampleInformerFactory.Dev().V1().GameServers())
 
 	if err := gsController.Run(1, stopCh); err != nil {
-		klog.Fatalf("Error running controller: %s", err.Error())
+		klog.Info("Error running controller: %s", err.Error())
 	}
 	// Wrap the services in endpoints that can be invoked from other
 	// services potentially running in different processes.
