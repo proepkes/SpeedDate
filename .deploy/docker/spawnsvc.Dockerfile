@@ -8,7 +8,6 @@ COPY Gopkg.lock Gopkg.toml /go/src/github.com/proepkes/speeddate/src/
 WORKDIR /go/src/github.com/proepkes/speeddate/src/
 
 COPY src/spawnsvc spawnsvc/
-COPY src/pkg pkg/
 
 # Install library dependencies
 RUN dep ensure -vendor-only
