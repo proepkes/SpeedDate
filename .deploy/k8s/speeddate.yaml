@@ -1,4 +1,47 @@
 ---
+# Source: speeddate/templates/speeddate/spawnsvc-rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: armada-controller
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: armada-controller
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create", "delete", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get"]
+- apiGroups: ["speeddate.dev"]
+  resources: ["gameservers"]
+  verbs: ["create", "delete", "get", "list", "update", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: armada-controller-access
+  namespace: default
+subjects:
+- kind: User
+  name: system:serviceaccount:default:armada-controller
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: armada-controller
+---
 # Source: speeddate/templates/crds/gameserver.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -189,6 +232,7 @@ spec:
         app: spawnsvc
         version: v1
     spec:
+      serviceAccountName: armada-controller
       containers:
       - name: spawnsvc
         image: docker.io/proepkes/spawnsvc:dev

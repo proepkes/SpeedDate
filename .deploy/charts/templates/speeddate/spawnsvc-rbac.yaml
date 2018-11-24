@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.spawnsvcSettings.ServiceAccount }}
+  namespace: {{ .Release.Namespace }}
+---
+{{- if .Values.spawnsvcSettings.rbacEnabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.spawnsvcSettings.ServiceAccount }}
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create", "delete", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get"]
+- apiGroups: ["speeddate.dev"]
+  resources: ["gameservers"]
+  verbs: ["create", "delete", "get", "list", "update", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.spawnsvcSettings.ServiceAccount }}-access
+  namespace: {{ .Release.Namespace }}
+subjects:
+- kind: User
+  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Values.spawnsvcSettings.ServiceAccount }}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.spawnsvcSettings.ServiceAccount }}
+{{- end }}

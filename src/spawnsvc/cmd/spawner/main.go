@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -11,16 +12,12 @@ import (
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/gs"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/signals"
 
-	glog "github.com/golang/glog"
 	informers "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
-
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 )
 
 // retrieve the Kubernetes cluster client from outside of the cluster
@@ -37,21 +34,21 @@ func getClientLocal() (kubernetes.Interface, *clientset.Clientset) {
 	// create the config from the path
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 	if err != nil {
-		glog.Fatalf("getClusterConfig: %v", err)
+		log.Fatalf("getClusterConfig: %v", err)
 	}
 
 	// generate the client based off of the config
 	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		glog.Fatalf("getClusterConfig: %v", err)
+		log.Fatalf("getClusterConfig: %v", err)
 	}
 
 	client, err := clientset.NewForConfig(config)
 	if err != nil {
-		glog.Fatalf("Error building example clientset: %s", err.Error())
+		log.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	glog.Infoln("Successfully constructed k8s client")
+	log.Println("Successfully constructed k8s client")
 
 	return k8sClient, client
 }
@@ -59,37 +56,27 @@ func getClientLocal() (kubernetes.Interface, *clientset.Clientset) {
 func getClientInCluster() (kubernetes.Interface, *clientset.Clientset) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		glog.Fatalf("getClusterConfig: %v", err)
+		log.Fatalf("getClusterConfig: %v", err)
 	}
 
 	// generate the client based off of the config
 	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		glog.Fatalf("getClusterConfig: %v", err)
+		log.Fatalf("getClusterConfig: %v", err)
 	}
 
 	client, err := clientset.NewForConfig(config)
 	if err != nil {
-		glog.Fatalf("Error building example clientset: %s", err.Error())
+		log.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	glog.Infoln("Successfully constructed k8s client")
+	log.Println("Successfully constructed k8s client")
 
 	return k8sClient, client
 }
 
 func main() {
 	flag.Parse()
-
-	// Create go-kit logger in your main.go
-	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-	logger = log.With(logger, "caller", log.DefaultCaller)
-	logger = level.NewFilter(logger, level.AllowAll())
-
-	// Overriding the default glog with our go-kit glog implementation.
-	// Thus we need to pass it our go-kit logger object.
-	glog.SetLogger(logger)
 
 	// get the Kubernetes client for connectivity
 	k8sClient, client := getClientInCluster()
