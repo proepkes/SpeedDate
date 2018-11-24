@@ -58,6 +58,10 @@ required = ["goa.design/goa/codegen/generator"]
   name = "k8s.io/client-go"
   version = "9.0.0"
 
+[[override]]
+  name = "github.com/golang/glog"
+  source = "github.com/kubermatic/glog-gokit"
+
 [prune]
   go-tests = true
   unused-packages = true

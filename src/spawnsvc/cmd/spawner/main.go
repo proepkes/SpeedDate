@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,12 +20,16 @@ import (
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
 
+	glog "github.com/golang/glog"
 	informers "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 )
 
 // retrieve the Kubernetes cluster client from outside of the cluster
@@ -93,14 +96,24 @@ func main() {
 	)
 	flag.Parse()
 
+	// Create go-kit logger in your main.go
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
+	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+	logger = log.With(logger, "caller", log.DefaultCaller)
+	logger = level.NewFilter(logger, level.AllowAll())
+
+	// Overriding the default glog with our go-kit glog implementation.
+	// Thus we need to pass it our go-kit logger object.
+	glog.SetLogger(logger)
+
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice.
 	var (
 		adapter middleware.Logger
-		logger  *log.Logger
+		// logger  *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[spawnsvc] ", log.Ltime)
+		// logger = log.New(os.Stderr, "[spawnsvc] ", log.Ltime)
 		adapter = middleware.NewLogger(logger)
 	}
 
