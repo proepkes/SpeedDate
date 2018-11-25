@@ -10,9 +10,12 @@ import (
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
 	corev1 "k8s.io/api/core/v1"
+	apiv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+	extv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
@@ -67,8 +70,7 @@ func NewGameServerController(
 	kubeClient kubernetes.Interface,
 	kubeInformerFactory informers.SharedInformerFactory,
 	extClient extclientset.Interface,
-	client versioned.Interface,
-	informerFactory externalversions.SharedInformerFactory) *GameServerController {
+	client versioned.Interface, informerFactory externalversions.SharedInformerFactory) *GameServerController {
 
 	pods := kubeInformerFactory.Core().V1().Pods()
 	gameServers := informerFactory.Dev().V1().GameServers()
@@ -90,16 +92,39 @@ func NewGameServerController(
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(c.logger.Printf)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClient.CoreV1().Events("")})
-	c.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "gameserver-controller"})
+	c.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "armada-controller"})
 
-	gsInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: c.enqueueFoo,
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			c.enqueueFoo(newObj)
-		},
-	})
+	// gsInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	// 	AddFunc: c.enqueueFoo,
+	// 	UpdateFunc: func(oldObj, newObj interface{}) {
+	// 		c.enqueueFoo(newObj)
+	// 	},
+	// })
 
 	return c
+}
+
+// WaitForEstablishedCRD blocks until CRD comes to an Established state.
+// Has a deadline of 60 seconds for this to occur.
+func WaitForEstablishedCRD(crdGetter extv1beta1.CustomResourceDefinitionInterface, name string) error {
+	return wait.PollImmediate(time.Second, 60*time.Second, func() (done bool, err error) {
+		crd, err := crdGetter.Get(name, v1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+
+		for _, cond := range crd.Status.Conditions {
+			switch cond.Type {
+			case apiv1beta1.Established:
+				if cond.Status == apiv1beta1.ConditionTrue {
+					log.Println("custom resource definition established")
+					return true, err
+				}
+			}
+		}
+
+		return false, nil
+	})
 }
 
 // Run the GameServer controller. Will block until stop is closed.
@@ -107,6 +132,11 @@ func NewGameServerController(
 func (c *GameServerController) Run(workers int, stopCh <-chan struct{}) error {
 	defer runtime.HandleCrash()
 	defer c.workerqueue.ShutDown()
+
+	err := WaitForEstablishedCRD(c.crdGetter, "gameservers.speeddate.dev")
+	if err != nil {
+		return err
+	}
 
 	log.Println("Wait for cache sync")
 	if !cache.WaitForCacheSync(stopCh, c.gameServerSynced) {

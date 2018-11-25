@@ -397,7 +397,7 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /user/
+        prefix: /storage/
     route:
     - destination:
         host: storagesvc.default.svc.cluster.local

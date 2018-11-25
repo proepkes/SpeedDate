@@ -1,5 +1,5 @@
 package dev
 
 const (
-	GroupName = "dev.speeddate"
+	GroupName = "speeddate.dev"
 )

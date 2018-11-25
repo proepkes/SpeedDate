@@ -10,10 +10,10 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	clientset "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
+	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/gs"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/signals"
 
-	informers "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
 	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -77,20 +77,21 @@ func main() {
 	flag.Parse()
 
 	// get the Kubernetes client for connectivity
-	k8sClient, extClient, client := getClientInCluster()
+	k8sClient, extClient, client := getClientLocal()
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
 
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(k8sClient, time.Second*30)
-	exampleInformerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
+	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second*30)
+
+	allocationMutex := &sync.Mutex{}
+	gsController := gs.NewGameServerController(allocationMutex, k8sClient, kubeInformerFactory, extClient, client, informerFactory)
 
 	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	kubeInformerFactory.Start(stopCh)
-	exampleInformerFactory.Start(stopCh)
-	allocationMutex := &sync.Mutex{}
-	gsController := gs.NewGameServerController(allocationMutex, k8sClient, kubeInformerFactory, extClient, client, exampleInformerFactory)
+	informerFactory.Start(stopCh)
 
 	if err := gsController.Run(1, stopCh); err != nil {
 		log.Fatalf("Error running controller: %s", err.Error())
