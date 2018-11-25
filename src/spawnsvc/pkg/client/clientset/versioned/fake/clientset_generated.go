@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
-	speeddatev1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1"
-	fakespeeddatev1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1/fake"
+	speeddatev1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1alpha1"
+	fakespeeddatev1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -71,12 +71,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// SpeeddateV1 retrieves the SpeeddateV1Client
-func (c *Clientset) SpeeddateV1() speeddatev1.SpeeddateV1Interface {
-	return &fakespeeddatev1.FakeSpeeddateV1{Fake: &c.Fake}
+// SpeeddateV1alpha1 retrieves the SpeeddateV1alpha1Client
+func (c *Clientset) SpeeddateV1alpha1() speeddatev1alpha1.SpeeddateV1alpha1Interface {
+	return &fakespeeddatev1alpha1.FakeSpeeddateV1alpha1{Fake: &c.Fake}
 }
 
-// Speeddate retrieves the SpeeddateV1Client
-func (c *Clientset) Speeddate() speeddatev1.SpeeddateV1Interface {
-	return &fakespeeddatev1.FakeSpeeddateV1{Fake: &c.Fake}
+// Speeddate retrieves the SpeeddateV1alpha1Client
+func (c *Clientset) Speeddate() speeddatev1alpha1.SpeeddateV1alpha1Interface {
+	return &fakespeeddatev1alpha1.FakeSpeeddateV1alpha1{Fake: &c.Fake}
 }

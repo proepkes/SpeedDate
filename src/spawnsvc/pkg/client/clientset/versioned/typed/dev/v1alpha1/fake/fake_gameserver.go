@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	devv1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/apis/dev/v1"
+	v1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/apis/dev/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -30,29 +30,29 @@ import (
 
 // FakeGameServers implements GameServerInterface
 type FakeGameServers struct {
-	Fake *FakeSpeeddateV1
+	Fake *FakeSpeeddateV1alpha1
 	ns   string
 }
 
-var gameserversResource = schema.GroupVersionResource{Group: "speeddate.dev", Version: "v1", Resource: "gameservers"}
+var gameserversResource = schema.GroupVersionResource{Group: "speeddate.dev", Version: "v1alpha1", Resource: "gameservers"}
 
-var gameserversKind = schema.GroupVersionKind{Group: "speeddate.dev", Version: "v1", Kind: "GameServer"}
+var gameserversKind = schema.GroupVersionKind{Group: "speeddate.dev", Version: "v1alpha1", Kind: "GameServer"}
 
 // Get takes name of the gameServer, and returns the corresponding gameServer object, and an error if there is any.
-func (c *FakeGameServers) Get(name string, options v1.GetOptions) (result *devv1.GameServer, err error) {
+func (c *FakeGameServers) Get(name string, options v1.GetOptions) (result *v1alpha1.GameServer, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(gameserversResource, c.ns, name), &devv1.GameServer{})
+		Invokes(testing.NewGetAction(gameserversResource, c.ns, name), &v1alpha1.GameServer{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*devv1.GameServer), err
+	return obj.(*v1alpha1.GameServer), err
 }
 
 // List takes label and field selectors, and returns the list of GameServers that match those selectors.
-func (c *FakeGameServers) List(opts v1.ListOptions) (result *devv1.GameServerList, err error) {
+func (c *FakeGameServers) List(opts v1.ListOptions) (result *v1alpha1.GameServerList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(gameserversResource, gameserversKind, c.ns, opts), &devv1.GameServerList{})
+		Invokes(testing.NewListAction(gameserversResource, gameserversKind, c.ns, opts), &v1alpha1.GameServerList{})
 
 	if obj == nil {
 		return nil, err
@@ -62,8 +62,8 @@ func (c *FakeGameServers) List(opts v1.ListOptions) (result *devv1.GameServerLis
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &devv1.GameServerList{ListMeta: obj.(*devv1.GameServerList).ListMeta}
-	for _, item := range obj.(*devv1.GameServerList).Items {
+	list := &v1alpha1.GameServerList{ListMeta: obj.(*v1alpha1.GameServerList).ListMeta}
+	for _, item := range obj.(*v1alpha1.GameServerList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -79,31 +79,31 @@ func (c *FakeGameServers) Watch(opts v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a gameServer and creates it.  Returns the server's representation of the gameServer, and an error, if there is any.
-func (c *FakeGameServers) Create(gameServer *devv1.GameServer) (result *devv1.GameServer, err error) {
+func (c *FakeGameServers) Create(gameServer *v1alpha1.GameServer) (result *v1alpha1.GameServer, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(gameserversResource, c.ns, gameServer), &devv1.GameServer{})
+		Invokes(testing.NewCreateAction(gameserversResource, c.ns, gameServer), &v1alpha1.GameServer{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*devv1.GameServer), err
+	return obj.(*v1alpha1.GameServer), err
 }
 
 // Update takes the representation of a gameServer and updates it. Returns the server's representation of the gameServer, and an error, if there is any.
-func (c *FakeGameServers) Update(gameServer *devv1.GameServer) (result *devv1.GameServer, err error) {
+func (c *FakeGameServers) Update(gameServer *v1alpha1.GameServer) (result *v1alpha1.GameServer, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(gameserversResource, c.ns, gameServer), &devv1.GameServer{})
+		Invokes(testing.NewUpdateAction(gameserversResource, c.ns, gameServer), &v1alpha1.GameServer{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*devv1.GameServer), err
+	return obj.(*v1alpha1.GameServer), err
 }
 
 // Delete takes name of the gameServer and deletes it. Returns an error if one occurs.
 func (c *FakeGameServers) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(gameserversResource, c.ns, name), &devv1.GameServer{})
+		Invokes(testing.NewDeleteAction(gameserversResource, c.ns, name), &v1alpha1.GameServer{})
 
 	return err
 }
@@ -112,17 +112,17 @@ func (c *FakeGameServers) Delete(name string, options *v1.DeleteOptions) error {
 func (c *FakeGameServers) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	action := testing.NewDeleteCollectionAction(gameserversResource, c.ns, listOptions)
 
-	_, err := c.Fake.Invokes(action, &devv1.GameServerList{})
+	_, err := c.Fake.Invokes(action, &v1alpha1.GameServerList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched gameServer.
-func (c *FakeGameServers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *devv1.GameServer, err error) {
+func (c *FakeGameServers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.GameServer, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(gameserversResource, c.ns, name, pt, data, subresources...), &devv1.GameServer{})
+		Invokes(testing.NewPatchSubresourceAction(gameserversResource, c.ns, name, pt, data, subresources...), &v1alpha1.GameServer{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*devv1.GameServer), err
+	return obj.(*v1alpha1.GameServer), err
 }
