@@ -27,8 +27,8 @@ import (
 	"k8s.io/klog"
 
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/scheme"
-	getterv1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1"
-	listerv1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/listers/dev/v1"
+	getterv1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1alpha1"
+	listerv1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/listers/dev/v1alpha1"
 
 	corelisterv1 "k8s.io/client-go/listers/core/v1"
 )
@@ -50,7 +50,6 @@ type GameServerController struct {
 }
 
 const (
-	controllerAgentName = "armada-controller"
 	// SuccessSynced is used as part of the Event 'reason' when a Gameserver is synced
 	SuccessSynced = "Synced"
 	// ErrResourceExists is used as part of the Event 'reason' when a Gameserver fails
@@ -65,7 +64,7 @@ const (
 	MessageResourceSynced = "Gameserver synced successfully"
 )
 
-func NewGameServerController(
+func NewController(
 	allocationMutex *sync.Mutex,
 	kubeClient kubernetes.Interface,
 	kubeInformerFactory informers.SharedInformerFactory,
@@ -73,7 +72,7 @@ func NewGameServerController(
 	client versioned.Interface, informerFactory externalversions.SharedInformerFactory) *GameServerController {
 
 	pods := kubeInformerFactory.Core().V1().Pods()
-	gameServers := informerFactory.Speeddate().V1().GameServers()
+	gameServers := informerFactory.Speeddate().V1alpha1().GameServers()
 	gsInformer := gameServers.Informer()
 
 	c := &GameServerController{
@@ -82,7 +81,7 @@ func NewGameServerController(
 		podGetter:        kubeClient.CoreV1(),
 		podLister:        pods.Lister(),
 		podSynced:        pods.Informer().HasSynced,
-		gameServerGetter: client.SpeeddateV1(),
+		gameServerGetter: client.SpeeddateV1alpha1(),
 		gameServerLister: gameServers.Lister(),
 		gameServerSynced: gsInformer.HasSynced,
 		nodeLister:       kubeInformerFactory.Core().V1().Nodes().Lister(),
