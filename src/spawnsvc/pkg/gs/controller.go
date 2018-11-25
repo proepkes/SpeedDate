@@ -73,7 +73,7 @@ func NewGameServerController(
 	client versioned.Interface, informerFactory externalversions.SharedInformerFactory) *GameServerController {
 
 	pods := kubeInformerFactory.Core().V1().Pods()
-	gameServers := informerFactory.Dev().V1().GameServers()
+	gameServers := informerFactory.Speeddate().V1().GameServers()
 	gsInformer := gameServers.Informer()
 
 	c := &GameServerController{
@@ -82,7 +82,7 @@ func NewGameServerController(
 		podGetter:        kubeClient.CoreV1(),
 		podLister:        pods.Lister(),
 		podSynced:        pods.Informer().HasSynced,
-		gameServerGetter: client.DevV1(),
+		gameServerGetter: client.SpeeddateV1(),
 		gameServerLister: gameServers.Lister(),
 		gameServerSynced: gsInformer.HasSynced,
 		nodeLister:       kubeInformerFactory.Core().V1().Nodes().Lister(),
@@ -92,39 +92,16 @@ func NewGameServerController(
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(c.logger.Printf)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClient.CoreV1().Events("")})
-	c.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "armada-controller"})
+	c.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "gameserver-controller"})
 
-	// gsInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-	// 	AddFunc: c.enqueueFoo,
-	// 	UpdateFunc: func(oldObj, newObj interface{}) {
-	// 		c.enqueueFoo(newObj)
-	// 	},
-	// })
+	gsInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: c.enqueueFoo,
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			c.enqueueFoo(newObj)
+		},
+	})
 
 	return c
-}
-
-// WaitForEstablishedCRD blocks until CRD comes to an Established state.
-// Has a deadline of 60 seconds for this to occur.
-func WaitForEstablishedCRD(crdGetter extv1beta1.CustomResourceDefinitionInterface, name string) error {
-	return wait.PollImmediate(time.Second, 60*time.Second, func() (done bool, err error) {
-		crd, err := crdGetter.Get(name, v1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-
-		for _, cond := range crd.Status.Conditions {
-			switch cond.Type {
-			case apiv1beta1.Established:
-				if cond.Status == apiv1beta1.ConditionTrue {
-					log.Println("custom resource definition established")
-					return true, err
-				}
-			}
-		}
-
-		return false, nil
-	})
 }
 
 // Run the GameServer controller. Will block until stop is closed.
@@ -273,4 +250,27 @@ func (c *GameServerController) enqueueFoo(obj interface{}) {
 		return
 	}
 	c.workerqueue.AddRateLimited(key)
+}
+
+// WaitForEstablishedCRD blocks until CRD comes to an Established state.
+// Has a deadline of 60 seconds for this to occur.
+func WaitForEstablishedCRD(crdGetter extv1beta1.CustomResourceDefinitionInterface, name string) error {
+	return wait.PollImmediate(time.Second, 60*time.Second, func() (done bool, err error) {
+		crd, err := crdGetter.Get(name, v1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+
+		for _, cond := range crd.Status.Conditions {
+			switch cond.Type {
+			case apiv1beta1.Established:
+				if cond.Status == apiv1beta1.ConditionTrue {
+					log.Println("custom resource definition established")
+					return true, err
+				}
+			}
+		}
+
+		return false, nil
+	})
 }
