@@ -39,7 +39,7 @@ spawnsvcSettings:
   ImageName: spawnsvc
   Port: 8003
   HealthPort: 9000
-  ServiceAccount: armada-controller
+  ServiceAccount: gameserver-controller
   rbacEnabled: true
 
 speeddateui:
