@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	devv1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1"
+	speeddatev1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -27,27 +27,27 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	DevV1() devv1.DevV1Interface
+	SpeeddateV1() speeddatev1.SpeeddateV1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Dev() devv1.DevV1Interface
+	Speeddate() speeddatev1.SpeeddateV1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	devV1 *devv1.DevV1Client
+	speeddateV1 *speeddatev1.SpeeddateV1Client
 }
 
-// DevV1 retrieves the DevV1Client
-func (c *Clientset) DevV1() devv1.DevV1Interface {
-	return c.devV1
+// SpeeddateV1 retrieves the SpeeddateV1Client
+func (c *Clientset) SpeeddateV1() speeddatev1.SpeeddateV1Interface {
+	return c.speeddateV1
 }
 
-// Deprecated: Dev retrieves the default version of DevClient.
+// Deprecated: Speeddate retrieves the default version of SpeeddateClient.
 // Please explicitly pick a version.
-func (c *Clientset) Dev() devv1.DevV1Interface {
-	return c.devV1
+func (c *Clientset) Speeddate() speeddatev1.SpeeddateV1Interface {
+	return c.speeddateV1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -66,7 +66,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.devV1, err = devv1.NewForConfig(&configShallowCopy)
+	cs.speeddateV1, err = speeddatev1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.devV1 = devv1.NewForConfigOrDie(c)
+	cs.speeddateV1 = speeddatev1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -91,7 +91,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.devV1 = devv1.New(c)
+	cs.speeddateV1 = speeddatev1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

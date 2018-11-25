@@ -30,13 +30,13 @@ import (
 
 // FakeGameServers implements GameServerInterface
 type FakeGameServers struct {
-	Fake *FakeDevV1
+	Fake *FakeSpeeddateV1
 	ns   string
 }
 
-var gameserversResource = schema.GroupVersionResource{Group: "dev.speeddate", Version: "v1", Resource: "gameservers"}
+var gameserversResource = schema.GroupVersionResource{Group: "speeddate.dev", Version: "v1", Resource: "gameservers"}
 
-var gameserversKind = schema.GroupVersionKind{Group: "dev.speeddate", Version: "v1", Kind: "GameServer"}
+var gameserversKind = schema.GroupVersionKind{Group: "speeddate.dev", Version: "v1", Kind: "GameServer"}
 
 // Get takes name of the gameServer, and returns the corresponding gameServer object, and an error if there is any.
 func (c *FakeGameServers) Get(name string, options v1.GetOptions) (result *devv1.GameServer, err error) {

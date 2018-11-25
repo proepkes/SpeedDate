@@ -55,7 +55,7 @@ type gameServers struct {
 }
 
 // newGameServers returns a GameServers
-func newGameServers(c *DevV1Client, namespace string) *gameServers {
+func newGameServers(c *SpeeddateV1Client, namespace string) *gameServers {
 	return &gameServers{
 		client: c.RESTClient(),
 		ns:     namespace,

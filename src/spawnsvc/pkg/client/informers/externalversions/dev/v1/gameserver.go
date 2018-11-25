@@ -61,13 +61,13 @@ func NewFilteredGameServerInformer(client versioned.Interface, namespace string,
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.DevV1().GameServers(namespace).List(options)
+				return client.SpeeddateV1().GameServers(namespace).List(options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.DevV1().GameServers(namespace).Watch(options)
+				return client.SpeeddateV1().GameServers(namespace).Watch(options)
 			},
 		},
 		&devv1.GameServer{},
