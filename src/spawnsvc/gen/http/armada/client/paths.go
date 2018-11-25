@@ -9,5 +9,5 @@ package client
 
 // AddArmadaPath returns the URL path to the armada service add HTTP endpoint.
 func AddArmadaPath() string {
-	return "/armada"
+	return "/armada/add"
 }

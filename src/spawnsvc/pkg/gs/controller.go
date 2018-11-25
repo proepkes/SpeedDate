@@ -7,8 +7,10 @@ import (
 	"time"
 
 	errorsPkg "github.com/pkg/errors"
+	"github.com/proepkes/speeddate/src/spawnsvc/pkg/apis/dev/v1alpha1"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -16,6 +18,7 @@ import (
 	extv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
@@ -24,29 +27,29 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
-	"k8s.io/klog"
 
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/scheme"
 	getterv1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned/typed/dev/v1alpha1"
 	listerv1alpha1 "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/listers/dev/v1alpha1"
+	appslisters "k8s.io/client-go/listers/apps/v1"
 
 	corelisterv1 "k8s.io/client-go/listers/core/v1"
 )
 
 type GameServerController struct {
-	logger           *log.Logger
-	crdGetter        v1beta1.CustomResourceDefinitionInterface
-	podGetter        typedcorev1.PodsGetter
-	podLister        corelisterv1.PodLister
-	podSynced        cache.InformerSynced
-	gameServerGetter getterv1alpha1.GameServersGetter
-	gameServerLister listerv1alpha1.GameServerLister
-	gameServerSynced cache.InformerSynced
-	nodeLister       corelisterv1.NodeLister
-	allocationMutex  *sync.Mutex
-	stop             <-chan struct{}
-	recorder         record.EventRecorder
-	workerqueue      workqueue.RateLimitingInterface
+	logger            *log.Logger
+	kubeclientset     kubernetes.Interface
+	clientset         versioned.Interface
+	crdGetter         v1beta1.CustomResourceDefinitionInterface
+	deploymentsLister appslisters.DeploymentLister
+	gameServerGetter  getterv1alpha1.GameServersGetter
+	gameServerLister  listerv1alpha1.GameServerLister
+	gameServerSynced  cache.InformerSynced
+	nodeLister        corelisterv1.NodeLister
+	allocationMutex   *sync.Mutex
+	stop              <-chan struct{}
+	recorder          record.EventRecorder
+	workerqueue       workqueue.RateLimitingInterface
 }
 
 const (
@@ -71,25 +74,25 @@ func NewController(
 	extClient extclientset.Interface,
 	client versioned.Interface, informerFactory externalversions.SharedInformerFactory) *GameServerController {
 
-	pods := kubeInformerFactory.Core().V1().Pods()
+	// pods := kubeInformerFactory.Core().V1().Pods()
 	gameServers := informerFactory.Speeddate().V1alpha1().GameServers()
 	gsInformer := gameServers.Informer()
 
 	c := &GameServerController{
-		allocationMutex:  allocationMutex,
-		crdGetter:        extClient.ApiextensionsV1beta1().CustomResourceDefinitions(),
-		podGetter:        kubeClient.CoreV1(),
-		podLister:        pods.Lister(),
-		podSynced:        pods.Informer().HasSynced,
-		gameServerGetter: client.SpeeddateV1alpha1(),
-		gameServerLister: gameServers.Lister(),
-		gameServerSynced: gsInformer.HasSynced,
-		nodeLister:       kubeInformerFactory.Core().V1().Nodes().Lister(),
-		workerqueue:      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Gameservers"),
+		allocationMutex:   allocationMutex,
+		kubeclientset:     kubeClient,
+		clientset:         client,
+		crdGetter:         extClient.ApiextensionsV1beta1().CustomResourceDefinitions(),
+		deploymentsLister: kubeInformerFactory.Apps().V1().Deployments().Lister(),
+		gameServerGetter:  client.SpeeddateV1alpha1(),
+		gameServerLister:  gameServers.Lister(),
+		gameServerSynced:  gsInformer.HasSynced,
+		nodeLister:        kubeInformerFactory.Core().V1().Nodes().Lister(),
+		workerqueue:       workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Gameservers"),
 	}
 
 	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartLogging(c.logger.Printf)
+	// eventBroadcaster.StartLogging(c.logger.Printf)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClient.CoreV1().Events("")})
 	c.recorder = eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "gameserver-controller"})
 
@@ -182,7 +185,7 @@ func (c *GameServerController) processNextWorkItem() bool {
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queued again until another change happens.
 		c.workerqueue.Forget(obj)
-		klog.Infof("Successfully synced '%s'", key)
+		log.Printf("Successfully synced '%s'", key)
 		return nil
 	}(obj)
 
@@ -198,7 +201,6 @@ func (c *GameServerController) processNextWorkItem() bool {
 // converge the two. It then updates the Status block of the Foo resource
 // with the current status of the resource.
 func (c *GameServerController) syncHandler(key string) error {
-	// Convert the namespace/name string into a distinct namespace and name
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		runtime.HandleError(fmt.Errorf("invalid resource key: %s", key))
@@ -227,9 +229,46 @@ func (c *GameServerController) syncHandler(key string) error {
 		return nil
 	}
 
+	// Get the deployment with the name specified in Foo.spec
+	deployment, err := c.deploymentsLister.Deployments(foo.Namespace).Get(deploymentName)
+	// If the resource doesn't exist, we'll create it
+	if errors.IsNotFound(err) {
+		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Create(newDeployment(foo))
+	}
+
 	// If an error occurs during Get/Create, we'll requeue the item so we can
 	// attempt processing again later. This could have been caused by a
 	// temporary network failure, or any other transient reason.
+	if err != nil {
+		return err
+	}
+
+	// If the Deployment is not controlled by this Foo resource, we should log
+	// a warning to the event recorder and ret
+	if !metav1.IsControlledBy(deployment, foo) {
+		msg := fmt.Sprintf(MessageResourceExists, deployment.Name)
+		c.recorder.Event(foo, corev1.EventTypeWarning, ErrResourceExists, msg)
+		return fmt.Errorf(msg)
+	}
+
+	// If this number of the replicas on the Foo resource is specified, and the
+	// number does not equal the current desired replicas on the Deployment, we
+	// should update the Deployment resource.
+	if foo.Spec.Replicas != nil && *foo.Spec.Replicas != *deployment.Spec.Replicas {
+		log.Printf("Foo %s replicas: %d, deployment replicas: %d", name, *foo.Spec.Replicas, *deployment.Spec.Replicas)
+		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
+	}
+
+	// If an error occurs during Update, we'll requeue the item so we can
+	// attempt processing again later. THis could have been caused by a
+	// temporary network failure, or any other transient reason.
+	if err != nil {
+		return err
+	}
+
+	// Finally, we update the status block of the Foo resource to reflect the
+	// current state of the world
+	err = c.updateFooStatus(foo, deployment)
 	if err != nil {
 		return err
 	}
@@ -272,4 +311,32 @@ func WaitForEstablishedCRD(crdGetter extv1beta1.CustomResourceDefinitionInterfac
 
 		return false, nil
 	})
+}
+
+func (c *GameServerController) updateFooStatus(foo *v1alpha1.GameServer, deployment *appsv1.Deployment) error {
+	// NEVER modify objects from the store. It's a read-only, local cache.
+	// You can use DeepCopy() to make a deep copy of original object and modify this copy
+	// Or create a copy manually for better performance
+	fooCopy := foo.DeepCopy()
+	fooCopy.Status.AvailableReplicas = deployment.Status.AvailableReplicas
+	// If the CustomResourceSubresources feature gate is not enabled,
+	// we must use Update instead of UpdateStatus to update the Status block of the Foo resource.
+	// UpdateStatus will not allow changes to the Spec of the resource,
+	// which is ideal for ensuring nothing other than resource status has been updated.
+	_, err := c.clientset.SpeeddateV1alpha1().GameServers(foo.Namespace).Update(fooCopy)
+	return err
+}
+
+func (c *GameServerController) NewGameserver() *v1alpha1.GameServer {
+	var replicas int32 = 1
+	gs := &v1alpha1.GameServer{
+		TypeMeta:   metav1.TypeMeta{APIVersion: v1alpha1.SchemeGroupVersion.String()},
+		ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "default"},
+		Spec: v1alpha1.FooSpec{
+			DeploymentName: "gs-deployment",
+			Replicas:       &replicas,
+		},
+	}
+	c.gameServerGetter.GameServers("default").Create(gs)
+	return gs
 }

@@ -13,7 +13,7 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /armada:
+  /armada/add:
     post:
       tags:
       - armada

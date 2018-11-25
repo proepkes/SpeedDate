@@ -14,7 +14,7 @@ var _ = Service("armada", func() {
 		Description("Add a new gameserver to the armada.")
 		Result(String)
 		HTTP(func() {
-			POST("/")
+			POST("/add")
 			Response(StatusCreated)
 		})
 	})
