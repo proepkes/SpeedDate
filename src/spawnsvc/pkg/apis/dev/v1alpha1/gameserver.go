@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,12 +14,10 @@ type GameServer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	State State          `json:"state"`
-	Spec  GameServerSpec `json:"spec"`
-}
+	State State `json:"state"`
+	Port  int32 `json:"Port"`
 
-type GameServerSpec struct {
-	Port int32 `json:"Port"`
+	Template corev1.PodTemplateSpec `json:"template"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

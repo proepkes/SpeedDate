@@ -328,13 +328,12 @@ func (c *GameServerController) updateFooStatus(foo *v1alpha1.GameServer, deploym
 }
 
 func (c *GameServerController) NewGameserver() *v1alpha1.GameServer {
-	var replicas int32 = 1
+
 	gs := &v1alpha1.GameServer{
 		TypeMeta:   metav1.TypeMeta{APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "default"},
-		Spec: v1alpha1.FooSpec{
-			DeploymentName: "gs-deployment",
-			Replicas:       &replicas,
+		Spec: v1alpha1.GameServerSpec{
+			Port: 55443,
 		},
 	}
 	c.gameServerGetter.GameServers("default").Create(gs)
