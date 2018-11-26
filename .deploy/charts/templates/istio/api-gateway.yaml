@@ -20,13 +20,13 @@ spec:
     hosts:
     - {{ .Values.hosts.ui }}
   #TODO: test https https://istio.io/docs/tasks/traffic-management/secure-ingress/
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-      privateKey: /etc/istio/ingressgateway-certs/tls.key
-    hosts:
-    - "httpbin.example.com"
+  # - port:
+  #     number: 443
+  #     name: https
+  #     protocol: HTTPS
+  #   tls:
+  #     mode: SIMPLE
+  #     serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+  #     privateKey: /etc/istio/ingressgateway-certs/tls.key
+  #   hosts:
+  #   - "httpbin.example.com"
