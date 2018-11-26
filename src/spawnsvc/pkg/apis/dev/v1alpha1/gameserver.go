@@ -63,5 +63,9 @@ func (gs *GameServer) Pod() *corev1.Pod {
 		GameServerPodLabel: gs.ObjectMeta.Name,
 	}
 	pod.ObjectMeta.Name = gs.ObjectMeta.Name
+
+	// Set ownerRef because IsControlledBy checks if the object has a controllerRef set to the given owner
+	ref := metav1.NewControllerRef(gs, SchemeGroupVersion.WithKind("GameServer"))
+	pod.ObjectMeta.OwnerReferences = append(pod.ObjectMeta.OwnerReferences, *ref)
 	return pod
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	errorsPkg "github.com/pkg/errors"
+	"github.com/proepkes/speeddate/src/spawnsvc/pkg/apis/dev"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/apis/dev/v1alpha1"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
 	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
@@ -241,22 +242,6 @@ func (c *GameServerController) syncHandler(key string) error {
 		return err
 	}
 
-	// deploymentName := foo.Spec.DeploymentName
-	// if deploymentName == "" {
-	// 	// We choose to absorb the error here as the worker would requeue the
-	// 	// resource otherwise. Instead, the next time the resource is updated
-	// 	// the resource will be queued again.
-	// 	runtime.HandleError(fmt.Errorf("%s: deployment name must be specified", key))
-	// 	return nil
-	// }
-
-	// // Get the deployment with the name specified in Foo.spec
-	// deployment, err := c.deploymentsLister.Deployments(foo.Namespace).Get(deploymentName)
-	// // If the resource doesn't exist, we'll create it
-	// if errors.IsNotFound(err) {
-	// 	deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Create(newDeployment(foo))
-	// }
-
 	// If an error occurs during Get/Create, we'll requeue the item so we can
 	// attempt processing again later. This could have been caused by a
 	// temporary network failure, or any other transient reason.
@@ -270,14 +255,6 @@ func (c *GameServerController) syncHandler(key string) error {
 	// 	msg := fmt.Sprintf(MessageResourceExists, deployment.Name)
 	// 	c.recorder.Event(foo, corev1.EventTypeWarning, ErrResourceExists, msg)
 	// 	return fmt.Errorf(msg)
-	// }
-
-	// If this number of the replicas on the Foo resource is specified, and the
-	// number does not equal the current desired replicas on the Deployment, we
-	// should update the Deployment resource.
-	// if foo.Spec.Replicas != nil && *foo.Spec.Replicas != *deployment.Spec.Replicas {
-	// 	log.Printf("Foo %s replicas: %d, deployment replicas: %d", name, *foo.Spec.Replicas, *deployment.Spec.Replicas)
-	// 	deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
 	// }
 
 	// If an error occurs during Update, we'll requeue the item so we can
@@ -342,7 +319,19 @@ func (c *GameServerController) handleDeleted(gs *v1alpha1.GameServer) (*v1alpha1
 	}
 	c.recorder.Event(gs, corev1.EventTypeNormal, string(gs.State), fmt.Sprintf("Deleting Pod %s", pod.ObjectMeta.Name))
 
-	return gs, nil
+	gsCopy := gs.DeepCopy()
+	// remove the finalizer for this controller
+	var fin []string
+	// var err error
+	for _, f := range gsCopy.ObjectMeta.Finalizers {
+		if f != dev.GroupName {
+			fin = append(fin, f)
+		}
+	}
+	gsCopy.ObjectMeta.Finalizers = fin
+	gs, err = c.gameServerGetter.GameServers(gsCopy.ObjectMeta.Namespace).Update(gsCopy)
+
+	return gs, err
 }
 
 // enqueueFoo takes a Foo resource and converts it into a namespace/name
