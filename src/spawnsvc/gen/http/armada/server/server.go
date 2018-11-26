@@ -20,6 +20,7 @@ import (
 type Server struct {
 	Mounts []*MountPoint
 	Add    http.Handler
+	Clear  http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -50,8 +51,10 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"Add", "POST", "/armada/add"},
+			{"Clear", "POST", "/armada/clear"},
 		},
-		Add: NewAddHandler(e.Add, mux, dec, enc, eh),
+		Add:   NewAddHandler(e.Add, mux, dec, enc, eh),
+		Clear: NewClearHandler(e.Clear, mux, dec, enc, eh),
 	}
 }
 
@@ -61,11 +64,13 @@ func (s *Server) Service() string { return "armada" }
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Add = m(s.Add)
+	s.Clear = m(s.Clear)
 }
 
 // Mount configures the mux to serve the armada endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountAddHandler(mux, h.Add)
+	MountClearHandler(mux, h.Clear)
 }
 
 // MountAddHandler configures the mux to serve the "armada" service "add"
@@ -96,6 +101,50 @@ func NewAddHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "add")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "armada")
+
+		res, err := endpoint(ctx, nil)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
+// MountClearHandler configures the mux to serve the "armada" service "clear"
+// endpoint.
+func MountClearHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("POST", "/armada/clear", f)
+}
+
+// NewClearHandler creates a HTTP handler which loads the HTTP request and
+// calls the "armada" service "clear" endpoint.
+func NewClearHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		encodeResponse = EncodeClearResponse(enc)
+		encodeError    = goahttp.ErrorEncoder(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "clear")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "armada")
 
 		res, err := endpoint(ctx, nil)

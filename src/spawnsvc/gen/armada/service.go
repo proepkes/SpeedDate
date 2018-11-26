@@ -15,6 +15,8 @@ import (
 type Service interface {
 	// Add a new gameserver to the armada.
 	Add(context.Context) (res string, err error)
+	// Removes all gameserver pods.
+	Clear(context.Context) (res string, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -25,4 +27,4 @@ const ServiceName = "armada"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"add"}
+var MethodNames = [2]string{"add", "clear"}

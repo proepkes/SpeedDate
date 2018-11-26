@@ -20,6 +20,9 @@ type Client struct {
 	// Add Doer is the HTTP client used to make requests to the add endpoint.
 	AddDoer goahttp.Doer
 
+	// Clear Doer is the HTTP client used to make requests to the clear endpoint.
+	ClearDoer goahttp.Doer
+
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -41,6 +44,7 @@ func NewClient(
 ) *Client {
 	return &Client{
 		AddDoer:             doer,
+		ClearDoer:           doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -64,6 +68,26 @@ func (c *Client) Add() goa.Endpoint {
 
 		if err != nil {
 			return nil, goahttp.ErrRequestError("armada", "add", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Clear returns an endpoint that makes HTTP requests to the armada service
+// clear server.
+func (c *Client) Clear() goa.Endpoint {
+	var (
+		decodeResponse = DecodeClearResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildClearRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ClearDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("armada", "clear", err)
 		}
 		return decodeResponse(resp)
 	}

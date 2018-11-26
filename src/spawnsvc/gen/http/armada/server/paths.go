@@ -11,3 +11,8 @@ package server
 func AddArmadaPath() string {
 	return "/armada/add"
 }
+
+// ClearArmadaPath returns the URL path to the armada service clear HTTP endpoint.
+func ClearArmadaPath() string {
+	return "/armada/clear"
+}

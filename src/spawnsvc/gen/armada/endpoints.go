@@ -15,19 +15,22 @@ import (
 
 // Endpoints wraps the "armada" service endpoints.
 type Endpoints struct {
-	Add goa.Endpoint
+	Add   goa.Endpoint
+	Clear goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "armada" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Add: NewAddEndpoint(s),
+		Add:   NewAddEndpoint(s),
+		Clear: NewClearEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "armada" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Add = m(e.Add)
+	e.Clear = m(e.Clear)
 }
 
 // NewAddEndpoint returns an endpoint function that calls the method "add" of
@@ -35,5 +38,13 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 func NewAddEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		return s.Add(ctx)
+	}
+}
+
+// NewClearEndpoint returns an endpoint function that calls the method "clear"
+// of service "armada".
+func NewClearEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return s.Clear(ctx)
 	}
 }

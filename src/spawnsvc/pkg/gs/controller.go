@@ -111,6 +111,10 @@ func (c *GameServerController) CreateGameserver() {
 	c.gameServerGetter.GameServers("default").Create(v1alpha1.NewGameserver())
 }
 
+func (c *GameServerController) ClearGameservers() {
+	c.gameServerGetter.GameServers("default").DeleteCollection(&v1.DeleteOptions{}, v1.ListOptions{})
+}
+
 // Run the GameServer controller. Will block until stop is closed.
 // Runs threadiness number workers to process the rate limited queue
 func (c *GameServerController) Run(workers int, stopCh <-chan struct{}) error {

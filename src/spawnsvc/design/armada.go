@@ -18,4 +18,13 @@ var _ = Service("armada", func() {
 			Response(StatusCreated)
 		})
 	})
+
+	Method("clear", func() {
+		Description("Removes all gameserver pods.")
+		Result(String)
+		HTTP(func() {
+			POST("/clear")
+			Response(StatusOK)
+		})
+	})
 })

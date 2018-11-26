@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `armada add
+	return `armada (add|clear)
 `
 }
 
@@ -46,9 +46,12 @@ func ParseEndpoint(
 		armadaFlags = flag.NewFlagSet("armada", flag.ContinueOnError)
 
 		armadaAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
+
+		armadaClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 	)
 	armadaFlags.Usage = armadaUsage
 	armadaAddFlags.Usage = armadaAddUsage
+	armadaClearFlags.Usage = armadaClearUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -87,6 +90,9 @@ func ParseEndpoint(
 			case "add":
 				epf = armadaAddFlags
 
+			case "clear":
+				epf = armadaClearFlags
+
 			}
 
 		}
@@ -115,6 +121,9 @@ func ParseEndpoint(
 			case "add":
 				endpoint = c.Add()
 				data = nil
+			case "clear":
+				endpoint = c.Clear()
+				data = nil
 			}
 		}
 	}
@@ -133,6 +142,7 @@ Usage:
 
 COMMAND:
     add: Add a new gameserver to the armada.
+    clear: Removes all gameserver pods.
 
 Additional help:
     %s armada COMMAND --help
@@ -145,5 +155,15 @@ Add a new gameserver to the armada.
 
 Example:
     `+os.Args[0]+` armada add
+`, os.Args[0])
+}
+
+func armadaClearUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] armada clear
+
+Removes all gameserver pods.
+
+Example:
+    `+os.Args[0]+` armada clear
 `, os.Args[0])
 }

@@ -27,6 +27,20 @@ paths:
             type: string
       schemes:
       - http
+  /armada/clear:
+    post:
+      tags:
+      - armada
+      summary: clear armada
+      description: Removes all gameserver pods.
+      operationId: armada#clear
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            type: string
+      schemes:
+      - http
   /swagger/swagger.json:
     get:
       summary: Download ../../gen/http/openapi.json

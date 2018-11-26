@@ -15,13 +15,15 @@ import (
 
 // Client is the "armada" service client.
 type Client struct {
-	AddEndpoint goa.Endpoint
+	AddEndpoint   goa.Endpoint
+	ClearEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "armada" service client given the endpoints.
-func NewClient(add goa.Endpoint) *Client {
+func NewClient(add, clear goa.Endpoint) *Client {
 	return &Client{
-		AddEndpoint: add,
+		AddEndpoint:   add,
+		ClearEndpoint: clear,
 	}
 }
 
@@ -29,6 +31,16 @@ func NewClient(add goa.Endpoint) *Client {
 func (c *Client) Add(ctx context.Context) (res string, err error) {
 	var ires interface{}
 	ires, err = c.AddEndpoint(ctx, nil)
+	if err != nil {
+		return
+	}
+	return ires.(string), nil
+}
+
+// Clear calls the "clear" endpoint of the "armada" service.
+func (c *Client) Clear(ctx context.Context) (res string, err error) {
+	var ires interface{}
+	ires, err = c.ClearEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}
