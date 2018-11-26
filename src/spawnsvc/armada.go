@@ -23,6 +23,6 @@ func NewArmada(logger *log.Logger, gsController *gs.GameServerController) armada
 // Add a new gameserver to the armada.
 func (s *armadaSvc) Add(ctx context.Context) (res string, err error) {
 	s.logger.Print("armada.add")
-	s.gsController.NewGameserver()
+	s.gsController.CreateGameserver()
 	return
 }
