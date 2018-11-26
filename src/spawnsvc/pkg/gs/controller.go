@@ -17,6 +17,7 @@ import (
 	extv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
@@ -111,8 +112,11 @@ func (c *GameServerController) CreateGameserver() {
 	c.gameServerGetter.GameServers("default").Create(v1alpha1.NewGameserver())
 }
 
-func (c *GameServerController) ClearGameservers() {
-	c.gameServerGetter.GameServers("default").DeleteCollection(&v1.DeleteOptions{}, v1.ListOptions{})
+func (c *GameServerController) ClearAll() {
+	err := c.gameServerGetter.GameServers("default").DeleteCollection(&v1.DeleteOptions{}, v1.ListOptions{})
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
 }
 
 // Run the GameServer controller. Will block until stop is closed.
@@ -229,6 +233,10 @@ func (c *GameServerController) syncHandler(key string) error {
 		return err
 	}
 
+	if gs, err = c.handleDeleted(gs); err != nil {
+		return err
+	}
+
 	if gs, err = c.handleRequested(gs); err != nil {
 		return err
 	}
@@ -316,6 +324,27 @@ func (c *GameServerController) handleRequested(gs *v1alpha1.GameServer) (*v1alph
 	return gs, nil
 }
 
+// syncGameServerCreatingState checks if the GameServer is in the Creating state, and if so
+// creates a Pod for the GameServer and moves the state to Starting
+func (c *GameServerController) handleDeleted(gs *v1alpha1.GameServer) (*v1alpha1.GameServer, error) {
+	if gs.ObjectMeta.DeletionTimestamp.IsZero() {
+		return gs, nil
+	}
+
+	pod, err := c.getPod(gs)
+	if err != nil {
+		return gs, err
+	}
+
+	err = c.podGetter.Pods(pod.ObjectMeta.Namespace).Delete(pod.ObjectMeta.Name, nil)
+	if err != nil {
+		return gs, err
+	}
+	c.recorder.Event(gs, corev1.EventTypeNormal, string(gs.State), fmt.Sprintf("Deleting Pod %s", pod.ObjectMeta.Name))
+
+	return gs, nil
+}
+
 // enqueueFoo takes a Foo resource and converts it into a namespace/name
 // string which is then put onto the work queue. This method should *not* be
 // passed resources of any type other than Foo.
@@ -362,4 +391,18 @@ func (c *GameServerController) createGameServerPod(gs *v1alpha1.GameServer) (*v1
 		fmt.Sprintf("Pod %s created", pod.ObjectMeta.Name))
 
 	return gs, nil
+}
+
+func (c *GameServerController) getPod(gs *v1alpha1.GameServer) (*corev1.Pod, error) {
+	pods, err := c.podLister.List(labels.SelectorFromSet(labels.Set{v1alpha1.GameServerPodLabel: gs.ObjectMeta.Name}))
+	if err != nil {
+		return nil, fmt.Errorf("error checking if pod exists for GameServer %s", gs.Name)
+	}
+	for _, p := range pods {
+		if v1.IsControlledBy(p, gs) {
+			return p, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no pod exists for GameServer %s", gs.Name)
 }

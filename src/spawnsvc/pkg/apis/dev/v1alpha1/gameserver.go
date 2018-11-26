@@ -11,6 +11,8 @@ type State string
 const (
 	Requested State = "Requested"
 	Ready     State = "Ready"
+
+	GameServerPodLabel = dev.GroupName + "_gameserver"
 )
 
 // +genclient
@@ -43,7 +45,7 @@ func NewGameserver() *GameServer {
 		State: Requested,
 		Template: corev1.PodTemplateSpec{
 			Spec: corev1.PodSpec{
-				Containers: []corev1.Container{{Name: "server", Image: "docker.io/proepkes/mmsvc:dev"}},
+				Containers: []corev1.Container{{Name: "exampleserver", Image: "docker.io/proepkes/mmsvc:dev"}},
 			},
 		},
 	}
@@ -57,6 +59,9 @@ func (gs *GameServer) Pod() *corev1.Pod {
 		ObjectMeta: *gs.Template.ObjectMeta.DeepCopy(),
 		Spec:       *gs.Template.Spec.DeepCopy(),
 	}
-	pod.ObjectMeta.GenerateName = gs.ObjectMeta.Name
+	pod.ObjectMeta.Labels = map[string]string{
+		GameServerPodLabel: gs.ObjectMeta.Name,
+	}
+	pod.ObjectMeta.Name = gs.ObjectMeta.Name
 	return pod
 }

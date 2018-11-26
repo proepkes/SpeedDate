@@ -30,6 +30,6 @@ func (s *armadaSvc) Add(ctx context.Context) (res string, err error) {
 // Removes all gameserver pods.
 func (s *armadaSvc) Clear(ctx context.Context) (res string, err error) {
 	s.logger.Print("armada.clear")
-	s.gsController.ClearGameservers()
+	s.gsController.ClearAll()
 	return
 }
