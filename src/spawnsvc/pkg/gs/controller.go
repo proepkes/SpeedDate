@@ -3,7 +3,6 @@ package gs
 import (
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	errorsPkg "github.com/pkg/errors"
@@ -47,7 +46,6 @@ type GameServerController struct {
 	gameServerLister listerv1alpha1.GameServerLister
 	gameServerSynced cache.InformerSynced
 	nodeLister       corelisterv1.NodeLister
-	allocationMutex  *sync.Mutex
 	stop             <-chan struct{}
 	recorder         record.EventRecorder
 	workerqueue      workqueue.RateLimitingInterface
@@ -69,7 +67,6 @@ const (
 )
 
 func NewController(
-	allocationMutex *sync.Mutex,
 	kubeClient kubernetes.Interface,
 	kubeInformerFactory informers.SharedInformerFactory,
 	extClient extclientset.Interface,
@@ -80,7 +77,6 @@ func NewController(
 	gsInformer := gameServers.Informer()
 
 	c := &GameServerController{
-		allocationMutex:  allocationMutex,
 		kubeclientset:    kubeClient,
 		clientset:        client,
 		crdGetter:        extClient.ApiextensionsV1beta1().CustomResourceDefinitions(),
@@ -109,8 +105,9 @@ func NewController(
 	return c
 }
 
-func (c *GameServerController) CreateGameserver() {
-	c.gameServerGetter.GameServers("default").Create(v1alpha1.NewGameserver())
+func (c *GameServerController) CreateGameserver() (*v1alpha1.GameServer, error) {
+	gs := v1alpha1.NewGameserver()
+	return c.gameServerGetter.GameServers(gs.ObjectMeta.Namespace).Create(gs)
 }
 
 func (c *GameServerController) ClearAll() {

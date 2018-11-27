@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -62,25 +61,7 @@ func main() {
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(k8sClient, time.Second*30)
 	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second*30)
 
-	allocationMutex := &sync.Mutex{}
-	gsController := gs.NewController(allocationMutex, k8sClient, kubeInformerFactory, extClient, client, informerFactory)
-
-	// Create the structs that implement the services.
-	var (
-		armadaSvc armada.Service
-	)
-	{
-		armadaSvc = spawnsvc.NewArmada(logger, gsController)
-	}
-
-	// Wrap the services in endpoints that can be invoked from other
-	// services potentially running in different processes.
-	var (
-		armadaEndpoints *armada.Endpoints
-	)
-	{
-		armadaEndpoints = armada.NewEndpoints(armadaSvc)
-	}
+	gsController := gs.NewController(k8sClient, kubeInformerFactory, extClient, client, informerFactory)
 
 	// Provide the transport specific request decoder and response encoder.
 	// The goa http package has built-in support for JSON, XML and gob.
@@ -96,6 +77,7 @@ func main() {
 	{
 		mux = goahttp.NewMuxer()
 	}
+
 	// Wrap the endpoints with the transport specific layers. The generated
 	// server packages contains code generated from the design which maps
 	// the service input and output data structures to HTTP requests and
@@ -106,9 +88,10 @@ func main() {
 	)
 	{
 		eh := ErrorHandler(logger)
-		armadaServer = armadasvr.New(armadaEndpoints, mux, dec, enc, eh)
+		armadaServer = armadasvr.New(armada.NewEndpoints(spawnsvc.NewArmada(logger, gsController)), mux, dec, enc, eh)
 		swaggerServer = swaggersvr.New(nil, mux, dec, enc, eh)
 	}
+
 	// Configure the mux.
 	armadasvr.Mount(mux, armadaServer)
 	swaggersvr.Mount(mux, swaggerServer)
@@ -155,7 +138,7 @@ func main() {
 	go func() {
 		http.ListenAndServe(":9000", srvHealth)
 	}()
-	
+
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}
@@ -186,7 +169,7 @@ func ErrorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 	return func(ctx context.Context, w http.ResponseWriter, err error) {
 		id := ctx.Value(middleware.RequestIDKey).(string)
 		w.Write([]byte("[" + id + "] encoding: " + err.Error()))
-		logger.Printf("[%s] ERROR: %s", id, err.Error())
+		logger.Printf("[%s] ERROR: %v", id, err)
 	}
 }
 
@@ -222,8 +205,6 @@ func createClientSets() (kubernetes.Interface, *extclientset.Clientset, *clients
 }
 
 func createClients(config *rest.Config) (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
-
-	// generate the client based off of the config
 	k8sClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("getClusterConfig: %v", err)
@@ -231,12 +212,12 @@ func createClients(config *rest.Config) (kubernetes.Interface, *extclientset.Cli
 
 	extClient, err := extclientset.NewForConfig(config)
 	if err != nil {
-		log.Fatalf("Could not create the api extension clientset")
+		log.Fatalf("Could not create the api extension clientset: %v", err)
 	}
 
 	client, err := clientset.NewForConfig(config)
 	if err != nil {
-		log.Fatalf("Error building example clientset: %s", err.Error())
+		log.Fatalf("Error building example clientset: %v", err)
 	}
 
 	log.Println("Successfully constructed clients")
