@@ -8,7 +8,7 @@ Under construction
 # Development:
 ## Minikube
 - https://kubernetes.io/docs/tasks/tools/install-minikube/
-- minikube start --memory=4096 --cpus=4 --extra-config=apiserver.authorization-mode=RBAC --extra-config=apiserver.admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota
+- minikube start --kubernetes-version v1.11.3 --memory=4096 --cpus=4 --extra-config=apiserver.authorization-mode=RBAC --extra-config=apiserver.admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota
 
 - kubectl apply -f .dev/setup/minikube/metallb.yaml
 - kubectl apply -f .dev/setup/minikube/metallb-config.yaml

@@ -1,7 +1,7 @@
 // From: https://istio.io/docs/setup/kubernetes/quick-start/
 
 curl -L https://git.io/getLatestIstio | sh -
-cd istio-1.0.3
+cd istio-1.0.4
 
 
 kubectl apply -f install/kubernetes/helm/istio/templates/crds.yaml
