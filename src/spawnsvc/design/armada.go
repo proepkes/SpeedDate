@@ -1,13 +1,21 @@
 package design
 
-import . "goa.design/goa/http/design"
-import . "goa.design/goa/http/dsl"
+import (
+	. "goa.design/goa/http/design"
+	_ "goa.design/plugins/cors"
+	. "goa.design/plugins/cors/dsl"
+)
 
 var _ = Service("armada", func() {
 	Description("The service makes it possible to manage gameservers")
 
 	HTTP(func() {
 		Path("/armada")
+	})
+
+	// Sets CORS response headers for requests with any Origin header
+	Origin("*", func() {
+		Methods("POST")
 	})
 
 	Method("add", func() {
