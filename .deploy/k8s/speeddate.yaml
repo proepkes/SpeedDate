@@ -26,7 +26,7 @@ rules:
   verbs: ["get"]
 - apiGroups: ["speeddate.dev"]
   resources: ["gameservers"]
-  verbs: ["create", "delete", "get", "list", "update", "watch"]
+  verbs: ["create", "delete", "get", "list", "update", "watch", "deletecollection"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -108,7 +108,7 @@ metadata:
 spec:
   ports:
   - port: 8001
-    targetPort: 8003
+    targetPort: 8001
     name: http
   selector:
     app: spawnsvc
@@ -238,7 +238,7 @@ spec:
         image: docker.io/proepkes/spawnsvc:dev
         imagePullPolicy: Always      
         ports:
-        - containerPort: 8003
+        - containerPort: 8001
         livenessProbe:
           httpGet:
             path: /health
@@ -397,6 +397,12 @@ spec:
   http:
   - match:
     - uri:
+        prefix: /armada/
+    route:
+    - destination:
+        host: spawnsvc.default.svc.cluster.local
+  - match:
+    - uri:
         prefix: /storage/
     route:
     - destination:
@@ -417,7 +423,6 @@ metadata:
 spec:
   hosts:
   - ui.speeddate.local
-  - "httpbin.example.com"
   gateways:
   - sd-gateway
   http:

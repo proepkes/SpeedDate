@@ -22,6 +22,14 @@ storagesvcSettings:
   DbUser: speeddateuser
   DbPassword: password
 
+spawnsvcSettings:
+  DeploymentName: spawnsvc-v1
+  ImageName: spawnsvc
+  Port: 8001
+  HealthPort: 9000
+  ServiceAccount: gameserver-controller
+  rbacEnabled: true
+  
 authsvcSettings:
   DeploymentName: authsvc-v1
   ImageName: authsvc
@@ -34,13 +42,6 @@ mmsvcSettings:
   Port: 8003
   HealthPort: 9000
 
-spawnsvcSettings:
-  DeploymentName: spawnsvc-v1
-  ImageName: spawnsvc
-  Port: 8003
-  HealthPort: 9000
-  ServiceAccount: gameserver-controller
-  rbacEnabled: true
 
 speeddateui:
   Port: 80

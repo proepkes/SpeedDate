@@ -5,7 +5,6 @@ metadata:
 spec:
   hosts:
   - {{ .Values.hosts.ui }}
-  - "httpbin.example.com"
   gateways:
   - sd-gateway
   http:

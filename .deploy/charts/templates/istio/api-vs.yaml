@@ -10,13 +10,19 @@ spec:
   http:
   - match:
     - uri:
+        prefix: /armada/
+    route:
+    - destination:
+        host: spawnsvc.{{ .Release.Namespace }}.svc.cluster.local
+  - match:
+    - uri:
         prefix: /storage/
     route:
     - destination:
-        host: storagesvc.default.svc.cluster.local
+        host: storagesvc.{{ .Release.Namespace }}.svc.cluster.local
   - match:
     - uri:
         prefix: /auth/
     route:
     - destination:
-        host: authsvc.default.svc.cluster.local
+        host: authsvc.{{ .Release.Namespace }}.svc.cluster.local
