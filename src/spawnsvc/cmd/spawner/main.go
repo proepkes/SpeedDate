@@ -35,6 +35,10 @@ type Runner interface {
 	Run(workers int, stop <-chan struct{}) error
 }
 
+const (
+	numWorkers = 4
+)
+
 func main() {
 	// Define command line flags, add any other flag required to configure
 	// the service.
@@ -125,7 +129,7 @@ func main() {
 
 	for _, r := range []Runner{gsController} {
 		go func(runner Runner) {
-			if err := runner.Run(1, stopCh); err != nil {
+			if err := runner.Run(numWorkers, stopCh); err != nil {
 				log.Fatalf("Error running controller: %s", err.Error())
 			}
 		}(r)
