@@ -14,9 +14,7 @@ var _ = Service("armada", func() {
 	})
 
 	// Sets CORS response headers for requests with any Origin header
-	Origin("*", func() {
-		Methods("POST")
-	})
+	Origin("*")
 
 	Method("add", func() {
 		Description("Add a new gameserver to the armada.")

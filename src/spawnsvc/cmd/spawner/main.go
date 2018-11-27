@@ -111,7 +111,7 @@ func main() {
 	}
 	// Configure the mux.
 	armadasvr.Mount(mux, armadaServer)
-	swaggersvr.Mount(mux)
+	swaggersvr.Mount(mux, swaggerServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.

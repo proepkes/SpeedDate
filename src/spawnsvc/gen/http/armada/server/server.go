@@ -205,7 +205,6 @@ func handleArmadaOrigin(h http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Credentials", "false")
 			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
-				w.Header().Set("Access-Control-Allow-Methods", "POST")
 			}
 			origHndlr(w, r)
 			return
