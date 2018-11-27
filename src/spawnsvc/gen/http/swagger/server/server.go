@@ -18,6 +18,7 @@ import (
 // Server lists the swagger service endpoint HTTP handlers.
 type Server struct {
 	Mounts []*MountPoint
+	CORS   http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -47,8 +48,10 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
+			{"CORS", "OPTIONS", "/swagger/swagger.json"},
 			{"../../gen/http/openapi.json", "GET", "/swagger/swagger.json"},
 		},
+		CORS: NewCORSHandler(),
 	}
 }
 
@@ -57,10 +60,12 @@ func (s *Server) Service() string { return "swagger" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
+	s.CORS = m(s.CORS)
 }
 
 // Mount configures the mux to serve the swagger endpoints.
-func Mount(mux goahttp.Muxer) {
+func Mount(mux goahttp.Muxer, h *Server) {
+	MountCORSHandler(mux, h.CORS)
 	MountGenHTTPOpenapiJSON(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../../gen/http/openapi.json")
 	}))
@@ -69,5 +74,41 @@ func Mount(mux goahttp.Muxer) {
 // MountGenHTTPOpenapiJSON configures the mux to serve GET request made to
 // "/swagger/swagger.json".
 func MountGenHTTPOpenapiJSON(mux goahttp.Muxer, h http.Handler) {
-	mux.Handle("GET", "/swagger/swagger.json", h.ServeHTTP)
+	mux.Handle("GET", "/swagger/swagger.json", handleSwaggerOrigin(h).ServeHTTP)
+}
+
+// MountCORSHandler configures the mux to serve the CORS endpoints for the
+// service swagger.
+func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
+	h = handleSwaggerOrigin(h)
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("OPTIONS", "/swagger/swagger.json", f)
+}
+
+// NewCORSHandler creates a HTTP handler which returns a simple 200 response.
+func NewCORSHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+}
+
+// handleSwaggerOrigin applies the CORS response headers corresponding to the
+// origin for the service swagger.
+func handleSwaggerOrigin(h http.Handler) http.Handler {
+	origHndlr := h.(http.HandlerFunc)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			origHndlr(w, r)
+			return
+		}
+		origHndlr(w, r)
+		return
+	})
 }

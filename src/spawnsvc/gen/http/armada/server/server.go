@@ -14,6 +14,7 @@ import (
 	armada "github.com/proepkes/speeddate/src/spawnsvc/gen/armada"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
+	"goa.design/plugins/cors"
 )
 
 // Server lists the armada service endpoint HTTP handlers.
@@ -21,6 +22,7 @@ type Server struct {
 	Mounts []*MountPoint
 	Add    http.Handler
 	Clear  http.Handler
+	CORS   http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -52,9 +54,12 @@ func New(
 		Mounts: []*MountPoint{
 			{"Add", "POST", "/armada/add"},
 			{"Clear", "POST", "/armada/clear"},
+			{"CORS", "OPTIONS", "/armada/add"},
+			{"CORS", "OPTIONS", "/armada/clear"},
 		},
 		Add:   NewAddHandler(e.Add, mux, dec, enc, eh),
 		Clear: NewClearHandler(e.Clear, mux, dec, enc, eh),
+		CORS:  NewCORSHandler(),
 	}
 }
 
@@ -65,18 +70,20 @@ func (s *Server) Service() string { return "armada" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Add = m(s.Add)
 	s.Clear = m(s.Clear)
+	s.CORS = m(s.CORS)
 }
 
 // Mount configures the mux to serve the armada endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountAddHandler(mux, h.Add)
 	MountClearHandler(mux, h.Clear)
+	MountCORSHandler(mux, h.CORS)
 }
 
 // MountAddHandler configures the mux to serve the "armada" service "add"
 // endpoint.
 func MountAddHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
+	f, ok := handleArmadaOrigin(h).(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
@@ -120,7 +127,7 @@ func NewAddHandler(
 // MountClearHandler configures the mux to serve the "armada" service "clear"
 // endpoint.
 func MountClearHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
+	f, ok := handleArmadaOrigin(h).(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
@@ -158,5 +165,52 @@ func NewClearHandler(
 		if err := encodeResponse(ctx, w, res); err != nil {
 			eh(ctx, w, err)
 		}
+	})
+}
+
+// MountCORSHandler configures the mux to serve the CORS endpoints for the
+// service armada.
+func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
+	h = handleArmadaOrigin(h)
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("OPTIONS", "/armada/add", f)
+	mux.Handle("OPTIONS", "/armada/clear", f)
+}
+
+// NewCORSHandler creates a HTTP handler which returns a simple 200 response.
+func NewCORSHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+}
+
+// handleArmadaOrigin applies the CORS response headers corresponding to the
+// origin for the service armada.
+func handleArmadaOrigin(h http.Handler) http.Handler {
+	origHndlr := h.(http.HandlerFunc)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			origHndlr(w, r)
+			return
+		}
+		if cors.MatchOrigin(origin, "*") {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				w.Header().Set("Access-Control-Allow-Methods", "POST")
+			}
+			origHndlr(w, r)
+			return
+		}
+		origHndlr(w, r)
+		return
 	})
 }
