@@ -57,7 +57,7 @@ func main() {
 	}
 
 	// get the Kubernetes client for connectivity
-	k8sClient, extClient, client := getClientLocal()
+	k8sClient, extClient, client := createClientSets()
 
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(k8sClient, time.Second*30)
 	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second*30)
@@ -182,32 +182,34 @@ func ErrorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 	}
 }
 
-// retrieve the Kubernetes cluster client from outside of the cluster
-func getClientLocal() (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(home)
-		os.Exit(1)
+func createClientSets() (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
+	_, hasHost := os.LookupEnv("KUBERNETES_SERVICE_HOST")
+	_, hasPort := os.LookupEnv("KUBERNETES_SERVICE_PORT")
+
+	var err error
+	var config *rest.Config
+	if hasHost && hasPort {
+		// We are most likely inside a kuberneter cluster
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			log.Fatalf("getClusterConfig (inCluster): %v", err)
+		}
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(home)
+			os.Exit(1)
+		}
+
+		// construct the path to resolve to `~/.kube/config`
+		kubeConfigPath := home + "/.kube/config"
+
+		// create the config from the path
+		config, err = clientcmd.BuildConfigFromFlags("", kubeConfigPath)
+		if err != nil {
+			log.Fatalf("getClusterConfig (local): %v", err)
+		}
 	}
-
-	// construct the path to resolve to `~/.kube/config`
-	kubeConfigPath := home + "/.kube/config"
-
-	// create the config from the path
-	config, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
-	if err != nil {
-		log.Fatalf("getClusterConfig: %v", err)
-	}
-
-	return createClients(config)
-}
-
-func getClientInCluster() (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		log.Fatalf("getClusterConfig: %v", err)
-	}
-
 	return createClients(config)
 }
 
