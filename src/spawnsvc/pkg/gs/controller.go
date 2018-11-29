@@ -274,6 +274,47 @@ func (c *GameServerController) syncHandler(key string) error {
 
 // syncGameServerCreatingState checks if the GameServer is in the Creating state, and if so
 // creates a Pod for the GameServer and moves the state to Starting
+func (c *GameServerController) handleDeleted(gs *v1alpha1.GameServer) (*v1alpha1.GameServer, error) {
+	if gs.ObjectMeta.DeletionTimestamp.IsZero() {
+		return gs, nil
+	}
+
+	pods, err := c.podLister.List(labels.SelectorFromSet(labels.Set{v1alpha1.GameServerPodLabel: gs.ObjectMeta.Name}))
+	if err != nil {
+		return nil, fmt.Errorf("Error listing pods for GameServer %s", gs.Name)
+	}
+
+	if len(pods) > 0 {
+		for _, p := range pods {
+			if v1.IsControlledBy(p, gs) {
+				err = c.podGetter.Pods(p.ObjectMeta.Namespace).Delete(p.ObjectMeta.Name, nil)
+				if err != nil {
+					return gs, fmt.Errorf("Failed to delete pod %s for GameServer %s", p.ObjectMeta.Name, gs.ObjectMeta.Name)
+				}
+			}
+
+			c.recorder.Event(gs, corev1.EventTypeNormal, string(gs.State), fmt.Sprintf("Deleting Pod %s", p.ObjectMeta.Name))
+		}
+		return gs, nil
+	}
+
+	// Remove our finalizer after all corresponding pods are deleted
+	gsCopy := gs.DeepCopy()
+
+	var fin []string
+	for _, f := range gsCopy.ObjectMeta.Finalizers {
+		if f != dev.GroupName {
+			fin = append(fin, f)
+		}
+	}
+	gsCopy.ObjectMeta.Finalizers = fin
+	gs, err = c.gameServerGetter.GameServers(gsCopy.ObjectMeta.Namespace).Update(gsCopy)
+
+	return gs, err
+}
+
+// syncGameServerCreatingState checks if the GameServer is in the Creating state, and if so
+// creates a Pod for the GameServer and moves the state to Starting
 func (c *GameServerController) handleRequested(gs *v1alpha1.GameServer) (*v1alpha1.GameServer, error) {
 	if gs.State != v1alpha1.Requested {
 		return gs, nil
@@ -296,39 +337,6 @@ func (c *GameServerController) handleRequested(gs *v1alpha1.GameServer) (*v1alph
 	}
 
 	return gs, nil
-}
-
-// syncGameServerCreatingState checks if the GameServer is in the Creating state, and if so
-// creates a Pod for the GameServer and moves the state to Starting
-func (c *GameServerController) handleDeleted(gs *v1alpha1.GameServer) (*v1alpha1.GameServer, error) {
-	if gs.ObjectMeta.DeletionTimestamp.IsZero() {
-		return gs, nil
-	}
-
-	pod, err := c.getPod(gs)
-	if err != nil {
-		return gs, err
-	}
-
-	err = c.podGetter.Pods(pod.ObjectMeta.Namespace).Delete(pod.ObjectMeta.Name, nil)
-	if err != nil {
-		return gs, err
-	}
-	c.recorder.Event(gs, corev1.EventTypeNormal, string(gs.State), fmt.Sprintf("Deleting Pod %s", pod.ObjectMeta.Name))
-
-	gsCopy := gs.DeepCopy()
-	// remove the finalizer for this controller
-	var fin []string
-	// var err error
-	for _, f := range gsCopy.ObjectMeta.Finalizers {
-		if f != dev.GroupName {
-			fin = append(fin, f)
-		}
-	}
-	gsCopy.ObjectMeta.Finalizers = fin
-	gs, err = c.gameServerGetter.GameServers(gsCopy.ObjectMeta.Namespace).Update(gsCopy)
-
-	return gs, err
 }
 
 // enqueueFoo takes a Foo resource and converts it into a namespace/name
@@ -377,18 +385,4 @@ func (c *GameServerController) createGameServerPod(gs *v1alpha1.GameServer) (*v1
 		fmt.Sprintf("Pod %s created", pod.ObjectMeta.Name))
 
 	return gs, nil
-}
-
-func (c *GameServerController) getPod(gs *v1alpha1.GameServer) (*corev1.Pod, error) {
-	pods, err := c.podLister.List(labels.SelectorFromSet(labels.Set{v1alpha1.GameServerPodLabel: gs.ObjectMeta.Name}))
-	if err != nil {
-		return nil, fmt.Errorf("error checking if pod exists for GameServer %s", gs.Name)
-	}
-	for _, p := range pods {
-		if v1.IsControlledBy(p, gs) {
-			return p, nil
-		}
-	}
-
-	return nil, fmt.Errorf("no pod exists for GameServer %s", gs.Name)
 }
