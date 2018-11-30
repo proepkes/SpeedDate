@@ -5,14 +5,6 @@ Under construction
 - Istio
 - Cockroachdb
 
-# Development:
-## Minikube
-- https://kubernetes.io/docs/tasks/tools/install-minikube/
-
-- minikube start --kubernetes-version v1.11.3 --memory=4096 --cpus=4 --extra-config=apiserver.authorization-mode=RBAC --extra-config=apiserver.enable-admission-plugins="LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,DefaultTolerationSeconds"
-
-- kubectl apply -f .dev/setup/minikube/metallb.yaml
-- kubectl apply -f .dev/setup/minikube/metallb-config.yaml
 
 ## Cockroachdb
 
