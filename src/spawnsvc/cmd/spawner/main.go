@@ -12,31 +12,13 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/proepkes/speeddate/src/spawnsvc"
-	clientset "github.com/proepkes/speeddate/src/spawnsvc/pkg/client/clientset/versioned"
-	"github.com/proepkes/speeddate/src/spawnsvc/pkg/client/informers/externalversions"
-	"github.com/proepkes/speeddate/src/spawnsvc/pkg/gs"
-	"github.com/proepkes/speeddate/src/spawnsvc/pkg/signals"
-
-	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	kubeinformers "k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
-	armada "github.com/proepkes/speeddate/src/spawnsvc/gen/armada"
-	armadasvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/armada/server"
+	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
+	fleetsvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/fleet/server"
 	swaggersvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/swagger/server"
 	goahttp "goa.design/goa/http"
 	"goa.design/goa/http/middleware"
-)
-
-// Runner ...
-type Runner interface {
-	Run(workers int, stop <-chan struct{}) error
-}
-
-const (
-	numWorkers = 4
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func main() {
@@ -47,6 +29,11 @@ func main() {
 		dbg  = flag.Bool("debug", false, "Log request and response bodies")
 	)
 	flag.Parse()
+
+	gsNamespace, ok := os.LookupEnv("GS_NAMESPACE")
+	if !ok {
+		gsNamespace = "default"
+	}
 
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice.
@@ -59,13 +46,22 @@ func main() {
 		adapter = middleware.NewLogger(logger)
 	}
 
-	// get the Kubernetes client for connectivity
-	k8sClient, extClient, client := createClientSets()
+	// Create the structs that implement the services.
+	var (
+		fleetSvc fleet.Service
+	)
+	{
+		fleetSvc = spawnsvc.NewFleet(logger, gsNamespace, getClusterConfig())
+	}
 
-	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(k8sClient, time.Second*30)
-	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second*30)
-
-	gsController := gs.NewController(k8sClient, kubeInformerFactory, extClient, client, informerFactory)
+	// Wrap the services in endpoints that can be invoked from other
+	// services potentially running in different processes.
+	var (
+		fleetEndpoints *fleet.Endpoints
+	)
+	{
+		fleetEndpoints = fleet.NewEndpoints(fleetSvc)
+	}
 
 	// Provide the transport specific request decoder and response encoder.
 	// The goa http package has built-in support for JSON, XML and gob.
@@ -81,23 +77,21 @@ func main() {
 	{
 		mux = goahttp.NewMuxer()
 	}
-
 	// Wrap the endpoints with the transport specific layers. The generated
 	// server packages contains code generated from the design which maps
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		armadaServer  *armadasvr.Server
+		fleetServer   *fleetsvr.Server
 		swaggerServer *swaggersvr.Server
 	)
 	{
 		eh := ErrorHandler(logger)
-		armadaServer = armadasvr.New(armada.NewEndpoints(spawnsvc.NewArmada(logger, gsController)), mux, dec, enc, eh)
+		fleetServer = fleetsvr.New(fleetEndpoints, mux, dec, enc, eh)
 		swaggerServer = swaggersvr.New(nil, mux, dec, enc, eh)
 	}
-
 	// Configure the mux.
-	armadasvr.Mount(mux, armadaServer)
+	fleetsvr.Mount(mux, fleetServer)
 	swaggersvr.Mount(mux, swaggerServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
@@ -122,19 +116,6 @@ func main() {
 		errc <- fmt.Errorf("%s", <-c)
 	}()
 
-	stopCh := signals.SetupSignalHandler()
-
-	kubeInformerFactory.Start(stopCh)
-	informerFactory.Start(stopCh)
-
-	for _, r := range []Runner{gsController} {
-		go func(runner Runner) {
-			if err := runner.Run(numWorkers, stopCh); err != nil {
-				log.Fatalf("Error running controller: %s", err.Error())
-			}
-		}(r)
-	}
-
 	srvHealth := http.NewServeMux()
 	srvHealth.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
@@ -142,12 +123,11 @@ func main() {
 	go func() {
 		http.ListenAndServe(":9000", srvHealth)
 	}()
-
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: *addr, Handler: handler}
 	go func() {
-		for _, m := range armadaServer.Mounts {
+		for _, m := range fleetServer.Mounts {
 			logger.Printf("method %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 		}
 		for _, m := range swaggerServer.Mounts {
@@ -173,11 +153,11 @@ func ErrorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 	return func(ctx context.Context, w http.ResponseWriter, err error) {
 		id := ctx.Value(middleware.RequestIDKey).(string)
 		w.Write([]byte("[" + id + "] encoding: " + err.Error()))
-		logger.Printf("[%s] ERROR: %v", id, err)
+		logger.Printf("[%s] ERROR: %s", id, err.Error())
 	}
 }
 
-func createClientSets() (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
+func getClusterConfig() *rest.Config {
 	_, hasHost := os.LookupEnv("KUBERNETES_SERVICE_HOST")
 	_, hasPort := os.LookupEnv("KUBERNETES_SERVICE_PORT")
 
@@ -205,26 +185,5 @@ func createClientSets() (kubernetes.Interface, *extclientset.Clientset, *clients
 			log.Fatalf("getClusterConfig (local): %v", err)
 		}
 	}
-	return createClients(config)
-}
-
-func createClients(config *rest.Config) (kubernetes.Interface, *extclientset.Clientset, *clientset.Clientset) {
-	k8sClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("getClusterConfig: %v", err)
-	}
-
-	extClient, err := extclientset.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("Could not create the api extension clientset: %v", err)
-	}
-
-	client, err := clientset.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("Error building example clientset: %v", err)
-	}
-
-	log.Println("Successfully constructed clients")
-
-	return k8sClient, extClient, client
+	return config
 }

@@ -27,8 +27,8 @@ spawnsvcSettings:
   ImageName: spawnsvc
   Port: 8001
   HealthPort: 9000
-  ServiceAccount: gameserver-controller
-  rbacEnabled: true
+  GameserverNamespace: default
+  AgonesNamespace: speeddate-system
   
 authsvcSettings:
   DeploymentName: authsvc-v1

@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	armadac "github.com/proepkes/speeddate/src/spawnsvc/gen/http/armada/client"
+	fleetc "github.com/proepkes/speeddate/src/spawnsvc/gen/http/fleet/client"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
 )
@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `armada (add|clear)
+	return `fleet (add|clear)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` armada add` + "\n" +
+	return os.Args[0] + ` fleet add` + "\n" +
 		""
 }
 
@@ -43,15 +43,15 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
-		armadaFlags = flag.NewFlagSet("armada", flag.ContinueOnError)
+		fleetFlags = flag.NewFlagSet("fleet", flag.ContinueOnError)
 
-		armadaAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
+		fleetAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
 
-		armadaClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
+		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 	)
-	armadaFlags.Usage = armadaUsage
-	armadaAddFlags.Usage = armadaAddUsage
-	armadaClearFlags.Usage = armadaClearUsage
+	fleetFlags.Usage = fleetUsage
+	fleetAddFlags.Usage = fleetAddUsage
+	fleetClearFlags.Usage = fleetClearUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -68,8 +68,8 @@ func ParseEndpoint(
 	{
 		svcn = os.Args[1+flag.NFlag()]
 		switch svcn {
-		case "armada":
-			svcf = armadaFlags
+		case "fleet":
+			svcf = fleetFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -85,13 +85,13 @@ func ParseEndpoint(
 	{
 		epn = os.Args[2+flag.NFlag()+svcf.NFlag()]
 		switch svcn {
-		case "armada":
+		case "fleet":
 			switch epn {
 			case "add":
-				epf = armadaAddFlags
+				epf = fleetAddFlags
 
 			case "clear":
-				epf = armadaClearFlags
+				epf = fleetClearFlags
 
 			}
 
@@ -115,8 +115,8 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "armada":
-			c := armadac.NewClient(scheme, host, doer, enc, dec, restore)
+		case "fleet":
+			c := fleetc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
 			case "add":
 				endpoint = c.Add()
@@ -134,36 +134,36 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// armadaUsage displays the usage of the armada command and its subcommands.
-func armadaUsage() {
+// fleetUsage displays the usage of the fleet command and its subcommands.
+func fleetUsage() {
 	fmt.Fprintf(os.Stderr, `The service makes it possible to manage gameservers
 Usage:
-    %s [globalflags] armada COMMAND [flags]
+    %s [globalflags] fleet COMMAND [flags]
 
 COMMAND:
-    add: Add a new gameserver to the armada.
+    add: Add a new gameserver.
     clear: Removes all gameserver pods.
 
 Additional help:
-    %s armada COMMAND --help
+    %s fleet COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func armadaAddUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] armada add
+func fleetAddUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet add
 
-Add a new gameserver to the armada.
+Add a new gameserver.
 
 Example:
-    `+os.Args[0]+` armada add
+    `+os.Args[0]+` fleet add
 `, os.Args[0])
 }
 
-func armadaClearUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] armada clear
+func fleetClearUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet clear
 
 Removes all gameserver pods.
 
 Example:
-    `+os.Args[0]+` armada clear
+    `+os.Args[0]+` fleet clear
 `, os.Args[0])
 }

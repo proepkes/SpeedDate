@@ -7,8 +7,8 @@ var _ = API("spawnsvc", func() {
 	Description("HTTP service for managing game-instances")
 
 	Server("spawner", func() {
-		Description("Serves repository and swagger service")
-		Services("armada", "swagger")
+		Description("Serves fleet and swagger service")
+		Services("fleet", "swagger")
 		Host("localhost", func() {
 			Description("Host on local machine")
 			URI("http://:8001")

@@ -11,11 +11,13 @@ spec:
         app: {{ .Values.spawnsvcSettings.ImageName }}
         version: v1
     spec:
-      serviceAccountName: {{ .Values.spawnsvcSettings.ServiceAccount }}
       containers:
       - name: {{ .Values.spawnsvcSettings.ImageName }}
         image: {{ .Values.image.imageRegistry }}/{{ .Values.spawnsvcSettings.ImageName }}:{{ .Values.image.dockerTag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}      
+        imagePullPolicy: {{ .Values.image.pullPolicy }}     
+        env:
+        - name: GS_NAMESPACE
+          value: {{ .Values.storagesvcSettings.GameserverNamespace }} 
         ports:
         - containerPort: {{ .Values.spawnsvcSettings.Port }}
         livenessProbe:

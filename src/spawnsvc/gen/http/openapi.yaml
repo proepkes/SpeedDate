@@ -13,13 +13,13 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /armada/add:
+  /fleet/add:
     post:
       tags:
-      - armada
-      summary: add armada
-      description: Add a new gameserver to the armada.
-      operationId: armada#add
+      - fleet
+      summary: add fleet
+      description: Add a new gameserver.
+      operationId: fleet#add
       responses:
         "201":
           description: Created response.
@@ -27,13 +27,13 @@ paths:
             type: string
       schemes:
       - http
-  /armada/clear:
+  /fleet/clear:
     post:
       tags:
-      - armada
-      summary: clear armada
+      - fleet
+      summary: clear fleet
       description: Removes all gameserver pods.
-      operationId: armada#clear
+      operationId: fleet#clear
       responses:
         "200":
           description: OK response.
