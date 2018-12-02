@@ -41,6 +41,20 @@ paths:
             type: string
       schemes:
       - http
+  /gameserver/configure:
+    post:
+      tags:
+      - gameserver
+      summary: configure gameserver
+      description: Configure gameserver-properties.
+      operationId: gameserver#configure
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            type: string
+      schemes:
+      - http
   /swagger/swagger.json:
     get:
       summary: Download ../../gen/http/openapi.json

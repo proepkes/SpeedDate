@@ -14,7 +14,6 @@ import (
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
-	"goa.design/plugins/cors"
 )
 
 // Server lists the fleet service endpoint HTTP handlers.
@@ -197,15 +196,6 @@ func handleFleetOrigin(h http.Handler) http.Handler {
 		origin := r.Header.Get("Origin")
 		if origin == "" {
 			// Not a CORS request
-			origHndlr(w, r)
-			return
-		}
-		if cors.MatchOrigin(origin, "*") {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Access-Control-Allow-Credentials", "false")
-			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
-				// We are handling a preflight request
-			}
 			origHndlr(w, r)
 			return
 		}
