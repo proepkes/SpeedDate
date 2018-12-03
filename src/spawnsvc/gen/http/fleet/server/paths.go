@@ -16,3 +16,8 @@ func AddFleetPath() string {
 func ClearFleetPath() string {
 	return "/fleet/clear"
 }
+
+// ConfigureFleetPath returns the URL path to the fleet service configure HTTP endpoint.
+func ConfigureFleetPath() string {
+	return "/fleet/configure"
+}

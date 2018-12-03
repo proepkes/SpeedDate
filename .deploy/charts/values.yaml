@@ -27,8 +27,14 @@ spawnsvcSettings:
   ImageName: spawnsvc
   Port: 8001
   HealthPort: 9000
-  GameserverNamespace: default
+  PortPolicy: dynamic
   AgonesNamespace: speeddate-system
+  GameserverNamespace: default
+  GameserverNamePrefix: udp-server
+  ContainerPort: 7777
+  ContainerName: udp-server
+  ContainerImage: gcr.io/agones-images/udp-server:0.4
+  
   
 authsvcSettings:
   DeploymentName: authsvc-v1

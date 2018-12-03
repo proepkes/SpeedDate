@@ -15,15 +15,17 @@ import (
 
 // Endpoints wraps the "fleet" service endpoints.
 type Endpoints struct {
-	Add   goa.Endpoint
-	Clear goa.Endpoint
+	Add       goa.Endpoint
+	Clear     goa.Endpoint
+	Configure goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "fleet" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Add:   NewAddEndpoint(s),
-		Clear: NewClearEndpoint(s),
+		Add:       NewAddEndpoint(s),
+		Clear:     NewClearEndpoint(s),
+		Configure: NewConfigureEndpoint(s),
 	}
 }
 
@@ -31,6 +33,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Add = m(e.Add)
 	e.Clear = m(e.Clear)
+	e.Configure = m(e.Configure)
 }
 
 // NewAddEndpoint returns an endpoint function that calls the method "add" of
@@ -46,5 +49,13 @@ func NewAddEndpoint(s Service) goa.Endpoint {
 func NewClearEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		return s.Clear(ctx)
+	}
+}
+
+// NewConfigureEndpoint returns an endpoint function that calls the method
+// "configure" of service "fleet".
+func NewConfigureEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return s.Configure(ctx)
 	}
 }

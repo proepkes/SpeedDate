@@ -23,6 +23,10 @@ type Client struct {
 	// Clear Doer is the HTTP client used to make requests to the clear endpoint.
 	ClearDoer goahttp.Doer
 
+	// Configure Doer is the HTTP client used to make requests to the configure
+	// endpoint.
+	ConfigureDoer goahttp.Doer
+
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
 
@@ -48,6 +52,7 @@ func NewClient(
 	return &Client{
 		AddDoer:             doer,
 		ClearDoer:           doer,
+		ConfigureDoer:       doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -92,6 +97,26 @@ func (c *Client) Clear() goa.Endpoint {
 
 		if err != nil {
 			return nil, goahttp.ErrRequestError("fleet", "clear", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Configure returns an endpoint that makes HTTP requests to the fleet service
+// configure server.
+func (c *Client) Configure() goa.Endpoint {
+	var (
+		decodeResponse = DecodeConfigureResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildConfigureRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ConfigureDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("fleet", "configure", err)
 		}
 		return decodeResponse(resp)
 	}

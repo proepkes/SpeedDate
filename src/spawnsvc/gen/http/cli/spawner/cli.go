@@ -23,15 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `fleet (add|clear)
-gameserver configure
+	return `fleet (add|clear|configure)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` fleet add` + "\n" +
-		os.Args[0] + ` gameserver configure` + "\n" +
 		""
 }
 
@@ -51,16 +49,12 @@ func ParseEndpoint(
 
 		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 
-		gameserverFlags = flag.NewFlagSet("gameserver", flag.ContinueOnError)
-
-		gameserverConfigureFlags = flag.NewFlagSet("configure", flag.ExitOnError)
+		fleetConfigureFlags = flag.NewFlagSet("configure", flag.ExitOnError)
 	)
 	fleetFlags.Usage = fleetUsage
 	fleetAddFlags.Usage = fleetAddUsage
 	fleetClearFlags.Usage = fleetClearUsage
-
-	gameserverFlags.Usage = gameserverUsage
-	gameserverConfigureFlags.Usage = gameserverConfigureUsage
+	fleetConfigureFlags.Usage = fleetConfigureUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -79,8 +73,6 @@ func ParseEndpoint(
 		switch svcn {
 		case "fleet":
 			svcf = fleetFlags
-		case "gameserver":
-			svcf = gameserverFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -104,12 +96,8 @@ func ParseEndpoint(
 			case "clear":
 				epf = fleetClearFlags
 
-			}
-
-		case "gameserver":
-			switch epn {
 			case "configure":
-				epf = gameserverConfigureFlags
+				epf = fleetConfigureFlags
 
 			}
 
@@ -142,10 +130,6 @@ func ParseEndpoint(
 			case "clear":
 				endpoint = c.Clear()
 				data = nil
-			}
-		case "gameserver":
-			c := gameserverc.NewClient(scheme, host, doer, enc, dec, restore)
-			switch epn {
 			case "configure":
 				endpoint = c.Configure()
 				data = nil
@@ -168,6 +152,7 @@ Usage:
 COMMAND:
     add: Add a new gameserver.
     clear: Removes all gameserver pods.
+    configure: Configure gameserver-properties.
 
 Additional help:
     %s fleet COMMAND --help
@@ -193,26 +178,12 @@ Example:
 `, os.Args[0])
 }
 
-// gameserverUsage displays the usage of the gameserver command and its
-// subcommands.
-func gameserverUsage() {
-	fmt.Fprintf(os.Stderr, `The service makes it possible to manage gameservers
-Usage:
-    %s [globalflags] gameserver COMMAND [flags]
-
-COMMAND:
-    configure: Configure gameserver-properties.
-
-Additional help:
-    %s gameserver COMMAND --help
-`, os.Args[0], os.Args[0])
-}
-func gameserverConfigureUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] gameserver configure
+func fleetConfigureUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet configure
 
 Configure gameserver-properties.
 
 Example:
-    `+os.Args[0]+` gameserver configure
+    `+os.Args[0]+` fleet configure
 `, os.Args[0])
 }

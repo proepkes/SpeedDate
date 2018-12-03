@@ -33,4 +33,13 @@ var _ = Service("fleet", func() {
 			Response(StatusOK)
 		})
 	})
+
+	Method("configure", func() {
+		Description("Configure gameserver-properties.")
+		Result(String)
+		HTTP(func() {
+			POST("/configure")
+			Response(StatusOK)
+		})
+	})
 })

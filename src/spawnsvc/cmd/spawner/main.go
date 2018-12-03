@@ -12,7 +12,7 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/proepkes/speeddate/src/spawnsvc"
-	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
+	"github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	fleetsvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/fleet/server"
 	swaggersvr "github.com/proepkes/speeddate/src/spawnsvc/gen/http/swagger/server"
 	goahttp "goa.design/goa/http"
@@ -34,7 +34,10 @@ func main() {
 	if !ok {
 		gsNamespace = "default"
 	}
-
+	sdNamespace, ok := os.LookupEnv("SD_NAMESPACE")
+	if !ok {
+		sdNamespace = "speeddate-system"
+	}
 	// Setup logger and goa log adapter. Replace logger with your own using
 	// your log package of choice.
 	var (
@@ -51,7 +54,7 @@ func main() {
 		fleetSvc fleet.Service
 	)
 	{
-		fleetSvc = spawnsvc.NewFleet(logger, gsNamespace, getClusterConfig())
+		fleetSvc = spawnsvc.NewFleet(logger, sdNamespace, gsNamespace, getClusterConfig())
 	}
 
 	// Wrap the services in endpoints that can be invoked from other

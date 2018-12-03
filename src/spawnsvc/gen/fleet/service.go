@@ -17,6 +17,8 @@ type Service interface {
 	Add(context.Context) (res string, err error)
 	// Removes all gameserver pods.
 	Clear(context.Context) (res string, err error)
+	// Configure gameserver-properties.
+	Configure(context.Context) (res string, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -27,4 +29,4 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"add", "clear"}
+var MethodNames = [3]string{"add", "clear", "configure"}

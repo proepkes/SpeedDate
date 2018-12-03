@@ -14,14 +14,16 @@ import (
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
+	"goa.design/plugins/cors"
 )
 
 // Server lists the fleet service endpoint HTTP handlers.
 type Server struct {
-	Mounts []*MountPoint
-	Add    http.Handler
-	Clear  http.Handler
-	CORS   http.Handler
+	Mounts    []*MountPoint
+	Add       http.Handler
+	Clear     http.Handler
+	Configure http.Handler
+	CORS      http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -53,12 +55,15 @@ func New(
 		Mounts: []*MountPoint{
 			{"Add", "POST", "/fleet/add"},
 			{"Clear", "POST", "/fleet/clear"},
+			{"Configure", "POST", "/fleet/configure"},
 			{"CORS", "OPTIONS", "/fleet/add"},
 			{"CORS", "OPTIONS", "/fleet/clear"},
+			{"CORS", "OPTIONS", "/fleet/configure"},
 		},
-		Add:   NewAddHandler(e.Add, mux, dec, enc, eh),
-		Clear: NewClearHandler(e.Clear, mux, dec, enc, eh),
-		CORS:  NewCORSHandler(),
+		Add:       NewAddHandler(e.Add, mux, dec, enc, eh),
+		Clear:     NewClearHandler(e.Clear, mux, dec, enc, eh),
+		Configure: NewConfigureHandler(e.Configure, mux, dec, enc, eh),
+		CORS:      NewCORSHandler(),
 	}
 }
 
@@ -69,6 +74,7 @@ func (s *Server) Service() string { return "fleet" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Add = m(s.Add)
 	s.Clear = m(s.Clear)
+	s.Configure = m(s.Configure)
 	s.CORS = m(s.CORS)
 }
 
@@ -76,6 +82,7 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountAddHandler(mux, h.Add)
 	MountClearHandler(mux, h.Clear)
+	MountConfigureHandler(mux, h.Configure)
 	MountCORSHandler(mux, h.CORS)
 }
 
@@ -167,6 +174,50 @@ func NewClearHandler(
 	})
 }
 
+// MountConfigureHandler configures the mux to serve the "fleet" service
+// "configure" endpoint.
+func MountConfigureHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := handleFleetOrigin(h).(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("POST", "/fleet/configure", f)
+}
+
+// NewConfigureHandler creates a HTTP handler which loads the HTTP request and
+// calls the "fleet" service "configure" endpoint.
+func NewConfigureHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		encodeResponse = EncodeConfigureResponse(enc)
+		encodeError    = goahttp.ErrorEncoder(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "configure")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
+
+		res, err := endpoint(ctx, nil)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
 // MountCORSHandler configures the mux to serve the CORS endpoints for the
 // service fleet.
 func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
@@ -179,6 +230,7 @@ func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
 	}
 	mux.Handle("OPTIONS", "/fleet/add", f)
 	mux.Handle("OPTIONS", "/fleet/clear", f)
+	mux.Handle("OPTIONS", "/fleet/configure", f)
 }
 
 // NewCORSHandler creates a HTTP handler which returns a simple 200 response.
@@ -196,6 +248,15 @@ func handleFleetOrigin(h http.Handler) http.Handler {
 		origin := r.Header.Get("Origin")
 		if origin == "" {
 			// Not a CORS request
+			origHndlr(w, r)
+			return
+		}
+		if cors.MatchOrigin(origin, "*") {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+			}
 			origHndlr(w, r)
 			return
 		}

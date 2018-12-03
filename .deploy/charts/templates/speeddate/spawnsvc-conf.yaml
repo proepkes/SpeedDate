@@ -1,0 +1,14 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gameserver-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.spawnsvcSettings.ImageName }}
+data:
+  GameserverNamespace: "{{ .Values.spawnsvcSettings.GameserverNamespace }}"
+  GameserverNamePrefix: "{{ .Values.spawnsvcSettings.GameserverNamePrefix }}"
+  PortPolicy: "{{ .Values.spawnsvcSettings.PortPolicy }}"
+  ContainerPort: "{{ .Values.spawnsvcSettings.ContainerPort }}"
+  ContainerName: "{{ .Values.spawnsvcSettings.ContainerName }}"
+  ContainerImage: "{{ .Values.spawnsvcSettings.ContainerImage }}"
