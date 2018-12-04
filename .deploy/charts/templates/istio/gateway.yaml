@@ -6,19 +6,13 @@ spec:
   selector:
     istio: ingressgateway # use istio default controller
   servers:
-  - port:
-      #DOC: Ports have to be opened by istio, https://github.com/istio/istio/issues/7242
-      number: 31400
-      name: api
-      protocol: HTTP
-    hosts:
-    - {{ .Values.hosts.api }}
+  #DOC: Ports have to be opened by istio, https://github.com/istio/istio/issues/7242
   - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    - {{ .Values.hosts.ui }}
+    - {{ .Values.host }}
   #TODO: test https https://istio.io/docs/tasks/traffic-management/secure-ingress/
   # - port:
   #     number: 443

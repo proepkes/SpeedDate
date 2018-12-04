@@ -15,17 +15,19 @@ import (
 
 // Client is the "fleet" service client.
 type Client struct {
-	AddEndpoint       goa.Endpoint
-	ClearEndpoint     goa.Endpoint
-	ConfigureEndpoint goa.Endpoint
+	AddEndpoint           goa.Endpoint
+	ClearEndpoint         goa.Endpoint
+	ConfigurationEndpoint goa.Endpoint
+	ConfigureEndpoint     goa.Endpoint
 }
 
 // NewClient initializes a "fleet" service client given the endpoints.
-func NewClient(add, clear, configure goa.Endpoint) *Client {
+func NewClient(add, clear, configuration, configure goa.Endpoint) *Client {
 	return &Client{
-		AddEndpoint:       add,
-		ClearEndpoint:     clear,
-		ConfigureEndpoint: configure,
+		AddEndpoint:           add,
+		ClearEndpoint:         clear,
+		ConfigurationEndpoint: configuration,
+		ConfigureEndpoint:     configure,
 	}
 }
 
@@ -49,10 +51,20 @@ func (c *Client) Clear(ctx context.Context) (res string, err error) {
 	return ires.(string), nil
 }
 
-// Configure calls the "configure" endpoint of the "fleet" service.
-func (c *Client) Configure(ctx context.Context) (res string, err error) {
+// Configuration calls the "configuration" endpoint of the "fleet" service.
+func (c *Client) Configuration(ctx context.Context) (res *GameserverTemplate, err error) {
 	var ires interface{}
-	ires, err = c.ConfigureEndpoint(ctx, nil)
+	ires, err = c.ConfigurationEndpoint(ctx, nil)
+	if err != nil {
+		return
+	}
+	return ires.(*GameserverTemplate), nil
+}
+
+// Configure calls the "configure" endpoint of the "fleet" service.
+func (c *Client) Configure(ctx context.Context, p *GameserverTemplate) (res string, err error) {
+	var ires interface{}
+	ires, err = c.ConfigureEndpoint(ctx, p)
 	if err != nil {
 		return
 	}

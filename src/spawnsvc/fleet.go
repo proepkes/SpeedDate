@@ -84,14 +84,39 @@ func (s *fleetSvc) Clear(ctx context.Context) (res string, err error) {
 	return
 }
 
-// Configure gameserver-properties.
-func (s *fleetSvc) Configure(ctx context.Context) (res string, err error) {
+// Get gameserver deployment configuration.
+func (s *fleetSvc) Configuration(ctx context.Context) (res *fleet.GameserverTemplate, err error) {
+
+	cm, err := s.getGameserverConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	res = &fleet.GameserverTemplate{
+		ContainerName:  cm.Data["ContainerName"],
+		ContainerPort:  cm.Data["ContainerPort"],
+		ContainerImage: cm.Data["ContainerImage"],
+		NamePrefix:     cm.Data["GameserverNamePrefix"],
+		Namespace:      cm.Data["GameserverNamespace"],
+		PortPolicy:     cm.Data["PortPolicy"],
+	}
+	s.logger.Print("fleet.configuration")
+
+	return
+}
+
+// Configure gameserver deployment.
+func (s *fleetSvc) Configure(ctx context.Context, p *fleet.GameserverTemplate) (res string, err error) {
 	s.logger.Print("fleet.configure")
+
 	cm, err := s.getGameserverConfig()
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(cm)
+
+	cmCopy := cm.DeepCopy()
+	cmCopy.Data["ContainerImage"] = p.ContainerImage
+	fmt.Println(cmCopy)
 	return
 }
 

@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `fleet (add|clear|configure)
+	return `fleet (add|clear|configuration|configure)
 `
 }
 
@@ -49,11 +49,15 @@ func ParseEndpoint(
 
 		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 
-		fleetConfigureFlags = flag.NewFlagSet("configure", flag.ExitOnError)
+		fleetConfigurationFlags = flag.NewFlagSet("configuration", flag.ExitOnError)
+
+		fleetConfigureFlags    = flag.NewFlagSet("configure", flag.ExitOnError)
+		fleetConfigureBodyFlag = fleetConfigureFlags.String("body", "REQUIRED", "")
 	)
 	fleetFlags.Usage = fleetUsage
 	fleetAddFlags.Usage = fleetAddUsage
 	fleetClearFlags.Usage = fleetClearUsage
+	fleetConfigurationFlags.Usage = fleetConfigurationUsage
 	fleetConfigureFlags.Usage = fleetConfigureUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
@@ -96,6 +100,9 @@ func ParseEndpoint(
 			case "clear":
 				epf = fleetClearFlags
 
+			case "configuration":
+				epf = fleetConfigurationFlags
+
 			case "configure":
 				epf = fleetConfigureFlags
 
@@ -130,9 +137,12 @@ func ParseEndpoint(
 			case "clear":
 				endpoint = c.Clear()
 				data = nil
+			case "configuration":
+				endpoint = c.Configuration()
+				data = nil
 			case "configure":
 				endpoint = c.Configure()
-				data = nil
+				data, err = fleetc.BuildConfigurePayload(*fleetConfigureBodyFlag)
 			}
 		}
 	}
@@ -152,7 +162,8 @@ Usage:
 COMMAND:
     add: Add a new gameserver.
     clear: Removes all gameserver pods.
-    configure: Configure gameserver-properties.
+    configuration: Get gameserver deployment configuration.
+    configure: Configure gameserver deployment.
 
 Additional help:
     %s fleet COMMAND --help
@@ -178,12 +189,30 @@ Example:
 `, os.Args[0])
 }
 
-func fleetConfigureUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] fleet configure
+func fleetConfigurationUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet configuration
 
-Configure gameserver-properties.
+Get gameserver deployment configuration.
 
 Example:
-    `+os.Args[0]+` fleet configure
+    `+os.Args[0]+` fleet configuration
+`, os.Args[0])
+}
+
+func fleetConfigureUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet configure -body JSON
+
+Configure gameserver deployment.
+    -body JSON: 
+
+Example:
+    `+os.Args[0]+` fleet configure --body '{
+      "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
+      "ContainerName": "my-server",
+      "ContainerPort": "7777",
+      "NamePrefix": "my-server",
+      "Namespace": "speeddate-system",
+      "PortPolicy": "dynamic"
+   }'
 `, os.Args[0])
 }

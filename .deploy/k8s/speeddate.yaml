@@ -231,7 +231,7 @@ spec:
             cpu: "100m"
 
 ---
-# Source: speeddate/templates/istio/api-gateway.yaml
+# Source: speeddate/templates/istio/gateway.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -240,19 +240,13 @@ spec:
   selector:
     istio: ingressgateway # use istio default controller
   servers:
-  - port:
-      #DOC: Ports have to be opened by istio, https://github.com/istio/istio/issues/7242
-      number: 31400
-      name: api
-      protocol: HTTP
-    hosts:
-    - api.speeddate.local
+  #DOC: Ports have to be opened by istio, https://github.com/istio/istio/issues/7242
   - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    - ui.speeddate.local
+    - speeddate.local
   #TODO: test https https://istio.io/docs/tasks/traffic-management/secure-ingress/
   # - port:
   #     number: 443
@@ -266,7 +260,7 @@ spec:
   #   - "httpbin.example.com"
 
 ---
-# Source: speeddate/templates/istio/usersvc-cockroachdb-se.yaml
+# Source: speeddate/templates/istio/storagesvc-cockroachdb-se.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -286,54 +280,47 @@ spec:
       tcp: 26257
 
 ---
-# Source: speeddate/templates/istio/api-vs.yaml
+# Source: speeddate/templates/istio/vs.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: api-vs
 spec:
   hosts:
-  - api.speeddate.local
+  - speeddate.local
   gateways:
   - sd-gateway
   http:
   - match:
     - uri:
-        prefix: /armada/
+        prefix: "/api/fleet"
+    rewrite:
+      uri: "/fleet"
     route:
     - destination:
         host: spawnsvc.speeddate-system.svc.cluster.local
   - match:
     - uri:
-        prefix: /storage/
+        prefix: "/api/storage"
+    rewrite:
+      uri: "/storage"
     route:
     - destination:
         host: storagesvc.speeddate-system.svc.cluster.local
   - match:
     - uri:
-        prefix: /auth/
+        prefix: "/api/auth"
+    rewrite:
+      uri: "/auth"
     route:
     - destination:
-        host: authsvc.speeddate-system.svc.cluster.local
-
----
-# Source: speeddate/templates/istio/ui-vs.yaml
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: ui-vs
-spec:
-  hosts:
-  - ui.speeddate.local
-  gateways:
-  - sd-gateway
-  http:
+        host: authsvc.speeddate-system.svc.cluster.local    
   - match:
     - uri:
         prefix: /
     route:
     - destination:
-        host: speeddateui
+        host: speeddateui.speeddate-system.svc.cluster.local
         port:
           number: 80
 

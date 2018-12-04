@@ -15,17 +15,19 @@ import (
 
 // Endpoints wraps the "fleet" service endpoints.
 type Endpoints struct {
-	Add       goa.Endpoint
-	Clear     goa.Endpoint
-	Configure goa.Endpoint
+	Add           goa.Endpoint
+	Clear         goa.Endpoint
+	Configuration goa.Endpoint
+	Configure     goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "fleet" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Add:       NewAddEndpoint(s),
-		Clear:     NewClearEndpoint(s),
-		Configure: NewConfigureEndpoint(s),
+		Add:           NewAddEndpoint(s),
+		Clear:         NewClearEndpoint(s),
+		Configuration: NewConfigurationEndpoint(s),
+		Configure:     NewConfigureEndpoint(s),
 	}
 }
 
@@ -33,6 +35,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Add = m(e.Add)
 	e.Clear = m(e.Clear)
+	e.Configuration = m(e.Configuration)
 	e.Configure = m(e.Configure)
 }
 
@@ -52,10 +55,19 @@ func NewClearEndpoint(s Service) goa.Endpoint {
 	}
 }
 
+// NewConfigurationEndpoint returns an endpoint function that calls the method
+// "configuration" of service "fleet".
+func NewConfigurationEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return s.Configuration(ctx)
+	}
+}
+
 // NewConfigureEndpoint returns an endpoint function that calls the method
 // "configure" of service "fleet".
 func NewConfigureEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.Configure(ctx)
+		p := req.(*GameserverTemplate)
+		return s.Configure(ctx, p)
 	}
 }

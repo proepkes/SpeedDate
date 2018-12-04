@@ -19,11 +19,12 @@ import (
 
 // Server lists the fleet service endpoint HTTP handlers.
 type Server struct {
-	Mounts    []*MountPoint
-	Add       http.Handler
-	Clear     http.Handler
-	Configure http.Handler
-	CORS      http.Handler
+	Mounts        []*MountPoint
+	Add           http.Handler
+	Clear         http.Handler
+	Configuration http.Handler
+	Configure     http.Handler
+	CORS          http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -55,15 +56,18 @@ func New(
 		Mounts: []*MountPoint{
 			{"Add", "POST", "/fleet/add"},
 			{"Clear", "POST", "/fleet/clear"},
+			{"Configuration", "GET", "/fleet/configuration"},
 			{"Configure", "POST", "/fleet/configure"},
 			{"CORS", "OPTIONS", "/fleet/add"},
 			{"CORS", "OPTIONS", "/fleet/clear"},
+			{"CORS", "OPTIONS", "/fleet/configuration"},
 			{"CORS", "OPTIONS", "/fleet/configure"},
 		},
-		Add:       NewAddHandler(e.Add, mux, dec, enc, eh),
-		Clear:     NewClearHandler(e.Clear, mux, dec, enc, eh),
-		Configure: NewConfigureHandler(e.Configure, mux, dec, enc, eh),
-		CORS:      NewCORSHandler(),
+		Add:           NewAddHandler(e.Add, mux, dec, enc, eh),
+		Clear:         NewClearHandler(e.Clear, mux, dec, enc, eh),
+		Configuration: NewConfigurationHandler(e.Configuration, mux, dec, enc, eh),
+		Configure:     NewConfigureHandler(e.Configure, mux, dec, enc, eh),
+		CORS:          NewCORSHandler(),
 	}
 }
 
@@ -74,6 +78,7 @@ func (s *Server) Service() string { return "fleet" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Add = m(s.Add)
 	s.Clear = m(s.Clear)
+	s.Configuration = m(s.Configuration)
 	s.Configure = m(s.Configure)
 	s.CORS = m(s.CORS)
 }
@@ -82,6 +87,7 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountAddHandler(mux, h.Add)
 	MountClearHandler(mux, h.Clear)
+	MountConfigurationHandler(mux, h.Configuration)
 	MountConfigureHandler(mux, h.Configure)
 	MountCORSHandler(mux, h.CORS)
 }
@@ -174,6 +180,50 @@ func NewClearHandler(
 	})
 }
 
+// MountConfigurationHandler configures the mux to serve the "fleet" service
+// "configuration" endpoint.
+func MountConfigurationHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := handleFleetOrigin(h).(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/fleet/configuration", f)
+}
+
+// NewConfigurationHandler creates a HTTP handler which loads the HTTP request
+// and calls the "fleet" service "configuration" endpoint.
+func NewConfigurationHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		encodeResponse = EncodeConfigurationResponse(enc)
+		encodeError    = goahttp.ErrorEncoder(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "configuration")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
+
+		res, err := endpoint(ctx, nil)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
 // MountConfigureHandler configures the mux to serve the "fleet" service
 // "configure" endpoint.
 func MountConfigureHandler(mux goahttp.Muxer, h http.Handler) {
@@ -196,6 +246,7 @@ func NewConfigureHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
+		decodeRequest  = DecodeConfigureRequest(mux, dec)
 		encodeResponse = EncodeConfigureResponse(enc)
 		encodeError    = goahttp.ErrorEncoder(enc)
 	)
@@ -203,8 +254,13 @@ func NewConfigureHandler(
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "configure")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			eh(ctx, w, err)
+			return
+		}
 
-		res, err := endpoint(ctx, nil)
+		res, err := endpoint(ctx, payload)
 
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
@@ -230,6 +286,7 @@ func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
 	}
 	mux.Handle("OPTIONS", "/fleet/add", f)
 	mux.Handle("OPTIONS", "/fleet/clear", f)
+	mux.Handle("OPTIONS", "/fleet/configuration", f)
 	mux.Handle("OPTIONS", "/fleet/configure", f)
 }
 

@@ -6,3 +6,46 @@
 // $ goa gen github.com/proepkes/speeddate/src/spawnsvc/design
 
 package client
+
+import (
+	"encoding/json"
+	"fmt"
+	"unicode/utf8"
+
+	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
+	goa "goa.design/goa"
+)
+
+// BuildConfigurePayload builds the payload for the fleet configure endpoint
+// from CLI flags.
+func BuildConfigurePayload(fleetConfigureBody string) (*fleet.GameserverTemplate, error) {
+	var err error
+	var body ConfigureRequestBody
+	{
+		err = json.Unmarshal([]byte(fleetConfigureBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n      \"ContainerName\": \"my-server\",\n      \"ContainerPort\": \"7777\",\n      \"NamePrefix\": \"my-server\",\n      \"Namespace\": \"speeddate-system\",\n      \"PortPolicy\": \"dynamic\"\n   }'")
+		}
+		if utf8.RuneCountInString(body.Namespace) > 100 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.Namespace", body.Namespace, utf8.RuneCountInString(body.Namespace), 100, false))
+		}
+		if utf8.RuneCountInString(body.NamePrefix) > 100 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.NamePrefix", body.NamePrefix, utf8.RuneCountInString(body.NamePrefix), 100, false))
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	v := &fleet.GameserverTemplate{
+		Namespace:      body.Namespace,
+		NamePrefix:     body.NamePrefix,
+		PortPolicy:     body.PortPolicy,
+		ContainerName:  body.ContainerName,
+		ContainerImage: body.ContainerImage,
+		ContainerPort:  body.ContainerPort,
+	}
+	return v, nil
+}

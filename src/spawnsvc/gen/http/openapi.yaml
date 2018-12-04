@@ -41,13 +41,47 @@ paths:
             type: string
       schemes:
       - http
+  /fleet/configuration:
+    get:
+      tags:
+      - fleet
+      summary: configuration fleet
+      description: Get gameserver deployment configuration.
+      operationId: fleet#configuration
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/ConfigurationResponseBody'
+            required:
+            - Namespace
+            - NamePrefix
+            - PortPolicy
+            - ContainerName
+            - ContainerImage
+            - ContainerPort
+      schemes:
+      - http
   /fleet/configure:
     post:
       tags:
       - fleet
       summary: configure fleet
-      description: Configure gameserver-properties.
+      description: Configure gameserver deployment.
       operationId: fleet#configure
+      parameters:
+      - name: ConfigureRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/FleetConfigureRequestBody'
+          required:
+          - Namespace
+          - NamePrefix
+          - PortPolicy
+          - ContainerName
+          - ContainerImage
+          - ContainerPort
       responses:
         "200":
           description: OK response.
@@ -67,6 +101,95 @@ paths:
             type: file
       schemes:
       - http
+definitions:
+  ConfigurationResponseBody:
+    title: ConfigurationResponseBody
+    type: object
+    properties:
+      ContainerImage:
+        type: string
+        description: Image of the gameserver
+        example: gcr.io/agones-images/udp-server:0.4
+      ContainerName:
+        type: string
+        description: Name of the gameserver-container
+        example: my-server
+      ContainerPort:
+        type: string
+        description: Exposed port of the gameserver
+        example: "7777"
+      NamePrefix:
+        type: string
+        description: Prefix for the generated pod-name
+        example: my-server
+        maxLength: 100
+      Namespace:
+        type: string
+        description: Namespace where the gameserver will run in
+        example: speeddate-system
+        maxLength: 100
+      PortPolicy:
+        type: string
+        description: Portpolicy either dynamic or static
+        example: dynamic
+    example:
+      ContainerImage: gcr.io/agones-images/udp-server:0.4
+      ContainerName: my-server
+      ContainerPort: "7777"
+      NamePrefix: my-server
+      Namespace: speeddate-system
+      PortPolicy: dynamic
+    required:
+    - Namespace
+    - NamePrefix
+    - PortPolicy
+    - ContainerName
+    - ContainerImage
+    - ContainerPort
+  FleetConfigureRequestBody:
+    title: FleetConfigureRequestBody
+    type: object
+    properties:
+      ContainerImage:
+        type: string
+        description: Image of the gameserver
+        example: gcr.io/agones-images/udp-server:0.4
+      ContainerName:
+        type: string
+        description: Name of the gameserver-container
+        example: my-server
+      ContainerPort:
+        type: string
+        description: Exposed port of the gameserver
+        example: "7777"
+      NamePrefix:
+        type: string
+        description: Prefix for the generated pod-name
+        example: my-server
+        maxLength: 100
+      Namespace:
+        type: string
+        description: Namespace where the gameserver will run in
+        example: speeddate-system
+        maxLength: 100
+      PortPolicy:
+        type: string
+        description: Portpolicy either dynamic or static
+        example: dynamic
+    example:
+      ContainerImage: gcr.io/agones-images/udp-server:0.4
+      ContainerName: my-server
+      ContainerPort: "7777"
+      NamePrefix: my-server
+      Namespace: speeddate-system
+      PortPolicy: dynamic
+    required:
+    - Namespace
+    - NamePrefix
+    - PortPolicy
+    - ContainerName
+    - ContainerImage
+    - ContainerPort
 securityDefinitions:
   jwt:
     type: apiKey

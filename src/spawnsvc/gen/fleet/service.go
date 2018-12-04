@@ -17,8 +17,10 @@ type Service interface {
 	Add(context.Context) (res string, err error)
 	// Removes all gameserver pods.
 	Clear(context.Context) (res string, err error)
-	// Configure gameserver-properties.
-	Configure(context.Context) (res string, err error)
+	// Get gameserver deployment configuration.
+	Configuration(context.Context) (res *GameserverTemplate, err error)
+	// Configure gameserver deployment.
+	Configure(context.Context, *GameserverTemplate) (res string, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -29,4 +31,21 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"add", "clear", "configure"}
+var MethodNames = [4]string{"add", "clear", "configuration", "configure"}
+
+// GameserverTemplate is the result type of the fleet service configuration
+// method.
+type GameserverTemplate struct {
+	// Namespace where the gameserver will run in
+	Namespace string
+	// Prefix for the generated pod-name
+	NamePrefix string
+	// Portpolicy either dynamic or static
+	PortPolicy string
+	// Name of the gameserver-container
+	ContainerName string
+	// Image of the gameserver
+	ContainerImage string
+	// Exposed port of the gameserver
+	ContainerPort string
+}

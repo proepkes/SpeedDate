@@ -26,22 +26,26 @@ var JWTAuth = JWTSecurity("jwt", func() {
 
 var GameserverTemplate = Type("GameserverTemplate", func() {
 	Description("GameserverTemplate describes gameserver")
-	Attribute("namespace", String, "Namespace where the gameserver will run in", func() {
+	Attribute("Namespace", String, "Namespace where the gameserver will run in", func() {
 		MaxLength(100)
 		Example("speeddate-system")
 	})
-	Attribute("nameprefix", String, "Prefix for the generated pod-name", func() {
+	Attribute("NamePrefix", String, "Prefix for the generated pod-name", func() {
 		MaxLength(100)
 		Example("my-server")
 	})
-	Attribute("portpolicy", String, "Portpolicy either dynamic or static", func() {
+	Attribute("PortPolicy", String, "Portpolicy either dynamic or static", func() {
 		Example("dynamic")
+		Example("static")
 	})
-	Attribute("containerimage", String, "Image of the gameserver", func() {
+	Attribute("ContainerName", String, "Name of the gameserver-container", func() {
+		Example("my-server")
+	})
+	Attribute("ContainerImage", String, "Image of the gameserver", func() {
 		Example("gcr.io/agones-images/udp-server:0.4")
 	})
-	Attribute("containerport", String, "Exposed port of the gameserver", func() {
+	Attribute("ContainerPort", String, "Exposed port of the gameserver", func() {
 		Example("7777")
 	})
-	Required("namespace", "nameprefix", "portpolicy", "containerimage", "containerport")
+	Required("Namespace", "NamePrefix", "PortPolicy", "ContainerName", "ContainerImage", "ContainerPort")
 })

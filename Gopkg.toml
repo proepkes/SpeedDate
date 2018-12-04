@@ -64,10 +64,6 @@ required = ["goa.design/goa/codegen/generator"]
   name = "k8s.io/client-go"
   version = "7.0.0"
 
-[[constraint]]
-  name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.10.4"
-
 [prune]
   go-tests = true
   unused-packages = true

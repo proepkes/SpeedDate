@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 
+	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	goahttp "goa.design/goa/http"
 )
 
@@ -117,6 +118,61 @@ func DecodeClearResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 	}
 }
 
+// BuildConfigurationRequest instantiates a HTTP request object with method and
+// path set to call the "fleet" service "configuration" endpoint
+func (c *Client) BuildConfigurationRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ConfigurationFleetPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("fleet", "configuration", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeConfigurationResponse returns a decoder for responses returned by the
+// fleet configuration endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+func DecodeConfigurationResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ConfigurationResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("fleet", "configuration", err)
+			}
+			err = body.Validate()
+			if err != nil {
+				return nil, goahttp.ErrValidationError("fleet", "configuration", err)
+			}
+			res := NewConfigurationGameserverTemplateOK(&body)
+			return res, nil
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("fleet", "configuration", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildConfigureRequest instantiates a HTTP request object with method and
 // path set to call the "fleet" service "configure" endpoint
 func (c *Client) BuildConfigureRequest(ctx context.Context, v interface{}) (*http.Request, error) {
@@ -130,6 +186,22 @@ func (c *Client) BuildConfigureRequest(ctx context.Context, v interface{}) (*htt
 	}
 
 	return req, nil
+}
+
+// EncodeConfigureRequest returns an encoder for requests sent to the fleet
+// configure server.
+func EncodeConfigureRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*fleet.GameserverTemplate)
+		if !ok {
+			return goahttp.ErrInvalidType("fleet", "configure", "*fleet.GameserverTemplate", v)
+		}
+		body := NewConfigureRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("fleet", "configure", err)
+		}
+		return nil
+	}
 }
 
 // DecodeConfigureResponse returns a decoder for responses returned by the

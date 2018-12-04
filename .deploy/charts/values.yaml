@@ -6,9 +6,7 @@ image:
   imageRegistry: docker.io/proepkes
   dockerTag: dev
 
-hosts:
-  ui: ui.speeddate.local
-  api: api.speeddate.local
+host: speeddate.local
 
 storagesvcSettings:
   DeploymentName: storagesvc-v1

@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-vs
+spec:
+  hosts:
+  - {{ .Values.host }}
+  gateways:
+  - sd-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/api/fleet"
+    rewrite:
+      uri: "/fleet"
+    route:
+    - destination:
+        host: spawnsvc.{{ .Release.Namespace }}.svc.cluster.local
+  - match:
+    - uri:
+        prefix: "/api/storage"
+    rewrite:
+      uri: "/storage"
+    route:
+    - destination:
+        host: storagesvc.{{ .Release.Namespace }}.svc.cluster.local
+  - match:
+    - uri:
+        prefix: "/api/auth"
+    rewrite:
+      uri: "/auth"
+    route:
+    - destination:
+        host: authsvc.{{ .Release.Namespace }}.svc.cluster.local    
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: speeddateui.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: 80
