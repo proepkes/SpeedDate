@@ -34,9 +34,19 @@ var _ = Service("fleet", func() {
 		})
 	})
 
+	Method("configuration", func() {
+		Description("Get gameserver deployment configuration.")
+		Result(GameserverTemplate)
+		HTTP(func() {
+			GET("/configuration")
+			Response(StatusOK)
+		})
+	})
+
 	Method("configure", func() {
-		Description("Configure gameserver-properties.")
+		Description("Configure gameserver deployment.")
 		Result(String)
+		Payload(GameserverTemplate)
 		HTTP(func() {
 			POST("/configure")
 			Response(StatusOK)
