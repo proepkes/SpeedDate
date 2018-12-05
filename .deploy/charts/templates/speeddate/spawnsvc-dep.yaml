@@ -18,7 +18,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}     
         env:
         - name: GS_NAMESPACE
-          value: {{ .Values.storagesvcSettings.GameserverNamespace }} 
+          value: {{ .Values.spawnsvcSettings.GameserverNamespace }} 
         ports:
         - containerPort: {{ .Values.spawnsvcSettings.Port }}
         livenessProbe:
