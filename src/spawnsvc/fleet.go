@@ -50,6 +50,7 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 
 	cm, err := s.getGameserverConfig()
 	if err != nil {
+		s.logger.Println(err.Error())
 		return "", err
 	}
 
@@ -69,6 +70,7 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 	}
 	newGS, err := s.client.StableV1alpha1().GameServers(s.gameserverNamespace).Create(gs)
 	if err != nil {
+		s.logger.Println(err.Error())
 		panic(err)
 	}
 
@@ -89,6 +91,7 @@ func (s *fleetSvc) Configuration(ctx context.Context) (res *fleet.GameserverTemp
 
 	cm, err := s.getGameserverConfig()
 	if err != nil {
+		s.logger.Println(err.Error())
 		return nil, err
 	}
 
@@ -111,6 +114,7 @@ func (s *fleetSvc) Configure(ctx context.Context, p *fleet.GameserverTemplate) (
 
 	cm, err := s.getGameserverConfig()
 	if err != nil {
+		s.logger.Println(err.Error())
 		return "", err
 	}
 
@@ -123,6 +127,7 @@ func (s *fleetSvc) Configure(ctx context.Context, p *fleet.GameserverTemplate) (
 func (s *fleetSvc) getGameserverConfig() (*corev1.ConfigMap, error) {
 	configMaps, err := s.k8sClient.CoreV1().ConfigMaps(s.speeddateNamespace).List(metav1.ListOptions{})
 	if err != nil {
+		s.logger.Println(err.Error())
 		return nil, err
 	}
 	for _, cm := range configMaps.Items {
