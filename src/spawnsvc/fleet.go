@@ -55,12 +55,15 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 	}
 
 	cp, err := strconv.ParseInt(cm.Data["ContainerPort"], 10, 32)
-	pp := v1alpha1.PortPolicy(cm.Data["PortPolicy"])
+	if err != nil {
+		s.logger.Println(err.Error())
+		return "", err
+	}
 
 	// Create a GameServer
 	gs := &v1alpha1.GameServer{ObjectMeta: metav1.ObjectMeta{GenerateName: cm.Data["GameserverNamePrefix"], Namespace: cm.Data["GameserverNamespace"]},
 		Spec: v1alpha1.GameServerSpec{
-			Ports: []v1alpha1.GameServerPort{{ContainerPort: int32(cp), PortPolicy: pp}},
+			Ports: []v1alpha1.GameServerPort{{ContainerPort: int32(cp), PortPolicy: v1alpha1.PortPolicy(cm.Data["PortPolicy"])}},
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{Name: cm.Data["ContainerName"], Image: cm.Data["ContainerImage"]}},
@@ -68,7 +71,7 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 			},
 		},
 	}
-	newGS, err := s.client.StableV1alpha1().GameServers(s.gameserverNamespace).Create(gs)
+	newGS, err := s.client.StableV1alpha1().GameServers(cm.Data["GameserverNamespace"]).Create(gs)
 	if err != nil {
 		s.logger.Println(err.Error())
 		panic(err)
@@ -82,7 +85,13 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 // Removes all gameserver pods.
 func (s *fleetSvc) Clear(ctx context.Context) (res string, err error) {
 	s.logger.Print("fleet.clear")
-	s.client.StableV1alpha1().GameServers(s.gameserverNamespace).DeleteCollection(&metav1.DeleteOptions{}, metav1.ListOptions{})
+	cm, err := s.getGameserverConfig()
+	if err != nil {
+		s.logger.Println(err.Error())
+		return "", err
+	}
+
+	s.client.StableV1alpha1().GameServers(cm.Data["GameserverNamespace"]).DeleteCollection(&metav1.DeleteOptions{}, metav1.ListOptions{})
 	return
 }
 
