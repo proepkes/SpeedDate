@@ -21,6 +21,8 @@ storagesvcSettings:
   DbPassword: password
 
 spawnsvcSettings:
+  serviceaccount:
+    name: spawnsvc
   DeploymentName: spawnsvc-v1
   ImageName: spawnsvc
   Port: 8001

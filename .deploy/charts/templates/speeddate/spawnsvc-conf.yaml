@@ -12,3 +12,35 @@ data:
   ContainerPort: "{{ .Values.spawnsvcSettings.ContainerPort }}"
   ContainerName: "{{ .Values.spawnsvcSettings.ContainerName }}"
   ContainerImage: "{{ .Values.spawnsvcSettings.ContainerImage }}"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.spawnsvcSettings.serviceaccount.name }}
+  namespace: {{ .Release.Namespace }}
+---
+{{- if .Values.rbacEnabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.spawnsvcSettings.serviceaccount.name }}
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["update", "get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.spawnsvcSettings.serviceaccount.name }}-access
+  namespace: {{ .Release.Namespace }}
+subjects:
+- kind: User
+  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Values.spawnsvcSettings.serviceaccount.name }}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.spawnsvcSettings.serviceaccount.name }}
+{{- end }}

@@ -11,6 +11,7 @@ spec:
         app: {{ .Values.spawnsvcSettings.ImageName }}
         version: v1
     spec:
+      serviceAccountName: {{ .Values.spawnsvcSettings.serviceaccount.name }}
       containers:
       - name: {{ .Values.spawnsvcSettings.ImageName }}
         image: {{ .Values.image.imageRegistry }}/{{ .Values.spawnsvcSettings.ImageName }}:{{ .Values.image.dockerTag }}

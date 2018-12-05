@@ -15,6 +15,37 @@ data:
   ContainerName: "udp-server"
   ContainerImage: "gcr.io/agones-images/udp-server:0.4"
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spawnsvc
+  namespace: speeddate-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: spawnsvc
+  namespace: speeddate-system
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["update", "get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: spawnsvc-access
+  namespace: speeddate-system
+subjects:
+- kind: User
+  name: system:serviceaccount:speeddate-system:spawnsvc
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: spawnsvc
+
+---
 # Source: speeddate/templates/speeddate/authsvc-svc.yaml
 apiVersion: v1
 kind: Service
@@ -184,6 +215,7 @@ spec:
         app: spawnsvc
         version: v1
     spec:
+      serviceAccountName: spawnsvc
       containers:
       - name: spawnsvc
         image: docker.io/proepkes/spawnsvc:dev

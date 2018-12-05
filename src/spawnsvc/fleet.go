@@ -34,14 +34,14 @@ func NewFleet(logger *log.Logger, speeddateNamespace string, gameserverNamespace
 		logger.Fatal("Could not create the k8s clientset")
 	}
 
-	// Access to the Agones resources through the Agones Clientset
-	// Note that we reuse the same config as we used for the Kubernetes Clientset
 	client, err := versioned.NewForConfig(clusterConfig)
 	if err != nil {
 		logger.Fatal("Could not create the agones api clientset")
 	}
 
-	return &fleetSvc{logger, speeddateNamespace, gameserverNamespace, k8sClient, client}
+	x := &fleetSvc{logger, speeddateNamespace, gameserverNamespace, k8sClient, client}
+	logger.Println(x)
+	return x
 }
 
 // Add a new gameserver.
