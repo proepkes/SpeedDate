@@ -129,7 +129,12 @@ func (s *fleetSvc) Configure(ctx context.Context, p *fleet.GameserverTemplate) (
 
 	cmCopy := cm.DeepCopy()
 	cmCopy.Data["ContainerImage"] = p.ContainerImage
-	fmt.Println(cmCopy)
+
+	_, err = s.k8sClient.CoreV1().ConfigMaps(s.speeddateNamespace).Update(cmCopy)
+	if err != nil {
+		s.logger.Println(err.Error())
+		return "", err
+	}
 	return
 }
 
