@@ -14,7 +14,11 @@ var _ = Service("fleet", func() {
 	})
 
 	// Sets CORS response headers for requests with any Origin header
-	Origin("*")
+	Origin("*", func() {
+		Headers("Origin, X-Requested-With, Content-Type, Accept")
+		Methods("OPTIONS", "POST")
+		MaxAge(600)
+	})
 
 	Method("add", func() {
 		Description("Add a new gameserver.")

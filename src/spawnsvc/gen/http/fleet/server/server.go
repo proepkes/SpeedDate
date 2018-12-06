@@ -310,9 +310,12 @@ func handleFleetOrigin(h http.Handler) http.Handler {
 		}
 		if cors.MatchOrigin(origin, "*") {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Max-Age", "600")
 			w.Header().Set("Access-Control-Allow-Credentials", "false")
 			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
+				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
+				w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			}
 			origHndlr(w, r)
 			return
