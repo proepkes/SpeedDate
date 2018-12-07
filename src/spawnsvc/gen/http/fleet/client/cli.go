@@ -23,7 +23,7 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 	{
 		err = json.Unmarshal([]byte(fleetCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 1746324384,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 1259733314,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
 		}
 		if body.FleetSpec == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
@@ -53,6 +53,21 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 		v.FleetSpec = marshalFleetSpecRequestBodyToFleetSpec(body.FleetSpec)
 	}
 	return v, nil
+}
+
+// BuildListPayload builds the payload for the fleet list endpoint from CLI
+// flags.
+func BuildListPayload(fleetListNamespace string) (*fleet.NamespacePayload, error) {
+	var namespace *string
+	{
+		if fleetListNamespace != "" {
+			namespace = &fleetListNamespace
+		}
+	}
+	payload := &fleet.NamespacePayload{
+		Namespace: namespace,
+	}
+	return payload, nil
 }
 
 // BuildConfigurePayload builds the payload for the fleet configure endpoint

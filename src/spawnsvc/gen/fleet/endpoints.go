@@ -17,6 +17,7 @@ import (
 type Endpoints struct {
 	Add           goa.Endpoint
 	Create        goa.Endpoint
+	List          goa.Endpoint
 	Clear         goa.Endpoint
 	Configuration goa.Endpoint
 	Configure     goa.Endpoint
@@ -27,6 +28,7 @@ func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Add:           NewAddEndpoint(s),
 		Create:        NewCreateEndpoint(s),
+		List:          NewListEndpoint(s),
 		Clear:         NewClearEndpoint(s),
 		Configuration: NewConfigurationEndpoint(s),
 		Configure:     NewConfigureEndpoint(s),
@@ -37,6 +39,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Add = m(e.Add)
 	e.Create = m(e.Create)
+	e.List = m(e.List)
 	e.Clear = m(e.Clear)
 	e.Configuration = m(e.Configuration)
 	e.Configure = m(e.Configure)
@@ -56,6 +59,15 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*Fleet)
 		return s.Create(ctx, p)
+	}
+}
+
+// NewListEndpoint returns an endpoint function that calls the method "list" of
+// service "fleet".
+func NewListEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*NamespacePayload)
+		return s.List(ctx, p)
 	}
 }
 

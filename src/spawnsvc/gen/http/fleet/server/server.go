@@ -22,6 +22,7 @@ type Server struct {
 	Mounts        []*MountPoint
 	Add           http.Handler
 	Create        http.Handler
+	List          http.Handler
 	Clear         http.Handler
 	Configuration http.Handler
 	Configure     http.Handler
@@ -57,17 +58,20 @@ func New(
 		Mounts: []*MountPoint{
 			{"Add", "POST", "/fleet/add"},
 			{"Create", "POST", "/fleet/create"},
+			{"List", "GET", "/fleet/list"},
 			{"Clear", "POST", "/fleet/clear"},
 			{"Configuration", "GET", "/fleet/configuration"},
 			{"Configure", "POST", "/fleet/configure"},
 			{"CORS", "OPTIONS", "/fleet/add"},
 			{"CORS", "OPTIONS", "/fleet/create"},
+			{"CORS", "OPTIONS", "/fleet/list"},
 			{"CORS", "OPTIONS", "/fleet/clear"},
 			{"CORS", "OPTIONS", "/fleet/configuration"},
 			{"CORS", "OPTIONS", "/fleet/configure"},
 		},
 		Add:           NewAddHandler(e.Add, mux, dec, enc, eh),
 		Create:        NewCreateHandler(e.Create, mux, dec, enc, eh),
+		List:          NewListHandler(e.List, mux, dec, enc, eh),
 		Clear:         NewClearHandler(e.Clear, mux, dec, enc, eh),
 		Configuration: NewConfigurationHandler(e.Configuration, mux, dec, enc, eh),
 		Configure:     NewConfigureHandler(e.Configure, mux, dec, enc, eh),
@@ -82,6 +86,7 @@ func (s *Server) Service() string { return "fleet" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Add = m(s.Add)
 	s.Create = m(s.Create)
+	s.List = m(s.List)
 	s.Clear = m(s.Clear)
 	s.Configuration = m(s.Configuration)
 	s.Configure = m(s.Configure)
@@ -92,6 +97,7 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountAddHandler(mux, h.Add)
 	MountCreateHandler(mux, h.Create)
+	MountListHandler(mux, h.List)
 	MountClearHandler(mux, h.Clear)
 	MountConfigurationHandler(mux, h.Configuration)
 	MountConfigureHandler(mux, h.Configure)
@@ -171,6 +177,56 @@ func NewCreateHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "create")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			eh(ctx, w, err)
+			return
+		}
+
+		res, err := endpoint(ctx, payload)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
+// MountListHandler configures the mux to serve the "fleet" service "list"
+// endpoint.
+func MountListHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := handleFleetOrigin(h).(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/fleet/list", f)
+}
+
+// NewListHandler creates a HTTP handler which loads the HTTP request and calls
+// the "fleet" service "list" endpoint.
+func NewListHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		decodeRequest  = DecodeListRequest(mux, dec)
+		encodeResponse = EncodeListResponse(enc)
+		encodeError    = goahttp.ErrorEncoder(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "list")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
 		payload, err := decodeRequest(r)
 		if err != nil {
@@ -342,6 +398,7 @@ func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
 	}
 	mux.Handle("OPTIONS", "/fleet/add", f)
 	mux.Handle("OPTIONS", "/fleet/create", f)
+	mux.Handle("OPTIONS", "/fleet/list", f)
 	mux.Handle("OPTIONS", "/fleet/clear", f)
 	mux.Handle("OPTIONS", "/fleet/configuration", f)
 	mux.Handle("OPTIONS", "/fleet/configure", f)
@@ -371,7 +428,7 @@ func handleFleetOrigin(h http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Credentials", "false")
 			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
-				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
+				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST, GET")
 				w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			}
 			origHndlr(w, r)

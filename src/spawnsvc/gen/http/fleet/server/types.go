@@ -32,6 +32,10 @@ type ConfigureRequestBody struct {
 	GameServerSpec *GameServerSpecRequestBody `form:"GameServerSpec,omitempty" json:"GameServerSpec,omitempty" xml:"GameServerSpec,omitempty"`
 }
 
+// ListResponseBody is the type of the "fleet" service "list" endpoint HTTP
+// response body.
+type ListResponseBody []*StoredFleetResponseBody
+
 // ConfigurationResponseBody is the type of the "fleet" service "configuration"
 // endpoint HTTP response body.
 type ConfigurationResponseBody struct {
@@ -41,12 +45,39 @@ type ConfigurationResponseBody struct {
 	GameServerSpec *GameServerSpecResponseBody `form:"GameServerSpec" json:"GameServerSpec" xml:"GameServerSpec"`
 }
 
+// StoredFleetResponseBody is used to define fields on response body types.
+type StoredFleetResponseBody struct {
+	// The Fleets ObjectMeta
+	ObjectMeta *ObjectMetaResponseBody `form:"ObjectMeta" json:"ObjectMeta" xml:"ObjectMeta"`
+	// The FleetSpec
+	FleetSpec *FleetSpecResponseBody `form:"FleetSpec" json:"FleetSpec" xml:"FleetSpec"`
+	// The FleetStatus
+	FleetStatus *FleetStatusResponseBody `form:"FleetStatus,omitempty" json:"FleetStatus,omitempty" xml:"FleetStatus,omitempty"`
+}
+
 // ObjectMetaResponseBody is used to define fields on response body types.
 type ObjectMetaResponseBody struct {
 	// Prefix for the generated fleetname
 	GenerateName string `form:"GenerateName" json:"GenerateName" xml:"GenerateName"`
 	// Namespace where the fleet will run in
 	Namespace string `form:"Namespace" json:"Namespace" xml:"Namespace"`
+}
+
+// FleetSpecResponseBody is used to define fields on response body types.
+type FleetSpecResponseBody struct {
+	// Replicas
+	Replicas int32 `form:"Replicas" json:"Replicas" xml:"Replicas"`
+	// Template of the gameserver
+	Template *GameserverTemplateResponseBody `form:"Template" json:"Template" xml:"Template"`
+}
+
+// GameserverTemplateResponseBody is used to define fields on response body
+// types.
+type GameserverTemplateResponseBody struct {
+	// GameserverTemplates ObjectMeta
+	ObjectMeta *ObjectMetaResponseBody `form:"ObjectMeta,omitempty" json:"ObjectMeta,omitempty" xml:"ObjectMeta,omitempty"`
+	// GameServerSpec
+	GameServerSpec *GameServerSpecResponseBody `form:"GameServerSpec" json:"GameServerSpec" xml:"GameServerSpec"`
 }
 
 // GameServerSpecResponseBody is used to define fields on response body types.
@@ -59,6 +90,16 @@ type GameServerSpecResponseBody struct {
 	ContainerImage string `form:"ContainerImage" json:"ContainerImage" xml:"ContainerImage"`
 	// Exposed port of the gameserver
 	ContainerPort int32 `form:"ContainerPort" json:"ContainerPort" xml:"ContainerPort"`
+}
+
+// FleetStatusResponseBody is used to define fields on response body types.
+type FleetStatusResponseBody struct {
+	// Replicas
+	Replicas int32 `form:"Replicas" json:"Replicas" xml:"Replicas"`
+	// ReadyReplicas
+	ReadyReplicas int32 `form:"ReadyReplicas" json:"ReadyReplicas" xml:"ReadyReplicas"`
+	// AllocatedReplicas
+	AllocatedReplicas int32 `form:"AllocatedReplicas" json:"AllocatedReplicas" xml:"AllocatedReplicas"`
 }
 
 // ObjectMetaRequestBody is used to define fields on request body types.
@@ -97,6 +138,25 @@ type GameServerSpecRequestBody struct {
 	ContainerPort *int32 `form:"ContainerPort,omitempty" json:"ContainerPort,omitempty" xml:"ContainerPort,omitempty"`
 }
 
+// NewStoredFleetResponseBody builds the HTTP response body from the result of
+// the "list" endpoint of the "fleet" service.
+func NewStoredFleetResponseBody(res []*fleet.StoredFleet) []*StoredFleetResponseBody {
+	body := make([]*StoredFleetResponseBody, len(res))
+	for i, val := range res {
+		body[i] = &StoredFleetResponseBody{}
+		if val.ObjectMeta != nil {
+			body[i].ObjectMeta = marshalObjectMetaToObjectMetaResponseBody(val.ObjectMeta)
+		}
+		if val.FleetSpec != nil {
+			body[i].FleetSpec = marshalFleetSpecToFleetSpecResponseBody(val.FleetSpec)
+		}
+		if val.FleetStatus != nil {
+			body[i].FleetStatus = marshalFleetStatusToFleetStatusResponseBody(val.FleetStatus)
+		}
+	}
+	return body
+}
+
 // NewConfigurationResponseBody builds the HTTP response body from the result
 // of the "configuration" endpoint of the "fleet" service.
 func NewConfigurationResponseBody(res *fleet.GameserverTemplate) *ConfigurationResponseBody {
@@ -118,6 +178,13 @@ func NewCreateFleet(body *CreateRequestBody) *fleet.Fleet {
 	}
 	v.FleetSpec = unmarshalFleetSpecRequestBodyToFleetSpec(body.FleetSpec)
 	return v
+}
+
+// NewListNamespacePayload builds a fleet service list endpoint payload.
+func NewListNamespacePayload(namespace *string) *fleet.NamespacePayload {
+	return &fleet.NamespacePayload{
+		Namespace: namespace,
+	}
 }
 
 // NewConfigureGameserverTemplate builds a fleet service configure endpoint
@@ -167,6 +234,27 @@ func (body *ConfigureRequestBody) Validate() (err error) {
 	return
 }
 
+// Validate runs the validations defined on StoredFleetResponseBody
+func (body *StoredFleetResponseBody) Validate() (err error) {
+	if body.ObjectMeta == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("ObjectMeta", "body"))
+	}
+	if body.FleetSpec == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
+	}
+	if body.ObjectMeta != nil {
+		if err2 := body.ObjectMeta.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.FleetSpec != nil {
+		if err2 := body.FleetSpec.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
 // Validate runs the validations defined on ObjectMetaResponseBody
 func (body *ObjectMetaResponseBody) Validate() (err error) {
 	if utf8.RuneCountInString(body.GenerateName) > 100 {
@@ -174,6 +262,32 @@ func (body *ObjectMetaResponseBody) Validate() (err error) {
 	}
 	if utf8.RuneCountInString(body.Namespace) > 100 {
 		err = goa.MergeErrors(err, goa.InvalidLengthError("body.Namespace", body.Namespace, utf8.RuneCountInString(body.Namespace), 100, false))
+	}
+	return
+}
+
+// Validate runs the validations defined on FleetSpecResponseBody
+func (body *FleetSpecResponseBody) Validate() (err error) {
+	if body.Template == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("Template", "body"))
+	}
+	if body.Template != nil {
+		if err2 := body.Template.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// Validate runs the validations defined on GameserverTemplateResponseBody
+func (body *GameserverTemplateResponseBody) Validate() (err error) {
+	if body.GameServerSpec == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("GameServerSpec", "body"))
+	}
+	if body.ObjectMeta != nil {
+		if err2 := body.ObjectMeta.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
 	}
 	return
 }

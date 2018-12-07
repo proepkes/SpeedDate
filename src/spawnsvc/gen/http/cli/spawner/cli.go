@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `fleet (add|create|clear|configuration|configure)
+	return `fleet (add|create|list|clear|configuration|configure)
 `
 }
 
@@ -50,6 +50,9 @@ func ParseEndpoint(
 		fleetCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		fleetCreateBodyFlag = fleetCreateFlags.String("body", "REQUIRED", "")
 
+		fleetListFlags         = flag.NewFlagSet("list", flag.ExitOnError)
+		fleetListNamespaceFlag = fleetListFlags.String("namespace", "", "")
+
 		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 
 		fleetConfigurationFlags = flag.NewFlagSet("configuration", flag.ExitOnError)
@@ -60,6 +63,7 @@ func ParseEndpoint(
 	fleetFlags.Usage = fleetUsage
 	fleetAddFlags.Usage = fleetAddUsage
 	fleetCreateFlags.Usage = fleetCreateUsage
+	fleetListFlags.Usage = fleetListUsage
 	fleetClearFlags.Usage = fleetClearUsage
 	fleetConfigurationFlags.Usage = fleetConfigurationUsage
 	fleetConfigureFlags.Usage = fleetConfigureUsage
@@ -104,6 +108,9 @@ func ParseEndpoint(
 			case "create":
 				epf = fleetCreateFlags
 
+			case "list":
+				epf = fleetListFlags
+
 			case "clear":
 				epf = fleetClearFlags
 
@@ -144,6 +151,9 @@ func ParseEndpoint(
 			case "create":
 				endpoint = c.Create()
 				data, err = fleetc.BuildCreatePayload(*fleetCreateBodyFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = fleetc.BuildListPayload(*fleetListNamespaceFlag)
 			case "clear":
 				endpoint = c.Clear()
 				data = nil
@@ -172,6 +182,7 @@ Usage:
 COMMAND:
     add: Add a new gameserver.
     create: Create a new fleet.
+    list: List all fleets.
     clear: Removes all gameserver pods.
     configuration: Get gameserver deployment configuration.
     configure: Configure gameserver deployment.
@@ -199,7 +210,7 @@ Create a new fleet.
 Example:
     `+os.Args[0]+` fleet create --body '{
       "FleetSpec": {
-         "Replicas": 1746324384,
+         "Replicas": 1259733314,
          "Template": {
             "GameServerSpec": {
                "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
@@ -218,6 +229,17 @@ Example:
          "Namespace": "speeddate-system"
       }
    }'
+`, os.Args[0])
+}
+
+func fleetListUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet list -namespace STRING
+
+List all fleets.
+    -namespace STRING: 
+
+Example:
+    `+os.Args[0]+` fleet list --namespace "Exercitationem quae."
 `, os.Args[0])
 }
 

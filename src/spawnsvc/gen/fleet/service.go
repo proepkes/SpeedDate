@@ -17,6 +17,8 @@ type Service interface {
 	Add(context.Context) (res string, err error)
 	// Create a new fleet.
 	Create(context.Context, *Fleet) (res string, err error)
+	// List all fleets.
+	List(context.Context, *NamespacePayload) (res []*StoredFleet, err error)
 	// Removes all gameserver pods.
 	Clear(context.Context) (res string, err error)
 	// Get gameserver deployment configuration.
@@ -33,7 +35,7 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [5]string{"add", "create", "clear", "configuration", "configure"}
+var MethodNames = [6]string{"add", "create", "list", "clear", "configuration", "configure"}
 
 // Fleet is the payload type of the fleet service create method.
 type Fleet struct {
@@ -41,6 +43,11 @@ type Fleet struct {
 	ObjectMeta *ObjectMeta
 	// FleetSpec
 	FleetSpec *FleetSpec
+}
+
+// NamespacePayload is the payload type of the fleet service list method.
+type NamespacePayload struct {
+	Namespace *string
 }
 
 // GameserverTemplate is the result type of the fleet service configuration
@@ -66,6 +73,25 @@ type FleetSpec struct {
 	Replicas int32
 	// Template of the gameserver
 	Template *GameserverTemplate
+}
+
+// Fleet
+type StoredFleet struct {
+	// The Fleets ObjectMeta
+	ObjectMeta *ObjectMeta
+	// The FleetSpec
+	FleetSpec *FleetSpec
+	// The FleetStatus
+	FleetStatus *FleetStatus
+}
+
+type FleetStatus struct {
+	// Replicas
+	Replicas int32
+	// ReadyReplicas
+	ReadyReplicas int32
+	// AllocatedReplicas
+	AllocatedReplicas int32
 }
 
 // GameserverTemplate describes gameserver

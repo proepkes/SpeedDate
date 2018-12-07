@@ -66,6 +66,35 @@ func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 	}
 }
 
+// EncodeListResponse returns an encoder for responses returned by the fleet
+// list endpoint.
+func EncodeListResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		res := v.([]*fleet.StoredFleet)
+		enc := encoder(ctx, w)
+		body := NewStoredFleetResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeListRequest returns a decoder for requests sent to the fleet list
+// endpoint.
+func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			namespace *string
+		)
+		namespaceRaw := r.URL.Query().Get("namespace")
+		if namespaceRaw != "" {
+			namespace = &namespaceRaw
+		}
+		payload := NewListNamespacePayload(namespace)
+
+		return payload, nil
+	}
+}
+
 // EncodeClearResponse returns an encoder for responses returned by the fleet
 // clear endpoint.
 func EncodeClearResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
@@ -181,12 +210,37 @@ func unmarshalGameServerSpecRequestBodyToGameServerSpec(v *GameServerSpecRequest
 // marshalObjectMetaToObjectMetaResponseBody builds a value of type
 // *ObjectMetaResponseBody from a value of type *fleet.ObjectMeta.
 func marshalObjectMetaToObjectMetaResponseBody(v *fleet.ObjectMeta) *ObjectMetaResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &ObjectMetaResponseBody{
 		GenerateName: v.GenerateName,
 		Namespace:    v.Namespace,
+	}
+
+	return res
+}
+
+// marshalFleetSpecToFleetSpecResponseBody builds a value of type
+// *FleetSpecResponseBody from a value of type *fleet.FleetSpec.
+func marshalFleetSpecToFleetSpecResponseBody(v *fleet.FleetSpec) *FleetSpecResponseBody {
+	res := &FleetSpecResponseBody{
+		Replicas: v.Replicas,
+	}
+	if v.Template != nil {
+		res.Template = marshalGameserverTemplateToGameserverTemplateResponseBody(v.Template)
+	}
+
+	return res
+}
+
+// marshalGameserverTemplateToGameserverTemplateResponseBody builds a value of
+// type *GameserverTemplateResponseBody from a value of type
+// *fleet.GameserverTemplate.
+func marshalGameserverTemplateToGameserverTemplateResponseBody(v *fleet.GameserverTemplate) *GameserverTemplateResponseBody {
+	res := &GameserverTemplateResponseBody{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = marshalObjectMetaToObjectMetaResponseBody(v.ObjectMeta)
+	}
+	if v.GameServerSpec != nil {
+		res.GameServerSpec = marshalGameServerSpecToGameServerSpecResponseBody(v.GameServerSpec)
 	}
 
 	return res
@@ -200,6 +254,21 @@ func marshalGameServerSpecToGameServerSpecResponseBody(v *fleet.GameServerSpec) 
 		ContainerName:  v.ContainerName,
 		ContainerImage: v.ContainerImage,
 		ContainerPort:  v.ContainerPort,
+	}
+
+	return res
+}
+
+// marshalFleetStatusToFleetStatusResponseBody builds a value of type
+// *FleetStatusResponseBody from a value of type *fleet.FleetStatus.
+func marshalFleetStatusToFleetStatusResponseBody(v *fleet.FleetStatus) *FleetStatusResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &FleetStatusResponseBody{
+		Replicas:          v.Replicas,
+		ReadyReplicas:     v.ReadyReplicas,
+		AllocatedReplicas: v.AllocatedReplicas,
 	}
 
 	return res

@@ -15,6 +15,7 @@ import (
 	"net/url"
 
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
+	goa "goa.design/goa"
 	goahttp "goa.design/goa/http"
 )
 
@@ -130,6 +131,84 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("fleet", "create", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildListRequest instantiates a HTTP request object with method and path set
+// to call the "fleet" service "list" endpoint
+func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListFleetPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("fleet", "list", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeListRequest returns an encoder for requests sent to the fleet list
+// server.
+func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*fleet.NamespacePayload)
+		if !ok {
+			return goahttp.ErrInvalidType("fleet", "list", "*fleet.NamespacePayload", v)
+		}
+		values := req.URL.Query()
+		if p.Namespace != nil {
+			values.Add("namespace", *p.Namespace)
+		}
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeListResponse returns a decoder for responses returned by the fleet
+// list endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ListResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("fleet", "list", err)
+			}
+			for _, e := range body {
+				if e != nil {
+					if err2 := e.Validate(); err2 != nil {
+						err = goa.MergeErrors(err, err2)
+					}
+				}
+			}
+			if err != nil {
+				return nil, goahttp.ErrValidationError("fleet", "list", err)
+			}
+			res := NewListStoredFleetOK(body)
+			return res, nil
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("fleet", "list", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -418,13 +497,34 @@ func marshalGameServerSpecRequestBodyToGameServerSpec(v *GameServerSpecRequestBo
 // unmarshalObjectMetaResponseBodyToObjectMeta builds a value of type
 // *fleet.ObjectMeta from a value of type *ObjectMetaResponseBody.
 func unmarshalObjectMetaResponseBodyToObjectMeta(v *ObjectMetaResponseBody) *fleet.ObjectMeta {
-	if v == nil {
-		return nil
-	}
 	res := &fleet.ObjectMeta{
 		GenerateName: *v.GenerateName,
 		Namespace:    *v.Namespace,
 	}
+
+	return res
+}
+
+// unmarshalFleetSpecResponseBodyToFleetSpec builds a value of type
+// *fleet.FleetSpec from a value of type *FleetSpecResponseBody.
+func unmarshalFleetSpecResponseBodyToFleetSpec(v *FleetSpecResponseBody) *fleet.FleetSpec {
+	res := &fleet.FleetSpec{
+		Replicas: *v.Replicas,
+	}
+	res.Template = unmarshalGameserverTemplateResponseBodyToGameserverTemplate(v.Template)
+
+	return res
+}
+
+// unmarshalGameserverTemplateResponseBodyToGameserverTemplate builds a value
+// of type *fleet.GameserverTemplate from a value of type
+// *GameserverTemplateResponseBody.
+func unmarshalGameserverTemplateResponseBodyToGameserverTemplate(v *GameserverTemplateResponseBody) *fleet.GameserverTemplate {
+	res := &fleet.GameserverTemplate{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = unmarshalObjectMetaResponseBodyToObjectMeta(v.ObjectMeta)
+	}
+	res.GameServerSpec = unmarshalGameServerSpecResponseBodyToGameServerSpec(v.GameServerSpec)
 
 	return res
 }
@@ -437,6 +537,21 @@ func unmarshalGameServerSpecResponseBodyToGameServerSpec(v *GameServerSpecRespon
 		ContainerName:  *v.ContainerName,
 		ContainerImage: *v.ContainerImage,
 		ContainerPort:  *v.ContainerPort,
+	}
+
+	return res
+}
+
+// unmarshalFleetStatusResponseBodyToFleetStatus builds a value of type
+// *fleet.FleetStatus from a value of type *FleetStatusResponseBody.
+func unmarshalFleetStatusResponseBodyToFleetStatus(v *FleetStatusResponseBody) *fleet.FleetStatus {
+	if v == nil {
+		return nil
+	}
+	res := &fleet.FleetStatus{
+		Replicas:          *v.Replicas,
+		ReadyReplicas:     *v.ReadyReplicas,
+		AllocatedReplicas: *v.AllocatedReplicas,
 	}
 
 	return res

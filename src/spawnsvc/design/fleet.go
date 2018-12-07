@@ -16,7 +16,7 @@ var _ = Service("fleet", func() {
 	// Sets CORS response headers for requests with any Origin header
 	Origin("*", func() {
 		Headers("Origin, X-Requested-With, Content-Type, Accept")
-		Methods("OPTIONS", "POST")
+		Methods("OPTIONS", "POST", "GET")
 		MaxAge(600)
 	})
 
@@ -36,6 +36,17 @@ var _ = Service("fleet", func() {
 		HTTP(func() {
 			POST("/create")
 			Response(StatusCreated)
+		})
+	})
+
+	Method("list", func() {
+		Description("List all fleets.")
+		Result(ArrayOf(StoredFleet))
+		Payload(NamespacePayload)
+		HTTP(func() {
+			GET("/list")
+			Param("namespace")
+			Response(StatusOK)
 		})
 	})
 

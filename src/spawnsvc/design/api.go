@@ -78,3 +78,27 @@ var Fleet = Type("Fleet", func() {
 
 	Required("FleetSpec")
 })
+
+var FleetStatus = Type("FleetStatus", func() {
+	// Replicas the total number of current GameServer replicas
+	Attribute("Replicas", Int32, "Replicas")
+	// ReadyReplicas are the number of Ready GameServer replicas
+	Attribute("ReadyReplicas", Int32, "ReadyReplicas")
+	// AllocatedReplicas are the number of Allocated GameServer replicas
+	Attribute("AllocatedReplicas", Int32, "AllocatedReplicas")
+
+	Required("Replicas", "ReadyReplicas", "AllocatedReplicas")
+})
+
+var StoredFleet = Type("StoredFleet", func() {
+	Description("Fleet")
+	Attribute("ObjectMeta", ObjectMeta, "The Fleets ObjectMeta")
+	Attribute("FleetSpec", FleetSpec, "The FleetSpec")
+	Attribute("FleetStatus", FleetStatus, "The FleetStatus")
+
+	Required("ObjectMeta", "FleetSpec")
+})
+
+var NamespacePayload = Type("NamespacePayload", func() {
+	Attribute("namespace", String)
+})

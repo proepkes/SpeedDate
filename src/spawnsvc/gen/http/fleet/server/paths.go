@@ -17,6 +17,11 @@ func CreateFleetPath() string {
 	return "/fleet/create"
 }
 
+// ListFleetPath returns the URL path to the fleet service list HTTP endpoint.
+func ListFleetPath() string {
+	return "/fleet/list"
+}
+
 // ClearFleetPath returns the URL path to the fleet service clear HTTP endpoint.
 func ClearFleetPath() string {
 	return "/fleet/clear"

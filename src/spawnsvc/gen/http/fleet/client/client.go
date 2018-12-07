@@ -23,6 +23,9 @@ type Client struct {
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
 
+	// List Doer is the HTTP client used to make requests to the list endpoint.
+	ListDoer goahttp.Doer
+
 	// Clear Doer is the HTTP client used to make requests to the clear endpoint.
 	ClearDoer goahttp.Doer
 
@@ -59,6 +62,7 @@ func NewClient(
 	return &Client{
 		AddDoer:             doer,
 		CreateDoer:          doer,
+		ListDoer:            doer,
 		ClearDoer:           doer,
 		ConfigurationDoer:   doer,
 		ConfigureDoer:       doer,
@@ -111,6 +115,31 @@ func (c *Client) Create() goa.Endpoint {
 
 		if err != nil {
 			return nil, goahttp.ErrRequestError("fleet", "create", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// List returns an endpoint that makes HTTP requests to the fleet service list
+// server.
+func (c *Client) List() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeListRequest(c.encoder)
+		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildListRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ListDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("fleet", "list", err)
 		}
 		return decodeResponse(resp)
 	}
