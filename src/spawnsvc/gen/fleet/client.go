@@ -16,15 +16,17 @@ import (
 // Client is the "fleet" service client.
 type Client struct {
 	AddEndpoint           goa.Endpoint
+	CreateEndpoint        goa.Endpoint
 	ClearEndpoint         goa.Endpoint
 	ConfigurationEndpoint goa.Endpoint
 	ConfigureEndpoint     goa.Endpoint
 }
 
 // NewClient initializes a "fleet" service client given the endpoints.
-func NewClient(add, clear, configuration, configure goa.Endpoint) *Client {
+func NewClient(add, create, clear, configuration, configure goa.Endpoint) *Client {
 	return &Client{
 		AddEndpoint:           add,
+		CreateEndpoint:        create,
 		ClearEndpoint:         clear,
 		ConfigurationEndpoint: configuration,
 		ConfigureEndpoint:     configure,
@@ -35,6 +37,16 @@ func NewClient(add, clear, configuration, configure goa.Endpoint) *Client {
 func (c *Client) Add(ctx context.Context) (res string, err error) {
 	var ires interface{}
 	ires, err = c.AddEndpoint(ctx, nil)
+	if err != nil {
+		return
+	}
+	return ires.(string), nil
+}
+
+// Create calls the "create" endpoint of the "fleet" service.
+func (c *Client) Create(ctx context.Context, p *Fleet) (res string, err error) {
+	var ires interface{}
+	ires, err = c.CreateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}

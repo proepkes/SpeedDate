@@ -16,6 +16,7 @@ import (
 // Endpoints wraps the "fleet" service endpoints.
 type Endpoints struct {
 	Add           goa.Endpoint
+	Create        goa.Endpoint
 	Clear         goa.Endpoint
 	Configuration goa.Endpoint
 	Configure     goa.Endpoint
@@ -25,6 +26,7 @@ type Endpoints struct {
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Add:           NewAddEndpoint(s),
+		Create:        NewCreateEndpoint(s),
 		Clear:         NewClearEndpoint(s),
 		Configuration: NewConfigurationEndpoint(s),
 		Configure:     NewConfigureEndpoint(s),
@@ -34,6 +36,7 @@ func NewEndpoints(s Service) *Endpoints {
 // Use applies the given middleware to all the "fleet" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Add = m(e.Add)
+	e.Create = m(e.Create)
 	e.Clear = m(e.Clear)
 	e.Configuration = m(e.Configuration)
 	e.Configure = m(e.Configure)
@@ -44,6 +47,15 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 func NewAddEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		return s.Add(ctx)
+	}
+}
+
+// NewCreateEndpoint returns an endpoint function that calls the method
+// "create" of service "fleet".
+func NewCreateEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*Fleet)
+		return s.Create(ctx, p)
 	}
 }
 

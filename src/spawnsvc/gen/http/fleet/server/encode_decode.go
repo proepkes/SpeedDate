@@ -29,6 +29,43 @@ func EncodeAddResponse(encoder func(context.Context, http.ResponseWriter) goahtt
 	}
 }
 
+// EncodeCreateResponse returns an encoder for responses returned by the fleet
+// create endpoint.
+func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		res := v.(string)
+		enc := encoder(ctx, w)
+		body := res
+		w.WriteHeader(http.StatusCreated)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeCreateRequest returns a decoder for requests sent to the fleet create
+// endpoint.
+func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			body CreateRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if err == io.EOF {
+				return nil, goa.MissingPayloadError()
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = body.Validate()
+		if err != nil {
+			return nil, err
+		}
+		payload := NewCreateFleet(&body)
+
+		return payload, nil
+	}
+}
+
 // EncodeClearResponse returns an encoder for responses returned by the fleet
 // clear endpoint.
 func EncodeClearResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
@@ -88,4 +125,82 @@ func DecodeConfigureRequest(mux goahttp.Muxer, decoder func(*http.Request) goaht
 
 		return payload, nil
 	}
+}
+
+// unmarshalObjectMetaRequestBodyToObjectMeta builds a value of type
+// *fleet.ObjectMeta from a value of type *ObjectMetaRequestBody.
+func unmarshalObjectMetaRequestBodyToObjectMeta(v *ObjectMetaRequestBody) *fleet.ObjectMeta {
+	if v == nil {
+		return nil
+	}
+	res := &fleet.ObjectMeta{
+		GenerateName: *v.GenerateName,
+		Namespace:    *v.Namespace,
+	}
+
+	return res
+}
+
+// unmarshalFleetSpecRequestBodyToFleetSpec builds a value of type
+// *fleet.FleetSpec from a value of type *FleetSpecRequestBody.
+func unmarshalFleetSpecRequestBodyToFleetSpec(v *FleetSpecRequestBody) *fleet.FleetSpec {
+	res := &fleet.FleetSpec{
+		Replicas: *v.Replicas,
+	}
+	res.Template = unmarshalGameserverTemplateRequestBodyToGameserverTemplate(v.Template)
+
+	return res
+}
+
+// unmarshalGameserverTemplateRequestBodyToGameserverTemplate builds a value of
+// type *fleet.GameserverTemplate from a value of type
+// *GameserverTemplateRequestBody.
+func unmarshalGameserverTemplateRequestBodyToGameserverTemplate(v *GameserverTemplateRequestBody) *fleet.GameserverTemplate {
+	res := &fleet.GameserverTemplate{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = unmarshalObjectMetaRequestBodyToObjectMeta(v.ObjectMeta)
+	}
+	res.GameServerSpec = unmarshalGameServerSpecRequestBodyToGameServerSpec(v.GameServerSpec)
+
+	return res
+}
+
+// unmarshalGameServerSpecRequestBodyToGameServerSpec builds a value of type
+// *fleet.GameServerSpec from a value of type *GameServerSpecRequestBody.
+func unmarshalGameServerSpecRequestBodyToGameServerSpec(v *GameServerSpecRequestBody) *fleet.GameServerSpec {
+	res := &fleet.GameServerSpec{
+		PortPolicy:     *v.PortPolicy,
+		ContainerName:  *v.ContainerName,
+		ContainerImage: *v.ContainerImage,
+		ContainerPort:  *v.ContainerPort,
+	}
+
+	return res
+}
+
+// marshalObjectMetaToObjectMetaResponseBody builds a value of type
+// *ObjectMetaResponseBody from a value of type *fleet.ObjectMeta.
+func marshalObjectMetaToObjectMetaResponseBody(v *fleet.ObjectMeta) *ObjectMetaResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &ObjectMetaResponseBody{
+		GenerateName: v.GenerateName,
+		Namespace:    v.Namespace,
+	}
+
+	return res
+}
+
+// marshalGameServerSpecToGameServerSpecResponseBody builds a value of type
+// *GameServerSpecResponseBody from a value of type *fleet.GameServerSpec.
+func marshalGameServerSpecToGameServerSpecResponseBody(v *fleet.GameServerSpec) *GameServerSpecResponseBody {
+	res := &GameServerSpecResponseBody{
+		PortPolicy:     v.PortPolicy,
+		ContainerName:  v.ContainerName,
+		ContainerImage: v.ContainerImage,
+		ContainerPort:  v.ContainerPort,
+	}
+
+	return res
 }

@@ -14,30 +14,43 @@ import (
 	goa "goa.design/goa"
 )
 
+// CreateRequestBody is the type of the "fleet" service "create" endpoint HTTP
+// request body.
+type CreateRequestBody struct {
+	// Fleets ObjectMeta
+	ObjectMeta *ObjectMetaRequestBody `form:"ObjectMeta,omitempty" json:"ObjectMeta,omitempty" xml:"ObjectMeta,omitempty"`
+	// FleetSpec
+	FleetSpec *FleetSpecRequestBody `form:"FleetSpec,omitempty" json:"FleetSpec,omitempty" xml:"FleetSpec,omitempty"`
+}
+
 // ConfigureRequestBody is the type of the "fleet" service "configure" endpoint
 // HTTP request body.
 type ConfigureRequestBody struct {
-	// Namespace where the gameserver will run in
-	Namespace *string `form:"Namespace,omitempty" json:"Namespace,omitempty" xml:"Namespace,omitempty"`
-	// Prefix for the generated pod-name
-	NamePrefix *string `form:"NamePrefix,omitempty" json:"NamePrefix,omitempty" xml:"NamePrefix,omitempty"`
-	// Portpolicy either dynamic or static
-	PortPolicy *string `form:"PortPolicy,omitempty" json:"PortPolicy,omitempty" xml:"PortPolicy,omitempty"`
-	// Name of the gameserver-container
-	ContainerName *string `form:"ContainerName,omitempty" json:"ContainerName,omitempty" xml:"ContainerName,omitempty"`
-	// Image of the gameserver
-	ContainerImage *string `form:"ContainerImage,omitempty" json:"ContainerImage,omitempty" xml:"ContainerImage,omitempty"`
-	// Exposed port of the gameserver
-	ContainerPort *string `form:"ContainerPort,omitempty" json:"ContainerPort,omitempty" xml:"ContainerPort,omitempty"`
+	// GameserverTemplates ObjectMeta
+	ObjectMeta *ObjectMetaRequestBody `form:"ObjectMeta,omitempty" json:"ObjectMeta,omitempty" xml:"ObjectMeta,omitempty"`
+	// GameServerSpec
+	GameServerSpec *GameServerSpecRequestBody `form:"GameServerSpec,omitempty" json:"GameServerSpec,omitempty" xml:"GameServerSpec,omitempty"`
 }
 
 // ConfigurationResponseBody is the type of the "fleet" service "configuration"
 // endpoint HTTP response body.
 type ConfigurationResponseBody struct {
-	// Namespace where the gameserver will run in
+	// GameserverTemplates ObjectMeta
+	ObjectMeta *ObjectMetaResponseBody `form:"ObjectMeta,omitempty" json:"ObjectMeta,omitempty" xml:"ObjectMeta,omitempty"`
+	// GameServerSpec
+	GameServerSpec *GameServerSpecResponseBody `form:"GameServerSpec" json:"GameServerSpec" xml:"GameServerSpec"`
+}
+
+// ObjectMetaResponseBody is used to define fields on response body types.
+type ObjectMetaResponseBody struct {
+	// Prefix for the generated fleetname
+	GenerateName string `form:"GenerateName" json:"GenerateName" xml:"GenerateName"`
+	// Namespace where the fleet will run in
 	Namespace string `form:"Namespace" json:"Namespace" xml:"Namespace"`
-	// Prefix for the generated pod-name
-	NamePrefix string `form:"NamePrefix" json:"NamePrefix" xml:"NamePrefix"`
+}
+
+// GameServerSpecResponseBody is used to define fields on response body types.
+type GameServerSpecResponseBody struct {
 	// Portpolicy either dynamic or static
 	PortPolicy string `form:"PortPolicy" json:"PortPolicy" xml:"PortPolicy"`
 	// Name of the gameserver-container
@@ -45,66 +58,194 @@ type ConfigurationResponseBody struct {
 	// Image of the gameserver
 	ContainerImage string `form:"ContainerImage" json:"ContainerImage" xml:"ContainerImage"`
 	// Exposed port of the gameserver
-	ContainerPort string `form:"ContainerPort" json:"ContainerPort" xml:"ContainerPort"`
+	ContainerPort int32 `form:"ContainerPort" json:"ContainerPort" xml:"ContainerPort"`
+}
+
+// ObjectMetaRequestBody is used to define fields on request body types.
+type ObjectMetaRequestBody struct {
+	// Prefix for the generated fleetname
+	GenerateName *string `form:"GenerateName,omitempty" json:"GenerateName,omitempty" xml:"GenerateName,omitempty"`
+	// Namespace where the fleet will run in
+	Namespace *string `form:"Namespace,omitempty" json:"Namespace,omitempty" xml:"Namespace,omitempty"`
+}
+
+// FleetSpecRequestBody is used to define fields on request body types.
+type FleetSpecRequestBody struct {
+	// Replicas
+	Replicas *int32 `form:"Replicas,omitempty" json:"Replicas,omitempty" xml:"Replicas,omitempty"`
+	// Template of the gameserver
+	Template *GameserverTemplateRequestBody `form:"Template,omitempty" json:"Template,omitempty" xml:"Template,omitempty"`
+}
+
+// GameserverTemplateRequestBody is used to define fields on request body types.
+type GameserverTemplateRequestBody struct {
+	// GameserverTemplates ObjectMeta
+	ObjectMeta *ObjectMetaRequestBody `form:"ObjectMeta,omitempty" json:"ObjectMeta,omitempty" xml:"ObjectMeta,omitempty"`
+	// GameServerSpec
+	GameServerSpec *GameServerSpecRequestBody `form:"GameServerSpec,omitempty" json:"GameServerSpec,omitempty" xml:"GameServerSpec,omitempty"`
+}
+
+// GameServerSpecRequestBody is used to define fields on request body types.
+type GameServerSpecRequestBody struct {
+	// Portpolicy either dynamic or static
+	PortPolicy *string `form:"PortPolicy,omitempty" json:"PortPolicy,omitempty" xml:"PortPolicy,omitempty"`
+	// Name of the gameserver-container
+	ContainerName *string `form:"ContainerName,omitempty" json:"ContainerName,omitempty" xml:"ContainerName,omitempty"`
+	// Image of the gameserver
+	ContainerImage *string `form:"ContainerImage,omitempty" json:"ContainerImage,omitempty" xml:"ContainerImage,omitempty"`
+	// Exposed port of the gameserver
+	ContainerPort *int32 `form:"ContainerPort,omitempty" json:"ContainerPort,omitempty" xml:"ContainerPort,omitempty"`
 }
 
 // NewConfigurationResponseBody builds the HTTP response body from the result
 // of the "configuration" endpoint of the "fleet" service.
 func NewConfigurationResponseBody(res *fleet.GameserverTemplate) *ConfigurationResponseBody {
-	body := &ConfigurationResponseBody{
-		Namespace:      res.Namespace,
-		NamePrefix:     res.NamePrefix,
-		PortPolicy:     res.PortPolicy,
-		ContainerName:  res.ContainerName,
-		ContainerImage: res.ContainerImage,
-		ContainerPort:  res.ContainerPort,
+	body := &ConfigurationResponseBody{}
+	if res.ObjectMeta != nil {
+		body.ObjectMeta = marshalObjectMetaToObjectMetaResponseBody(res.ObjectMeta)
+	}
+	if res.GameServerSpec != nil {
+		body.GameServerSpec = marshalGameServerSpecToGameServerSpecResponseBody(res.GameServerSpec)
 	}
 	return body
+}
+
+// NewCreateFleet builds a fleet service create endpoint payload.
+func NewCreateFleet(body *CreateRequestBody) *fleet.Fleet {
+	v := &fleet.Fleet{}
+	if body.ObjectMeta != nil {
+		v.ObjectMeta = unmarshalObjectMetaRequestBodyToObjectMeta(body.ObjectMeta)
+	}
+	v.FleetSpec = unmarshalFleetSpecRequestBodyToFleetSpec(body.FleetSpec)
+	return v
 }
 
 // NewConfigureGameserverTemplate builds a fleet service configure endpoint
 // payload.
 func NewConfigureGameserverTemplate(body *ConfigureRequestBody) *fleet.GameserverTemplate {
-	v := &fleet.GameserverTemplate{
-		Namespace:      *body.Namespace,
-		NamePrefix:     *body.NamePrefix,
-		PortPolicy:     *body.PortPolicy,
-		ContainerName:  *body.ContainerName,
-		ContainerImage: *body.ContainerImage,
-		ContainerPort:  *body.ContainerPort,
+	v := &fleet.GameserverTemplate{}
+	if body.ObjectMeta != nil {
+		v.ObjectMeta = unmarshalObjectMetaRequestBodyToObjectMeta(body.ObjectMeta)
 	}
+	v.GameServerSpec = unmarshalGameServerSpecRequestBodyToGameServerSpec(body.GameServerSpec)
 	return v
+}
+
+// Validate runs the validations defined on CreateRequestBody
+func (body *CreateRequestBody) Validate() (err error) {
+	if body.FleetSpec == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
+	}
+	if body.ObjectMeta != nil {
+		if err2 := body.ObjectMeta.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.FleetSpec != nil {
+		if err2 := body.FleetSpec.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
 }
 
 // Validate runs the validations defined on ConfigureRequestBody
 func (body *ConfigureRequestBody) Validate() (err error) {
+	if body.GameServerSpec == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("GameServerSpec", "body"))
+	}
+	if body.ObjectMeta != nil {
+		if err2 := body.ObjectMeta.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.GameServerSpec != nil {
+		if err2 := body.GameServerSpec.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// Validate runs the validations defined on ObjectMetaResponseBody
+func (body *ObjectMetaResponseBody) Validate() (err error) {
+	if utf8.RuneCountInString(body.GenerateName) > 100 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("body.GenerateName", body.GenerateName, utf8.RuneCountInString(body.GenerateName), 100, false))
+	}
+	if utf8.RuneCountInString(body.Namespace) > 100 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("body.Namespace", body.Namespace, utf8.RuneCountInString(body.Namespace), 100, false))
+	}
+	return
+}
+
+// Validate runs the validations defined on ObjectMetaRequestBody
+func (body *ObjectMetaRequestBody) Validate() (err error) {
+	if body.GenerateName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("GenerateName", "body"))
+	}
 	if body.Namespace == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("Namespace", "body"))
 	}
-	if body.NamePrefix == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("NamePrefix", "body"))
-	}
-	if body.PortPolicy == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("PortPolicy", "body"))
-	}
-	if body.ContainerName == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerName", "body"))
-	}
-	if body.ContainerImage == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerImage", "body"))
-	}
-	if body.ContainerPort == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerPort", "body"))
+	if body.GenerateName != nil {
+		if utf8.RuneCountInString(*body.GenerateName) > 100 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.GenerateName", *body.GenerateName, utf8.RuneCountInString(*body.GenerateName), 100, false))
+		}
 	}
 	if body.Namespace != nil {
 		if utf8.RuneCountInString(*body.Namespace) > 100 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.Namespace", *body.Namespace, utf8.RuneCountInString(*body.Namespace), 100, false))
 		}
 	}
-	if body.NamePrefix != nil {
-		if utf8.RuneCountInString(*body.NamePrefix) > 100 {
-			err = goa.MergeErrors(err, goa.InvalidLengthError("body.NamePrefix", *body.NamePrefix, utf8.RuneCountInString(*body.NamePrefix), 100, false))
+	return
+}
+
+// Validate runs the validations defined on FleetSpecRequestBody
+func (body *FleetSpecRequestBody) Validate() (err error) {
+	if body.Replicas == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("Replicas", "body"))
+	}
+	if body.Template == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("Template", "body"))
+	}
+	if body.Template != nil {
+		if err2 := body.Template.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
 		}
+	}
+	return
+}
+
+// Validate runs the validations defined on GameserverTemplateRequestBody
+func (body *GameserverTemplateRequestBody) Validate() (err error) {
+	if body.GameServerSpec == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("GameServerSpec", "body"))
+	}
+	if body.ObjectMeta != nil {
+		if err2 := body.ObjectMeta.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.GameServerSpec != nil {
+		if err2 := body.GameServerSpec.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// Validate runs the validations defined on GameServerSpecRequestBody
+func (body *GameServerSpecRequestBody) Validate() (err error) {
+	if body.PortPolicy == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("PortPolicy", "body"))
+	}
+	if body.ContainerImage == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerImage", "body"))
+	}
+	if body.ContainerName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerName", "body"))
+	}
+	if body.ContainerPort == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerPort", "body"))
 	}
 	return
 }

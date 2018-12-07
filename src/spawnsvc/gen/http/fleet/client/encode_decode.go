@@ -68,6 +68,72 @@ func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 	}
 }
 
+// BuildCreateRequest instantiates a HTTP request object with method and path
+// set to call the "fleet" service "create" endpoint
+func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateFleetPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("fleet", "create", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeCreateRequest returns an encoder for requests sent to the fleet create
+// server.
+func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*fleet.Fleet)
+		if !ok {
+			return goahttp.ErrInvalidType("fleet", "create", "*fleet.Fleet", v)
+		}
+		body := NewCreateRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("fleet", "create", err)
+		}
+		return nil
+	}
+}
+
+// DecodeCreateResponse returns a decoder for responses returned by the fleet
+// create endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusCreated:
+			var (
+				body string
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("fleet", "create", err)
+			}
+			return body, nil
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("fleet", "create", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildClearRequest instantiates a HTTP request object with method and path
 // set to call the "fleet" service "clear" endpoint
 func (c *Client) BuildClearRequest(ctx context.Context, v interface{}) (*http.Request, error) {
@@ -237,4 +303,141 @@ func DecodeConfigureResponse(decoder func(*http.Response) goahttp.Decoder, resto
 			return nil, goahttp.ErrInvalidResponse("fleet", "configure", resp.StatusCode, string(body))
 		}
 	}
+}
+
+// marshalObjectMetaToObjectMetaRequestBody builds a value of type
+// *ObjectMetaRequestBody from a value of type *fleet.ObjectMeta.
+func marshalObjectMetaToObjectMetaRequestBody(v *fleet.ObjectMeta) *ObjectMetaRequestBody {
+	if v == nil {
+		return nil
+	}
+	res := &ObjectMetaRequestBody{
+		GenerateName: v.GenerateName,
+		Namespace:    v.Namespace,
+	}
+
+	return res
+}
+
+// marshalFleetSpecToFleetSpecRequestBody builds a value of type
+// *FleetSpecRequestBody from a value of type *fleet.FleetSpec.
+func marshalFleetSpecToFleetSpecRequestBody(v *fleet.FleetSpec) *FleetSpecRequestBody {
+	res := &FleetSpecRequestBody{
+		Replicas: v.Replicas,
+	}
+	if v.Template != nil {
+		res.Template = marshalGameserverTemplateToGameserverTemplateRequestBody(v.Template)
+	}
+
+	return res
+}
+
+// marshalGameserverTemplateToGameserverTemplateRequestBody builds a value of
+// type *GameserverTemplateRequestBody from a value of type
+// *fleet.GameserverTemplate.
+func marshalGameserverTemplateToGameserverTemplateRequestBody(v *fleet.GameserverTemplate) *GameserverTemplateRequestBody {
+	res := &GameserverTemplateRequestBody{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = marshalObjectMetaToObjectMetaRequestBody(v.ObjectMeta)
+	}
+	if v.GameServerSpec != nil {
+		res.GameServerSpec = marshalGameServerSpecToGameServerSpecRequestBody(v.GameServerSpec)
+	}
+
+	return res
+}
+
+// marshalGameServerSpecToGameServerSpecRequestBody builds a value of type
+// *GameServerSpecRequestBody from a value of type *fleet.GameServerSpec.
+func marshalGameServerSpecToGameServerSpecRequestBody(v *fleet.GameServerSpec) *GameServerSpecRequestBody {
+	res := &GameServerSpecRequestBody{
+		PortPolicy:     v.PortPolicy,
+		ContainerName:  v.ContainerName,
+		ContainerImage: v.ContainerImage,
+		ContainerPort:  v.ContainerPort,
+	}
+
+	return res
+}
+
+// marshalObjectMetaRequestBodyToObjectMeta builds a value of type
+// *fleet.ObjectMeta from a value of type *ObjectMetaRequestBody.
+func marshalObjectMetaRequestBodyToObjectMeta(v *ObjectMetaRequestBody) *fleet.ObjectMeta {
+	if v == nil {
+		return nil
+	}
+	res := &fleet.ObjectMeta{
+		GenerateName: v.GenerateName,
+		Namespace:    v.Namespace,
+	}
+
+	return res
+}
+
+// marshalFleetSpecRequestBodyToFleetSpec builds a value of type
+// *fleet.FleetSpec from a value of type *FleetSpecRequestBody.
+func marshalFleetSpecRequestBodyToFleetSpec(v *FleetSpecRequestBody) *fleet.FleetSpec {
+	res := &fleet.FleetSpec{
+		Replicas: v.Replicas,
+	}
+	if v.Template != nil {
+		res.Template = marshalGameserverTemplateRequestBodyToGameserverTemplate(v.Template)
+	}
+
+	return res
+}
+
+// marshalGameserverTemplateRequestBodyToGameserverTemplate builds a value of
+// type *fleet.GameserverTemplate from a value of type
+// *GameserverTemplateRequestBody.
+func marshalGameserverTemplateRequestBodyToGameserverTemplate(v *GameserverTemplateRequestBody) *fleet.GameserverTemplate {
+	res := &fleet.GameserverTemplate{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = marshalObjectMetaRequestBodyToObjectMeta(v.ObjectMeta)
+	}
+	if v.GameServerSpec != nil {
+		res.GameServerSpec = marshalGameServerSpecRequestBodyToGameServerSpec(v.GameServerSpec)
+	}
+
+	return res
+}
+
+// marshalGameServerSpecRequestBodyToGameServerSpec builds a value of type
+// *fleet.GameServerSpec from a value of type *GameServerSpecRequestBody.
+func marshalGameServerSpecRequestBodyToGameServerSpec(v *GameServerSpecRequestBody) *fleet.GameServerSpec {
+	res := &fleet.GameServerSpec{
+		PortPolicy:     v.PortPolicy,
+		ContainerName:  v.ContainerName,
+		ContainerImage: v.ContainerImage,
+		ContainerPort:  v.ContainerPort,
+	}
+
+	return res
+}
+
+// unmarshalObjectMetaResponseBodyToObjectMeta builds a value of type
+// *fleet.ObjectMeta from a value of type *ObjectMetaResponseBody.
+func unmarshalObjectMetaResponseBodyToObjectMeta(v *ObjectMetaResponseBody) *fleet.ObjectMeta {
+	if v == nil {
+		return nil
+	}
+	res := &fleet.ObjectMeta{
+		GenerateName: *v.GenerateName,
+		Namespace:    *v.Namespace,
+	}
+
+	return res
+}
+
+// unmarshalGameServerSpecResponseBodyToGameServerSpec builds a value of type
+// *fleet.GameServerSpec from a value of type *GameServerSpecResponseBody.
+func unmarshalGameServerSpecResponseBodyToGameServerSpec(v *GameServerSpecResponseBody) *fleet.GameServerSpec {
+	res := &fleet.GameServerSpec{
+		PortPolicy:     *v.PortPolicy,
+		ContainerName:  *v.ContainerName,
+		ContainerImage: *v.ContainerImage,
+		ContainerPort:  *v.ContainerPort,
+	}
+
+	return res
 }

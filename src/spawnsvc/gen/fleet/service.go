@@ -15,6 +15,8 @@ import (
 type Service interface {
 	// Add a new gameserver.
 	Add(context.Context) (res string, err error)
+	// Create a new fleet.
+	Create(context.Context, *Fleet) (res string, err error)
 	// Removes all gameserver pods.
 	Clear(context.Context) (res string, err error)
 	// Get gameserver deployment configuration.
@@ -31,15 +33,43 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [4]string{"add", "clear", "configuration", "configure"}
+var MethodNames = [5]string{"add", "create", "clear", "configuration", "configure"}
+
+// Fleet is the payload type of the fleet service create method.
+type Fleet struct {
+	// Fleets ObjectMeta
+	ObjectMeta *ObjectMeta
+	// FleetSpec
+	FleetSpec *FleetSpec
+}
 
 // GameserverTemplate is the result type of the fleet service configuration
 // method.
 type GameserverTemplate struct {
-	// Namespace where the gameserver will run in
+	// GameserverTemplates ObjectMeta
+	ObjectMeta *ObjectMeta
+	// GameServerSpec
+	GameServerSpec *GameServerSpec
+}
+
+// Spec for ObjectMeta
+type ObjectMeta struct {
+	// Prefix for the generated fleetname
+	GenerateName string
+	// Namespace where the fleet will run in
 	Namespace string
-	// Prefix for the generated pod-name
-	NamePrefix string
+}
+
+// Spec for Fleet
+type FleetSpec struct {
+	// Replicas
+	Replicas int32
+	// Template of the gameserver
+	Template *GameserverTemplate
+}
+
+// GameserverTemplate describes gameserver
+type GameServerSpec struct {
 	// Portpolicy either dynamic or static
 	PortPolicy string
 	// Name of the gameserver-container
@@ -47,5 +77,5 @@ type GameserverTemplate struct {
 	// Image of the gameserver
 	ContainerImage string
 	// Exposed port of the gameserver
-	ContainerPort string
+	ContainerPort int32
 }

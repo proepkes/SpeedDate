@@ -29,6 +29,16 @@ var _ = Service("fleet", func() {
 		})
 	})
 
+	Method("create", func() {
+		Description("Create a new fleet.")
+		Result(String)
+		Payload(Fleet)
+		HTTP(func() {
+			POST("/create")
+			Response(StatusCreated)
+		})
+	})
+
 	Method("clear", func() {
 		Description("Removes all gameserver pods.")
 		Result(String)

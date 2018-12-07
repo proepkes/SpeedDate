@@ -61,7 +61,8 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 	}
 
 	// Create a GameServer
-	gs := &v1alpha1.GameServer{ObjectMeta: metav1.ObjectMeta{GenerateName: cm.Data["GameserverNamePrefix"], Namespace: cm.Data["GameserverNamespace"]},
+	gs := &v1alpha1.GameServer{
+		ObjectMeta: metav1.ObjectMeta{GenerateName: cm.Data["GameserverNamePrefix"], Namespace: cm.Data["GameserverNamespace"]},
 		Spec: v1alpha1.GameServerSpec{
 			Ports: []v1alpha1.GameServerPort{{ContainerPort: int32(cp), PortPolicy: v1alpha1.PortPolicy(cm.Data["PortPolicy"])}},
 			Template: corev1.PodTemplateSpec{
@@ -82,6 +83,50 @@ func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
 	return
 }
 
+// Create a new fleet.
+func (s *fleetSvc) Create(ctx context.Context, p *fleet.Fleet) (res string, err error) {
+	_, err = s.client.StableV1alpha1().Fleets(p.ObjectMeta.Namespace).Create(asFleet(p))
+	if err != nil {
+		s.logger.Println(err.Error())
+		return "", err
+	}
+
+	return
+}
+
+func asFleet(p *fleet.Fleet) *v1alpha1.Fleet {
+	return &v1alpha1.Fleet{
+		ObjectMeta: metav1.ObjectMeta{GenerateName: p.ObjectMeta.GenerateName, Namespace: p.ObjectMeta.Namespace},
+		Spec: v1alpha1.FleetSpec{
+			Replicas: p.FleetSpec.Replicas,
+			Template: v1alpha1.GameServerTemplateSpec{
+				Spec: asGameServerSpec(p.FleetSpec.Template.GameServerSpec),
+			},
+		},
+	}
+}
+
+func asGameServerSpec(p *fleet.GameServerSpec) v1alpha1.GameServerSpec {
+	return v1alpha1.GameServerSpec{
+		//TODO: full convert
+		Container: p.ContainerName,
+		Ports: []v1alpha1.GameServerPort{{
+			ContainerPort: p.ContainerPort,
+			Name:          "gameport",
+			PortPolicy:    v1alpha1.PortPolicy(p.PortPolicy),
+			Protocol:      corev1.ProtocolUDP,
+		}},
+		Template: corev1.PodTemplateSpec{
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{{
+					Name:            p.ContainerName,
+					Image:           p.ContainerImage,
+					ImagePullPolicy: corev1.PullIfNotPresent}},
+			},
+		},
+	}
+}
+
 // Removes all gameserver pods.
 func (s *fleetSvc) Clear(ctx context.Context) (res string, err error) {
 	s.logger.Print("fleet.clear")
@@ -97,21 +142,24 @@ func (s *fleetSvc) Clear(ctx context.Context) (res string, err error) {
 
 // Get gameserver deployment configuration.
 func (s *fleetSvc) Configuration(ctx context.Context) (res *fleet.GameserverTemplate, err error) {
+	res = &fleet.GameserverTemplate{}
+	// cm, err := s.getGameserverConfig()
+	// if err != nil {
+	// 	s.logger.Println(err.Error())
+	// 	return nil, err
+	// }
 
-	cm, err := s.getGameserverConfig()
-	if err != nil {
-		s.logger.Println(err.Error())
-		return nil, err
-	}
+	// res = &fleet.GameServerSpec{
+	// 	ObjectMeta: &fleet.ObjectMeta{
+	// 		Namespace:    cm.Data["GameserverNamespace"],
+	// 		GenerateName: cm.Data["GameserverNamePrefix"],
+	// 	},
 
-	res = &fleet.GameserverTemplate{
-		ContainerName:  cm.Data["ContainerName"],
-		ContainerPort:  cm.Data["ContainerPort"],
-		ContainerImage: cm.Data["ContainerImage"],
-		NamePrefix:     cm.Data["GameserverNamePrefix"],
-		Namespace:      cm.Data["GameserverNamespace"],
-		PortPolicy:     cm.Data["PortPolicy"],
-	}
+	// 	ContainerName:  cm.Data["ContainerName"],
+	// 	ContainerPort:  cm.Data["ContainerPort"],
+	// 	ContainerImage: cm.Data["ContainerImage"],
+	// 	PortPolicy:     cm.Data["PortPolicy"],
+	// }
 	s.logger.Print("fleet.configuration")
 
 	return
@@ -128,7 +176,7 @@ func (s *fleetSvc) Configure(ctx context.Context, p *fleet.GameserverTemplate) (
 	}
 
 	cmCopy := cm.DeepCopy()
-	cmCopy.Data["ContainerImage"] = p.ContainerImage
+	cmCopy.Data["ContainerImage"] = p.GameServerSpec.ContainerImage
 
 	_, err = s.k8sClient.CoreV1().ConfigMaps(s.speeddateNamespace).Update(cmCopy)
 	if err != nil {

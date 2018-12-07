@@ -24,16 +24,21 @@ var JWTAuth = JWTSecurity("jwt", func() {
 	Scope("api:write", "Read and write access")
 })
 
-var GameserverTemplate = Type("GameserverTemplate", func() {
-	Description("GameserverTemplate describes gameserver")
-	Attribute("Namespace", String, "Namespace where the gameserver will run in", func() {
-		MaxLength(100)
-		Example("speeddate-system")
-	})
-	Attribute("NamePrefix", String, "Prefix for the generated pod-name", func() {
+var ObjectMeta = Type("ObjectMeta", func() {
+	Description("Spec for ObjectMeta")
+	Attribute("GenerateName", String, "Prefix for the generated fleetname", func() {
 		MaxLength(100)
 		Example("my-server")
 	})
+	Attribute("Namespace", String, "Namespace where the fleet will run in", func() {
+		MaxLength(100)
+		Example("speeddate-system")
+	})
+	Required("GenerateName", "Namespace")
+})
+
+var GameServerSpec = Type("GameServerSpec", func() {
+	Description("GameserverTemplate describes gameserver")
 	Attribute("PortPolicy", String, "Portpolicy either dynamic or static", func() {
 		Example("dynamic")
 		Example("static")
@@ -44,8 +49,32 @@ var GameserverTemplate = Type("GameserverTemplate", func() {
 	Attribute("ContainerImage", String, "Image of the gameserver", func() {
 		Example("gcr.io/agones-images/udp-server:0.4")
 	})
-	Attribute("ContainerPort", String, "Exposed port of the gameserver", func() {
-		Example("7777")
+	Attribute("ContainerPort", Int32, "Exposed port of the gameserver", func() {
+		Example(7777)
 	})
-	Required("Namespace", "NamePrefix", "PortPolicy", "ContainerName", "ContainerImage", "ContainerPort")
+	Required("PortPolicy", "ContainerImage", "ContainerName", "ContainerPort")
+})
+
+var GameserverTemplate = Type("GameserverTemplate", func() {
+	Description("GameserverTemplate describes gameserver")
+	Attribute("ObjectMeta", ObjectMeta, "GameserverTemplates ObjectMeta")
+	Attribute("GameServerSpec", GameServerSpec, "GameServerSpec")
+
+	Required("GameServerSpec")
+})
+
+var FleetSpec = Type("FleetSpec", func() {
+	Description("Spec for Fleet")
+	Attribute("Replicas", Int32, "Replicas")
+	Attribute("Template", GameserverTemplate, "Template of the gameserver")
+
+	Required("Replicas", "Template")
+})
+
+var Fleet = Type("Fleet", func() {
+	Description("Fleet")
+	Attribute("ObjectMeta", ObjectMeta, "Fleets ObjectMeta")
+	Attribute("FleetSpec", FleetSpec, "FleetSpec")
+
+	Required("FleetSpec")
 })

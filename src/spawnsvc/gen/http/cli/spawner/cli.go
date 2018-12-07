@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `fleet (add|clear|configuration|configure)
+	return `fleet (add|create|clear|configuration|configure)
 `
 }
 
@@ -47,6 +47,9 @@ func ParseEndpoint(
 
 		fleetAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
 
+		fleetCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		fleetCreateBodyFlag = fleetCreateFlags.String("body", "REQUIRED", "")
+
 		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 
 		fleetConfigurationFlags = flag.NewFlagSet("configuration", flag.ExitOnError)
@@ -56,6 +59,7 @@ func ParseEndpoint(
 	)
 	fleetFlags.Usage = fleetUsage
 	fleetAddFlags.Usage = fleetAddUsage
+	fleetCreateFlags.Usage = fleetCreateUsage
 	fleetClearFlags.Usage = fleetClearUsage
 	fleetConfigurationFlags.Usage = fleetConfigurationUsage
 	fleetConfigureFlags.Usage = fleetConfigureUsage
@@ -97,6 +101,9 @@ func ParseEndpoint(
 			case "add":
 				epf = fleetAddFlags
 
+			case "create":
+				epf = fleetCreateFlags
+
 			case "clear":
 				epf = fleetClearFlags
 
@@ -134,6 +141,9 @@ func ParseEndpoint(
 			case "add":
 				endpoint = c.Add()
 				data = nil
+			case "create":
+				endpoint = c.Create()
+				data, err = fleetc.BuildCreatePayload(*fleetCreateBodyFlag)
 			case "clear":
 				endpoint = c.Clear()
 				data = nil
@@ -161,6 +171,7 @@ Usage:
 
 COMMAND:
     add: Add a new gameserver.
+    create: Create a new fleet.
     clear: Removes all gameserver pods.
     configuration: Get gameserver deployment configuration.
     configure: Configure gameserver deployment.
@@ -176,6 +187,37 @@ Add a new gameserver.
 
 Example:
     `+os.Args[0]+` fleet add
+`, os.Args[0])
+}
+
+func fleetCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet create -body JSON
+
+Create a new fleet.
+    -body JSON: 
+
+Example:
+    `+os.Args[0]+` fleet create --body '{
+      "FleetSpec": {
+         "Replicas": 1746324384,
+         "Template": {
+            "GameServerSpec": {
+               "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
+               "ContainerName": "my-server",
+               "ContainerPort": 7777,
+               "PortPolicy": "dynamic"
+            },
+            "ObjectMeta": {
+               "GenerateName": "my-server",
+               "Namespace": "speeddate-system"
+            }
+         }
+      },
+      "ObjectMeta": {
+         "GenerateName": "my-server",
+         "Namespace": "speeddate-system"
+      }
+   }'
 `, os.Args[0])
 }
 
@@ -207,12 +249,16 @@ Configure gameserver deployment.
 
 Example:
     `+os.Args[0]+` fleet configure --body '{
-      "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
-      "ContainerName": "my-server",
-      "ContainerPort": "7777",
-      "NamePrefix": "my-server",
-      "Namespace": "speeddate-system",
-      "PortPolicy": "dynamic"
+      "GameServerSpec": {
+         "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
+         "ContainerName": "my-server",
+         "ContainerPort": 7777,
+         "PortPolicy": "dynamic"
+      },
+      "ObjectMeta": {
+         "GenerateName": "my-server",
+         "Namespace": "speeddate-system"
+      }
    }'
 `, os.Args[0])
 }

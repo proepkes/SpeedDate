@@ -10,11 +10,50 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"unicode/utf8"
 
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	goa "goa.design/goa"
 )
+
+// BuildCreatePayload builds the payload for the fleet create endpoint from CLI
+// flags.
+func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
+	var err error
+	var body CreateRequestBody
+	{
+		err = json.Unmarshal([]byte(fleetCreateBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 1746324384,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
+		}
+		if body.FleetSpec == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
+		}
+		if body.ObjectMeta != nil {
+			if err2 := body.ObjectMeta.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+		if body.FleetSpec != nil {
+			if err2 := body.FleetSpec.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	v := &fleet.Fleet{}
+	if body.ObjectMeta != nil {
+		v.ObjectMeta = marshalObjectMetaRequestBodyToObjectMeta(body.ObjectMeta)
+	}
+	if body.FleetSpec != nil {
+		v.FleetSpec = marshalFleetSpecRequestBodyToFleetSpec(body.FleetSpec)
+	}
+	return v, nil
+}
 
 // BuildConfigurePayload builds the payload for the fleet configure endpoint
 // from CLI flags.
@@ -24,13 +63,15 @@ func BuildConfigurePayload(fleetConfigureBody string) (*fleet.GameserverTemplate
 	{
 		err = json.Unmarshal([]byte(fleetConfigureBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n      \"ContainerName\": \"my-server\",\n      \"ContainerPort\": \"7777\",\n      \"NamePrefix\": \"my-server\",\n      \"Namespace\": \"speeddate-system\",\n      \"PortPolicy\": \"dynamic\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"GameServerSpec\": {\n         \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n         \"ContainerName\": \"my-server\",\n         \"ContainerPort\": 7777,\n         \"PortPolicy\": \"dynamic\"\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
 		}
-		if utf8.RuneCountInString(body.Namespace) > 100 {
-			err = goa.MergeErrors(err, goa.InvalidLengthError("body.Namespace", body.Namespace, utf8.RuneCountInString(body.Namespace), 100, false))
+		if body.GameServerSpec == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("GameServerSpec", "body"))
 		}
-		if utf8.RuneCountInString(body.NamePrefix) > 100 {
-			err = goa.MergeErrors(err, goa.InvalidLengthError("body.NamePrefix", body.NamePrefix, utf8.RuneCountInString(body.NamePrefix), 100, false))
+		if body.ObjectMeta != nil {
+			if err2 := body.ObjectMeta.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
 		}
 		if err != nil {
 			return nil, err
@@ -39,13 +80,12 @@ func BuildConfigurePayload(fleetConfigureBody string) (*fleet.GameserverTemplate
 	if err != nil {
 		return nil, err
 	}
-	v := &fleet.GameserverTemplate{
-		Namespace:      body.Namespace,
-		NamePrefix:     body.NamePrefix,
-		PortPolicy:     body.PortPolicy,
-		ContainerName:  body.ContainerName,
-		ContainerImage: body.ContainerImage,
-		ContainerPort:  body.ContainerPort,
+	v := &fleet.GameserverTemplate{}
+	if body.ObjectMeta != nil {
+		v.ObjectMeta = marshalObjectMetaRequestBodyToObjectMeta(body.ObjectMeta)
+	}
+	if body.GameServerSpec != nil {
+		v.GameServerSpec = marshalGameServerSpecRequestBodyToGameServerSpec(body.GameServerSpec)
 	}
 	return v, nil
 }
