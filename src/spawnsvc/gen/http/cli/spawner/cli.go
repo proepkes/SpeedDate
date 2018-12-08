@@ -52,6 +52,7 @@ func ParseEndpoint(
 
 		fleetListFlags         = flag.NewFlagSet("list", flag.ExitOnError)
 		fleetListNamespaceFlag = fleetListFlags.String("namespace", "", "")
+		fleetListViewFlag      = fleetListFlags.String("view", "", "")
 
 		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
 
@@ -153,7 +154,7 @@ func ParseEndpoint(
 				data, err = fleetc.BuildCreatePayload(*fleetCreateBodyFlag)
 			case "list":
 				endpoint = c.List()
-				data, err = fleetc.BuildListPayload(*fleetListNamespaceFlag)
+				data, err = fleetc.BuildListPayload(*fleetListNamespaceFlag, *fleetListViewFlag)
 			case "clear":
 				endpoint = c.Clear()
 				data = nil
@@ -210,7 +211,7 @@ Create a new fleet.
 Example:
     `+os.Args[0]+` fleet create --body '{
       "FleetSpec": {
-         "Replicas": 1259733314,
+         "Replicas": 1109312752,
          "Template": {
             "GameServerSpec": {
                "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
@@ -233,13 +234,14 @@ Example:
 }
 
 func fleetListUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] fleet list -namespace STRING
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet list -namespace STRING -view STRING
 
 List all fleets.
     -namespace STRING: 
+    -view STRING: 
 
 Example:
-    `+os.Args[0]+` fleet list --namespace "Exercitationem quae."
+    `+os.Args[0]+` fleet list --namespace "Totam error voluptatum rerum." --view "default"
 `, os.Args[0])
 }
 

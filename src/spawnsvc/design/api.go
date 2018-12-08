@@ -1,7 +1,8 @@
 package design
 
-import . "goa.design/goa/http/design"
-import . "goa.design/plugins/cors/dsl"
+import (
+	. "goa.design/goa/dsl"
+)
 
 var _ = API("spawnsvc", func() {
 	Title("Speeddate Spawnerservice")
@@ -90,15 +91,24 @@ var FleetStatus = Type("FleetStatus", func() {
 	Required("Replicas", "ReadyReplicas", "AllocatedReplicas")
 })
 
-var StoredFleet = Type("StoredFleet", func() {
-	Description("Fleet")
-	Attribute("ObjectMeta", ObjectMeta, "The Fleets ObjectMeta")
-	Attribute("FleetSpec", FleetSpec, "The FleetSpec")
-	Attribute("FleetStatus", FleetStatus, "The FleetStatus")
+var StoredFleet = ResultType("application/sd.stored-fleet", func() {
+	Description("Stored Fleet")
 
-	Required("ObjectMeta", "FleetSpec")
-})
+	TypeName("StoredFleet")
 
-var NamespacePayload = Type("NamespacePayload", func() {
-	Attribute("namespace", String)
+	Attributes(func() {
+		Attribute("Name", String, "The Fleets Name")
+		Attribute("ObjectMeta", ObjectMeta, "The Fleets ObjectMeta")
+		Attribute("FleetSpec", FleetSpec, "The FleetSpec")
+		Attribute("FleetStatus", FleetStatus, "The FleetStatus")
+	})
+
+	View("default", func() {
+		Attribute("Name")
+		Attribute("ObjectMeta")
+		Attribute("FleetSpec")
+		Attribute("FleetStatus")
+	})
+
+	Required("Name", "ObjectMeta", "FleetSpec")
 })

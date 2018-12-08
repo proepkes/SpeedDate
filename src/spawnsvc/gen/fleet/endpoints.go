@@ -66,8 +66,13 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 // service "fleet".
 func NewListEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*NamespacePayload)
-		return s.List(ctx, p)
+		p := req.(*ListPayload)
+		res, err := s.List(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedStoredFleetCollection(res, "default")
+		return vres, nil
 	}
 }
 

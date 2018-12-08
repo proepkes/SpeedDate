@@ -1,9 +1,8 @@
 package design
 
 import (
-	. "goa.design/goa/http/design"
-	_ "goa.design/plugins/cors"
-	. "goa.design/plugins/cors/dsl"
+	. "goa.design/goa/dsl"
+	cors "goa.design/plugins/cors/dsl" // Use CORS plugin
 )
 
 var _ = Service("fleet", func() {
@@ -14,10 +13,10 @@ var _ = Service("fleet", func() {
 	})
 
 	// Sets CORS response headers for requests with any Origin header
-	Origin("*", func() {
-		Headers("Origin, X-Requested-With, Content-Type, Accept")
-		Methods("OPTIONS", "POST", "GET")
-		MaxAge(600)
+	cors.Origin("*", func() {
+		cors.Headers("Origin, X-Requested-With, Content-Type, Accept")
+		cors.Methods("OPTIONS", "POST", "GET")
+		cors.MaxAge(600)
 	})
 
 	Method("add", func() {
@@ -41,11 +40,21 @@ var _ = Service("fleet", func() {
 
 	Method("list", func() {
 		Description("List all fleets.")
-		Result(ArrayOf(StoredFleet))
-		Payload(NamespacePayload)
+		Payload(func() {
+			Attribute("namespace", String, "The namespace", func() {
+				Default("default")
+			})
+			Attribute("view", String, "View to render", func() {
+				Enum("default")
+			})
+		})
+		Result(CollectionOf(StoredFleet), func() {
+			View("default")
+		})
 		HTTP(func() {
 			GET("/list")
 			Param("namespace")
+			Param("view")
 			Response(StatusOK)
 		})
 	})

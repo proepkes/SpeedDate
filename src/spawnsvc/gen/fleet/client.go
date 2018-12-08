@@ -56,13 +56,13 @@ func (c *Client) Create(ctx context.Context, p *Fleet) (res string, err error) {
 }
 
 // List calls the "list" endpoint of the "fleet" service.
-func (c *Client) List(ctx context.Context, p *NamespacePayload) (res []*StoredFleet, err error) {
+func (c *Client) List(ctx context.Context, p *ListPayload) (res StoredFleetCollection, err error) {
 	var ires interface{}
 	ires, err = c.ListEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.([]*StoredFleet), nil
+	return ires.(StoredFleetCollection), nil
 }
 
 // Clear calls the "clear" endpoint of the "fleet" service.

@@ -1,7 +1,8 @@
 package design
 
-import . "goa.design/goa/http/design"
-import . "goa.design/goa/http/dsl"
+import (
+	. "goa.design/goa/dsl"
+)
 
 var _ = Service("authstorage", func() {
 	Description("The service makes it possible to persist data used by the authservice.")
@@ -76,8 +77,8 @@ var AuthStoredUser = ResultType("application/sd.data.stored-authuser", func() {
 	Attributes(func() {
 		Attribute("id", String, "UUID is the unique id of the user.", func() {
 			Example("f923e008-e511-11e8-9f32-f2801f1b9fd1")
-			Metadata("struct:tag:gorm", "TYPE:uuid; COLUMN:id; PRIMARY_KEY; DEFAULT: gen_random_uuid()")
-			Metadata("struct:tag:json", "id")
+			Meta("struct:tag:gorm", "TYPE:uuid; COLUMN:id; PRIMARY_KEY; DEFAULT: gen_random_uuid()")
+			Meta("struct:tag:json", "id")
 		})
 		Attribute("name")
 		Attribute("online", Boolean, "Indicates whether the user is currently online.")

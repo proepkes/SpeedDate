@@ -9,6 +9,8 @@ package fleet
 
 import (
 	"context"
+
+	fleetviews "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet/views"
 )
 
 // The service makes it possible to manage gameservers
@@ -18,7 +20,7 @@ type Service interface {
 	// Create a new fleet.
 	Create(context.Context, *Fleet) (res string, err error)
 	// List all fleets.
-	List(context.Context, *NamespacePayload) (res []*StoredFleet, err error)
+	List(context.Context, *ListPayload) (res StoredFleetCollection, err error)
 	// Removes all gameserver pods.
 	Clear(context.Context) (res string, err error)
 	// Get gameserver deployment configuration.
@@ -45,10 +47,16 @@ type Fleet struct {
 	FleetSpec *FleetSpec
 }
 
-// NamespacePayload is the payload type of the fleet service list method.
-type NamespacePayload struct {
-	Namespace *string
+// ListPayload is the payload type of the fleet service list method.
+type ListPayload struct {
+	// The namespace
+	Namespace string
+	// View to render
+	View *string
 }
+
+// StoredFleetCollection is the result type of the fleet service list method.
+type StoredFleetCollection []*StoredFleet
 
 // GameserverTemplate is the result type of the fleet service configuration
 // method.
@@ -75,8 +83,10 @@ type FleetSpec struct {
 	Template *GameserverTemplate
 }
 
-// Fleet
+// Stored Fleet
 type StoredFleet struct {
+	// The Fleets Name
+	Name string
 	// The Fleets ObjectMeta
 	ObjectMeta *ObjectMeta
 	// The FleetSpec
@@ -104,4 +114,219 @@ type GameServerSpec struct {
 	ContainerImage string
 	// Exposed port of the gameserver
 	ContainerPort int32
+}
+
+// NewStoredFleetCollection initializes result type StoredFleetCollection from
+// viewed result type StoredFleetCollection.
+func NewStoredFleetCollection(vres fleetviews.StoredFleetCollection) StoredFleetCollection {
+	var res StoredFleetCollection
+	switch vres.View {
+	case "default", "":
+		res = newStoredFleetCollection(vres.Projected)
+	}
+	return res
+}
+
+// NewViewedStoredFleetCollection initializes viewed result type
+// StoredFleetCollection from result type StoredFleetCollection using the given
+// view.
+func NewViewedStoredFleetCollection(res StoredFleetCollection, view string) fleetviews.StoredFleetCollection {
+	var vres fleetviews.StoredFleetCollection
+	switch view {
+	case "default", "":
+		p := newStoredFleetCollectionView(res)
+		vres = fleetviews.StoredFleetCollection{p, "default"}
+	}
+	return vres
+}
+
+// newStoredFleetCollection converts projected type StoredFleetCollection to
+// service type StoredFleetCollection.
+func newStoredFleetCollection(vres fleetviews.StoredFleetCollectionView) StoredFleetCollection {
+	res := make(StoredFleetCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newStoredFleet(n)
+	}
+	return res
+}
+
+// newStoredFleetCollectionView projects result type StoredFleetCollection into
+// projected type StoredFleetCollectionView using the "default" view.
+func newStoredFleetCollectionView(res StoredFleetCollection) fleetviews.StoredFleetCollectionView {
+	vres := make(fleetviews.StoredFleetCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newStoredFleetView(n)
+	}
+	return vres
+}
+
+// newStoredFleet converts projected type StoredFleet to service type
+// StoredFleet.
+func newStoredFleet(vres *fleetviews.StoredFleetView) *StoredFleet {
+	res := &StoredFleet{}
+	if vres.Name != nil {
+		res.Name = *vres.Name
+	}
+	if vres.ObjectMeta != nil {
+		res.ObjectMeta = unmarshalObjectMetaViewToObjectMeta(vres.ObjectMeta)
+	}
+	if vres.FleetSpec != nil {
+		res.FleetSpec = unmarshalFleetSpecViewToFleetSpec(vres.FleetSpec)
+	}
+	if vres.FleetStatus != nil {
+		res.FleetStatus = unmarshalFleetStatusViewToFleetStatus(vres.FleetStatus)
+	}
+	return res
+}
+
+// newStoredFleetView projects result type StoredFleet into projected type
+// StoredFleetView using the "default" view.
+func newStoredFleetView(res *StoredFleet) *fleetviews.StoredFleetView {
+	vres := &fleetviews.StoredFleetView{
+		Name: &res.Name,
+	}
+	if res.ObjectMeta != nil {
+		vres.ObjectMeta = marshalObjectMetaToObjectMetaView(res.ObjectMeta)
+	}
+	if res.FleetSpec != nil {
+		vres.FleetSpec = marshalFleetSpecToFleetSpecView(res.FleetSpec)
+	}
+	if res.FleetStatus != nil {
+		vres.FleetStatus = marshalFleetStatusToFleetStatusView(res.FleetStatus)
+	}
+	return vres
+}
+
+// unmarshalObjectMetaViewToObjectMeta builds a value of type *ObjectMeta from
+// a value of type *fleetviews.ObjectMetaView.
+func unmarshalObjectMetaViewToObjectMeta(v *fleetviews.ObjectMetaView) *ObjectMeta {
+	if v == nil {
+		return nil
+	}
+	res := &ObjectMeta{
+		GenerateName: *v.GenerateName,
+		Namespace:    *v.Namespace,
+	}
+
+	return res
+}
+
+// unmarshalFleetSpecViewToFleetSpec builds a value of type *FleetSpec from a
+// value of type *fleetviews.FleetSpecView.
+func unmarshalFleetSpecViewToFleetSpec(v *fleetviews.FleetSpecView) *FleetSpec {
+	if v == nil {
+		return nil
+	}
+	res := &FleetSpec{
+		Replicas: *v.Replicas,
+	}
+	res.Template = unmarshalGameserverTemplateViewToGameserverTemplate(v.Template)
+
+	return res
+}
+
+// unmarshalGameserverTemplateViewToGameserverTemplate builds a value of type
+// *GameserverTemplate from a value of type *fleetviews.GameserverTemplateView.
+func unmarshalGameserverTemplateViewToGameserverTemplate(v *fleetviews.GameserverTemplateView) *GameserverTemplate {
+	res := &GameserverTemplate{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = unmarshalObjectMetaViewToObjectMeta(v.ObjectMeta)
+	}
+	res.GameServerSpec = unmarshalGameServerSpecViewToGameServerSpec(v.GameServerSpec)
+
+	return res
+}
+
+// unmarshalGameServerSpecViewToGameServerSpec builds a value of type
+// *GameServerSpec from a value of type *fleetviews.GameServerSpecView.
+func unmarshalGameServerSpecViewToGameServerSpec(v *fleetviews.GameServerSpecView) *GameServerSpec {
+	res := &GameServerSpec{
+		PortPolicy:     *v.PortPolicy,
+		ContainerName:  *v.ContainerName,
+		ContainerImage: *v.ContainerImage,
+		ContainerPort:  *v.ContainerPort,
+	}
+
+	return res
+}
+
+// unmarshalFleetStatusViewToFleetStatus builds a value of type *FleetStatus
+// from a value of type *fleetviews.FleetStatusView.
+func unmarshalFleetStatusViewToFleetStatus(v *fleetviews.FleetStatusView) *FleetStatus {
+	if v == nil {
+		return nil
+	}
+	res := &FleetStatus{
+		Replicas:          *v.Replicas,
+		ReadyReplicas:     *v.ReadyReplicas,
+		AllocatedReplicas: *v.AllocatedReplicas,
+	}
+
+	return res
+}
+
+// marshalObjectMetaToObjectMetaView builds a value of type
+// *fleetviews.ObjectMetaView from a value of type *ObjectMeta.
+func marshalObjectMetaToObjectMetaView(v *ObjectMeta) *fleetviews.ObjectMetaView {
+	res := &fleetviews.ObjectMetaView{
+		GenerateName: &v.GenerateName,
+		Namespace:    &v.Namespace,
+	}
+
+	return res
+}
+
+// marshalFleetSpecToFleetSpecView builds a value of type
+// *fleetviews.FleetSpecView from a value of type *FleetSpec.
+func marshalFleetSpecToFleetSpecView(v *FleetSpec) *fleetviews.FleetSpecView {
+	res := &fleetviews.FleetSpecView{
+		Replicas: &v.Replicas,
+	}
+	if v.Template != nil {
+		res.Template = marshalGameserverTemplateToGameserverTemplateView(v.Template)
+	}
+
+	return res
+}
+
+// marshalGameserverTemplateToGameserverTemplateView builds a value of type
+// *fleetviews.GameserverTemplateView from a value of type *GameserverTemplate.
+func marshalGameserverTemplateToGameserverTemplateView(v *GameserverTemplate) *fleetviews.GameserverTemplateView {
+	res := &fleetviews.GameserverTemplateView{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = marshalObjectMetaToObjectMetaView(v.ObjectMeta)
+	}
+	if v.GameServerSpec != nil {
+		res.GameServerSpec = marshalGameServerSpecToGameServerSpecView(v.GameServerSpec)
+	}
+
+	return res
+}
+
+// marshalGameServerSpecToGameServerSpecView builds a value of type
+// *fleetviews.GameServerSpecView from a value of type *GameServerSpec.
+func marshalGameServerSpecToGameServerSpecView(v *GameServerSpec) *fleetviews.GameServerSpecView {
+	res := &fleetviews.GameServerSpecView{
+		PortPolicy:     &v.PortPolicy,
+		ContainerName:  &v.ContainerName,
+		ContainerImage: &v.ContainerImage,
+		ContainerPort:  &v.ContainerPort,
+	}
+
+	return res
+}
+
+// marshalFleetStatusToFleetStatusView builds a value of type
+// *fleetviews.FleetStatusView from a value of type *FleetStatus.
+func marshalFleetStatusToFleetStatusView(v *FleetStatus) *fleetviews.FleetStatusView {
+	if v == nil {
+		return nil
+	}
+	res := &fleetviews.FleetStatusView{
+		Replicas:          &v.Replicas,
+		ReadyReplicas:     &v.ReadyReplicas,
+		AllocatedReplicas: &v.AllocatedReplicas,
+	}
+
+	return res
 }

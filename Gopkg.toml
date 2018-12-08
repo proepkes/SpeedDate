@@ -49,8 +49,7 @@ required = ["goa.design/goa/codegen/generator"]
 [[constraint]]
   branch = "master"
   name = "goa.design/plugins"
-
-
+  
 [[constraint]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.10.4"
@@ -58,7 +57,6 @@ required = ["goa.design/goa/codegen/generator"]
 [[constraint]]
   name = "k8s.io/api"
   version = "kubernetes-1.10.4"
-
 
 [[constraint]]
   name = "k8s.io/client-go"

@@ -180,7 +180,9 @@ func NewCreateHandler(
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
 		payload, err := decodeRequest(r)
 		if err != nil {
-			eh(ctx, w, err)
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
 			return
 		}
 
@@ -230,7 +232,9 @@ func NewListHandler(
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
 		payload, err := decodeRequest(r)
 		if err != nil {
-			eh(ctx, w, err)
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
 			return
 		}
 
@@ -368,7 +372,9 @@ func NewConfigureHandler(
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
 		payload, err := decodeRequest(r)
 		if err != nil {
-			eh(ctx, w, err)
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
 			return
 		}
 

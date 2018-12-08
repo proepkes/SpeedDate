@@ -1,6 +1,8 @@
 package design
 
-import . "goa.design/goa/http/dsl"
+import (
+	. "goa.design/goa/dsl"
+)
 
 var _ = API("authsvc", func() {
 	Title("Speeddate Userservice")

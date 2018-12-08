@@ -1,20 +1,19 @@
 package design
 
 import (
-	. "goa.design/goa/http/design"
-	_ "goa.design/plugins/cors"
-	. "goa.design/plugins/cors/dsl"
+	. "goa.design/goa/dsl"
+	cors "goa.design/plugins/cors/dsl" // Use CORS plugin
 )
 
 var _ = Service("authorize", func() {
 	Description("The service makes it possible to generate login-tokens for valid authentification")
 
 	// Sets CORS response headers for requests with any Origin header
-	Origin("*", func() {
-		Headers("Authorization")
-		Methods("OPTIONS", "POST")
-		Expose("Access-token")
-		MaxAge(600)
+	cors.Origin("*", func() {
+		cors.Headers("Authorization")
+		cors.Methods("OPTIONS", "POST")
+		cors.Expose("Access-token")
+		cors.MaxAge(600)
 	})
 
 	HTTP(func() {

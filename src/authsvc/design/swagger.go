@@ -1,8 +1,7 @@
 package design
 
 import (
-	_ "goa.design/plugins/cors"
-	. "goa.design/plugins/cors/dsl"
+	. "goa.design/goa/dsl"
 )
 
 var _ = Service("swagger", func() {

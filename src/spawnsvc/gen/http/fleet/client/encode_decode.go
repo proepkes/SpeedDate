@@ -15,7 +15,7 @@ import (
 	"net/url"
 
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
-	goa "goa.design/goa"
+	fleetviews "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet/views"
 	goahttp "goa.design/goa/http"
 )
 
@@ -154,13 +154,14 @@ func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Req
 // server.
 func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
-		p, ok := v.(*fleet.NamespacePayload)
+		p, ok := v.(*fleet.ListPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("fleet", "list", "*fleet.NamespacePayload", v)
+			return goahttp.ErrInvalidType("fleet", "list", "*fleet.ListPayload", v)
 		}
 		values := req.URL.Query()
-		if p.Namespace != nil {
-			values.Add("namespace", *p.Namespace)
+		values.Add("namespace", p.Namespace)
+		if p.View != nil {
+			values.Add("view", *p.View)
 		}
 		req.URL.RawQuery = values.Encode()
 		return nil
@@ -194,17 +195,13 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("fleet", "list", err)
 			}
-			for _, e := range body {
-				if e != nil {
-					if err2 := e.Validate(); err2 != nil {
-						err = goa.MergeErrors(err, err2)
-					}
-				}
-			}
-			if err != nil {
+			p := NewListStoredFleetCollectionOK(body)
+			view := "default"
+			vres := fleetviews.StoredFleetCollection{p, view}
+			if err = vres.Validate(); err != nil {
 				return nil, goahttp.ErrValidationError("fleet", "list", err)
 			}
-			res := NewListStoredFleetOK(body)
+			res := fleet.NewStoredFleetCollection(vres)
 			return res, nil
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
@@ -494,37 +491,79 @@ func marshalGameServerSpecRequestBodyToGameServerSpec(v *GameServerSpecRequestBo
 	return res
 }
 
+// unmarshalObjectMetaResponseToObjectMetaView builds a value of type
+// *fleetviews.ObjectMetaView from a value of type *ObjectMetaResponse.
+func unmarshalObjectMetaResponseToObjectMetaView(v *ObjectMetaResponse) *fleetviews.ObjectMetaView {
+	res := &fleetviews.ObjectMetaView{
+		GenerateName: v.GenerateName,
+		Namespace:    v.Namespace,
+	}
+
+	return res
+}
+
+// unmarshalFleetSpecResponseToFleetSpecView builds a value of type
+// *fleetviews.FleetSpecView from a value of type *FleetSpecResponse.
+func unmarshalFleetSpecResponseToFleetSpecView(v *FleetSpecResponse) *fleetviews.FleetSpecView {
+	res := &fleetviews.FleetSpecView{
+		Replicas: v.Replicas,
+	}
+	res.Template = unmarshalGameserverTemplateResponseToGameserverTemplateView(v.Template)
+
+	return res
+}
+
+// unmarshalGameserverTemplateResponseToGameserverTemplateView builds a value
+// of type *fleetviews.GameserverTemplateView from a value of type
+// *GameserverTemplateResponse.
+func unmarshalGameserverTemplateResponseToGameserverTemplateView(v *GameserverTemplateResponse) *fleetviews.GameserverTemplateView {
+	res := &fleetviews.GameserverTemplateView{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = unmarshalObjectMetaResponseToObjectMetaView(v.ObjectMeta)
+	}
+	res.GameServerSpec = unmarshalGameServerSpecResponseToGameServerSpecView(v.GameServerSpec)
+
+	return res
+}
+
+// unmarshalGameServerSpecResponseToGameServerSpecView builds a value of type
+// *fleetviews.GameServerSpecView from a value of type *GameServerSpecResponse.
+func unmarshalGameServerSpecResponseToGameServerSpecView(v *GameServerSpecResponse) *fleetviews.GameServerSpecView {
+	res := &fleetviews.GameServerSpecView{
+		PortPolicy:     v.PortPolicy,
+		ContainerName:  v.ContainerName,
+		ContainerImage: v.ContainerImage,
+		ContainerPort:  v.ContainerPort,
+	}
+
+	return res
+}
+
+// unmarshalFleetStatusResponseToFleetStatusView builds a value of type
+// *fleetviews.FleetStatusView from a value of type *FleetStatusResponse.
+func unmarshalFleetStatusResponseToFleetStatusView(v *FleetStatusResponse) *fleetviews.FleetStatusView {
+	if v == nil {
+		return nil
+	}
+	res := &fleetviews.FleetStatusView{
+		Replicas:          v.Replicas,
+		ReadyReplicas:     v.ReadyReplicas,
+		AllocatedReplicas: v.AllocatedReplicas,
+	}
+
+	return res
+}
+
 // unmarshalObjectMetaResponseBodyToObjectMeta builds a value of type
 // *fleet.ObjectMeta from a value of type *ObjectMetaResponseBody.
 func unmarshalObjectMetaResponseBodyToObjectMeta(v *ObjectMetaResponseBody) *fleet.ObjectMeta {
+	if v == nil {
+		return nil
+	}
 	res := &fleet.ObjectMeta{
 		GenerateName: *v.GenerateName,
 		Namespace:    *v.Namespace,
 	}
-
-	return res
-}
-
-// unmarshalFleetSpecResponseBodyToFleetSpec builds a value of type
-// *fleet.FleetSpec from a value of type *FleetSpecResponseBody.
-func unmarshalFleetSpecResponseBodyToFleetSpec(v *FleetSpecResponseBody) *fleet.FleetSpec {
-	res := &fleet.FleetSpec{
-		Replicas: *v.Replicas,
-	}
-	res.Template = unmarshalGameserverTemplateResponseBodyToGameserverTemplate(v.Template)
-
-	return res
-}
-
-// unmarshalGameserverTemplateResponseBodyToGameserverTemplate builds a value
-// of type *fleet.GameserverTemplate from a value of type
-// *GameserverTemplateResponseBody.
-func unmarshalGameserverTemplateResponseBodyToGameserverTemplate(v *GameserverTemplateResponseBody) *fleet.GameserverTemplate {
-	res := &fleet.GameserverTemplate{}
-	if v.ObjectMeta != nil {
-		res.ObjectMeta = unmarshalObjectMetaResponseBodyToObjectMeta(v.ObjectMeta)
-	}
-	res.GameServerSpec = unmarshalGameServerSpecResponseBodyToGameServerSpec(v.GameServerSpec)
 
 	return res
 }
@@ -537,21 +576,6 @@ func unmarshalGameServerSpecResponseBodyToGameServerSpec(v *GameServerSpecRespon
 		ContainerName:  *v.ContainerName,
 		ContainerImage: *v.ContainerImage,
 		ContainerPort:  *v.ContainerPort,
-	}
-
-	return res
-}
-
-// unmarshalFleetStatusResponseBodyToFleetStatus builds a value of type
-// *fleet.FleetStatus from a value of type *FleetStatusResponseBody.
-func unmarshalFleetStatusResponseBodyToFleetStatus(v *FleetStatusResponseBody) *fleet.FleetStatus {
-	if v == nil {
-		return nil
-	}
-	res := &fleet.FleetStatus{
-		Replicas:          *v.Replicas,
-		ReadyReplicas:     *v.ReadyReplicas,
-		AllocatedReplicas: *v.AllocatedReplicas,
 	}
 
 	return res

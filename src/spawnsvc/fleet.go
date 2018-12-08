@@ -128,15 +128,17 @@ func asGameServerSpec(p *fleet.GameServerSpec) v1alpha1.GameServerSpec {
 }
 
 // List all fleets.
-func (s *fleetSvc) List(ctx context.Context, p string) (res []*fleet.StoredFleet, err error) {
+func (s *fleetSvc) List(ctx context.Context, p *fleet.ListPayload) (res fleet.StoredFleetCollection, err error) {
 	s.logger.Print("fleet.list")
-	fleets, err := s.client.StableV1alpha1().Fleets(p).List(metav1.ListOptions{})
+	fleets, err := s.client.StableV1alpha1().Fleets(p.Namespace).List(metav1.ListOptions{})
 	if err != nil {
 		s.logger.Println(err.Error())
 		return nil, err
 	}
 	for _, f := range fleets.Items {
+		s := f.Spec.Template.Spec //Equals GameServerSpec
 		res = append(res, &fleet.StoredFleet{
+			Name: f.Name,
 			ObjectMeta: &fleet.ObjectMeta{
 				Namespace:    f.ObjectMeta.Namespace,
 				GenerateName: f.ObjectMeta.GenerateName,
@@ -144,9 +146,11 @@ func (s *fleetSvc) List(ctx context.Context, p string) (res []*fleet.StoredFleet
 			FleetSpec: &fleet.FleetSpec{
 				Replicas: f.Spec.Replicas,
 				Template: &fleet.GameserverTemplate{
-					ObjectMeta: &fleet.ObjectMeta{
-						Namespace:    f.Spec.Template.Namespace,
-						GenerateName: f.Spec.Template.GenerateName,
+					GameServerSpec: &fleet.GameServerSpec{
+						PortPolicy:     string(s.Ports[0].PortPolicy),
+						ContainerPort:  s.Ports[0].ContainerPort,
+						ContainerImage: s.Template.Spec.Containers[0].Image,
+						ContainerName:  s.Template.Spec.Containers[0].Name,
 					},
 				},
 			},

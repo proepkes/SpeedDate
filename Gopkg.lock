@@ -134,15 +134,15 @@
   version = "v0.3.6"
 
 [[projects]]
-  digest = "1:6895fbe5a10c5aebd1965cac6f6905dcdb21bee01e08912d3ba6a805c2485f6a"
+  digest = "1:7e63b12cdd7bef2c411d736cb67e28134d39f5d236aa1bfb8f3d55e3ad709eca"
   name = "github.com/jinzhu/gorm"
   packages = [
     ".",
     "dialects/postgres",
   ]
   pruneopts = "UT"
-  revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
-  version = "v1.9.1"
+  revision = "472c70caa40267cb89fd8facb07fe6454b578626"
+  version = "v1.9.2"
 
 [[projects]]
   branch = "master"
@@ -262,51 +262,49 @@
 
 [[projects]]
   branch = "v2"
-  digest = "1:4be8771af2b17916829d2f89fe965a7c63e15ffa066d20229353725e60090695"
+  digest = "1:a16ce94186d41860ffa1086c9e79fa4517df6a611c46c500bf36738dd1bf3d9d"
   name = "goa.design/goa"
   packages = [
     ".",
     "codegen",
     "codegen/generator",
     "codegen/service",
-    "design",
     "dsl",
     "eval",
+    "expr",
     "http",
     "http/codegen",
     "http/codegen/openapi",
-    "http/design",
-    "http/dsl",
     "http/middleware",
     "pkg",
     "security",
   ]
   pruneopts = "UT"
-  revision = "e4a90910c0eb094c0967d0515cc9f851c6b75fb3"
+  revision = "6d9200ca48bab5261f3929cef8f114cf7d55a7ec"
 
 [[projects]]
   branch = "master"
-  digest = "1:1f681a25c47876d6a287b969b0a401781ada186a0c9d2b8d9e75b03b15b58359"
+  digest = "1:d95981cd6be00fab92716fa066b171e5bbad15f769c912d0cc854b7d8c39cc05"
   name = "goa.design/plugins"
   packages = [
     "cors",
-    "cors/design",
     "cors/dsl",
+    "cors/expr",
   ]
   pruneopts = "UT"
-  revision = "d6ba077162402be11c1a04a6938600bfc14da1ed"
+  revision = "0641a9b7482cea5303951506bd3189d2896d2eda"
 
 [[projects]]
   branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
-  digest = "1:67c2a615ba674115933f3ee56daa132974de340a9573937a97d14039f8544e8b"
+  digest = "1:f8292d035e3f59cbcf39fecb9ca1dd24ec20ae4f8a06750609ee4b71d60d0045"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
@@ -315,18 +313,18 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
+  revision = "610586996380ceef02dd726cc09df7e00a3f8e56"
 
 [[projects]]
   branch = "master"
-  digest = "1:f343f077a5b0bc3a3788b3a04e24dd417e3e25b2acb529c413e212d2c42416ef"
+  digest = "1:b9dceb1408ba5105803d5859193bc7d89ac3199b611cf8681dbaa0aa09c10d9c"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "62eef0e2fa9b2c385f7b2778e763486da6880d37"
+  revision = "70b957f3b65e069b4930ea94e2721eefa0f8f695"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -361,7 +359,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6511064c08bff306dd24fa83ea82e160009fa7572240b70173b25d1dbc3e1872"
+  digest = "1:d3955eca8c7b31e6a90e8b92d12caebbba42b92c43c3a0eabac7de911b2745d0"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -370,7 +368,7 @@
     "internal/gopathwalk",
   ]
   pruneopts = "UT"
-  revision = "04b5d21e00f1f47bd824a6ade581e7189bacde87"
+  revision = "4c874b978acba4ecd4a257d3bb8829dd5de17be8"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -381,12 +379,12 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [[projects]]
   digest = "1:1537dffcab6c5ed740c06e16df243a39a54bc69e0d221271e6da4b235160ceab"
@@ -541,9 +539,8 @@
     "github.com/satori/go.uuid",
     "goa.design/goa",
     "goa.design/goa/codegen/generator",
+    "goa.design/goa/dsl",
     "goa.design/goa/http",
-    "goa.design/goa/http/design",
-    "goa.design/goa/http/dsl",
     "goa.design/goa/http/middleware",
     "goa.design/goa/security",
     "goa.design/plugins/cors",
