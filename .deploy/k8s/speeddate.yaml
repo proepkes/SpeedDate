@@ -8,12 +8,14 @@ metadata:
   labels:
     app: spawnsvc
 data:
-  GameserverNamespace: "default"
+  NamePrefix: "fleet"
+  Replicas: "3"
+  Namespace: "default"
   GameserverNamePrefix: "udp-server"
   PortPolicy: "dynamic"
   ContainerPort: "7777"
   ContainerName: "udp-server"
-  ContainerImage: "gcr.io/agones-images/udp-server:0.4"
+  ContainerImage: "gcr.io/agones-images/udp-server:0.5"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -35,7 +37,7 @@ rules:
   verbs: ["create", "delete", "get", "list", "update", "watch", "deletecollection"]
 - apiGroups: ["stable.agones.dev"]
   resources: ["fleets", "fleetallocations", "fleetautoscalers"]
-  verbs: ["create", "get", "list", "update", "watch"]
+  verbs: ["create", "get", "list", "update", "watch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -228,7 +230,7 @@ spec:
         imagePullPolicy: Always     
         env:
         - name: GS_NAMESPACE
-          value: default 
+          value:  
         ports:
         - containerPort: 8001
         livenessProbe:
