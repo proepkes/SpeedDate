@@ -87,17 +87,17 @@ func (c *Client) Clear(ctx context.Context) (res string, err error) {
 }
 
 // Configuration calls the "configuration" endpoint of the "fleet" service.
-func (c *Client) Configuration(ctx context.Context) (res *GameserverTemplate, err error) {
+func (c *Client) Configuration(ctx context.Context) (res *Fleet, err error) {
 	var ires interface{}
 	ires, err = c.ConfigurationEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}
-	return ires.(*GameserverTemplate), nil
+	return ires.(*Fleet), nil
 }
 
 // Configure calls the "configure" endpoint of the "fleet" service.
-func (c *Client) Configure(ctx context.Context, p *GameserverTemplate) (res string, err error) {
+func (c *Client) Configure(ctx context.Context, p *ConfigurePayload) (res string, err error) {
 	var ires interface{}
 	ires, err = c.ConfigureEndpoint(ctx, p)
 	if err != nil {

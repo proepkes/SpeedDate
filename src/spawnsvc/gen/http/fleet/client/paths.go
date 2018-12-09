@@ -43,5 +43,5 @@ func ConfigurationFleetPath() string {
 
 // ConfigureFleetPath returns the URL path to the fleet service configure HTTP endpoint.
 func ConfigureFleetPath() string {
-	return "/fleet/configure"
+	return "/fleet/configuration"
 }

@@ -63,14 +63,13 @@ func New(
 			{"List", "GET", "/fleet/list"},
 			{"Clear", "POST", "/fleet/clear"},
 			{"Configuration", "GET", "/fleet/configuration"},
-			{"Configure", "POST", "/fleet/configure"},
+			{"Configure", "PATCH", "/fleet/configuration"},
 			{"CORS", "OPTIONS", "/fleet/add"},
 			{"CORS", "OPTIONS", "/fleet"},
 			{"CORS", "OPTIONS", "/fleet/{name}"},
 			{"CORS", "OPTIONS", "/fleet/list"},
 			{"CORS", "OPTIONS", "/fleet/clear"},
 			{"CORS", "OPTIONS", "/fleet/configuration"},
-			{"CORS", "OPTIONS", "/fleet/configure"},
 		},
 		Add:           NewAddHandler(e.Add, mux, dec, enc, eh),
 		Create:        NewCreateHandler(e.Create, mux, dec, enc, eh),
@@ -407,7 +406,7 @@ func MountConfigureHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/fleet/configure", f)
+	mux.Handle("PATCH", "/fleet/configuration", f)
 }
 
 // NewConfigureHandler creates a HTTP handler which loads the HTTP request and
@@ -466,7 +465,6 @@ func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("OPTIONS", "/fleet/list", f)
 	mux.Handle("OPTIONS", "/fleet/clear", f)
 	mux.Handle("OPTIONS", "/fleet/configuration", f)
-	mux.Handle("OPTIONS", "/fleet/configure", f)
 }
 
 // NewCORSHandler creates a HTTP handler which returns a simple 200 response.
@@ -493,7 +491,7 @@ func handleFleetOrigin(h http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Credentials", "false")
 			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
-				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, GET, DELETE")
+				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, GET, DELETE, PATCH")
 				w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			}
 			origHndlr(w, r)

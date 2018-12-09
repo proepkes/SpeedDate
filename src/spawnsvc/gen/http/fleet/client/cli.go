@@ -23,7 +23,7 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 	{
 		err = json.Unmarshal([]byte(fleetCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 930171550,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 2005356941,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
 		}
 		if body.FleetSpec == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
@@ -99,35 +99,26 @@ func BuildListPayload(fleetListNamespace string, fleetListView string) (*fleet.L
 
 // BuildConfigurePayload builds the payload for the fleet configure endpoint
 // from CLI flags.
-func BuildConfigurePayload(fleetConfigureBody string) (*fleet.GameserverTemplate, error) {
+func BuildConfigurePayload(fleetConfigureBody string) (*fleet.ConfigurePayload, error) {
 	var err error
 	var body ConfigureRequestBody
 	{
 		err = json.Unmarshal([]byte(fleetConfigureBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"GameServerSpec\": {\n         \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n         \"ContainerName\": \"my-server\",\n         \"ContainerPort\": 7777,\n         \"PortPolicy\": \"dynamic\"\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
-		}
-		if body.GameServerSpec == nil {
-			err = goa.MergeErrors(err, goa.MissingFieldError("GameServerSpec", "body"))
-		}
-		if body.ObjectMeta != nil {
-			if err2 := body.ObjectMeta.Validate(); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"Et est delectus voluptate tempore sunt.\",\n      \"ContainerName\": \"Ut ut quam quia nostrum exercitationem est.\",\n      \"ContainerPort\": 1609367978,\n      \"GameserverNamePrefix\": \"Ducimus voluptas error vel magni aut.\",\n      \"NamePrefix\": \"Asperiores quis fugit.\",\n      \"Namespace\": \"Velit dolorem.\",\n      \"Replicas\": 331646220\n   }'")
 		}
 	}
 	if err != nil {
 		return nil, err
 	}
-	v := &fleet.GameserverTemplate{}
-	if body.ObjectMeta != nil {
-		v.ObjectMeta = marshalObjectMetaRequestBodyToObjectMeta(body.ObjectMeta)
-	}
-	if body.GameServerSpec != nil {
-		v.GameServerSpec = marshalGameServerSpecRequestBodyToGameServerSpec(body.GameServerSpec)
+	v := &fleet.ConfigurePayload{
+		NamePrefix:           body.NamePrefix,
+		ContainerImage:       body.ContainerImage,
+		ContainerName:        body.ContainerName,
+		ContainerPort:        body.ContainerPort,
+		GameserverNamePrefix: body.GameserverNamePrefix,
+		Namespace:            body.Namespace,
+		Replicas:             body.Replicas,
 	}
 	return v, nil
 }

@@ -100,11 +100,10 @@ paths:
           schema:
             $ref: '#/definitions/ConfigurationResponseBody'
             required:
-            - GameServerSpec
+            - FleetSpec
       schemes:
       - http
-  /fleet/configure:
-    post:
+    patch:
       tags:
       - fleet
       summary: configure fleet
@@ -117,7 +116,13 @@ paths:
         schema:
           $ref: '#/definitions/FleetConfigureRequestBody'
           required:
-          - GameServerSpec
+          - ContainerImage
+          - ContainerName
+          - ContainerPort
+          - NamePrefix
+          - GameserverNamePrefix
+          - Namespace
+          - Replicas
       responses:
         "200":
           description: OK response.
@@ -170,40 +175,77 @@ definitions:
     title: ConfigurationResponseBody
     type: object
     properties:
-      GameServerSpec:
-        $ref: '#/definitions/GameServerSpecResponseBody'
+      FleetSpec:
+        $ref: '#/definitions/FleetSpecResponseBody'
       ObjectMeta:
         $ref: '#/definitions/ObjectMetaResponseBody'
     example:
-      GameServerSpec:
-        ContainerImage: gcr.io/agones-images/udp-server:0.4
-        ContainerName: my-server
-        ContainerPort: 7777
-        PortPolicy: dynamic
+      FleetSpec:
+        Replicas: 1187110244
+        Template:
+          GameServerSpec:
+            ContainerImage: gcr.io/agones-images/udp-server:0.4
+            ContainerName: my-server
+            ContainerPort: 7777
+            PortPolicy: dynamic
+          ObjectMeta:
+            GenerateName: my-server
+            Namespace: speeddate-system
       ObjectMeta:
         GenerateName: my-server
         Namespace: speeddate-system
     required:
-    - GameServerSpec
+    - FleetSpec
   FleetConfigureRequestBody:
     title: FleetConfigureRequestBody
     type: object
     properties:
-      GameServerSpec:
-        $ref: '#/definitions/GameServerSpecRequestBody'
-      ObjectMeta:
-        $ref: '#/definitions/ObjectMetaRequestBody'
+      ContainerImage:
+        type: string
+        description: The ContainerImage
+        example: Deleniti quo recusandae.
+      ContainerName:
+        type: string
+        description: The ContainerName
+        example: Et ea ab qui.
+      ContainerPort:
+        type: integer
+        description: The ContainerPort
+        example: 1911314754
+        format: int32
+      GameserverNamePrefix:
+        type: string
+        description: The GameserverNamePrefix
+        example: Voluptas doloremque autem.
+      NamePrefix:
+        type: string
+        description: The NamePrefix
+        example: Ea inventore recusandae velit ad.
+      Namespace:
+        type: string
+        description: The Namespace
+        example: Enim nobis sit laudantium aut quod.
+      Replicas:
+        type: integer
+        description: The Replicas
+        example: 108841389
+        format: int32
     example:
-      GameServerSpec:
-        ContainerImage: gcr.io/agones-images/udp-server:0.4
-        ContainerName: my-server
-        ContainerPort: 7777
-        PortPolicy: dynamic
-      ObjectMeta:
-        GenerateName: my-server
-        Namespace: speeddate-system
+      ContainerImage: Voluptatibus molestias quia ex.
+      ContainerName: Quas omnis.
+      ContainerPort: 304094668
+      GameserverNamePrefix: Ad eum aut quia est a.
+      NamePrefix: Quis aut quisquam minima quidem dolore.
+      Namespace: Quia optio.
+      Replicas: 1600223366
     required:
-    - GameServerSpec
+    - ContainerImage
+    - ContainerName
+    - ContainerPort
+    - NamePrefix
+    - GameserverNamePrefix
+    - Namespace
+    - Replicas
   FleetCreateRequestBody:
     title: FleetCreateRequestBody
     type: object
@@ -214,7 +256,7 @@ definitions:
         $ref: '#/definitions/ObjectMetaRequestBody'
     example:
       FleetSpec:
-        Replicas: 930171550
+        Replicas: 2005356941
         Template:
           GameServerSpec:
             ContainerImage: gcr.io/agones-images/udp-server:0.4
@@ -236,13 +278,13 @@ definitions:
       Replicas:
         type: integer
         description: Replicas
-        example: 966976652
+        example: 1224407362
         format: int32
       Template:
         $ref: '#/definitions/GameserverTemplateRequestBody'
     description: Spec for Fleet
     example:
-      Replicas: 145630915
+      Replicas: 281547333
       Template:
         GameServerSpec:
           ContainerImage: gcr.io/agones-images/udp-server:0.4
@@ -262,13 +304,39 @@ definitions:
       Replicas:
         type: integer
         description: Replicas
-        example: 307487429
+        example: 1155579061
         format: int32
       Template:
         $ref: '#/definitions/GameserverTemplateResponse'
     description: Spec for Fleet
     example:
-      Replicas: 2023791888
+      Replicas: 2138740847
+      Template:
+        GameServerSpec:
+          ContainerImage: gcr.io/agones-images/udp-server:0.4
+          ContainerName: my-server
+          ContainerPort: 7777
+          PortPolicy: dynamic
+        ObjectMeta:
+          GenerateName: my-server
+          Namespace: speeddate-system
+    required:
+    - Replicas
+    - Template
+  FleetSpecResponseBody:
+    title: FleetSpecResponseBody
+    type: object
+    properties:
+      Replicas:
+        type: integer
+        description: Replicas
+        example: 1863277990
+        format: int32
+      Template:
+        $ref: '#/definitions/GameserverTemplateResponseBody'
+    description: Spec for Fleet
+    example:
+      Replicas: 765680405
       Template:
         GameServerSpec:
           ContainerImage: gcr.io/agones-images/udp-server:0.4
@@ -288,22 +356,22 @@ definitions:
       AllocatedReplicas:
         type: integer
         description: AllocatedReplicas
-        example: 1134826046
+        example: 1028101974
         format: int32
       ReadyReplicas:
         type: integer
         description: ReadyReplicas
-        example: 1869806591
+        example: 1020240683
         format: int32
       Replicas:
         type: integer
         description: Replicas
-        example: 954637672
+        example: 1772396314
         format: int32
     example:
-      AllocatedReplicas: 599345392
-      ReadyReplicas: 1585341490
-      Replicas: 1277160663
+      AllocatedReplicas: 1084191870
+      ReadyReplicas: 28544934
+      Replicas: 1003550534
     required:
     - Replicas
     - ReadyReplicas
@@ -317,7 +385,7 @@ definitions:
       (default view)
     example:
     - FleetSpec:
-        Replicas: 25133837
+        Replicas: 122037179
         Template:
           GameServerSpec:
             ContainerImage: gcr.io/agones-images/udp-server:0.4
@@ -328,15 +396,15 @@ definitions:
             GenerateName: my-server
             Namespace: speeddate-system
       FleetStatus:
-        AllocatedReplicas: 360110565
-        ReadyReplicas: 1803372734
-        Replicas: 1943129366
-      Name: Sed est id qui velit earum dolores.
+        AllocatedReplicas: 1707239890
+        ReadyReplicas: 194869771
+        Replicas: 1415430722
+      Name: Repellat nulla.
       ObjectMeta:
         GenerateName: my-server
         Namespace: speeddate-system
     - FleetSpec:
-        Replicas: 25133837
+        Replicas: 122037179
         Template:
           GameServerSpec:
             ContainerImage: gcr.io/agones-images/udp-server:0.4
@@ -347,10 +415,10 @@ definitions:
             GenerateName: my-server
             Namespace: speeddate-system
       FleetStatus:
-        AllocatedReplicas: 360110565
-        ReadyReplicas: 1803372734
-        Replicas: 1943129366
-      Name: Sed est id qui velit earum dolores.
+        AllocatedReplicas: 1707239890
+        ReadyReplicas: 194869771
+        Replicas: 1415430722
+      Name: Repellat nulla.
       ObjectMeta:
         GenerateName: my-server
         Namespace: speeddate-system
@@ -490,6 +558,26 @@ definitions:
         Namespace: speeddate-system
     required:
     - GameServerSpec
+  GameserverTemplateResponseBody:
+    title: GameserverTemplateResponseBody
+    type: object
+    properties:
+      GameServerSpec:
+        $ref: '#/definitions/GameServerSpecResponseBody'
+      ObjectMeta:
+        $ref: '#/definitions/ObjectMetaResponseBody'
+    description: GameserverTemplate describes gameserver
+    example:
+      GameServerSpec:
+        ContainerImage: gcr.io/agones-images/udp-server:0.4
+        ContainerName: my-server
+        ContainerPort: 7777
+        PortPolicy: dynamic
+      ObjectMeta:
+        GenerateName: my-server
+        Namespace: speeddate-system
+    required:
+    - GameServerSpec
   ObjectMetaRequestBody:
     title: ObjectMetaRequestBody
     type: object
@@ -564,13 +652,13 @@ definitions:
       Name:
         type: string
         description: The Fleets Name
-        example: Et est delectus voluptate tempore sunt.
+        example: Qui et recusandae aliquid maiores neque.
       ObjectMeta:
         $ref: '#/definitions/ObjectMetaResponse'
     description: Stored Fleet (default view)
     example:
       FleetSpec:
-        Replicas: 25133837
+        Replicas: 122037179
         Template:
           GameServerSpec:
             ContainerImage: gcr.io/agones-images/udp-server:0.4
@@ -581,10 +669,10 @@ definitions:
             GenerateName: my-server
             Namespace: speeddate-system
       FleetStatus:
-        AllocatedReplicas: 360110565
-        ReadyReplicas: 1803372734
-        Replicas: 1943129366
-      Name: Soluta ducimus voluptas error.
+        AllocatedReplicas: 1707239890
+        ReadyReplicas: 194869771
+        Replicas: 1415430722
+      Name: Laudantium praesentium doloremque.
       ObjectMeta:
         GenerateName: my-server
         Namespace: speeddate-system

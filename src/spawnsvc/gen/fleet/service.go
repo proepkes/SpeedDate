@@ -27,9 +27,9 @@ type Service interface {
 	// Removes all gameserver pods.
 	Clear(context.Context) (res string, err error)
 	// Get gameserver deployment configuration.
-	Configuration(context.Context) (res *GameserverTemplate, err error)
+	Configuration(context.Context) (res *Fleet, err error)
 	// Configure gameserver deployment.
-	Configure(context.Context, *GameserverTemplate) (res string, err error)
+	Configure(context.Context, *ConfigurePayload) (res string, err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -69,13 +69,22 @@ type ListPayload struct {
 // StoredFleetCollection is the result type of the fleet service list method.
 type StoredFleetCollection []*StoredFleet
 
-// GameserverTemplate is the result type of the fleet service configuration
-// method.
-type GameserverTemplate struct {
-	// GameserverTemplates ObjectMeta
-	ObjectMeta *ObjectMeta
-	// GameServerSpec
-	GameServerSpec *GameServerSpec
+// ConfigurePayload is the payload type of the fleet service configure method.
+type ConfigurePayload struct {
+	// The NamePrefix
+	NamePrefix string
+	// The ContainerImage
+	ContainerImage string
+	// The ContainerName
+	ContainerName string
+	// The ContainerPort
+	ContainerPort int32
+	// The GameserverNamePrefix
+	GameserverNamePrefix string
+	// The Namespace
+	Namespace string
+	// The Replicas
+	Replicas uint32
 }
 
 // Spec for ObjectMeta
@@ -92,6 +101,26 @@ type FleetSpec struct {
 	Replicas int32
 	// Template of the gameserver
 	Template *GameserverTemplate
+}
+
+// GameserverTemplate describes gameserver
+type GameserverTemplate struct {
+	// GameserverTemplates ObjectMeta
+	ObjectMeta *ObjectMeta
+	// GameServerSpec
+	GameServerSpec *GameServerSpec
+}
+
+// GameserverTemplate describes gameserver
+type GameServerSpec struct {
+	// Portpolicy either dynamic or static
+	PortPolicy string
+	// Name of the gameserver-container
+	ContainerName string
+	// Image of the gameserver
+	ContainerImage string
+	// Exposed port of the gameserver
+	ContainerPort int32
 }
 
 // Stored Fleet
@@ -113,18 +142,6 @@ type FleetStatus struct {
 	ReadyReplicas int32
 	// AllocatedReplicas
 	AllocatedReplicas int32
-}
-
-// GameserverTemplate describes gameserver
-type GameServerSpec struct {
-	// Portpolicy either dynamic or static
-	PortPolicy string
-	// Name of the gameserver-container
-	ContainerName string
-	// Image of the gameserver
-	ContainerImage string
-	// Exposed port of the gameserver
-	ContainerPort int32
 }
 
 // MakeNotFound builds a goa.ServiceError from an error.

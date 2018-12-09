@@ -223,7 +223,7 @@ Create a new fleet.
 Example:
     `+os.Args[0]+` fleet create --body '{
       "FleetSpec": {
-         "Replicas": 930171550,
+         "Replicas": 2005356941,
          "Template": {
             "GameServerSpec": {
                "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
@@ -253,7 +253,7 @@ Delete a fleet
     -namespace STRING: 
 
 Example:
-    `+os.Args[0]+` fleet delete --name "Rerum quidem odit odit nobis quis." --namespace "Reprehenderit in nisi adipisci facilis."
+    `+os.Args[0]+` fleet delete --name "Dolores odit qui dolor ipsum." --namespace "Beatae in explicabo."
 `, os.Args[0])
 }
 
@@ -265,7 +265,7 @@ List all fleets.
     -view STRING: 
 
 Example:
-    `+os.Args[0]+` fleet list --namespace "Vel suscipit sunt aspernatur aliquam facilis." --view "default"
+    `+os.Args[0]+` fleet list --namespace "Pariatur laudantium ea corrupti perferendis." --view "default"
 `, os.Args[0])
 }
 
@@ -297,16 +297,13 @@ Configure gameserver deployment.
 
 Example:
     `+os.Args[0]+` fleet configure --body '{
-      "GameServerSpec": {
-         "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
-         "ContainerName": "my-server",
-         "ContainerPort": 7777,
-         "PortPolicy": "dynamic"
-      },
-      "ObjectMeta": {
-         "GenerateName": "my-server",
-         "Namespace": "speeddate-system"
-      }
+      "ContainerImage": "Et est delectus voluptate tempore sunt.",
+      "ContainerName": "Ut ut quam quia nostrum exercitationem est.",
+      "ContainerPort": 1609367978,
+      "GameserverNamePrefix": "Ducimus voluptas error vel magni aut.",
+      "NamePrefix": "Asperiores quis fugit.",
+      "Namespace": "Velit dolorem.",
+      "Replicas": 331646220
    }'
 `, os.Args[0])
 }

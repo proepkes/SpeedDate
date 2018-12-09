@@ -6,7 +6,9 @@ metadata:
   labels:
     app: {{ .Values.spawnsvcSettings.ImageName }}
 data:
-  GameserverNamespace: "{{ .Values.spawnsvcSettings.GameserverNamespace }}"
+  NamePrefix: "{{ .Values.spawnsvcSettings.FleetNamePrefix }}"
+  Replicas: "{{ .Values.spawnsvcSettings.Replicas }}"
+  Namespace: "{{ .Values.spawnsvcSettings.FleetNamespace }}"
   GameserverNamePrefix: "{{ .Values.spawnsvcSettings.GameserverNamePrefix }}"
   PortPolicy: "{{ .Values.spawnsvcSettings.PortPolicy }}"
   ContainerPort: "{{ .Values.spawnsvcSettings.ContainerPort }}"

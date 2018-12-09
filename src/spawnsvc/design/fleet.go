@@ -15,7 +15,7 @@ var _ = Service("fleet", func() {
 	// Sets CORS response headers for requests with any Origin header
 	cors.Origin("*", func() {
 		cors.Headers("Origin, X-Requested-With, Content-Type, Accept")
-		cors.Methods("OPTIONS", "PUT", "GET", "DELETE")
+		cors.Methods("OPTIONS", "PUT", "GET", "DELETE", "PATCH")
 		cors.MaxAge(600)
 	})
 
@@ -87,7 +87,7 @@ var _ = Service("fleet", func() {
 
 	Method("configuration", func() {
 		Description("Get gameserver deployment configuration.")
-		Result(GameserverTemplate)
+		Result(Fleet)
 		HTTP(func() {
 			GET("/configuration")
 			Response(StatusOK)
@@ -97,9 +97,19 @@ var _ = Service("fleet", func() {
 	Method("configure", func() {
 		Description("Configure gameserver deployment.")
 		Result(String)
-		Payload(GameserverTemplate)
+		Payload(func() {
+			Attribute("NamePrefix", String, "The NamePrefix")
+			Attribute("ContainerImage", String, "The ContainerImage")
+			Attribute("ContainerName", String, "The ContainerName")
+			Attribute("ContainerPort", Int32, "The ContainerPort")
+			Attribute("GameserverNamePrefix", String, "The GameserverNamePrefix")
+			Attribute("Namespace", String, "The Namespace")
+			Attribute("Replicas", UInt32, "The Replicas")
+
+			Required("ContainerImage", "ContainerName", "ContainerPort", "NamePrefix", "GameserverNamePrefix", "Namespace", "Replicas")
+		})
 		HTTP(func() {
-			POST("/configure")
+			PATCH("/configuration")
 			Response(StatusOK)
 		})
 	})

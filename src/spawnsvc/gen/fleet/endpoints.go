@@ -108,7 +108,7 @@ func NewConfigurationEndpoint(s Service) goa.Endpoint {
 // "configure" of service "fleet".
 func NewConfigureEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*GameserverTemplate)
+		p := req.(*ConfigurePayload)
 		return s.Configure(ctx, p)
 	}
 }

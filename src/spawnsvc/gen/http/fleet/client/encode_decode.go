@@ -373,7 +373,7 @@ func DecodeConfigurationResponse(decoder func(*http.Response) goahttp.Decoder, r
 			if err != nil {
 				return nil, goahttp.ErrValidationError("fleet", "configuration", err)
 			}
-			res := NewConfigurationGameserverTemplateOK(&body)
+			res := NewConfigurationFleetOK(&body)
 			return res, nil
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
@@ -386,7 +386,7 @@ func DecodeConfigurationResponse(decoder func(*http.Response) goahttp.Decoder, r
 // path set to call the "fleet" service "configure" endpoint
 func (c *Client) BuildConfigureRequest(ctx context.Context, v interface{}) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ConfigureFleetPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+	req, err := http.NewRequest("PATCH", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("fleet", "configure", u.String(), err)
 	}
@@ -401,9 +401,9 @@ func (c *Client) BuildConfigureRequest(ctx context.Context, v interface{}) (*htt
 // configure server.
 func EncodeConfigureRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
-		p, ok := v.(*fleet.GameserverTemplate)
+		p, ok := v.(*fleet.ConfigurePayload)
 		if !ok {
-			return goahttp.ErrInvalidType("fleet", "configure", "*fleet.GameserverTemplate", v)
+			return goahttp.ErrInvalidType("fleet", "configure", "*fleet.ConfigurePayload", v)
 		}
 		body := NewConfigureRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
@@ -635,6 +635,30 @@ func unmarshalObjectMetaResponseBodyToObjectMeta(v *ObjectMetaResponseBody) *fle
 		GenerateName: *v.GenerateName,
 		Namespace:    *v.Namespace,
 	}
+
+	return res
+}
+
+// unmarshalFleetSpecResponseBodyToFleetSpec builds a value of type
+// *fleet.FleetSpec from a value of type *FleetSpecResponseBody.
+func unmarshalFleetSpecResponseBodyToFleetSpec(v *FleetSpecResponseBody) *fleet.FleetSpec {
+	res := &fleet.FleetSpec{
+		Replicas: *v.Replicas,
+	}
+	res.Template = unmarshalGameserverTemplateResponseBodyToGameserverTemplate(v.Template)
+
+	return res
+}
+
+// unmarshalGameserverTemplateResponseBodyToGameserverTemplate builds a value
+// of type *fleet.GameserverTemplate from a value of type
+// *GameserverTemplateResponseBody.
+func unmarshalGameserverTemplateResponseBodyToGameserverTemplate(v *GameserverTemplateResponseBody) *fleet.GameserverTemplate {
+	res := &fleet.GameserverTemplate{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = unmarshalObjectMetaResponseBodyToObjectMeta(v.ObjectMeta)
+	}
+	res.GameServerSpec = unmarshalGameServerSpecResponseBodyToGameServerSpec(v.GameServerSpec)
 
 	return res
 }

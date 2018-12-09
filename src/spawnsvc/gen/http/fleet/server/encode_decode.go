@@ -160,7 +160,7 @@ func EncodeClearResponse(encoder func(context.Context, http.ResponseWriter) goah
 // fleet configuration endpoint.
 func EncodeConfigurationResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(*fleet.GameserverTemplate)
+		res := v.(*fleet.Fleet)
 		enc := encoder(ctx, w)
 		body := NewConfigurationResponseBody(res)
 		w.WriteHeader(http.StatusOK)
@@ -199,7 +199,7 @@ func DecodeConfigureRequest(mux goahttp.Muxer, decoder func(*http.Request) goaht
 		if err != nil {
 			return nil, err
 		}
-		payload := NewConfigureGameserverTemplate(&body)
+		payload := NewConfigurePayload(&body)
 
 		return payload, nil
 	}
@@ -342,6 +342,34 @@ func marshalObjectMetaToObjectMetaResponseBody(v *fleet.ObjectMeta) *ObjectMetaR
 	res := &ObjectMetaResponseBody{
 		GenerateName: v.GenerateName,
 		Namespace:    v.Namespace,
+	}
+
+	return res
+}
+
+// marshalFleetSpecToFleetSpecResponseBody builds a value of type
+// *FleetSpecResponseBody from a value of type *fleet.FleetSpec.
+func marshalFleetSpecToFleetSpecResponseBody(v *fleet.FleetSpec) *FleetSpecResponseBody {
+	res := &FleetSpecResponseBody{
+		Replicas: v.Replicas,
+	}
+	if v.Template != nil {
+		res.Template = marshalGameserverTemplateToGameserverTemplateResponseBody(v.Template)
+	}
+
+	return res
+}
+
+// marshalGameserverTemplateToGameserverTemplateResponseBody builds a value of
+// type *GameserverTemplateResponseBody from a value of type
+// *fleet.GameserverTemplate.
+func marshalGameserverTemplateToGameserverTemplateResponseBody(v *fleet.GameserverTemplate) *GameserverTemplateResponseBody {
+	res := &GameserverTemplateResponseBody{}
+	if v.ObjectMeta != nil {
+		res.ObjectMeta = marshalObjectMetaToObjectMetaResponseBody(v.ObjectMeta)
+	}
+	if v.GameServerSpec != nil {
+		res.GameServerSpec = marshalGameServerSpecToGameServerSpecResponseBody(v.GameServerSpec)
 	}
 
 	return res
