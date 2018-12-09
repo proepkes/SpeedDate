@@ -23,7 +23,7 @@ import (
 // to call the "fleet" service "add" endpoint
 func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AddFleetPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("fleet", "add", u.String(), err)
 	}
@@ -73,7 +73,7 @@ func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 // set to call the "fleet" service "create" endpoint
 func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateFleetPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("fleet", "create", u.String(), err)
 	}
@@ -131,6 +131,73 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("fleet", "create", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildDeleteRequest instantiates a HTTP request object with method and path
+// set to call the "fleet" service "delete" endpoint
+func (c *Client) BuildDeleteRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		name string
+	)
+	{
+		p, ok := v.(*fleet.DeletePayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("fleet", "delete", "*fleet.DeletePayload", v)
+		}
+		name = p.Name
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteFleetPath(name)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("fleet", "delete", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeDeleteRequest returns an encoder for requests sent to the fleet delete
+// server.
+func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*fleet.DeletePayload)
+		if !ok {
+			return goahttp.ErrInvalidType("fleet", "delete", "*fleet.DeletePayload", v)
+		}
+		values := req.URL.Query()
+		values.Add("namespace", p.Namespace)
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeDeleteResponse returns a decoder for responses returned by the fleet
+// delete endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("fleet", "delete", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -535,6 +602,10 @@ func unmarshalGameServerSpecResponseToGameServerSpecView(v *GameServerSpecRespon
 		ContainerImage: v.ContainerImage,
 		ContainerPort:  v.ContainerPort,
 	}
+	if v.PortPolicy == nil {
+		var tmp string = "dynamic"
+		res.PortPolicy = &tmp
+	}
 
 	return res
 }
@@ -572,10 +643,15 @@ func unmarshalObjectMetaResponseBodyToObjectMeta(v *ObjectMetaResponseBody) *fle
 // *fleet.GameServerSpec from a value of type *GameServerSpecResponseBody.
 func unmarshalGameServerSpecResponseBodyToGameServerSpec(v *GameServerSpecResponseBody) *fleet.GameServerSpec {
 	res := &fleet.GameServerSpec{
-		PortPolicy:     *v.PortPolicy,
 		ContainerName:  *v.ContainerName,
 		ContainerImage: *v.ContainerImage,
 		ContainerPort:  *v.ContainerPort,
+	}
+	if v.PortPolicy != nil {
+		res.PortPolicy = *v.PortPolicy
+	}
+	if v.PortPolicy == nil {
+		res.PortPolicy = "dynamic"
 	}
 
 	return res

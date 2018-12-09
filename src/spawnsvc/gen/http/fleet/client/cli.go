@@ -23,7 +23,7 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 	{
 		err = json.Unmarshal([]byte(fleetCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 1109312752,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 930171550,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
 		}
 		if body.FleetSpec == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
@@ -53,6 +53,26 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 		v.FleetSpec = marshalFleetSpecRequestBodyToFleetSpec(body.FleetSpec)
 	}
 	return v, nil
+}
+
+// BuildDeletePayload builds the payload for the fleet delete endpoint from CLI
+// flags.
+func BuildDeletePayload(fleetDeleteName string, fleetDeleteNamespace string) (*fleet.DeletePayload, error) {
+	var name string
+	{
+		name = fleetDeleteName
+	}
+	var namespace string
+	{
+		if fleetDeleteNamespace != "" {
+			namespace = fleetDeleteNamespace
+		}
+	}
+	payload := &fleet.DeletePayload{
+		Name:      name,
+		Namespace: namespace,
+	}
+	return payload, nil
 }
 
 // BuildListPayload builds the payload for the fleet list endpoint from CLI

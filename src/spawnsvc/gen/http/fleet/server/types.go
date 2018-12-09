@@ -85,7 +85,7 @@ type GameserverTemplateResponse struct {
 // GameServerSpecResponse is used to define fields on response body types.
 type GameServerSpecResponse struct {
 	// Portpolicy either dynamic or static
-	PortPolicy string `form:"PortPolicy" json:"PortPolicy" xml:"PortPolicy"`
+	PortPolicy string `form:"PortPolicy,omitempty" json:"PortPolicy,omitempty" xml:"PortPolicy,omitempty"`
 	// Name of the gameserver-container
 	ContainerName string `form:"ContainerName" json:"ContainerName" xml:"ContainerName"`
 	// Image of the gameserver
@@ -115,7 +115,7 @@ type ObjectMetaResponseBody struct {
 // GameServerSpecResponseBody is used to define fields on response body types.
 type GameServerSpecResponseBody struct {
 	// Portpolicy either dynamic or static
-	PortPolicy string `form:"PortPolicy" json:"PortPolicy" xml:"PortPolicy"`
+	PortPolicy string `form:"PortPolicy,omitempty" json:"PortPolicy,omitempty" xml:"PortPolicy,omitempty"`
 	// Name of the gameserver-container
 	ContainerName string `form:"ContainerName" json:"ContainerName" xml:"ContainerName"`
 	// Image of the gameserver
@@ -202,6 +202,14 @@ func NewCreateFleet(body *CreateRequestBody) *fleet.Fleet {
 	}
 	v.FleetSpec = unmarshalFleetSpecRequestBodyToFleetSpec(body.FleetSpec)
 	return v
+}
+
+// NewDeletePayload builds a fleet service delete endpoint payload.
+func NewDeletePayload(name string, namespace string) *fleet.DeletePayload {
+	return &fleet.DeletePayload{
+		Name:      name,
+		Namespace: namespace,
+	}
 }
 
 // NewListPayload builds a fleet service list endpoint payload.
@@ -385,9 +393,6 @@ func (body *GameserverTemplateRequestBody) Validate() (err error) {
 
 // Validate runs the validations defined on GameServerSpecRequestBody.
 func (body *GameServerSpecRequestBody) Validate() (err error) {
-	if body.PortPolicy == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("PortPolicy", "body"))
-	}
 	if body.ContainerImage == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerImage", "body"))
 	}

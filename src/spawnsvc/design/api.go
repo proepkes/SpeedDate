@@ -43,6 +43,7 @@ var GameServerSpec = Type("GameServerSpec", func() {
 	Attribute("PortPolicy", String, "Portpolicy either dynamic or static", func() {
 		Example("dynamic")
 		Example("static")
+		Default("dynamic")
 	})
 	Attribute("ContainerName", String, "Name of the gameserver-container", func() {
 		Example("my-server")
@@ -53,7 +54,7 @@ var GameServerSpec = Type("GameServerSpec", func() {
 	Attribute("ContainerPort", Int32, "Exposed port of the gameserver", func() {
 		Example(7777)
 	})
-	Required("PortPolicy", "ContainerImage", "ContainerName", "ContainerPort")
+	Required("ContainerImage", "ContainerName", "ContainerPort")
 })
 
 var GameserverTemplate = Type("GameserverTemplate", func() {

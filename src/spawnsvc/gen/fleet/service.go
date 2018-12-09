@@ -11,6 +11,7 @@ import (
 	"context"
 
 	fleetviews "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet/views"
+	"goa.design/goa"
 )
 
 // The service makes it possible to manage gameservers
@@ -19,6 +20,8 @@ type Service interface {
 	Add(context.Context) (res string, err error)
 	// Create a new fleet.
 	Create(context.Context, *Fleet) (res string, err error)
+	// Delete a fleet
+	Delete(context.Context, *DeletePayload) (err error)
 	// List all fleets.
 	List(context.Context, *ListPayload) (res StoredFleetCollection, err error)
 	// Removes all gameserver pods.
@@ -37,7 +40,7 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [6]string{"add", "create", "list", "clear", "configuration", "configure"}
+var MethodNames = [7]string{"add", "create", "delete", "list", "clear", "configuration", "configure"}
 
 // Fleet is the payload type of the fleet service create method.
 type Fleet struct {
@@ -45,6 +48,14 @@ type Fleet struct {
 	ObjectMeta *ObjectMeta
 	// FleetSpec
 	FleetSpec *FleetSpec
+}
+
+// DeletePayload is the payload type of the fleet service delete method.
+type DeletePayload struct {
+	// The namespace
+	Namespace string
+	// Name of the fleet
+	Name string
 }
 
 // ListPayload is the payload type of the fleet service list method.
@@ -114,6 +125,15 @@ type GameServerSpec struct {
 	ContainerImage string
 	// Exposed port of the gameserver
 	ContainerPort int32
+}
+
+// MakeNotFound builds a goa.ServiceError from an error.
+func MakeNotFound(err error) *goa.ServiceError {
+	return &goa.ServiceError{
+		Name:    "not_found",
+		ID:      goa.NewErrorID(),
+		Message: err.Error(),
+	}
 }
 
 // NewStoredFleetCollection initializes result type StoredFleetCollection from
@@ -241,10 +261,15 @@ func unmarshalGameserverTemplateViewToGameserverTemplate(v *fleetviews.Gameserve
 // *GameServerSpec from a value of type *fleetviews.GameServerSpecView.
 func unmarshalGameServerSpecViewToGameServerSpec(v *fleetviews.GameServerSpecView) *GameServerSpec {
 	res := &GameServerSpec{
-		PortPolicy:     *v.PortPolicy,
 		ContainerName:  *v.ContainerName,
 		ContainerImage: *v.ContainerImage,
 		ContainerPort:  *v.ContainerPort,
+	}
+	if v.PortPolicy != nil {
+		res.PortPolicy = *v.PortPolicy
+	}
+	if v.PortPolicy == nil {
+		res.PortPolicy = "dynamic"
 	}
 
 	return res

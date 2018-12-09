@@ -7,6 +7,10 @@
 
 package server
 
+import (
+	"fmt"
+)
+
 // AddFleetPath returns the URL path to the fleet service add HTTP endpoint.
 func AddFleetPath() string {
 	return "/fleet/add"
@@ -14,7 +18,12 @@ func AddFleetPath() string {
 
 // CreateFleetPath returns the URL path to the fleet service create HTTP endpoint.
 func CreateFleetPath() string {
-	return "/fleet/create"
+	return "/fleet"
+}
+
+// DeleteFleetPath returns the URL path to the fleet service delete HTTP endpoint.
+func DeleteFleetPath(name string) string {
+	return fmt.Sprintf("/fleet/%v", name)
 }
 
 // ListFleetPath returns the URL path to the fleet service list HTTP endpoint.

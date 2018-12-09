@@ -17,6 +17,7 @@ import (
 type Client struct {
 	AddEndpoint           goa.Endpoint
 	CreateEndpoint        goa.Endpoint
+	DeleteEndpoint        goa.Endpoint
 	ListEndpoint          goa.Endpoint
 	ClearEndpoint         goa.Endpoint
 	ConfigurationEndpoint goa.Endpoint
@@ -24,10 +25,11 @@ type Client struct {
 }
 
 // NewClient initializes a "fleet" service client given the endpoints.
-func NewClient(add, create, list, clear, configuration, configure goa.Endpoint) *Client {
+func NewClient(add, create, delete_, list, clear, configuration, configure goa.Endpoint) *Client {
 	return &Client{
 		AddEndpoint:           add,
 		CreateEndpoint:        create,
+		DeleteEndpoint:        delete_,
 		ListEndpoint:          list,
 		ClearEndpoint:         clear,
 		ConfigurationEndpoint: configuration,
@@ -53,6 +55,15 @@ func (c *Client) Create(ctx context.Context, p *Fleet) (res string, err error) {
 		return
 	}
 	return ires.(string), nil
+}
+
+// Delete calls the "delete" endpoint of the "fleet" service.
+// Delete may return the following errors:
+//	- "not_found" (type *goa.ServiceError)
+//	- error: internal error
+func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
+	_, err = c.DeleteEndpoint(ctx, p)
+	return
 }
 
 // List calls the "list" endpoint of the "fleet" service.

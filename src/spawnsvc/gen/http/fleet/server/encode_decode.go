@@ -67,6 +67,38 @@ func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 	}
 }
 
+// EncodeDeleteResponse returns an encoder for responses returned by the fleet
+// delete endpoint.
+func EncodeDeleteResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+}
+
+// DecodeDeleteRequest returns a decoder for requests sent to the fleet delete
+// endpoint.
+func DecodeDeleteRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			name      string
+			namespace string
+
+			params = mux.Vars(r)
+		)
+		name = params["name"]
+		namespaceRaw := r.URL.Query().Get("namespace")
+		if namespaceRaw != "" {
+			namespace = namespaceRaw
+		} else {
+			namespace = "default"
+		}
+		payload := NewDeletePayload(name, namespace)
+
+		return payload, nil
+	}
+}
+
 // EncodeListResponse returns an encoder for responses returned by the fleet
 // list endpoint.
 func EncodeListResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
@@ -215,10 +247,15 @@ func unmarshalGameserverTemplateRequestBodyToGameserverTemplate(v *GameserverTem
 // *fleet.GameServerSpec from a value of type *GameServerSpecRequestBody.
 func unmarshalGameServerSpecRequestBodyToGameServerSpec(v *GameServerSpecRequestBody) *fleet.GameServerSpec {
 	res := &fleet.GameServerSpec{
-		PortPolicy:     *v.PortPolicy,
 		ContainerName:  *v.ContainerName,
 		ContainerImage: *v.ContainerImage,
 		ContainerPort:  *v.ContainerPort,
+	}
+	if v.PortPolicy != nil {
+		res.PortPolicy = *v.PortPolicy
+	}
+	if v.PortPolicy == nil {
+		res.PortPolicy = "dynamic"
 	}
 
 	return res
@@ -267,10 +304,15 @@ func marshalGameserverTemplateViewToGameserverTemplateResponse(v *fleetviews.Gam
 // *GameServerSpecResponse from a value of type *fleetviews.GameServerSpecView.
 func marshalGameServerSpecViewToGameServerSpecResponse(v *fleetviews.GameServerSpecView) *GameServerSpecResponse {
 	res := &GameServerSpecResponse{
-		PortPolicy:     *v.PortPolicy,
 		ContainerName:  *v.ContainerName,
 		ContainerImage: *v.ContainerImage,
 		ContainerPort:  *v.ContainerPort,
+	}
+	if v.PortPolicy != nil {
+		res.PortPolicy = *v.PortPolicy
+	}
+	if v.PortPolicy == nil {
+		res.PortPolicy = "dynamic"
 	}
 
 	return res

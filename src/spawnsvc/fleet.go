@@ -108,7 +108,6 @@ func asFleet(p *fleet.Fleet) *v1alpha1.Fleet {
 
 func asGameServerSpec(p *fleet.GameServerSpec) v1alpha1.GameServerSpec {
 	return v1alpha1.GameServerSpec{
-		//TODO: full convert
 		Container: p.ContainerName,
 		Ports: []v1alpha1.GameServerPort{{
 			ContainerPort: p.ContainerPort,
@@ -121,10 +120,24 @@ func asGameServerSpec(p *fleet.GameServerSpec) v1alpha1.GameServerSpec {
 				Containers: []corev1.Container{{
 					Name:            p.ContainerName,
 					Image:           p.ContainerImage,
-					ImagePullPolicy: corev1.PullIfNotPresent}},
+					ImagePullPolicy: corev1.PullIfNotPresent,
+				}},
 			},
 		},
 	}
+}
+
+// Delete a fleet
+func (s *fleetSvc) Delete(ctx context.Context, p *fleet.DeletePayload) (err error) {
+	s.logger.Print("fleet.delete")
+
+	err = s.client.StableV1alpha1().Fleets(p.Namespace).Delete(p.Name, &metav1.DeleteOptions{})
+	if err != nil {
+		s.logger.Println(err.Error())
+		return err
+	}
+
+	return
 }
 
 // List all fleets.

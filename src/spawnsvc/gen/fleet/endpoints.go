@@ -17,6 +17,7 @@ import (
 type Endpoints struct {
 	Add           goa.Endpoint
 	Create        goa.Endpoint
+	Delete        goa.Endpoint
 	List          goa.Endpoint
 	Clear         goa.Endpoint
 	Configuration goa.Endpoint
@@ -28,6 +29,7 @@ func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Add:           NewAddEndpoint(s),
 		Create:        NewCreateEndpoint(s),
+		Delete:        NewDeleteEndpoint(s),
 		List:          NewListEndpoint(s),
 		Clear:         NewClearEndpoint(s),
 		Configuration: NewConfigurationEndpoint(s),
@@ -39,6 +41,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Add = m(e.Add)
 	e.Create = m(e.Create)
+	e.Delete = m(e.Delete)
 	e.List = m(e.List)
 	e.Clear = m(e.Clear)
 	e.Configuration = m(e.Configuration)
@@ -59,6 +62,15 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*Fleet)
 		return s.Create(ctx, p)
+	}
+}
+
+// NewDeleteEndpoint returns an endpoint function that calls the method
+// "delete" of service "fleet".
+func NewDeleteEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*DeletePayload)
+		return nil, s.Delete(ctx, p)
 	}
 }
 

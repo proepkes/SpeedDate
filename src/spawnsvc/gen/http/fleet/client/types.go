@@ -73,7 +73,7 @@ type GameserverTemplateRequestBody struct {
 // GameServerSpecRequestBody is used to define fields on request body types.
 type GameServerSpecRequestBody struct {
 	// Portpolicy either dynamic or static
-	PortPolicy string `form:"PortPolicy" json:"PortPolicy" xml:"PortPolicy"`
+	PortPolicy string `form:"PortPolicy,omitempty" json:"PortPolicy,omitempty" xml:"PortPolicy,omitempty"`
 	// Name of the gameserver-container
 	ContainerName string `form:"ContainerName" json:"ContainerName" xml:"ContainerName"`
 	// Image of the gameserver
@@ -355,9 +355,6 @@ func (body *GameserverTemplateResponse) Validate() (err error) {
 
 // Validate runs the validations defined on GameServerSpecResponse.
 func (body *GameServerSpecResponse) Validate() (err error) {
-	if body.PortPolicy == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("PortPolicy", "body"))
-	}
 	if body.ContainerImage == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerImage", "body"))
 	}
@@ -407,9 +404,6 @@ func (body *ObjectMetaResponseBody) Validate() (err error) {
 
 // Validate runs the validations defined on GameServerSpecResponseBody.
 func (body *GameServerSpecResponseBody) Validate() (err error) {
-	if body.PortPolicy == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("PortPolicy", "body"))
-	}
 	if body.ContainerImage == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("ContainerImage", "body"))
 	}

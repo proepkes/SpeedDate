@@ -15,7 +15,7 @@ var _ = Service("fleet", func() {
 	// Sets CORS response headers for requests with any Origin header
 	cors.Origin("*", func() {
 		cors.Headers("Origin, X-Requested-With, Content-Type, Accept")
-		cors.Methods("OPTIONS", "POST", "GET")
+		cors.Methods("OPTIONS", "PUT", "GET", "DELETE")
 		cors.MaxAge(600)
 	})
 
@@ -23,7 +23,7 @@ var _ = Service("fleet", func() {
 		Description("Add a new gameserver.")
 		Result(String)
 		HTTP(func() {
-			POST("/add")
+			PUT("/add")
 			Response(StatusCreated)
 		})
 	})
@@ -33,8 +33,25 @@ var _ = Service("fleet", func() {
 		Result(String)
 		Payload(Fleet)
 		HTTP(func() {
-			POST("/create")
+			PUT("/")
 			Response(StatusCreated)
+		})
+	})
+
+	Method("delete", func() {
+		Description("Delete a fleet")
+		Payload(func() {
+			Attribute("namespace", String, "The namespace", func() {
+				Default("default")
+			})
+			Attribute("name", String, "Name of the fleet")
+			Required("name")
+		})
+		Error("not_found")
+		HTTP(func() {
+			DELETE("/{name}")
+			Param("namespace")
+			Response(StatusNoContent)
 		})
 	})
 
