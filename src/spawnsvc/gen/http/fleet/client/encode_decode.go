@@ -19,56 +19,6 @@ import (
 	goahttp "goa.design/goa/http"
 )
 
-// BuildAddRequest instantiates a HTTP request object with method and path set
-// to call the "fleet" service "add" endpoint
-func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AddFleetPath()}
-	req, err := http.NewRequest("PUT", u.String(), nil)
-	if err != nil {
-		return nil, goahttp.ErrInvalidURL("fleet", "add", u.String(), err)
-	}
-	if ctx != nil {
-		req = req.WithContext(ctx)
-	}
-
-	return req, nil
-}
-
-// DecodeAddResponse returns a decoder for responses returned by the fleet add
-// endpoint. restoreBody controls whether the response body should be restored
-// after having been read.
-func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
-		if restoreBody {
-			b, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
-			defer func() {
-				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
-			}()
-		} else {
-			defer resp.Body.Close()
-		}
-		switch resp.StatusCode {
-		case http.StatusCreated:
-			var (
-				body string
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("fleet", "add", err)
-			}
-			return body, nil
-		default:
-			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("fleet", "add", resp.StatusCode, string(body))
-		}
-	}
-}
-
 // BuildCreateRequest instantiates a HTTP request object with method and path
 // set to call the "fleet" service "create" endpoint
 func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
@@ -277,13 +227,13 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 	}
 }
 
-// BuildClearRequest instantiates a HTTP request object with method and path
-// set to call the "fleet" service "clear" endpoint
-func (c *Client) BuildClearRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ClearFleetPath()}
+// BuildAllocateRequest instantiates a HTTP request object with method and path
+// set to call the "fleet" service "allocate" endpoint
+func (c *Client) BuildAllocateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AllocateFleetPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("fleet", "clear", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("fleet", "allocate", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -292,10 +242,27 @@ func (c *Client) BuildClearRequest(ctx context.Context, v interface{}) (*http.Re
 	return req, nil
 }
 
-// DecodeClearResponse returns a decoder for responses returned by the fleet
-// clear endpoint. restoreBody controls whether the response body should be
+// EncodeAllocateRequest returns an encoder for requests sent to the fleet
+// allocate server.
+func EncodeAllocateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*fleet.AllocatePayload)
+		if !ok {
+			return goahttp.ErrInvalidType("fleet", "allocate", "*fleet.AllocatePayload", v)
+		}
+		values := req.URL.Query()
+		values.Add("namespace", p.Namespace)
+		values.Add("fleet", p.Fleet)
+		values.Add("name", p.Name)
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeAllocateResponse returns a decoder for responses returned by the fleet
+// allocate endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
-func DecodeClearResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+func DecodeAllocateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := ioutil.ReadAll(resp.Body)
@@ -317,12 +284,12 @@ func DecodeClearResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("fleet", "clear", err)
+				return nil, goahttp.ErrDecodingError("fleet", "allocate", err)
 			}
 			return body, nil
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("fleet", "clear", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("fleet", "allocate", resp.StatusCode, string(body))
 		}
 	}
 }

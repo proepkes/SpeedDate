@@ -20,11 +20,10 @@ import (
 // Server lists the fleet service endpoint HTTP handlers.
 type Server struct {
 	Mounts        []*MountPoint
-	Add           http.Handler
 	Create        http.Handler
 	Delete        http.Handler
 	List          http.Handler
-	Clear         http.Handler
+	Allocate      http.Handler
 	Configuration http.Handler
 	Configure     http.Handler
 	CORS          http.Handler
@@ -57,25 +56,22 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Add", "PUT", "/fleet/add"},
 			{"Create", "PUT", "/fleet"},
 			{"Delete", "DELETE", "/fleet/{name}"},
 			{"List", "GET", "/fleet/list"},
-			{"Clear", "POST", "/fleet/clear"},
+			{"Allocate", "POST", "/fleet/allocate"},
 			{"Configuration", "GET", "/fleet/configuration"},
 			{"Configure", "PATCH", "/fleet/configuration"},
-			{"CORS", "OPTIONS", "/fleet/add"},
 			{"CORS", "OPTIONS", "/fleet"},
 			{"CORS", "OPTIONS", "/fleet/{name}"},
 			{"CORS", "OPTIONS", "/fleet/list"},
-			{"CORS", "OPTIONS", "/fleet/clear"},
+			{"CORS", "OPTIONS", "/fleet/allocate"},
 			{"CORS", "OPTIONS", "/fleet/configuration"},
 		},
-		Add:           NewAddHandler(e.Add, mux, dec, enc, eh),
 		Create:        NewCreateHandler(e.Create, mux, dec, enc, eh),
 		Delete:        NewDeleteHandler(e.Delete, mux, dec, enc, eh),
 		List:          NewListHandler(e.List, mux, dec, enc, eh),
-		Clear:         NewClearHandler(e.Clear, mux, dec, enc, eh),
+		Allocate:      NewAllocateHandler(e.Allocate, mux, dec, enc, eh),
 		Configuration: NewConfigurationHandler(e.Configuration, mux, dec, enc, eh),
 		Configure:     NewConfigureHandler(e.Configure, mux, dec, enc, eh),
 		CORS:          NewCORSHandler(),
@@ -87,11 +83,10 @@ func (s *Server) Service() string { return "fleet" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.Add = m(s.Add)
 	s.Create = m(s.Create)
 	s.Delete = m(s.Delete)
 	s.List = m(s.List)
-	s.Clear = m(s.Clear)
+	s.Allocate = m(s.Allocate)
 	s.Configuration = m(s.Configuration)
 	s.Configure = m(s.Configure)
 	s.CORS = m(s.CORS)
@@ -99,58 +94,13 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 
 // Mount configures the mux to serve the fleet endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountAddHandler(mux, h.Add)
 	MountCreateHandler(mux, h.Create)
 	MountDeleteHandler(mux, h.Delete)
 	MountListHandler(mux, h.List)
-	MountClearHandler(mux, h.Clear)
+	MountAllocateHandler(mux, h.Allocate)
 	MountConfigurationHandler(mux, h.Configuration)
 	MountConfigureHandler(mux, h.Configure)
 	MountCORSHandler(mux, h.CORS)
-}
-
-// MountAddHandler configures the mux to serve the "fleet" service "add"
-// endpoint.
-func MountAddHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := handleFleetOrigin(h).(http.HandlerFunc)
-	if !ok {
-		f = func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		}
-	}
-	mux.Handle("PUT", "/fleet/add", f)
-}
-
-// NewAddHandler creates a HTTP handler which loads the HTTP request and calls
-// the "fleet" service "add" endpoint.
-func NewAddHandler(
-	endpoint goa.Endpoint,
-	mux goahttp.Muxer,
-	dec func(*http.Request) goahttp.Decoder,
-	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
-	eh func(context.Context, http.ResponseWriter, error),
-) http.Handler {
-	var (
-		encodeResponse = EncodeAddResponse(enc)
-		encodeError    = goahttp.ErrorEncoder(enc)
-	)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "add")
-		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
-
-		res, err := endpoint(ctx, nil)
-
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				eh(ctx, w, err)
-			}
-			return
-		}
-		if err := encodeResponse(ctx, w, res); err != nil {
-			eh(ctx, w, err)
-		}
-	})
 }
 
 // MountCreateHandler configures the mux to serve the "fleet" service "create"
@@ -309,21 +259,21 @@ func NewListHandler(
 	})
 }
 
-// MountClearHandler configures the mux to serve the "fleet" service "clear"
-// endpoint.
-func MountClearHandler(mux goahttp.Muxer, h http.Handler) {
+// MountAllocateHandler configures the mux to serve the "fleet" service
+// "allocate" endpoint.
+func MountAllocateHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := handleFleetOrigin(h).(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/fleet/clear", f)
+	mux.Handle("POST", "/fleet/allocate", f)
 }
 
-// NewClearHandler creates a HTTP handler which loads the HTTP request and
-// calls the "fleet" service "clear" endpoint.
-func NewClearHandler(
+// NewAllocateHandler creates a HTTP handler which loads the HTTP request and
+// calls the "fleet" service "allocate" endpoint.
+func NewAllocateHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	dec func(*http.Request) goahttp.Decoder,
@@ -331,15 +281,23 @@ func NewClearHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
-		encodeResponse = EncodeClearResponse(enc)
+		decodeRequest  = DecodeAllocateRequest(mux, dec)
+		encodeResponse = EncodeAllocateResponse(enc)
 		encodeError    = goahttp.ErrorEncoder(enc)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "clear")
+		ctx = context.WithValue(ctx, goa.MethodKey, "allocate")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
 
-		res, err := endpoint(ctx, nil)
+		res, err := endpoint(ctx, payload)
 
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
@@ -459,11 +417,10 @@ func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("OPTIONS", "/fleet/add", f)
 	mux.Handle("OPTIONS", "/fleet", f)
 	mux.Handle("OPTIONS", "/fleet/{name}", f)
 	mux.Handle("OPTIONS", "/fleet/list", f)
-	mux.Handle("OPTIONS", "/fleet/clear", f)
+	mux.Handle("OPTIONS", "/fleet/allocate", f)
 	mux.Handle("OPTIONS", "/fleet/configuration", f)
 }
 
@@ -491,7 +448,7 @@ func handleFleetOrigin(h http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Credentials", "false")
 			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
-				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, GET, DELETE, PATCH")
+				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, GET, POST, DELETE, PATCH")
 				w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 			}
 			origHndlr(w, r)

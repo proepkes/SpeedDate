@@ -1,0 +1,36 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add detect-bowser
+
+PATH: 
+  C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\philb\bin;C:\Python27;C:\Python27\Scripts;C:\ProgramData\Boxstarter;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git\cmd;C:\Go\bin;C:\Users\philb\AppData\Local\Microsoft\WindowsApps;C:\Users\philb\AppData\Local\GitHubDesktop\bin;C:\Users\philb\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\philb\go\bin;C:\Users\philb\Documents\WindowsPowerShell\Scripts;E:\binaries;C:\Program Files (x86)\Kubernetes\Minikube;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files (x86)\Yarn\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\philb\AppData\Local\Microsoft\WindowsApps;C:\Users\philb\AppData\Local\GitHubDesktop\bin;C:\Users\philb\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\philb\go\bin;C:\Users\philb\Documents\WindowsPowerShell\Scripts;E:\binaries;C:\Program Files (x86)\Kubernetes\Minikube;C:\Users\philb\AppData\Roaming\npm;C:\Users\philb\AppData\Local\Yarn\bin;E:\flutter\bin
+
+Yarn version: 
+  1.12.3
+
+Node version: 
+  10.13.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/detect-bowser: Not found
+      at Request.params.callback [as _callback] (C:\Program Files (x86)\Yarn\lib\cli.js:65003:18)
+      at Request.self.callback (C:\Program Files (x86)\Yarn\lib\cli.js:129018:22)
+      at Request.emit (events.js:182:13)
+      at Request.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:129990:10)
+      at Request.emit (events.js:182:13)
+      at IncomingMessage.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:129912:12)
+      at Object.onceWrapper (events.js:273:13)
+      at IncomingMessage.emit (events.js:187:15)
+      at endReadableNT (_stream_readable.js:1094:12)
+      at process._tickCallback (internal/process/next_tick.js:63:19)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

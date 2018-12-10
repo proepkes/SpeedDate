@@ -15,17 +15,8 @@ var _ = Service("fleet", func() {
 	// Sets CORS response headers for requests with any Origin header
 	cors.Origin("*", func() {
 		cors.Headers("Origin, X-Requested-With, Content-Type, Accept")
-		cors.Methods("OPTIONS", "PUT", "GET", "DELETE", "PATCH")
+		cors.Methods("OPTIONS", "PUT", "GET", "POST", "DELETE", "PATCH")
 		cors.MaxAge(600)
-	})
-
-	Method("add", func() {
-		Description("Add a new gameserver.")
-		Result(String)
-		HTTP(func() {
-			PUT("/add")
-			Response(StatusCreated)
-		})
 	})
 
 	Method("create", func() {
@@ -76,17 +67,28 @@ var _ = Service("fleet", func() {
 		})
 	})
 
-	Method("clear", func() {
-		Description("Removes all gameserver pods.")
+	Method("allocate", func() {
+		Description("Create a fleetallocation.")
 		Result(String)
+		Payload(func() {
+			Attribute("fleet", String, "Name of the fleet to allocate from")
+			Attribute("namespace", String, "Must match the namespace of the fleet", func() {
+				Default("default")
+			})
+			Attribute("name", String, "Nameprefix for the allocation")
+			Required("fleet", "name")
+		})
 		HTTP(func() {
-			POST("/clear")
+			POST("/allocate")
+			Param("namespace")
+			Param("fleet")
+			Param("name")
 			Response(StatusOK)
 		})
 	})
 
 	Method("configuration", func() {
-		Description("Get gameserver deployment configuration.")
+		Description("Get default fleet configuration.")
 		Result(Fleet)
 		HTTP(func() {
 			GET("/configuration")
@@ -95,7 +97,7 @@ var _ = Service("fleet", func() {
 	})
 
 	Method("configure", func() {
-		Description("Configure gameserver deployment.")
+		Description("Configure default fleet options.")
 		Result(String)
 		Payload(func() {
 			Attribute("NamePrefix", String, "The NamePrefix")

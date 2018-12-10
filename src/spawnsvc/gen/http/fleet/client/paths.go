@@ -11,11 +11,6 @@ import (
 	"fmt"
 )
 
-// AddFleetPath returns the URL path to the fleet service add HTTP endpoint.
-func AddFleetPath() string {
-	return "/fleet/add"
-}
-
 // CreateFleetPath returns the URL path to the fleet service create HTTP endpoint.
 func CreateFleetPath() string {
 	return "/fleet"
@@ -31,9 +26,9 @@ func ListFleetPath() string {
 	return "/fleet/list"
 }
 
-// ClearFleetPath returns the URL path to the fleet service clear HTTP endpoint.
-func ClearFleetPath() string {
-	return "/fleet/clear"
+// AllocateFleetPath returns the URL path to the fleet service allocate HTTP endpoint.
+func AllocateFleetPath() string {
+	return "/fleet/allocate"
 }
 
 // ConfigurationFleetPath returns the URL path to the fleet service configuration HTTP endpoint.

@@ -23,7 +23,7 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 	{
 		err = json.Unmarshal([]byte(fleetCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 2005356941,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 729387113,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
 		}
 		if body.FleetSpec == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
@@ -97,6 +97,31 @@ func BuildListPayload(fleetListNamespace string, fleetListView string) (*fleet.L
 	return payload, nil
 }
 
+// BuildAllocatePayload builds the payload for the fleet allocate endpoint from
+// CLI flags.
+func BuildAllocatePayload(fleetAllocateNamespace string, fleetAllocateFleet2 string, fleetAllocateName string) (*fleet.AllocatePayload, error) {
+	var namespace string
+	{
+		if fleetAllocateNamespace != "" {
+			namespace = fleetAllocateNamespace
+		}
+	}
+	var fleet2 string
+	{
+		fleet2 = fleetAllocateFleet2
+	}
+	var name string
+	{
+		name = fleetAllocateName
+	}
+	payload := &fleet.AllocatePayload{
+		Namespace: namespace,
+		Fleet:     fleet2,
+		Name:      name,
+	}
+	return payload, nil
+}
+
 // BuildConfigurePayload builds the payload for the fleet configure endpoint
 // from CLI flags.
 func BuildConfigurePayload(fleetConfigureBody string) (*fleet.ConfigurePayload, error) {
@@ -105,7 +130,7 @@ func BuildConfigurePayload(fleetConfigureBody string) (*fleet.ConfigurePayload, 
 	{
 		err = json.Unmarshal([]byte(fleetConfigureBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"Et est delectus voluptate tempore sunt.\",\n      \"ContainerName\": \"Ut ut quam quia nostrum exercitationem est.\",\n      \"ContainerPort\": 1609367978,\n      \"GameserverNamePrefix\": \"Ducimus voluptas error vel magni aut.\",\n      \"NamePrefix\": \"Asperiores quis fugit.\",\n      \"Namespace\": \"Velit dolorem.\",\n      \"Replicas\": 331646220\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"Neque voluptas tempore corrupti qui deserunt et.\",\n      \"ContainerName\": \"Eius cupiditate.\",\n      \"ContainerPort\": 562447540,\n      \"GameserverNamePrefix\": \"Doloremque voluptatem.\",\n      \"NamePrefix\": \"Corrupti qui et recusandae aliquid.\",\n      \"Namespace\": \"Impedit saepe ea inventore recusandae velit.\",\n      \"Replicas\": 1095142904\n   }'")
 		}
 	}
 	if err != nil {

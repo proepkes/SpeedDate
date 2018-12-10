@@ -2,6 +2,7 @@ package spawnsvc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -175,6 +176,40 @@ func (s *fleetSvc) List(ctx context.Context, p *fleet.ListPayload) (res fleet.St
 		})
 	}
 	return
+}
+
+// Create a fleetallocation.
+func (s *fleetSvc) Allocate(ctx context.Context, p *fleet.AllocatePayload) (res string, err error) {
+	s.logger.Print("fleet.allocate")
+
+	fleetInterface := s.client.StableV1alpha1().Fleets(p.Namespace)
+	fleet, err := fleetInterface.Get(p.Fleet, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	readyReplicas := fleet.Status.ReadyReplicas
+	if readyReplicas < 1 {
+		return "", fmt.Errorf("Insufficient ready replicas, cannot create fleet allocation")
+	}
+
+	fleetAllocationInterface := s.client.StableV1alpha1().FleetAllocations(p.Namespace)
+
+	fa := &v1alpha1.FleetAllocation{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: p.Name, Namespace: p.Namespace,
+		},
+		Spec: v1alpha1.FleetAllocationSpec{FleetName: p.Fleet},
+	}
+
+	// Create a new fleet allocation
+	newFleetAllocation, err := fleetAllocationInterface.Create(fa)
+	if err != nil {
+		return "", err
+	}
+
+	b, _ := json.Marshal(newFleetAllocation.Status.GameServer.Status)
+	return string(b), nil
 }
 
 // Removes all gameserver pods.

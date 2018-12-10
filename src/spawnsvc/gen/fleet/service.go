@@ -16,19 +16,17 @@ import (
 
 // The service makes it possible to manage gameservers
 type Service interface {
-	// Add a new gameserver.
-	Add(context.Context) (res string, err error)
 	// Create a new fleet.
 	Create(context.Context, *Fleet) (res string, err error)
 	// Delete a fleet
 	Delete(context.Context, *DeletePayload) (err error)
 	// List all fleets.
 	List(context.Context, *ListPayload) (res StoredFleetCollection, err error)
-	// Removes all gameserver pods.
-	Clear(context.Context) (res string, err error)
-	// Get gameserver deployment configuration.
+	// Create a fleetallocation.
+	Allocate(context.Context, *AllocatePayload) (res string, err error)
+	// Get default fleet configuration.
 	Configuration(context.Context) (res *Fleet, err error)
-	// Configure gameserver deployment.
+	// Configure default fleet options.
 	Configure(context.Context, *ConfigurePayload) (res string, err error)
 }
 
@@ -40,7 +38,7 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [7]string{"add", "create", "delete", "list", "clear", "configuration", "configure"}
+var MethodNames = [6]string{"create", "delete", "list", "allocate", "configuration", "configure"}
 
 // Fleet is the payload type of the fleet service create method.
 type Fleet struct {
@@ -68,6 +66,16 @@ type ListPayload struct {
 
 // StoredFleetCollection is the result type of the fleet service list method.
 type StoredFleetCollection []*StoredFleet
+
+// AllocatePayload is the payload type of the fleet service allocate method.
+type AllocatePayload struct {
+	// Name of the fleet to allocate from
+	Fleet string
+	// Must match the namespace of the fleet
+	Namespace string
+	// Nameprefix for the allocation
+	Name string
+}
 
 // ConfigurePayload is the payload type of the fleet service configure method.
 type ConfigurePayload struct {

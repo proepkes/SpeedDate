@@ -247,6 +247,15 @@ func NewListPayload(namespace string, view *string) *fleet.ListPayload {
 	}
 }
 
+// NewAllocatePayload builds a fleet service allocate endpoint payload.
+func NewAllocatePayload(namespace string, fleet2 string, name string) *fleet.AllocatePayload {
+	return &fleet.AllocatePayload{
+		Namespace: namespace,
+		Fleet:     fleet2,
+		Name:      name,
+	}
+}
+
 // NewConfigurePayload builds a fleet service configure endpoint payload.
 func NewConfigurePayload(body *ConfigureRequestBody) *fleet.ConfigurePayload {
 	v := &fleet.ConfigurePayload{

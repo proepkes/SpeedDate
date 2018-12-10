@@ -23,13 +23,33 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `fleet (add|create|delete|list|clear|configuration|configure)
+	return `fleet (create|delete|list|allocate|configuration|configure)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` fleet add` + "\n" +
+	return os.Args[0] + ` fleet create --body '{
+      "FleetSpec": {
+         "Replicas": 729387113,
+         "Template": {
+            "GameServerSpec": {
+               "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
+               "ContainerName": "my-server",
+               "ContainerPort": 7777,
+               "PortPolicy": "dynamic"
+            },
+            "ObjectMeta": {
+               "GenerateName": "my-server",
+               "Namespace": "speeddate-system"
+            }
+         }
+      },
+      "ObjectMeta": {
+         "GenerateName": "my-server",
+         "Namespace": "speeddate-system"
+      }
+   }'` + "\n" +
 		""
 }
 
@@ -45,8 +65,6 @@ func ParseEndpoint(
 	var (
 		fleetFlags = flag.NewFlagSet("fleet", flag.ContinueOnError)
 
-		fleetAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
-
 		fleetCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		fleetCreateBodyFlag = fleetCreateFlags.String("body", "REQUIRED", "")
 
@@ -58,7 +76,10 @@ func ParseEndpoint(
 		fleetListNamespaceFlag = fleetListFlags.String("namespace", "", "")
 		fleetListViewFlag      = fleetListFlags.String("view", "", "")
 
-		fleetClearFlags = flag.NewFlagSet("clear", flag.ExitOnError)
+		fleetAllocateFlags         = flag.NewFlagSet("allocate", flag.ExitOnError)
+		fleetAllocateNamespaceFlag = fleetAllocateFlags.String("namespace", "", "")
+		fleetAllocateFleet2Flag    = fleetAllocateFlags.String("fleet2", "REQUIRED", "")
+		fleetAllocateNameFlag      = fleetAllocateFlags.String("name", "REQUIRED", "")
 
 		fleetConfigurationFlags = flag.NewFlagSet("configuration", flag.ExitOnError)
 
@@ -66,11 +87,10 @@ func ParseEndpoint(
 		fleetConfigureBodyFlag = fleetConfigureFlags.String("body", "REQUIRED", "")
 	)
 	fleetFlags.Usage = fleetUsage
-	fleetAddFlags.Usage = fleetAddUsage
 	fleetCreateFlags.Usage = fleetCreateUsage
 	fleetDeleteFlags.Usage = fleetDeleteUsage
 	fleetListFlags.Usage = fleetListUsage
-	fleetClearFlags.Usage = fleetClearUsage
+	fleetAllocateFlags.Usage = fleetAllocateUsage
 	fleetConfigurationFlags.Usage = fleetConfigurationUsage
 	fleetConfigureFlags.Usage = fleetConfigureUsage
 
@@ -108,9 +128,6 @@ func ParseEndpoint(
 		switch svcn {
 		case "fleet":
 			switch epn {
-			case "add":
-				epf = fleetAddFlags
-
 			case "create":
 				epf = fleetCreateFlags
 
@@ -120,8 +137,8 @@ func ParseEndpoint(
 			case "list":
 				epf = fleetListFlags
 
-			case "clear":
-				epf = fleetClearFlags
+			case "allocate":
+				epf = fleetAllocateFlags
 
 			case "configuration":
 				epf = fleetConfigurationFlags
@@ -154,9 +171,6 @@ func ParseEndpoint(
 		case "fleet":
 			c := fleetc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "add":
-				endpoint = c.Add()
-				data = nil
 			case "create":
 				endpoint = c.Create()
 				data, err = fleetc.BuildCreatePayload(*fleetCreateBodyFlag)
@@ -166,9 +180,9 @@ func ParseEndpoint(
 			case "list":
 				endpoint = c.List()
 				data, err = fleetc.BuildListPayload(*fleetListNamespaceFlag, *fleetListViewFlag)
-			case "clear":
-				endpoint = c.Clear()
-				data = nil
+			case "allocate":
+				endpoint = c.Allocate()
+				data, err = fleetc.BuildAllocatePayload(*fleetAllocateNamespaceFlag, *fleetAllocateFleet2Flag, *fleetAllocateNameFlag)
 			case "configuration":
 				endpoint = c.Configuration()
 				data = nil
@@ -192,28 +206,17 @@ Usage:
     %s [globalflags] fleet COMMAND [flags]
 
 COMMAND:
-    add: Add a new gameserver.
     create: Create a new fleet.
     delete: Delete a fleet
     list: List all fleets.
-    clear: Removes all gameserver pods.
-    configuration: Get gameserver deployment configuration.
-    configure: Configure gameserver deployment.
+    allocate: Create a fleetallocation.
+    configuration: Get default fleet configuration.
+    configure: Configure default fleet options.
 
 Additional help:
     %s fleet COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func fleetAddUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] fleet add
-
-Add a new gameserver.
-
-Example:
-    `+os.Args[0]+` fleet add
-`, os.Args[0])
-}
-
 func fleetCreateUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] fleet create -body JSON
 
@@ -223,7 +226,7 @@ Create a new fleet.
 Example:
     `+os.Args[0]+` fleet create --body '{
       "FleetSpec": {
-         "Replicas": 2005356941,
+         "Replicas": 729387113,
          "Template": {
             "GameServerSpec": {
                "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
@@ -253,7 +256,7 @@ Delete a fleet
     -namespace STRING: 
 
 Example:
-    `+os.Args[0]+` fleet delete --name "Dolores odit qui dolor ipsum." --namespace "Beatae in explicabo."
+    `+os.Args[0]+` fleet delete --name "Aut repellat nulla sequi minus cupiditate." --namespace "Incidunt saepe molestiae perspiciatis eveniet nobis."
 `, os.Args[0])
 }
 
@@ -265,24 +268,27 @@ List all fleets.
     -view STRING: 
 
 Example:
-    `+os.Args[0]+` fleet list --namespace "Pariatur laudantium ea corrupti perferendis." --view "default"
+    `+os.Args[0]+` fleet list --namespace "Quae vel." --view "default"
 `, os.Args[0])
 }
 
-func fleetClearUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] fleet clear
+func fleetAllocateUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet allocate -namespace STRING -fleet2 STRING -name STRING
 
-Removes all gameserver pods.
+Create a fleetallocation.
+    -namespace STRING: 
+    -fleet2 STRING: 
+    -name STRING: 
 
 Example:
-    `+os.Args[0]+` fleet clear
+    `+os.Args[0]+` fleet allocate --namespace "Ad ut ut quam quia nostrum." --fleet2 "Est numquam soluta ducimus voluptas error." --name "Magni aut alias velit dolorem provident."
 `, os.Args[0])
 }
 
 func fleetConfigurationUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] fleet configuration
 
-Get gameserver deployment configuration.
+Get default fleet configuration.
 
 Example:
     `+os.Args[0]+` fleet configuration
@@ -292,18 +298,18 @@ Example:
 func fleetConfigureUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] fleet configure -body JSON
 
-Configure gameserver deployment.
+Configure default fleet options.
     -body JSON: 
 
 Example:
     `+os.Args[0]+` fleet configure --body '{
-      "ContainerImage": "Et est delectus voluptate tempore sunt.",
-      "ContainerName": "Ut ut quam quia nostrum exercitationem est.",
-      "ContainerPort": 1609367978,
-      "GameserverNamePrefix": "Ducimus voluptas error vel magni aut.",
-      "NamePrefix": "Asperiores quis fugit.",
-      "Namespace": "Velit dolorem.",
-      "Replicas": 331646220
+      "ContainerImage": "Neque voluptas tempore corrupti qui deserunt et.",
+      "ContainerName": "Eius cupiditate.",
+      "ContainerPort": 562447540,
+      "GameserverNamePrefix": "Doloremque voluptatem.",
+      "NamePrefix": "Corrupti qui et recusandae aliquid.",
+      "Namespace": "Impedit saepe ea inventore recusandae velit.",
+      "Replicas": 1095142904
    }'
 `, os.Args[0])
 }

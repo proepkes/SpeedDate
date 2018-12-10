@@ -15,36 +15,24 @@ import (
 
 // Client is the "fleet" service client.
 type Client struct {
-	AddEndpoint           goa.Endpoint
 	CreateEndpoint        goa.Endpoint
 	DeleteEndpoint        goa.Endpoint
 	ListEndpoint          goa.Endpoint
-	ClearEndpoint         goa.Endpoint
+	AllocateEndpoint      goa.Endpoint
 	ConfigurationEndpoint goa.Endpoint
 	ConfigureEndpoint     goa.Endpoint
 }
 
 // NewClient initializes a "fleet" service client given the endpoints.
-func NewClient(add, create, delete_, list, clear, configuration, configure goa.Endpoint) *Client {
+func NewClient(create, delete_, list, allocate, configuration, configure goa.Endpoint) *Client {
 	return &Client{
-		AddEndpoint:           add,
 		CreateEndpoint:        create,
 		DeleteEndpoint:        delete_,
 		ListEndpoint:          list,
-		ClearEndpoint:         clear,
+		AllocateEndpoint:      allocate,
 		ConfigurationEndpoint: configuration,
 		ConfigureEndpoint:     configure,
 	}
-}
-
-// Add calls the "add" endpoint of the "fleet" service.
-func (c *Client) Add(ctx context.Context) (res string, err error) {
-	var ires interface{}
-	ires, err = c.AddEndpoint(ctx, nil)
-	if err != nil {
-		return
-	}
-	return ires.(string), nil
 }
 
 // Create calls the "create" endpoint of the "fleet" service.
@@ -76,10 +64,10 @@ func (c *Client) List(ctx context.Context, p *ListPayload) (res StoredFleetColle
 	return ires.(StoredFleetCollection), nil
 }
 
-// Clear calls the "clear" endpoint of the "fleet" service.
-func (c *Client) Clear(ctx context.Context) (res string, err error) {
+// Allocate calls the "allocate" endpoint of the "fleet" service.
+func (c *Client) Allocate(ctx context.Context, p *AllocatePayload) (res string, err error) {
 	var ires interface{}
-	ires, err = c.ClearEndpoint(ctx, nil)
+	ires, err = c.AllocateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}

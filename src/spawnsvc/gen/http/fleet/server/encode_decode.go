@@ -18,18 +18,6 @@ import (
 	goahttp "goa.design/goa/http"
 )
 
-// EncodeAddResponse returns an encoder for responses returned by the fleet add
-// endpoint.
-func EncodeAddResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
-	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(string)
-		enc := encoder(ctx, w)
-		body := res
-		w.WriteHeader(http.StatusCreated)
-		return enc.Encode(body)
-	}
-}
-
 // EncodeCreateResponse returns an encoder for responses returned by the fleet
 // create endpoint.
 func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
@@ -144,15 +132,48 @@ func DecodeListRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.De
 	}
 }
 
-// EncodeClearResponse returns an encoder for responses returned by the fleet
-// clear endpoint.
-func EncodeClearResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeAllocateResponse returns an encoder for responses returned by the
+// fleet allocate endpoint.
+func EncodeAllocateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		res := v.(string)
 		enc := encoder(ctx, w)
 		body := res
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// DecodeAllocateRequest returns a decoder for requests sent to the fleet
+// allocate endpoint.
+func DecodeAllocateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			namespace string
+			fleet2    string
+			name      string
+			err       error
+		)
+		namespaceRaw := r.URL.Query().Get("namespace")
+		if namespaceRaw != "" {
+			namespace = namespaceRaw
+		} else {
+			namespace = "default"
+		}
+		fleet2 = r.URL.Query().Get("fleet")
+		if fleet2 == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("fleet", "query string"))
+		}
+		name = r.URL.Query().Get("name")
+		if name == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("name", "query string"))
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewAllocatePayload(namespace, fleet2, name)
+
+		return payload, nil
 	}
 }
 

@@ -17,9 +17,6 @@ import (
 
 // Client lists the fleet service endpoint HTTP clients.
 type Client struct {
-	// Add Doer is the HTTP client used to make requests to the add endpoint.
-	AddDoer goahttp.Doer
-
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
 
@@ -29,8 +26,9 @@ type Client struct {
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
-	// Clear Doer is the HTTP client used to make requests to the clear endpoint.
-	ClearDoer goahttp.Doer
+	// Allocate Doer is the HTTP client used to make requests to the allocate
+	// endpoint.
+	AllocateDoer goahttp.Doer
 
 	// Configuration Doer is the HTTP client used to make requests to the
 	// configuration endpoint.
@@ -63,11 +61,10 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		AddDoer:             doer,
 		CreateDoer:          doer,
 		DeleteDoer:          doer,
 		ListDoer:            doer,
-		ClearDoer:           doer,
+		AllocateDoer:        doer,
 		ConfigurationDoer:   doer,
 		ConfigureDoer:       doer,
 		CORSDoer:            doer,
@@ -76,26 +73,6 @@ func NewClient(
 		host:                host,
 		decoder:             dec,
 		encoder:             enc,
-	}
-}
-
-// Add returns an endpoint that makes HTTP requests to the fleet service add
-// server.
-func (c *Client) Add() goa.Endpoint {
-	var (
-		decodeResponse = DecodeAddResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildAddRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.AddDoer.Do(req)
-
-		if err != nil {
-			return nil, goahttp.ErrRequestError("fleet", "add", err)
-		}
-		return decodeResponse(resp)
 	}
 }
 
@@ -174,21 +151,26 @@ func (c *Client) List() goa.Endpoint {
 	}
 }
 
-// Clear returns an endpoint that makes HTTP requests to the fleet service
-// clear server.
-func (c *Client) Clear() goa.Endpoint {
+// Allocate returns an endpoint that makes HTTP requests to the fleet service
+// allocate server.
+func (c *Client) Allocate() goa.Endpoint {
 	var (
-		decodeResponse = DecodeClearResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeAllocateRequest(c.encoder)
+		decodeResponse = DecodeAllocateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildClearRequest(ctx, v)
+		req, err := c.BuildAllocateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ClearDoer.Do(req)
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.AllocateDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("fleet", "clear", err)
+			return nil, goahttp.ErrRequestError("fleet", "allocate", err)
 		}
 		return decodeResponse(resp)
 	}

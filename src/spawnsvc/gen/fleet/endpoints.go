@@ -15,11 +15,10 @@ import (
 
 // Endpoints wraps the "fleet" service endpoints.
 type Endpoints struct {
-	Add           goa.Endpoint
 	Create        goa.Endpoint
 	Delete        goa.Endpoint
 	List          goa.Endpoint
-	Clear         goa.Endpoint
+	Allocate      goa.Endpoint
 	Configuration goa.Endpoint
 	Configure     goa.Endpoint
 }
@@ -27,11 +26,10 @@ type Endpoints struct {
 // NewEndpoints wraps the methods of the "fleet" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Add:           NewAddEndpoint(s),
 		Create:        NewCreateEndpoint(s),
 		Delete:        NewDeleteEndpoint(s),
 		List:          NewListEndpoint(s),
-		Clear:         NewClearEndpoint(s),
+		Allocate:      NewAllocateEndpoint(s),
 		Configuration: NewConfigurationEndpoint(s),
 		Configure:     NewConfigureEndpoint(s),
 	}
@@ -39,21 +37,12 @@ func NewEndpoints(s Service) *Endpoints {
 
 // Use applies the given middleware to all the "fleet" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.Add = m(e.Add)
 	e.Create = m(e.Create)
 	e.Delete = m(e.Delete)
 	e.List = m(e.List)
-	e.Clear = m(e.Clear)
+	e.Allocate = m(e.Allocate)
 	e.Configuration = m(e.Configuration)
 	e.Configure = m(e.Configure)
-}
-
-// NewAddEndpoint returns an endpoint function that calls the method "add" of
-// service "fleet".
-func NewAddEndpoint(s Service) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.Add(ctx)
-	}
 }
 
 // NewCreateEndpoint returns an endpoint function that calls the method
@@ -88,11 +77,12 @@ func NewListEndpoint(s Service) goa.Endpoint {
 	}
 }
 
-// NewClearEndpoint returns an endpoint function that calls the method "clear"
-// of service "fleet".
-func NewClearEndpoint(s Service) goa.Endpoint {
+// NewAllocateEndpoint returns an endpoint function that calls the method
+// "allocate" of service "fleet".
+func NewAllocateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.Clear(ctx)
+		p := req.(*AllocatePayload)
+		return s.Allocate(ctx, p)
 	}
 }
 
