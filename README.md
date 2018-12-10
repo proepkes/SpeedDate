@@ -1,9 +1,9 @@
 Under construction
 
-## Requirements:
-- Kubernetes-cluster
-- Istio
+## Dependencies:
+- Kubernetes + Istio
 - Cockroachdb
+- Agones
 
 
 ## Cockroachdb
