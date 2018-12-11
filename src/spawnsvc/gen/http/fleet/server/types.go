@@ -239,6 +239,15 @@ func NewDeletePayload(name string, namespace string) *fleet.DeletePayload {
 	}
 }
 
+// NewPatchPayload builds a fleet service patch endpoint payload.
+func NewPatchPayload(namespace string, name string, replicas *uint32) *fleet.PatchPayload {
+	return &fleet.PatchPayload{
+		Namespace: namespace,
+		Name:      name,
+		Replicas:  replicas,
+	}
+}
+
 // NewListPayload builds a fleet service list endpoint payload.
 func NewListPayload(namespace string, view *string) *fleet.ListPayload {
 	return &fleet.ListPayload{

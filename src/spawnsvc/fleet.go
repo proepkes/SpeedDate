@@ -13,6 +13,7 @@ import (
 	"agones.dev/agones/pkg/client/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -45,42 +46,11 @@ func NewFleet(logger *log.Logger, speeddateNamespace string, gameserverNamespace
 	return x
 }
 
-// Add a new gameserver.
-func (s *fleetSvc) Add(ctx context.Context) (res string, err error) {
-	s.logger.Print("fleet.add")
-
-	cm, err := s.getGameserverConfig()
-	if err != nil {
-		s.logger.Println(err.Error())
-		return "", err
-	}
-
-	cp, err := strconv.ParseInt(cm.Data["ContainerPort"], 10, 32)
-	if err != nil {
-		s.logger.Println(err.Error())
-		return "", err
-	}
-
-	// Create a GameServer
-	gs := &v1alpha1.GameServer{
-		ObjectMeta: metav1.ObjectMeta{GenerateName: cm.Data["GameserverNamePrefix"], Namespace: cm.Data["GameserverNamespace"]},
-		Spec: v1alpha1.GameServerSpec{
-			Ports: []v1alpha1.GameServerPort{{ContainerPort: int32(cp), PortPolicy: v1alpha1.PortPolicy(cm.Data["PortPolicy"])}},
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{{Name: cm.Data["ContainerName"], Image: cm.Data["ContainerImage"]}},
-				},
-			},
-		},
-	}
-	newGS, err := s.client.StableV1alpha1().GameServers(cm.Data["GameserverNamespace"]).Create(gs)
-	if err != nil {
-		s.logger.Println(err.Error())
-		panic(err)
-	}
-
-	fmt.Printf("New game servers' name is: %s", newGS.ObjectMeta.Name)
-
+// Create a new fleet.
+func (s *fleetSvc) Patch(ctx context.Context, p *fleet.PatchPayload) (res string, err error) {
+	s.logger.Print("fleet.patch")
+	patch := fmt.Sprintf(`[{ "op": "replace", "path": "/spec/replicas", "value": %d }]`, *p.Replicas)
+	s.client.StableV1alpha1().Fleets(p.Namespace).Patch(p.Name, types.JSONPatchType, []byte(patch))
 	return
 }
 

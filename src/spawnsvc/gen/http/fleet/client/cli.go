@@ -10,6 +10,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	goa "goa.design/goa"
@@ -23,7 +24,7 @@ func BuildCreatePayload(fleetCreateBody string) (*fleet.Fleet, error) {
 	{
 		err = json.Unmarshal([]byte(fleetCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 729387113,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"FleetSpec\": {\n         \"Replicas\": 737777790,\n         \"Template\": {\n            \"GameServerSpec\": {\n               \"ContainerImage\": \"gcr.io/agones-images/udp-server:0.4\",\n               \"ContainerName\": \"my-server\",\n               \"ContainerPort\": 7777,\n               \"PortPolicy\": \"dynamic\"\n            },\n            \"ObjectMeta\": {\n               \"GenerateName\": \"my-server\",\n               \"Namespace\": \"speeddate-system\"\n            }\n         }\n      },\n      \"ObjectMeta\": {\n         \"GenerateName\": \"my-server\",\n         \"Namespace\": \"speeddate-system\"\n      }\n   }'")
 		}
 		if body.FleetSpec == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("FleetSpec", "body"))
@@ -71,6 +72,43 @@ func BuildDeletePayload(fleetDeleteName string, fleetDeleteNamespace string) (*f
 	payload := &fleet.DeletePayload{
 		Name:      name,
 		Namespace: namespace,
+	}
+	return payload, nil
+}
+
+// BuildPatchPayload builds the payload for the fleet patch endpoint from CLI
+// flags.
+func BuildPatchPayload(fleetPatchNamespace string, fleetPatchName string, fleetPatchReplicas string) (*fleet.PatchPayload, error) {
+	var err error
+	var namespace string
+	{
+		if fleetPatchNamespace != "" {
+			namespace = fleetPatchNamespace
+		}
+	}
+	var name string
+	{
+		name = fleetPatchName
+	}
+	var replicas *uint32
+	{
+		if fleetPatchReplicas != "" {
+			var v uint64
+			v, err = strconv.ParseUint(fleetPatchReplicas, 10, 32)
+			val := uint32(v)
+			replicas = &val
+			if err != nil {
+				err = fmt.Errorf("invalid value for replicas, must be UINT32")
+			}
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	payload := &fleet.PatchPayload{
+		Namespace: namespace,
+		Name:      name,
+		Replicas:  replicas,
 	}
 	return payload, nil
 }
@@ -130,7 +168,7 @@ func BuildConfigurePayload(fleetConfigureBody string) (*fleet.ConfigurePayload, 
 	{
 		err = json.Unmarshal([]byte(fleetConfigureBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"Neque voluptas tempore corrupti qui deserunt et.\",\n      \"ContainerName\": \"Eius cupiditate.\",\n      \"ContainerPort\": 562447540,\n      \"GameserverNamePrefix\": \"Doloremque voluptatem.\",\n      \"NamePrefix\": \"Corrupti qui et recusandae aliquid.\",\n      \"Namespace\": \"Impedit saepe ea inventore recusandae velit.\",\n      \"Replicas\": 1095142904\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"ContainerImage\": \"Sit laudantium aut quod perferendis neque quis.\",\n      \"ContainerName\": \"Quisquam minima quidem dolore sint voluptatibus molestias.\",\n      \"ContainerPort\": 69570132,\n      \"GameserverNamePrefix\": \"Alias quas omnis qui harum ad.\",\n      \"NamePrefix\": \"Sunt enim.\",\n      \"Namespace\": \"Aut quia est a nam quia optio.\",\n      \"Replicas\": 1600223366\n   }'")
 		}
 	}
 	if err != nil {

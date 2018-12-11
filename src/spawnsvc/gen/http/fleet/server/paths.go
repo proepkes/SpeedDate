@@ -21,6 +21,11 @@ func DeleteFleetPath(name string) string {
 	return fmt.Sprintf("/fleet/%v", name)
 }
 
+// PatchFleetPath returns the URL path to the fleet service patch HTTP endpoint.
+func PatchFleetPath() string {
+	return "/fleet"
+}
+
 // ListFleetPath returns the URL path to the fleet service list HTTP endpoint.
 func ListFleetPath() string {
 	return "/fleet/list"

@@ -46,6 +46,26 @@ var _ = Service("fleet", func() {
 		})
 	})
 
+	Method("patch", func() {
+		Description("Patch a fleet.")
+		Result(String)
+		Payload(func() {
+			Attribute("namespace", String, "The namespace", func() {
+				Default("default")
+			})
+			Attribute("name", String, "Name of the fleet")
+			Attribute("replicas", UInt32, "Set replicas value")
+			Required("name")
+		})
+		HTTP(func() {
+			PATCH("/")
+			Param("namespace")
+			Param("name")
+			Param("replicas")
+			Response(StatusOK)
+		})
+	})
+
 	Method("list", func() {
 		Description("List all fleets.")
 		Payload(func() {

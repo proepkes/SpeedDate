@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `fleet (create|delete|list|allocate|configuration|configure)
+	return `fleet (create|delete|patch|list|allocate|configuration|configure)
 `
 }
 
@@ -31,7 +31,7 @@ func UsageCommands() string {
 func UsageExamples() string {
 	return os.Args[0] + ` fleet create --body '{
       "FleetSpec": {
-         "Replicas": 729387113,
+         "Replicas": 737777790,
          "Template": {
             "GameServerSpec": {
                "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
@@ -72,6 +72,11 @@ func ParseEndpoint(
 		fleetDeleteNameFlag      = fleetDeleteFlags.String("name", "REQUIRED", "Name of the fleet")
 		fleetDeleteNamespaceFlag = fleetDeleteFlags.String("namespace", "", "")
 
+		fleetPatchFlags         = flag.NewFlagSet("patch", flag.ExitOnError)
+		fleetPatchNamespaceFlag = fleetPatchFlags.String("namespace", "", "")
+		fleetPatchNameFlag      = fleetPatchFlags.String("name", "REQUIRED", "")
+		fleetPatchReplicasFlag  = fleetPatchFlags.String("replicas", "", "")
+
 		fleetListFlags         = flag.NewFlagSet("list", flag.ExitOnError)
 		fleetListNamespaceFlag = fleetListFlags.String("namespace", "", "")
 		fleetListViewFlag      = fleetListFlags.String("view", "", "")
@@ -89,6 +94,7 @@ func ParseEndpoint(
 	fleetFlags.Usage = fleetUsage
 	fleetCreateFlags.Usage = fleetCreateUsage
 	fleetDeleteFlags.Usage = fleetDeleteUsage
+	fleetPatchFlags.Usage = fleetPatchUsage
 	fleetListFlags.Usage = fleetListUsage
 	fleetAllocateFlags.Usage = fleetAllocateUsage
 	fleetConfigurationFlags.Usage = fleetConfigurationUsage
@@ -134,6 +140,9 @@ func ParseEndpoint(
 			case "delete":
 				epf = fleetDeleteFlags
 
+			case "patch":
+				epf = fleetPatchFlags
+
 			case "list":
 				epf = fleetListFlags
 
@@ -177,6 +186,9 @@ func ParseEndpoint(
 			case "delete":
 				endpoint = c.Delete()
 				data, err = fleetc.BuildDeletePayload(*fleetDeleteNameFlag, *fleetDeleteNamespaceFlag)
+			case "patch":
+				endpoint = c.Patch()
+				data, err = fleetc.BuildPatchPayload(*fleetPatchNamespaceFlag, *fleetPatchNameFlag, *fleetPatchReplicasFlag)
 			case "list":
 				endpoint = c.List()
 				data, err = fleetc.BuildListPayload(*fleetListNamespaceFlag, *fleetListViewFlag)
@@ -208,6 +220,7 @@ Usage:
 COMMAND:
     create: Create a new fleet.
     delete: Delete a fleet
+    patch: Patch a fleet.
     list: List all fleets.
     allocate: Create a fleetallocation.
     configuration: Get default fleet configuration.
@@ -226,7 +239,7 @@ Create a new fleet.
 Example:
     `+os.Args[0]+` fleet create --body '{
       "FleetSpec": {
-         "Replicas": 729387113,
+         "Replicas": 737777790,
          "Template": {
             "GameServerSpec": {
                "ContainerImage": "gcr.io/agones-images/udp-server:0.4",
@@ -256,7 +269,20 @@ Delete a fleet
     -namespace STRING: 
 
 Example:
-    `+os.Args[0]+` fleet delete --name "Aut repellat nulla sequi minus cupiditate." --namespace "Incidunt saepe molestiae perspiciatis eveniet nobis."
+    `+os.Args[0]+` fleet delete --name "Consequuntur voluptas dolores ea quae expedita." --namespace "Non id voluptatem facilis."
+`, os.Args[0])
+}
+
+func fleetPatchUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] fleet patch -namespace STRING -name STRING -replicas UINT32
+
+Patch a fleet.
+    -namespace STRING: 
+    -name STRING: 
+    -replicas UINT32: 
+
+Example:
+    `+os.Args[0]+` fleet patch --namespace "Quis fugit consequatur et est delectus." --name "Tempore sunt ad ut ut quam quia." --replicas 1277160663
 `, os.Args[0])
 }
 
@@ -268,7 +294,7 @@ List all fleets.
     -view STRING: 
 
 Example:
-    `+os.Args[0]+` fleet list --namespace "Quae vel." --view "default"
+    `+os.Args[0]+` fleet list --namespace "Aut repellat quidem dolore illum laboriosam praesentium." --view "default"
 `, os.Args[0])
 }
 
@@ -281,7 +307,7 @@ Create a fleetallocation.
     -name STRING: 
 
 Example:
-    `+os.Args[0]+` fleet allocate --namespace "Ad ut ut quam quia nostrum." --fleet2 "Est numquam soluta ducimus voluptas error." --name "Magni aut alias velit dolorem provident."
+    `+os.Args[0]+` fleet allocate --namespace "Praesentium doloremque voluptatem eos impedit saepe." --fleet2 "Inventore recusandae velit ad." --name "Deleniti quo recusandae."
 `, os.Args[0])
 }
 
@@ -303,13 +329,13 @@ Configure default fleet options.
 
 Example:
     `+os.Args[0]+` fleet configure --body '{
-      "ContainerImage": "Neque voluptas tempore corrupti qui deserunt et.",
-      "ContainerName": "Eius cupiditate.",
-      "ContainerPort": 562447540,
-      "GameserverNamePrefix": "Doloremque voluptatem.",
-      "NamePrefix": "Corrupti qui et recusandae aliquid.",
-      "Namespace": "Impedit saepe ea inventore recusandae velit.",
-      "Replicas": 1095142904
+      "ContainerImage": "Sit laudantium aut quod perferendis neque quis.",
+      "ContainerName": "Quisquam minima quidem dolore sint voluptatibus molestias.",
+      "ContainerPort": 69570132,
+      "GameserverNamePrefix": "Alias quas omnis qui harum ad.",
+      "NamePrefix": "Sunt enim.",
+      "Namespace": "Aut quia est a nam quia optio.",
+      "Replicas": 1600223366
    }'
 `, os.Args[0])
 }

@@ -22,6 +22,7 @@ type Server struct {
 	Mounts        []*MountPoint
 	Create        http.Handler
 	Delete        http.Handler
+	Patch         http.Handler
 	List          http.Handler
 	Allocate      http.Handler
 	Configuration http.Handler
@@ -58,6 +59,7 @@ func New(
 		Mounts: []*MountPoint{
 			{"Create", "PUT", "/fleet"},
 			{"Delete", "DELETE", "/fleet/{name}"},
+			{"Patch", "PATCH", "/fleet"},
 			{"List", "GET", "/fleet/list"},
 			{"Allocate", "POST", "/fleet/allocate"},
 			{"Configuration", "GET", "/fleet/configuration"},
@@ -70,6 +72,7 @@ func New(
 		},
 		Create:        NewCreateHandler(e.Create, mux, dec, enc, eh),
 		Delete:        NewDeleteHandler(e.Delete, mux, dec, enc, eh),
+		Patch:         NewPatchHandler(e.Patch, mux, dec, enc, eh),
 		List:          NewListHandler(e.List, mux, dec, enc, eh),
 		Allocate:      NewAllocateHandler(e.Allocate, mux, dec, enc, eh),
 		Configuration: NewConfigurationHandler(e.Configuration, mux, dec, enc, eh),
@@ -85,6 +88,7 @@ func (s *Server) Service() string { return "fleet" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Create = m(s.Create)
 	s.Delete = m(s.Delete)
+	s.Patch = m(s.Patch)
 	s.List = m(s.List)
 	s.Allocate = m(s.Allocate)
 	s.Configuration = m(s.Configuration)
@@ -96,6 +100,7 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountCreateHandler(mux, h.Create)
 	MountDeleteHandler(mux, h.Delete)
+	MountPatchHandler(mux, h.Patch)
 	MountListHandler(mux, h.List)
 	MountAllocateHandler(mux, h.Allocate)
 	MountConfigurationHandler(mux, h.Configuration)
@@ -184,6 +189,58 @@ func NewDeleteHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "delete")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+
+		res, err := endpoint(ctx, payload)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
+// MountPatchHandler configures the mux to serve the "fleet" service "patch"
+// endpoint.
+func MountPatchHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := handleFleetOrigin(h).(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("PATCH", "/fleet", f)
+}
+
+// NewPatchHandler creates a HTTP handler which loads the HTTP request and
+// calls the "fleet" service "patch" endpoint.
+func NewPatchHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		decodeRequest  = DecodePatchRequest(mux, dec)
+		encodeResponse = EncodePatchResponse(enc)
+		encodeError    = goahttp.ErrorEncoder(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "patch")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "fleet")
 		payload, err := decodeRequest(r)
 		if err != nil {

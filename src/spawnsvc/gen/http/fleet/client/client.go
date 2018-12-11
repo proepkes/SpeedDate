@@ -23,6 +23,9 @@ type Client struct {
 	// Delete Doer is the HTTP client used to make requests to the delete endpoint.
 	DeleteDoer goahttp.Doer
 
+	// Patch Doer is the HTTP client used to make requests to the patch endpoint.
+	PatchDoer goahttp.Doer
+
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
@@ -63,6 +66,7 @@ func NewClient(
 	return &Client{
 		CreateDoer:          doer,
 		DeleteDoer:          doer,
+		PatchDoer:           doer,
 		ListDoer:            doer,
 		AllocateDoer:        doer,
 		ConfigurationDoer:   doer,
@@ -121,6 +125,31 @@ func (c *Client) Delete() goa.Endpoint {
 
 		if err != nil {
 			return nil, goahttp.ErrRequestError("fleet", "delete", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Patch returns an endpoint that makes HTTP requests to the fleet service
+// patch server.
+func (c *Client) Patch() goa.Endpoint {
+	var (
+		encodeRequest  = EncodePatchRequest(c.encoder)
+		decodeResponse = DecodePatchResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildPatchRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.PatchDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("fleet", "patch", err)
 		}
 		return decodeResponse(resp)
 	}

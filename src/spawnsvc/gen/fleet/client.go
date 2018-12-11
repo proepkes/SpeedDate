@@ -17,6 +17,7 @@ import (
 type Client struct {
 	CreateEndpoint        goa.Endpoint
 	DeleteEndpoint        goa.Endpoint
+	PatchEndpoint         goa.Endpoint
 	ListEndpoint          goa.Endpoint
 	AllocateEndpoint      goa.Endpoint
 	ConfigurationEndpoint goa.Endpoint
@@ -24,10 +25,11 @@ type Client struct {
 }
 
 // NewClient initializes a "fleet" service client given the endpoints.
-func NewClient(create, delete_, list, allocate, configuration, configure goa.Endpoint) *Client {
+func NewClient(create, delete_, patch, list, allocate, configuration, configure goa.Endpoint) *Client {
 	return &Client{
 		CreateEndpoint:        create,
 		DeleteEndpoint:        delete_,
+		PatchEndpoint:         patch,
 		ListEndpoint:          list,
 		AllocateEndpoint:      allocate,
 		ConfigurationEndpoint: configuration,
@@ -52,6 +54,16 @@ func (c *Client) Create(ctx context.Context, p *Fleet) (res string, err error) {
 func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
 	_, err = c.DeleteEndpoint(ctx, p)
 	return
+}
+
+// Patch calls the "patch" endpoint of the "fleet" service.
+func (c *Client) Patch(ctx context.Context, p *PatchPayload) (res string, err error) {
+	var ires interface{}
+	ires, err = c.PatchEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(string), nil
 }
 
 // List calls the "list" endpoint of the "fleet" service.

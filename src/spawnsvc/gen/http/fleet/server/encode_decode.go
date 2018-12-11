@@ -11,6 +11,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
 	fleet "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet"
 	fleetviews "github.com/proepkes/speeddate/src/spawnsvc/gen/fleet/views"
@@ -82,6 +83,58 @@ func DecodeDeleteRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 			namespace = "default"
 		}
 		payload := NewDeletePayload(name, namespace)
+
+		return payload, nil
+	}
+}
+
+// EncodePatchResponse returns an encoder for responses returned by the fleet
+// patch endpoint.
+func EncodePatchResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		res := v.(string)
+		enc := encoder(ctx, w)
+		body := res
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodePatchRequest returns a decoder for requests sent to the fleet patch
+// endpoint.
+func DecodePatchRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			namespace string
+			name      string
+			replicas  *uint32
+			err       error
+		)
+		namespaceRaw := r.URL.Query().Get("namespace")
+		if namespaceRaw != "" {
+			namespace = namespaceRaw
+		} else {
+			namespace = "default"
+		}
+		name = r.URL.Query().Get("name")
+		if name == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("name", "query string"))
+		}
+		{
+			replicasRaw := r.URL.Query().Get("replicas")
+			if replicasRaw != "" {
+				v, err2 := strconv.ParseUint(replicasRaw, 10, 32)
+				if err2 != nil {
+					err = goa.MergeErrors(err, goa.InvalidFieldTypeError("replicas", replicasRaw, "unsigned integer"))
+				}
+				pv := uint32(v)
+				replicas = &pv
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewPatchPayload(namespace, name, replicas)
 
 		return payload, nil
 	}

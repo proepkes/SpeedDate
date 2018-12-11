@@ -20,6 +20,8 @@ type Service interface {
 	Create(context.Context, *Fleet) (res string, err error)
 	// Delete a fleet
 	Delete(context.Context, *DeletePayload) (err error)
+	// Patch a fleet.
+	Patch(context.Context, *PatchPayload) (res string, err error)
 	// List all fleets.
 	List(context.Context, *ListPayload) (res StoredFleetCollection, err error)
 	// Create a fleetallocation.
@@ -38,7 +40,7 @@ const ServiceName = "fleet"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [6]string{"create", "delete", "list", "allocate", "configuration", "configure"}
+var MethodNames = [7]string{"create", "delete", "patch", "list", "allocate", "configuration", "configure"}
 
 // Fleet is the payload type of the fleet service create method.
 type Fleet struct {
@@ -54,6 +56,16 @@ type DeletePayload struct {
 	Namespace string
 	// Name of the fleet
 	Name string
+}
+
+// PatchPayload is the payload type of the fleet service patch method.
+type PatchPayload struct {
+	// The namespace
+	Namespace string
+	// Name of the fleet
+	Name string
+	// Set replicas value
+	Replicas *uint32
 }
 
 // ListPayload is the payload type of the fleet service list method.
